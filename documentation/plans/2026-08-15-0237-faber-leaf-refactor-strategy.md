@@ -486,18 +486,21 @@ app — no phase leaves the tree broken.
 
 | # | Phase | Depends on | Notes |
 | --- | --- | --- | --- |
+| 0 | LeafMesh core: storage, attrs, topo, `cdt2d` | — | Headless and dependency-free; runs in parallel with everything below from day one. |
 | 1 | W0 rename | — | Trivial, do it first |
-| 2 | W2 delete TS sculpting | — | **Start here.** Leaf code, biggest ratio of lines-deleted to risk. Independent of W1. |
+| 2 | W2 delete TS sculpting | — | **Start here** on the deletion track. Leaf code, biggest ratio of lines-deleted to risk. Independent of W1. |
 | 3 | W1 steps 1–2: sever core→mesh | 2 | The hard part. Host-owned `SelMask`, registry-ize `api_define` / `PropsEditor` / `view3d_draw` / `entry_point`. |
 | 4 | W1 step 3: depcruise → `error` | 3 | The ratchet. Nothing regresses after this. |
 | 5 | W1 steps 4–5: delete the BREP | 4 | ~70k lines. Mechanical once 3–4 are done. |
 | 6 | W3: sculptcore optional | 5 | Needs the BREP gone first, or "optional" is meaningless — the host would still carry a mandatory geometry type. |
 | 7 | W5 steps 1–2: distributions | 6 | `faber-leaf-core` distribution *is* the W3 CI lane. |
-| 8 | W4: UV abstraction | 5 | Parallelizable with 6–7; needs only the BREP gone. |
+| 8 | W4: UV abstraction | 5, 0 | Parallelizable with 6–7. Needs the BREP gone and LeafMesh's `IUVSource` as the second implementor. |
 | 9 | W5 steps 3–4: de-globalize + docs | 7, 8 | Final polish. |
 
-Phases 2 and 3 can run in parallel with different people. Phase 8 forks off
-after 5.
+Phase 0 runs alongside everything — it is new code with no inbound
+dependencies, and having a working geometry type in hand before phase 5
+deletes the old one removes the scariest gap in the plan. Phases 2 and 3 can
+run in parallel with different people. Phase 8 forks off after 5.
 
 **Why sculpting deletion goes first:** it is the only large deletion with
 essentially no inbound host dependencies, so it de-risks the process, shrinks
@@ -511,13 +514,15 @@ the core-severing work.
 
 **The empty-host problem (highest risk).** After W1 and W3, a build without
 sculptcore has zero geometry types. "It boots" is then a weak claim — nothing
-can be modeled. Mitigation: ship a minimal `SimpleMesh`-backed geometry type
-(a few hundred lines: positions, indices, per-corner UVs, no BREP, no topology
-ops) in the host distribution as the reference `IGeometrySource` /
-`IUVSource` implementor. It is what makes `faber-leaf-core` a real product
-rather than a compile target, and it doubles as the second `IUVSource`
-implementation W4 needs. **This should be an explicit deliverable, not an
-afterthought.**
+can be modeled. Mitigation: ship **LeafMesh**, a small non-BREP geometry type
+with first-class faces-with-holes and a ported CDT, as an in-bundle addon —
+designed in
+[2026-08-15-0248-leafmesh-design.md](./2026-08-15-0248-leafmesh-design.md).
+It is what makes `faber-leaf-core` a real product rather than a compile
+target, it is the second `IUVSource` implementor W4 needs, and it is the
+worked example that proves success criterion #7. **This is an explicit
+deliverable, not an afterthought** — its first three modules have no
+dependency on the rest of the refactor and can start immediately.
 
 **Feature regression.** Deleting the BREP removes: BREP mesh editing (partly
 replaced by the LiteMesh boxmodel toolmode), subsurf, curves, tet meshes,
@@ -551,15 +556,18 @@ gone), and the genuinely reviewable logic changes are concentrated in phase 3.
 
 These need the user's call before the corresponding phase starts.
 
-1. **Does the host ship a built-in geometry type?** Recommended: yes, the
-   minimal `SimpleMesh`-backed type from §6. Without it, `faber-leaf-core` is
-   an empty shell and W3's optionality is nominal. This is the single most
-   consequential open question here.
+1. ~~**Does the host ship a built-in geometry type?**~~ **Resolved: yes —
+   LeafMesh.** A non-BREP SoA mesh whose faces are lists of loops (holes are
+   first-class), with sculptcore's CDT ported to TS for triangulation. Full
+   design: [2026-08-15-0248-leafmesh-design.md](./2026-08-15-0248-leafmesh-design.md).
+   Its own open questions (winding enforcement, live vs. rebuilt cycles,
+   F32/F64) are tracked there.
 2. **Boxmodel / polygon modeling with sculptcore absent.** `boxmodel.ts` +
    `litemesh_modeling_ops.ts` are sculptcore-backed. Options: (a) modeling is a
-   sculptcore feature, `faber-leaf-core` has none; (b) reimplement basic
-   modeling ops on the minimal type. Recommend (a) initially — (b) rebuilds a
-   BREP, which is what this refactor deletes.
+   sculptcore feature, `faber-leaf-core` has none; (b) build a modeling
+   toolmode on LeafMesh's Euler-op surface. Recommend (b) now that LeafMesh
+   exists — it has the primitives, and (a) would leave the core distribution
+   able to display geometry but not author it.
 3. **File compatibility.** Recommended: opaque round-trip via `missing_addon.ts`
    plus a UI notice; no BREP→LiteMesh converter.
 4. **Curves, tets, hair, subsurf.** Delete outright, or preserve in `archive/`
@@ -588,9 +596,8 @@ The refactor is done when all of these hold:
 5. Two distributions build from the same tree with no source forking.
 6. The UV editor operates on a non-LiteMesh `IUVSource` in a test, with no
    sculptcore present.
-7. A new geometry type can be added by a third-party addon — with the minimal
-   built-in type serving as the worked example — touching no file under
-   `scripts/`.
+7. A new geometry type can be added by a third-party addon — with LeafMesh
+   serving as the worked example — touching no file under `scripts/`.
 8. `documentation/embedding.md` exists and states the `@framework/api`
    stability contract.
 
