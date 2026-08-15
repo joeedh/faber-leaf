@@ -21,7 +21,7 @@
     "check:lint": "node tools/check-lint.mjs",
     "gen:paths": "node tools/gen-datapaths.mjs && node tools/gen-tsconfig-paths.mjs",
     "typecheck": "pnpm gen:paths && turbo typecheck",
-    "test": "turbo test",
+    "test": "node tools/run-tests.mjs",
     "test:slow": "pnpm --filter @webgl-app-framework/tests-integration test:slow",
     "watch-typecheck": "npx tsgo --watch",
     "nwjs": "node nwjs/launch.mjs --backend native",

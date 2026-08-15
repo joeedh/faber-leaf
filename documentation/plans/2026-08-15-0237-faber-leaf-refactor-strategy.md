@@ -1364,7 +1364,25 @@ covered all struct fields (§4 W1 step 5). Before an `xhigh` plan, spend the che
 tokens first on a sweep that enumerates the real call sites; `xhigh` over
 ungrounded input just argues a wrong plan more convincingly.
 
-- [ ] **P1 — [CI + layer-gate repair](./2026-08-15-0300-ci-and-layer-gate-repair.md)**
+> **⚠ Temporary machine constraint — REVERT WHEN THE REFACTOR IS COMPLETE.**
+> While this refactor is in flight, nothing may use more than **5 parallel jobs,
+> and that is a *global* cap**, not per-tool: do not build sculptcore and run
+> tests at the same time. In force:
+>
+> - `pnpm test` runs through `tools/run-tests.mjs`, which serializes turbo
+>   packages (`--concurrency=1`) and caps jest / vitest workers at 5.
+> - `tests/jest.config.ts` and `tests/integration/jest.config.mjs` are at
+>   `maxWorkers: 5` (were 6).
+> - Sculptcore builds are capped by `BUILD_JOBS: 5` in the gitignored
+>   `sculptcore/local-build-options.mjs`; pass `-j 5` explicitly on any
+>   invocation that bypasses it.
+>
+> None of this belongs in the shipped configuration. **Revert all four when the
+> Faber Leaf refactor is done** — `pnpm test` back to `turbo test`, delete the
+> wrapper, restore `maxWorkers`, delete the local build options. The CI workflow
+> is deliberately *not* capped: it runs on its own runner.
+
+- [x] **P1 — [CI + layer-gate repair](./2026-08-15-0300-ci-and-layer-gate-repair.md)** — landed 2026-08-15, commit `2144aeef`. Real layer baseline is **2483**, not the 288 this doc cited. ESLint is **not** gated (untriaged ~17k backlog; deferred to P9) — see that plan's §5 step 4 correction. `master` branch protection still has to mark the jobs required.
   - Add a PR workflow: `pnpm test`, `pnpm typecheck`, `pnpm eslint`,
     `pnpm check:layers`, blocking on failure, on the **full sculptcore-present**
     configuration — that is the default and the merge gate (§1).

@@ -30,7 +30,9 @@ const config = {
 
   // Every suite here boots a real NW.js app; letting jest scale workers to the
   // core count spawns far too many at once.
-  maxWorkers: 6,
+  // TODO: 5, not 6, is a temporary global job cap for the Faber Leaf refactor
+  // (see that strategy doc's §9.3 note). Restore 6 when the refactor lands.
+  maxWorkers: 5,
 
   testMatch: slow ? SLOW_GLOBS : ['<rootDir>/integration/**/*.test.ts'],
 
