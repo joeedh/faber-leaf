@@ -128,7 +128,7 @@ NW.js keys its default `--user-data-dir` on the manifest `name`, which is
 identical in every git worktree, so two worktrees could not run NW.js at once and
 their crash dumps collided. `nwjs/launch.mjs` instead derives the profile
 **per-worktree** via `nwjs/profile_dir.mjs`:
-`%LOCALAPPDATA%\webgl-app-framework\worktrees\<dir>-<hash8>\`, where `hash8` is
+`%LOCALAPPDATA%\faber-leaf\worktrees\<dir>-<hash8>\`, where `hash8` is
 over the case-folded worktree root — so each checkout runs independently and
 never clobbers another's window, lock, or dumps. Within one worktree:
 

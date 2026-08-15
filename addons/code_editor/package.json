@@ -1,5 +1,5 @@
 {
-  "name": "@webgl-app-framework/addon-code-editor",
+  "name": "@faber-leaf/addon-code-editor",
   "type": "module",
   "dependencies": {
     "monaco-editor": "^0.22.3"

@@ -15,13 +15,15 @@ import {createHash} from 'node:crypto'
 import {homedir} from 'node:os'
 import {basename, join, resolve} from 'node:path'
 
-/** OS-appropriate base for app-scoped cache/profile data. */
+/** OS-appropriate base for app-scoped cache/profile data. The app name here is
+ * a literal on purpose — this module is dependency-free and never reads the
+ * manifest — so a `package.json` rename does NOT move it. Keep the two in sync. */
 function localAppBase() {
   if (process.platform === 'win32') {
     const local = process.env.LOCALAPPDATA || join(homedir(), 'AppData', 'Local')
-    return join(local, 'webgl-app-framework')
+    return join(local, 'faber-leaf')
   }
-  return join(homedir(), '.cache', 'webgl-app-framework')
+  return join(homedir(), '.cache', 'faber-leaf')
 }
 
 /** Stable, readable per-worktree token: `<dir-basename>-<hash8>`. The hash is

@@ -11,7 +11,7 @@ fi
 python make_zip.py
 
 rm -rf _site
-git clone https://github.com/joeedh/webgl-app-framework.git _site
+git clone https://github.com/joeedh/faber-leaf.git _site
 
 mkdir -p _site
 if cd _site; then

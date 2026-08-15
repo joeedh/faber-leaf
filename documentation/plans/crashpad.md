@@ -19,14 +19,16 @@ Two findings corrected the original plan during implementation:
    confirmed by introspecting the live `nw.App`). There is **no way to redirect
    the dir**, so dumps land in the Chromium default
    `%LOCALAPPDATA%\<manifest-name>\User Data\Crashpad\reports\*.dmp`
-   (`<manifest-name>` = `webgl-app-framework`). The toolkit reads from there;
+   (`<manifest-name>` = `faber-leaf`). The toolkit reads from there;
    `$SC_CRASHDUMP_DIR` overrides. Crashpad itself **is on by default** — no
    enabling needed.
 
    > **Per-worktree dump dir (current path).** Crashpad writes under the active
    > `--user-data-dir`, which `nwjs/launch.mjs` now sets **per-worktree** (see the
    > NW.js multi-instance model), so dumps actually land in
-   > `…\worktrees\<dir>-<hash8>\<profile>\Crashpad\reports\*.dmp` — **not** the
+   > `%LOCALAPPDATA%\faber-leaf\worktrees\<dir>-<hash8>\<profile>\Crashpad\reports\*.dmp`
+   > (that base dir was `webgl-app-framework` before the Faber Leaf rename, so
+   > pre-rename dumps stay at the old path) — **not** the
    > old `User Data\…` path that `dump.mjs` still defaults to. The launcher
    > **prints** the exact reports dir on startup; export
    > `SC_CRASHDUMP_DIR=<that path>` before running `sculptcore/crash/dump.mjs`

@@ -1,7 +1,7 @@
 import {defineConfig, devices} from '@playwright/test'
 
 /**
- * Playwright e2e config for the webgl-app-framework.
+ * Playwright e2e config for Faber Leaf.
  *
  * These tests boot the *real* app in a GPU-backed Chromium (the realtime
  * renderer is WebGPU-only), load a `.wproj` project file through

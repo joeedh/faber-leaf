@@ -1,5 +1,5 @@
 /**
- * Jest config for the `@webgl-app-framework/tests-integration` package.
+ * Jest config for the `@faber-leaf/tests-integration` package.
  *
  * `rootDir` is the parent `tests/` directory so module resolution, the setup
  * file and the transform behave exactly as they do for the unit suites (this

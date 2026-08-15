@@ -1,5 +1,5 @@
 {
-  "name": "@sculptcore/frontend",
+  "name": "@faber-leaf/host",
   "scripts": {
     "typecheck": "npx tsgo --noEmit"
   },

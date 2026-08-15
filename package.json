@@ -1,5 +1,5 @@
 {
-  "name": "webgl-app-framework",
+  "name": "faber-leaf",
   "version": "1.0.0",
   "main": "nwjs/window.html",
   "window": {
@@ -22,7 +22,7 @@
     "gen:paths": "node tools/gen-datapaths.mjs && node tools/gen-tsconfig-paths.mjs",
     "typecheck": "pnpm gen:paths && turbo typecheck",
     "test": "node tools/run-tests.mjs",
-    "test:slow": "pnpm --filter @webgl-app-framework/tests-integration test:slow",
+    "test:slow": "pnpm --filter @faber-leaf/tests-integration test:slow",
     "watch-typecheck": "npx tsgo --watch",
     "nwjs": "node nwjs/launch.mjs --backend native",
     "serv": "node tools/serv.js",

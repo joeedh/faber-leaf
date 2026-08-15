@@ -1,5 +1,5 @@
 {
-  "name": "@webgl-app-framework/tests",
+  "name": "@faber-leaf/tests",
   "scripts": {
     "typecheck": "npx tsgo --noEmit",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js"

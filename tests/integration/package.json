@@ -1,5 +1,5 @@
 {
-  "name": "@webgl-app-framework/tests-integration",
+  "name": "@faber-leaf/tests-integration",
   "version": "1.0.0",
   "private": true,
   "type": "module",

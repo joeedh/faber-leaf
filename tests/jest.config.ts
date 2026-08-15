@@ -29,7 +29,7 @@ const config: Config = {
   testMatch: ['<rootDir>/**/*.test.ts', '<rootDir>/**/*.test.tsx'],
 
   // Don't try to load helpers as tests. integration/ is its own workspace
-  // package (@webgl-app-framework/tests-integration) that runs its suites once
+  // package (@faber-leaf/tests-integration) that runs its suites once
   // per sculptcore backend — see integration/run-split.mjs.
   testPathIgnorePatterns: ['/node_modules/', '<rootDir>/lib/', '<rootDir>/fixtures/', '<rootDir>/integration/'],
 

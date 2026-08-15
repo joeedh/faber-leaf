@@ -29,8 +29,8 @@ Clone the repo and pull all submodules (`path.ux`, `mathl`, `sculptcore`,
 `nstructjs`):
 
 ```sh
-git clone https://github.com/joeedh/webgl-app-framework.git
-cd webgl-app-framework
+git clone https://github.com/joeedh/faber-leaf.git
+cd faber-leaf
 bash tools/git_pull.sh
 ```
 
