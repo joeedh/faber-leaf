@@ -134,9 +134,19 @@ Migration is a no-op on file-backed (NW.js) storage: `FILE_NAMES` in
 
 Rules the implementation must follow:
 
-- **Copy, then mark, never move.** Write the new key, write a
-  `<newkey>-migrated-from-legacy` marker, and leave the legacy key in place.
-  A user who downgrades keeps a working install; disk cost is one scene blob.
+- **Copy, then mark; move only when the copy cannot fit.** Write the new key,
+  write a `<newkey>-migrated-from-legacy` marker, and leave the legacy key in
+  place. A user who downgrades keeps a working install; disk cost is one scene
+  blob.
+  **[corrected]** "never move" is not achievable for the startup scene. The
+  browser backend base64-encodes the scene blob, so a real profile carries
+  ~4MB of text against a **~5MB per-origin `localStorage` quota** — the second
+  copy throws `QuotaExceededError` and, under the copy-only rule, the scene was
+  silently dropped (this is exactly what the manual profile test in §6 caught).
+  The implementation therefore detects a quota failure, removes the legacy key,
+  and retries; if the retry also fails it restores the legacy value. The marker
+  records which happened (`copied` / `moved` / `skipped`), so a downgrade after
+  a `moved` migration starts fresh rather than reading a half-written key.
 - **Idempotent.** If the new key exists, do nothing — never overwrite newer
   data with older.
 - **Never throw.** A failed migration must degrade to "fresh profile", not to
@@ -209,7 +219,8 @@ point readers at where the code went.
   identical bytes, and that the legacy database still exists.
 
 **[corrected]** Both live in one file, `tests/unit/identity_migration.test.ts`
-(11 tests), because `fake-indexeddb` is installed globally by
+(13 tests — the last two cover the quota fallback), because `fake-indexeddb` is
+installed globally by
 `tests/lib/jest-setup.ts` in the *unit* workspace — the NW.js integration suites
 have no IndexedDB. "Corrupt legacy blob" needs no dedicated case: values move as
 opaque text and are never parsed, so any byte sequence round-trips; the
@@ -218,13 +229,32 @@ round-trip tests use non-base64 payloads to keep that honest.
   build (with at least one third-party addon installed from
   `addons/` — e.g. `graphit` or `morph`), run the renamed build, and confirm
   the startup scene, settings, and the installed addon all survive.
+
+  **[corrected] Done, 2026-08-15 — and it found a real bug.** A persistent
+  Chromium profile was written by the genuinely pre-rename build at `09570d73`
+  (`APP_KEY_NAME = 'webgl-app-framework'` in all three places) with a saved
+  startup scene, non-default settings and a real prebuilt third-party addon
+  installed through `IndexedDBAddonStorage`; the same profile was then reopened
+  against the renamed build. 19 checks, all passing on the final run: the 4.1MB
+  startup scene carried over byte-for-byte and the migrated scene actually
+  loaded, every legacy settings field survived and the app ran on them, the
+  addon database was recreated at the same version with identical rows and the
+  addon's `register()` ran, the legacy settings key and legacy addon database
+  were left untouched, and a second boot changed nothing.
+
+  The first run failed 5 of those checks: the startup scene was silently lost to
+  `QuotaExceededError` under the copy-only rule (see §5 step 2). Synthetic
+  fixtures would not have caught it — no unit test seeds a 4MB value.
 - `pnpm i` from clean, `pnpm test`, `pnpm build` green under the new names.
 
 ## 7. Risks
 
 - **IndexedDB copy failure is silent and total.** Mitigation: copy-not-move,
   count verification before the marker, and the manual test above is a
-  ship-blocker, not a nice-to-have.
+  ship-blocker, not a nice-to-have. **[corrected]** The `localStorage` half of
+  the migration had the same silent-and-total failure mode for a different
+  reason (quota, not IndexedDB), and only the manual test caught it — which
+  retroactively justifies calling it a ship-blocker.
 - **Package rename breaks the pnpm workspace link graph** in a way that only
   shows on a clean install. Mitigation: `rm -rf node_modules && pnpm i` in the
   same commit, and let P1's CI (which installs from clean) be the gate.
@@ -235,7 +265,7 @@ round-trip tests use non-base64 payloads to keep that honest.
 
 - `pnpm i` from clean, `pnpm test`, `pnpm build` all green under the new names.
 - A profile written by the pre-rename build opens with its scene, settings and
-  installed third-party addons intact.
+  installed third-party addons intact. **[met]** — see §6's manual test.
 - `grep -rn "webgl-app-framework"` returns only the legacy constant and its
   tests.
 - Open decision #7 recorded as settled in the strategy doc's §9.4 table.

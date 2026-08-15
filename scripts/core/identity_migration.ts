@@ -5,8 +5,11 @@
  *
  * Three rules the implementation holds to:
  *
- * - **Copy, then mark, never move.** The legacy key/database is left in place,
- *   so a user who downgrades still has a working install.
+ * - **Copy, then mark.** The legacy key/database is left in place, so a user
+ *   who downgrades still has a working install. The one exception is a value
+ *   too big to exist twice: the startup scene is routinely megabytes and
+ *   localStorage only allows ~5MB per origin, so a quota failure degrades to a
+ *   move rather than losing the scene (see `migrateTextKey`).
  * - **Idempotent.** If the destination already holds data, nothing is copied —
  *   newer data is never overwritten with older.
  * - **Never throws.** A failed migration degrades to "fresh profile", not to
@@ -40,11 +43,24 @@ function warn(what: string, err: unknown): void {
   console.warn(`identity migration: ${what} failed; continuing with a fresh profile`, err)
 }
 
+/** True for the various spellings of "localStorage is full". */
+function isQuotaError(err: unknown): boolean {
+  const e = err as {name?: string; code?: number}
+  return (
+    e?.name === 'QuotaExceededError' || e?.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e?.code === 22 || e?.code === 1014
+  )
+}
+
 /**
- * Copy one `localStorage` entry. Returns true if a copy was made.
+ * Copy one `localStorage` entry. Returns true if the value was carried over.
  *
  * Values move as raw text: the browser backend base64-encodes blobs on the way
  * in, so the startup scene round-trips byte-for-byte without a decode.
+ *
+ * A saved startup scene is easily 4MB of base64 against a ~5MB origin quota, so
+ * holding both copies is impossible and the plain copy throws. Rather than lose
+ * the scene, drop the legacy key and retry — the value is in memory for the
+ * whole window, so a failed retry can put it back.
  */
 export function migrateTextKey(storage: AppStorage, legacyKey: string, destKey: string): boolean {
   try {
@@ -57,8 +73,25 @@ export function migrateTextKey(storage: AppStorage, legacyKey: string, destKey: 
     const legacy = storage.getText(legacyKey)
     if (legacy === undefined) return false
 
-    storage.setText(destKey, legacy)
-    storage.setText(markerKey(destKey), 'copied')
+    try {
+      storage.setText(destKey, legacy)
+      storage.setText(markerKey(destKey), 'copied')
+    } catch (err) {
+      if (!isQuotaError(err)) throw err
+
+      storage.remove(legacyKey)
+      try {
+        storage.setText(destKey, legacy)
+        storage.setText(markerKey(destKey), 'moved')
+      } catch (retryErr) {
+        try {
+          storage.setText(legacyKey, legacy)
+        } catch {
+          // Out of options; the warn() below is the user's only signal.
+        }
+        throw retryErr
+      }
+    }
     return true
   } catch (err) {
     warn(`localStorage key "${legacyKey}"`, err)

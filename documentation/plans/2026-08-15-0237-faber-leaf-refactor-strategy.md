@@ -1152,7 +1152,11 @@ These need the user's call before the corresponding phase starts.
    two `localStorage` keys and the addon IndexedDB database forward at boot —
    copy-then-mark, idempotent, never throwing — and deliberately leaves the
    legacy originals in place so a downgrade still works
-   (`ImmediateTODOs.md` tracks their eventual deletion). The NW.js profile
+   (`ImmediateTODOs.md` tracks their eventual deletion). The one exception is a
+   value too big to exist twice: a real startup scene is ~4MB of base64 against
+   a ~5MB `localStorage` origin quota, so a `QuotaExceededError` degrades to a
+   move (legacy key removed, restored if the retry also fails) rather than
+   losing the scene. The NW.js profile
    directory moved without a copy: it holds only regenerable Chromium state, and
    copying a live profile would carry a stale `SingletonLock` across.
 8. **Does `faber-leaf-core` ship polygon modeling on day one?** This is what
@@ -1407,7 +1411,7 @@ ungrounded input just argues a wrong plan more convincingly.
   - Exit: criteria 0a/0b/0c. A deliberate type error in an addon and a deliberate
     layer violation both fail CI.
 
-- [x] **P2 — [W0: rename + identity migration](./2026-08-15-0305-w0-rename-faber-leaf.md)** — landed 2026-08-15 (`09570d73` + sculptcore `905c4c4`, then the migration commit). Open decision #7 settled: **migrate**. Two extra workspace packages the plan missed were renamed too (`@webgl-app-framework/tests`, `@webgl-app-framework/addon-code-editor`). `nwjs/profile_dir.mjs` turned out to hardcode the name rather than read the manifest, so the profile move was an independent edit. The one **manual** exit item is still open: opening a real pre-rename profile with a third-party addon installed.
+- [x] **P2 — [W0: rename + identity migration](./2026-08-15-0305-w0-rename-faber-leaf.md)** — landed 2026-08-15 (`09570d73` + sculptcore `905c4c4`, then the migration commit). Open decision #7 settled: **migrate**. Two extra workspace packages the plan missed were renamed too (`@webgl-app-framework/tests`, `@webgl-app-framework/addon-code-editor`). `nwjs/profile_dir.mjs` turned out to hardcode the name rather than read the manifest, so the profile move was an independent edit. The **manual** exit item is now closed: a real pre-rename profile (written by the build at `09570d73`, with a saved scene, non-default settings and a third-party addon installed) was reopened against the renamed build — 19/19 checks pass. It found a real bug: the ~4MB base64 startup scene blew the ~5MB `localStorage` quota and was silently dropped, so `migrateTextKey` now falls back to a move on quota failure.
   - Cosmetic: `package.json` name, `Readme.MD`, branding strings.
     `index.html:15` and the git remote are already done.
   - `@webgl-app-framework/tests-integration` → renamed together with the root

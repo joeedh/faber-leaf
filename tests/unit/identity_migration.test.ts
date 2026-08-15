@@ -25,11 +25,21 @@ class FakeStorage implements AppStorage {
   isFileBacked = false
   /** Set to a key to make every access to it throw. */
   poison?: string
+  /** Total stored value length allowed, mimicking the localStorage quota. */
+  capacity?: number
+  /** Keys whose writes always fail with a quota error. */
+  refuseWrites = new Set<string>()
 
   private check(key: string) {
     if (this.poison !== undefined && key === this.poison) {
       throw new Error(`storage refused key "${key}"`)
     }
+  }
+
+  private quotaError(): Error {
+    const err = new Error('quota exceeded')
+    err.name = 'QuotaExceededError'
+    return err
   }
 
   getText(key: string): string | undefined {
@@ -38,6 +48,14 @@ class FakeStorage implements AppStorage {
   }
   setText(key: string, data: string): void {
     this.check(key)
+    if (this.refuseWrites.has(key)) throw this.quotaError()
+    if (this.capacity !== undefined) {
+      let total = data.length
+      for (const [k, v] of this.map) {
+        if (k !== key) total += v.length
+      }
+      if (total > this.capacity) throw this.quotaError()
+    }
     this.map.set(key, data)
   }
   getBlob(key: string): Uint8Array | undefined {
@@ -151,6 +169,34 @@ describe('localStorage key migration', () => {
 
     await expect(migrateAppIdentity(s)).resolves.toBeUndefined()
     expect(s.map.has(APP_KEY_NAME)).toBe(false)
+  })
+
+  // A saved startup scene is megabytes of base64 and localStorage allows ~5MB
+  // per origin, so the two copies never coexist — the real profile test hit
+  // exactly this and lost the scene.
+  test('falls back to a move when holding both copies would blow the quota', async () => {
+    const s = new FakeStorage()
+    const scene = 'S'.repeat(12)
+    s.map.set(LEGACY_APP_KEY, scene)
+    s.capacity = 20
+
+    await migrateAppIdentity(s)
+
+    expect(s.map.get(APP_KEY_NAME)).toBe(scene)
+    expect(s.map.has(LEGACY_APP_KEY)).toBe(false)
+    expect(s.map.get(`${APP_KEY_NAME}-migrated-from-legacy`)).toBe('moved')
+  })
+
+  test('puts the legacy key back if the move also fails', async () => {
+    const s = new FakeStorage()
+    s.map.set(LEGACY_APP_KEY, 'SCENE')
+    s.refuseWrites.add(APP_KEY_NAME)
+
+    await migrateAppIdentity(s)
+
+    expect(s.map.get(LEGACY_APP_KEY)).toBe('SCENE')
+    expect(s.map.has(APP_KEY_NAME)).toBe(false)
+    expect(s.map.has(`${APP_KEY_NAME}-migrated-from-legacy`)).toBe(false)
   })
 
   test('is a no-op on file-backed (NW.js) storage', async () => {

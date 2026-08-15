@@ -13,3 +13,7 @@
      after the Faber Leaf rename. `scripts/core/identity_migration.ts` copies
      them forward and deliberately leaves the originals so a downgrade still
      works; once no supported build reads them, drop the copy and the keys.
+     Note the startup-scene key may already be gone: it is routinely ~4MB of
+     base64 against a ~5MB localStorage quota, so that one migration degrades
+     to a move (marker reads `moved`). Only the settings key and the addon
+     database are guaranteed to still be there.
