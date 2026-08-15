@@ -1,6 +1,6 @@
 # Sculptcore ↔ TypeScript App Integration Report
 
-How the `webgl-app-framework` TypeScript/JS app integrates the `sculptcore`
+How the Faber Leaf TypeScript/JS app integrates the `sculptcore`
 C++20 sculpting engine. The engine lives in the `sculptcore/` submodule; its
 binding surface is the workspace package `@sculptcore/api`
 (`sculptcore/typescript/`), which the app (`scripts/`, `@sculptcore/frontend`)

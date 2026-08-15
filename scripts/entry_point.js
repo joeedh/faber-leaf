@@ -8,6 +8,8 @@ import './typescript_entry.js'
 import './camera/camera.js'
 
 import * as appstate from './core/appstate.js'
+import {migrateAppIdentity} from './core/identity_migration.js'
+import {getAppStorage} from './core/app_storage.js'
 // Registers the OPFS / IndexedDB autosave backend (used when no NW.js fs
 // backend is available). Side-effect import; harmless under NW.js.
 import './core/autosave_backend_browser.js'
@@ -108,6 +110,10 @@ export function handleNodeArguments() {
 }
 
 export async function init() {
+  // Must run before anything reads the startup scene, settings or the installed
+  // addon list, i.e. before preinit()/startAddons(). Never throws.
+  await migrateAppIdentity(getAppStorage())
+
   await setupPathux()
 
   await sculptcore.getWasm()

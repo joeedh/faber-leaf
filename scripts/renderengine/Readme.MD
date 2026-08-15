@@ -1,1 +1,1 @@
-Deprecated, moved into the webgl-app-framework repo
+Deprecated, moved into the Faber Leaf repo (formerly webgl-app-framework)

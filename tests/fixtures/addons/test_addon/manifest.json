@@ -2,7 +2,7 @@
   "id": "test_addon",
   "name": "Test Addon",
   "version": "0.1.0",
-  "author": "webgl-app-framework refactor tests",
+  "author": "Faber Leaf refactor tests",
   "entry": "src/main.ts",
   "dependencies": [],
   "description": "Smoke-test addon used by tests/build/addon_build.test.ts.",

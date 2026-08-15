@@ -8,3 +8,8 @@
 [x]: edge boundary flags (at least for poly groups) are not being updated properly after file load
      leading to a failure to properly smooth poly group boundaries.
 [ ]: 
+[ ]: delete the legacy `webgl-app-framework-addons` IndexedDB database (and the
+     `webgl-app-framework` / `-settings` localStorage keys) a release or two
+     after the Faber Leaf rename. `scripts/core/identity_migration.ts` copies
+     them forward and deliberately leaves the originals so a downgrade still
+     works; once no supported build reads them, drop the copy and the keys.

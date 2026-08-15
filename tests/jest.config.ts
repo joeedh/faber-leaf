@@ -1,5 +1,5 @@
 /**
- * Jest config for the webgl-app-framework test workspace.
+ * Jest config for the Faber Leaf test workspace.
  *
  * - jsdom environment because most framework code touches window / document / _appstate
  * - @swc/jest transforms .ts and .js (faster than ts-jest, no separate tsconfig wiring)

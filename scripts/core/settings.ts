@@ -3,6 +3,7 @@ import {registerDataAPI} from '../data_api/api_define_registry.js'
 import {BrushSets, setBrushSet} from '../brush/brush'
 import addonManager from '../addon/addon.js'
 import {getAppStorage} from './app_storage'
+import {APP_KEY_NAME} from './const'
 import {registerSyncTarget, noteLocalWrite} from './storage_sync'
 import {FeatureFlags, FeatureFlagManager} from './feature-flag'
 
@@ -41,7 +42,7 @@ SavedScreen {
   }
 }
 
-export const SETTINGS_KEY = 'webgl-app-framework-settings'
+export const SETTINGS_KEY = `${APP_KEY_NAME}-settings`
 
 /** Deep structural equality for the small JSON values in AppSettings. */
 function jsonEq(a: unknown, b: unknown): boolean {

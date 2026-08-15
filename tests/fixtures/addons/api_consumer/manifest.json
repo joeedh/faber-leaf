@@ -2,7 +2,7 @@
   "id": "api_consumer",
   "name": "API Consumer",
   "version": "0.1.0",
-  "author": "webgl-app-framework refactor tests",
+  "author": "Faber Leaf refactor tests",
   "entry": "src/main.ts",
   "dependencies": ["mesh"],
   "description": "Smoke-test addon that imports from @addon/mesh/api via the runtime resolver.",

@@ -1147,11 +1147,14 @@ These need the user's call before the corresponding phase starts.
    Recommend: port — it is the most valuable algorithm code in the deleted set.
    The rescue to `archive/` must happen in the same change that deletes, or the
    decision is made for us.
-7. **The rename's storage keys.** Freeze the six runtime keys at
-   `webgl-app-framework` forever and rename only cosmetics, or rename them behind
-   a one-time migration (§4 W0)? Recommend: migrate — but only with the
-   IndexedDB rename tested, since getting it wrong silently uninstalls every
-   third-party addon a user has.
+7. ~~**The rename's storage keys.**~~ **Resolved: migrate, do not freeze**
+   (landed in P2, 2026-08-15). `scripts/core/identity_migration.ts` copies the
+   two `localStorage` keys and the addon IndexedDB database forward at boot —
+   copy-then-mark, idempotent, never throwing — and deliberately leaves the
+   legacy originals in place so a downgrade still works
+   (`ImmediateTODOs.md` tracks their eventual deletion). The NW.js profile
+   directory moved without a copy: it holds only regenerable Chromium state, and
+   copying a live profile would carry a stale `SingletonLock` across.
 8. **Does `faber-leaf-core` ship polygon modeling on day one?** This is what
    decides whether the BREP deletion can precede the LeafMesh modeling toolmode.
    Recommend: yes (it is the same call as decision 2), which is why §5 phase 8
@@ -1281,7 +1284,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | --- | --- | --- | --- | --- | --- |
 | — | [LeafMesh design](./2026-08-15-0248-leafmesh-design.md) | risk mitigation | 0 | — | **written** |
 | P1 | [CI + layer-gate repair](./2026-08-15-0300-ci-and-layer-gate-repair.md) | new — §2.4 | 1 | — | **written** |
-| P2 | [W0 — rename + identity migration](./2026-08-15-0305-w0-rename-faber-leaf.md) | W0 | 2 | P1 | **written** |
+| P2 | [W0 — rename + identity migration](./2026-08-15-0305-w0-rename-faber-leaf.md) | W0 | 2 | P1 | **landed** |
 | P3 | [LeafMesh core — storage, attrs, topo, CDT](./2026-08-15-0310-leafmesh-core-storage-topo-cdt.md) | risk mitigation | 0 | — | **written** |
 | P4 | [W2a — hoist the stroke base](./2026-08-15-0315-w2-stroke-base-hoist.md) | W2 §0 | 3 | P1 | **written** |
 | P5 | [W2b — delete the TS sculpting stack](./2026-08-15-0320-w2-delete-ts-sculpting-stack.md) | W2 §1 | 3 | P4 | **written** |
@@ -1404,7 +1407,7 @@ ungrounded input just argues a wrong plan more convincingly.
   - Exit: criteria 0a/0b/0c. A deliberate type error in an addon and a deliberate
     layer violation both fail CI.
 
-- [ ] **P2 — [W0: rename + identity migration](./2026-08-15-0305-w0-rename-faber-leaf.md)**
+- [x] **P2 — [W0: rename + identity migration](./2026-08-15-0305-w0-rename-faber-leaf.md)** — landed 2026-08-15 (`09570d73` + sculptcore `905c4c4`, then the migration commit). Open decision #7 settled: **migrate**. Two extra workspace packages the plan missed were renamed too (`@webgl-app-framework/tests`, `@webgl-app-framework/addon-code-editor`). `nwjs/profile_dir.mjs` turned out to hardcode the name rather than read the manifest, so the profile move was an independent edit. The one **manual** exit item is still open: opening a real pre-rename profile with a third-party addon installed.
   - Cosmetic: `package.json` name, `Readme.MD`, branding strings.
     `index.html:15` and the git remote are already done.
   - `@webgl-app-framework/tests-integration` → renamed together with the root
@@ -1770,7 +1773,7 @@ ungrounded input just argues a wrong plan more convincingly.
 | 4. Curves / tets / hair / subsurf | P13 | at the delete |
 | 5. Texture painting | P5 | at the delete |
 | 6. UV unwrapping | decided in P13 (rescue), executed in P19 | rescue before the delete |
-| 7. Rename's storage keys | P2 | before P2 ships |
+| 7. Rename's storage keys | **Resolved** — migrate (P2, landed 2026-08-15) | — |
 | 8. Does `faber-leaf-core` model on day one? | P12 | **before P13 is scheduled** — it decides the phase order |
 | 9. One-way format break | P10, documented in P20 | before the first external embedder |
 | 10. Does the sculptcore submodule go away? | **Resolved — no** (§7) | — |

@@ -11,6 +11,8 @@
  * entries from the zip before passing them through here.
  */
 
+import {APP_KEY_NAME} from '../core/const'
+
 export interface AddonStorage {
   /** List ids of all installed addons (one entry per addon directory). */
   list(): Promise<string[]>
@@ -176,7 +178,7 @@ function normalizePath(relPath: string): string {
 // IndexedDBAddonStorage — persistent backend for web (browser + jsdom envs
 // with a polyfilled `indexedDB`). Schema:
 //
-//   db `webgl-app-framework-addons`, version 1
+//   db `<APP_KEY_NAME>-addons`, version 1
 //     objectStore `files`
 //       keyPath: `key` (string `${addonId}/${relPath}`)
 //       value:   {key, addonId, relPath, bytes: Uint8Array, mime}
@@ -186,7 +188,11 @@ function normalizePath(relPath: string): string {
 // AddonStorage methods remain async. See plan §6 step 9b.
 // ---------------------------------------------------------------------------
 
-const DB_NAME = 'webgl-app-framework-addons'
+/** Exported so core/identity_migration.ts can carry a pre-rename database over
+ *  under this name without duplicating the literal. */
+export const ADDON_DB_NAME = `${APP_KEY_NAME}-addons`
+
+const DB_NAME = ADDON_DB_NAME
 const DB_VERSION = 1
 const STORE = 'files'
 const ADDON_INDEX = 'addonId'

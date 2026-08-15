@@ -14,6 +14,7 @@
  */
 
 import * as util from '../util/util'
+import {APP_KEY_NAME} from './const'
 
 export interface AppStorage {
   /** Binary blob (e.g. the compressed startup file). */
@@ -92,11 +93,12 @@ class BrowserAppStorage implements AppStorage {
 }
 
 // localStorage key → on-disk filename. Unmapped keys fall back to a sanitized
-// name; the two real consumers are listed explicitly.
+// name; the three real consumers are listed explicitly. The filenames are fixed,
+// so the app-name rename moved only the keys — no on-disk migration is needed.
 const FILE_NAMES: Record<string, string> = {
-  'webgl-app-framework'         : 'startup.bin',
-  'webgl-app-framework-settings': 'settings.json',
-  'feature-flags-app'           : 'feature-flags.json',
+  [APP_KEY_NAME]              : 'startup.bin',
+  [`${APP_KEY_NAME}-settings`]: 'settings.json',
+  'feature-flags-app'       : 'feature-flags.json',
 }
 
 interface NodeFsSync {

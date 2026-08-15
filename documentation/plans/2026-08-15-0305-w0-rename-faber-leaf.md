@@ -1,6 +1,9 @@
 # P2 — W0: rename + identity migration
 
-**Status:** plan — not started.
+**Status:** done — landed 2026-08-15. Steps 1 and 4 in commit `09570d73`
+(+ sculptcore `905c4c4`); steps 2, 3 and 5 in the commit that flipped this line.
+Corrections found while implementing are folded into the text below and marked
+**[corrected]**.
 
 **Date:** 2026-08-15
 
@@ -45,8 +48,9 @@ the way.
 | Item | Location |
 | --- | --- |
 | pnpm root package name | `package.json:2` — `"webgl-app-framework"` |
-| Readme | `Readme.MD` |
+| Readme | tracked as `Readme.MD` (git on Windows is case-insensitive, so the working tree shows `README.md` — use the tracked spelling in `git` commands) |
 | Tests workspace package | `@webgl-app-framework/tests-integration`, referenced by the root `test:slow` script (`package.json:24`) |
+| **[corrected]** two more workspace packages the plan missed | `@webgl-app-framework/tests` (`tests/package.json`) and `@webgl-app-framework/addon-code-editor` (`addons/code_editor/package.json`) |
 | App package misnamed | `scripts/package.json` is `@sculptcore/frontend` for what is the *app*, not sculptcore |
 | gh-pages publish clone URL | `tools/publish-gh-pages.sh:14` — still the old GitHub URL; works only through GitHub's rename redirect |
 | Already done | git remote; `index.html:15` |
@@ -63,6 +67,15 @@ the way.
 | IndexedDB db `webgl-app-framework-addons` | `scripts/addon/storage.ts:189` | **every installed third-party addon vanishes** |
 | NW.js profile + `.cache` dir | `nwjs/profile_dir.mjs:22,24` | profile and Crashpad dump location moves |
 | `package.json` `name` | `package.json:2` | pnpm root name **and** NW.js manifest name **and** the key Chromium derives profile/Crashpad from (`nwjs/window.html:18-23`) |
+
+**[corrected]** The last two rows overstate the coupling. `profile_dir.mjs` never
+reads the manifest — it hardcodes the app name as a literal (it is
+dependency-free ESM shared with the crash toolkit), so `package.json`'s `name`
+and the profile path are two independent edits that merely have to agree. And
+because `nwjs/launch.mjs` *always* passes an explicit `--user-data-dir`, the
+manifest-name-derived Chromium default in `window.html` is dead in practice; the
+only real consumer of that default was the stale fallback in
+`sculptcore/crash/dump.mjs`.
 
 ## 4. Decision (open decision #7)
 
@@ -94,12 +107,30 @@ New `scripts/core/identity_migration.ts`, called once from app boot **before**
 ```ts
 const LEGACY_APP_KEY = 'webgl-app-framework'
 
-export async function migrateAppIdentity(): Promise<void> {
-  migrateLocalStorageKey(LEGACY_APP_KEY, APP_KEY_NAME)
-  migrateLocalStorageKey(LEGACY_APP_KEY + '-settings', APP_KEY_NAME + '-settings')
-  await migrateAddonDatabase(LEGACY_APP_KEY + '-addons', APP_KEY_NAME + '-addons')
+// [corrected] the storage backend is injected rather than fetched via
+// getAppStorage(): a runtime import of app_storage drags in scripts/util/util.js
+// -> path.ux, which jest cannot load, and the module would not be unit-testable.
+// entry_point.js passes getAppStorage() in.
+export async function migrateAppIdentity(storage: AppStorage): Promise<void> {
+  migrateTextKey(storage, LEGACY_APP_KEY, APP_KEY_NAME)
+  migrateTextKey(storage, LEGACY_APP_KEY + '-settings', APP_KEY_NAME + '-settings')
+  await migrateAddonDatabase(LEGACY_APP_KEY + '-addons', ADDON_DB_NAME)
 }
 ```
+
+**[corrected]** Two supporting changes this needed:
+
+- `scripts/core/const.ts` imported `config/config.js` solely to re-export
+  `cacheSelectBufs`, which **nothing consumes**. Removing it makes `const.ts`
+  import-free, which is what lets `app_storage.ts`, `addon/storage.ts` and this
+  module all take `APP_KEY_NAME` from one place instead of re-spelling literals.
+- `scripts/addon/storage.ts` now exports `ADDON_DB_NAME` (` `${APP_KEY_NAME}-addons` `)
+  so the migration targets the exact name the addon backend opens; a unit test
+  asserts the two agree.
+
+Migration is a no-op on file-backed (NW.js) storage: `FILE_NAMES` in
+`app_storage.ts` maps keys to **fixed filenames** (`startup.bin`,
+`settings.json`), so the rename moved only the keys, never the files.
 
 Rules the implementation must follow:
 
@@ -130,10 +161,10 @@ intact (do **not** `deleteDatabase` in the same release).
 
 ### Step 4 — the NW.js profile directory
 
-`nwjs/profile_dir.mjs:22,24` derives the profile and `.cache` path from the app
-name, and `nwjs/window.html:18-23` shows Chromium deriving its own from the
-manifest name. Renaming relocates the profile, which loses Chromium-level
-state (not app state — that is steps 2–3) and moves where Crashpad dumps land
+`nwjs/profile_dir.mjs:22,24` hardcodes the app name in the profile and `.cache`
+path (**[corrected]** — it does not derive it from the manifest; see §3).
+Changing it relocates the profile, which loses Chromium-level state (not app
+state — that is steps 2–3) and moves where Crashpad dumps land
 (`documentation/plans/crashpad.md`).
 
 Two acceptable outcomes; pick one and state it in the commit message:
@@ -146,11 +177,27 @@ Two acceptable outcomes; pick one and state it in the commit message:
 
 Recommend (a) with the copy, so nothing is left carrying the old name.
 
+**Taken: (a) without the one-time copy.** Copying a live Chromium profile
+carries a stale `SingletonLock` and GPU caches into the new directory — a worse
+failure mode than starting clean, for state that is entirely regenerable. The
+cost is that pre-rename crash dumps stay under the old
+`%LOCALAPPDATA%\webgl-app-framework\` path; `documentation/plans/crashpad.md`
+says so.
+
 ### Step 5 — sweep
 
 `grep -rn "webgl-app-framework"` over the tree; every surviving hit is either
 the legacy constant in `identity_migration.ts`, a test fixture asserting the
 migration, or a bug.
+
+**[corrected]** Three categories of hit are legitimately *not* the app identity
+and are left alone: the on-disk checkout path (`C:/dev/webgl-app-framework`,
+which the repo directory and the agent worktree still use — quoted throughout
+`CLAUDE.md` and the research docs), the vendored-nstructjs branch name
+`webgl-app-framework-patches`, and completed plans quoting historical commands.
+Two `Readme.MD` files under `scripts/` now read "the Faber Leaf repo (formerly
+webgl-app-framework)" rather than dropping the old name, since they exist to
+point readers at where the code went.
 
 ## 6. Tests
 
@@ -160,6 +207,13 @@ migration, or a bug.
 - **Integration**: seed a fake legacy IndexedDB with two addon records, run the
   migration, assert both records exist under the new database name with
   identical bytes, and that the legacy database still exists.
+
+**[corrected]** Both live in one file, `tests/unit/identity_migration.test.ts`
+(11 tests), because `fake-indexeddb` is installed globally by
+`tests/lib/jest-setup.ts` in the *unit* workspace — the NW.js integration suites
+have no IndexedDB. "Corrupt legacy blob" needs no dedicated case: values move as
+opaque text and are never parsed, so any byte sequence round-trips; the
+round-trip tests use non-base64 payloads to keep that honest.
 - **Manual, required before ship**: take a real profile written by the current
   build (with at least one third-party addon installed from
   `addons/` — e.g. `graphit` or `morph`), run the renamed build, and confirm
