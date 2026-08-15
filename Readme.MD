@@ -1,6 +1,6 @@
 ## WebGPU-App-Framework
 ![alt text](image.png)
-[Try it out here](https://joeedh.github.io/webgl-app-framework/)
+[Try it out here](https://joeedh.github.io/faber-leaf/)
 
 A Blender-inspired 3D content-creation app framework. The realtime renderer is
 WebGPU-only; the geometry/sculpting core (`sculptcore`) is a C++20 engine that
