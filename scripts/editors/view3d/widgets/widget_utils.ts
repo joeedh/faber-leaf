@@ -1,3 +1,9 @@
+// @ts-nocheck
+// TODO: this module is imported by nothing in the repo (verified 2026-08-15) and
+// does not typecheck (93 errors). It was excluded from the old narrow tsconfig
+// `files` list, so widening the program to `scripts/**/*.ts` surfaced it. Either
+// port it or delete it; the exemption is here rather than in tsconfig.exclude so
+// it stays visible in the file.
 import {Vector2, Vector3, Vector4, Quat, Matrix4} from '../../../util/vectormath.js'
 import {SimpleMesh, LayerTypes} from '../../../webgl/simplemesh.ts'
 import {

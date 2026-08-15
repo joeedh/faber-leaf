@@ -81,9 +81,10 @@ export class BinaryWriter {
     this.data.push(c)
   }
 
+  /** @returns {ArrayBuffer} */
   finish() {
     const tarray = this.data.finish()
-    return tarray.buffer.slice(0, tarray.length)
+    return /** @type {ArrayBuffer} */ (tarray.buffer.slice(0, tarray.length))
   }
 }
 

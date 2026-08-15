@@ -10,7 +10,7 @@ import type {Scene} from '../scene/scene'
 import {BlockSet, DataBlock, DataRef, Library} from './lib_api'
 import {DebugEditor} from '../editors/debug/DebugEditor.js'
 import {MenuBarEditor} from '../editors/menu/MainMenu.js'
-import {Context, ILockableCtx, toLockedImpl} from '../path.ux/scripts/pathux.js'
+import {Context, DataAPI, ILockableCtx, toLockedImpl} from '../path.ux/scripts/pathux.js'
 import {SavedToolDefaults, Screen, UIBase} from '../path.ux/scripts/pathux.js'
 import {PropsEditor} from '../editors/properties/PropsEditor.js'
 import {MaterialEditor} from '../editors/node/MaterialEditor.js'
@@ -251,8 +251,11 @@ export class ToolContext extends ContextExtraAPI {
     return this.state.toolstack
   }
 
-  get api() {
-    return this.state.api
+  // `DataAPI<this>`, not the bare `DataAPI` AppState stores it as: path.ux's
+  // ContextLike declares `api: DataAPI<this>`, so a context whose `api` is
+  // `DataAPI<ContextLike>` fails the constraint on ToolMacro<ToolContext> etc.
+  get api(): DataAPI<this> {
+    return this.state.api as unknown as DataAPI<this>
   }
 
   get datalib() {

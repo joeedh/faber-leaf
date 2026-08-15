@@ -1633,7 +1633,7 @@ export class ProceduralTexUser {
 }
 
 export function buildProcTextureAPI(
-  api: DataAPI,
+  api: DataAPI<ViewContext>,
   api_define_datablock: <T extends DataBlock>(api: DataAPI<ViewContext>, cls: any) => DataStruct<any, T>
 ) {
   for (const cls of Patterns) {

@@ -1,0 +1,185 @@
+name: PR checks
+
+# The merge gate. Runs the full sculptcore-present configuration — the default
+# configuration, and the one every Faber Leaf plan's exit criteria are written
+# against. A `--no-sculptcore` lane is deliberately absent; it cannot pass yet
+# (P16 owns it), and gating on a cheaper configuration would quietly revoke
+# success criterion 0a.
+#
+# Two jobs, split by what they need rather than by speed, running in parallel:
+#   checks — static gates; needs only the source tree, so it starts immediately.
+#   test   — needs sculptcore WASM + the esbuild bundle, both cached by
+#            submodule SHA, so a TS-only PR skips the Emscripten toolchain.
+#
+# ESLint is not among the gates: the repo's pre-existing violation backlog has
+# not been triaged, and type-aware linting this tree costs tens of minutes.
+# See the step-4 correction in the plan. If `checks` gets slow for some other
+# reason, split it further — do NOT drop a gate or move it off the merge path.
+#
+# See documentation/plans/2026-08-15-0300-ci-and-layer-gate-repair.md §5 step 4.
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One run per branch; a new push supersedes an in-flight one. Never cancel a
+# master run — those are the ones whose green/red state people navigate by.
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  checks:
+    name: typecheck / format / layers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4 # version comes from package.json "packageManager"
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Runs gen:paths (datapaths + tsconfig addon aliases) first, then
+      # `turbo typecheck` across every workspace. Success criterion 0c: the
+      # frontend program is `scripts/**` + `addons/**`, so a type error in an
+      # addon source file fails here even though addons/builtin/* are not
+      # workspaces of their own.
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # gen:paths writes generated sources; if they differ from what is
+      # committed, the tree is stale and API_PATHS.md / datapaths.ts are lying.
+      # --ignore-submodules: gen-datapaths.mjs also drops a catalog copy into
+      # scripts/path.ux/generated/ (the ESLint rule reads a hardcoded path inside
+      # the submodule), which dirties the gitlink without meaning anything here.
+      - name: Verify generated sources are committed
+        run: |
+          if ! git diff --quiet --ignore-submodules=all; then
+            echo "pnpm gen:paths produced a diff — commit the regenerated files:"
+            git --no-pager diff --stat --ignore-submodules=all
+            exit 1
+          fi
+
+      - name: Format check
+        run: pnpm format:check
+
+      # NOTE: ESLint is deliberately NOT a gate here. The repo carries a large
+      # pre-existing violation backlog that this plan does not clear, and gating
+      # on a ratchet around a backlog nobody has looked at buys little for a lot
+      # of CI wall-clock (type-aware linting this tree runs tens of minutes).
+      # `tools/check-lint.mjs` exists and works — `pnpm check:lint` — but it is
+      # run by hand until the backlog is triaged. Wiring it in is P9's call.
+
+      # Ratchet for architectural layer boundaries. Every rule is
+      # still severity `warn` while the refactor is in flight — P9 flips them to
+      # `error` — so the per-rule budgets in tools/layer-baseline.json are the
+      # only thing keeping the numbers monotone.
+      - name: Layer boundaries (ratchet)
+        run: pnpm check:layers
+
+  test:
+    name: test (sculptcore present)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ---- sculptcore WASM (cached by submodule SHA) ------------------------
+      # Same build as deploy-pages.yml. esbuild consumes
+      # sculptcore/typescript/build/sculptcore-browser.{wasm,js}; they are
+      # gitignored build outputs, rebuilt only when the submodule commit, the
+      # pinned emsdk, or the third-party dependency revision changes.
+      - name: Resolve sculptcore commit
+        id: sc
+        run: echo "sha=$(git -C sculptcore rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache sculptcore WASM bundle
+        id: wasm-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            sculptcore/typescript/build/sculptcore-browser.wasm
+            sculptcore/typescript/build/sculptcore-browser.js
+          key: >-
+            sc-wasm-release-v2-${{ steps.sc.outputs.sha }}-${{
+            hashFiles('sculptcore/emsdkVersion.txt', 'sculptcore/tools/deps.mjs') }}
+
+      # emsdk is a ~2.4 GB git-cloned toolchain; cache it so only the first WASM
+      # build (or an emsdk version bump) pays the install cost.
+      - name: Cache emsdk toolchain
+        if: steps.wasm-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: sculptcore/emsdk
+          key: emsdk-${{ hashFiles('sculptcore/emsdkVersion.txt') }}
+
+      # Deliberately no CMake-build-dir cache: buildDir('wasm') is plain
+      # `sculptcore/build`, shared with the native/node targets, and its
+      # CMakeCache.txt records absolute paths that do not survive a move between
+      # runners. The two output artifacts above are the cacheable unit.
+      - name: Build sculptcore WASM
+        if: steps.wasm-cache.outputs.cache-hit != 'true'
+        working-directory: sculptcore
+        env:
+          # Trust the checked-in source/brush/kernels/generated/*.brush.gen.h
+          # headers instead of building the native `sbrushc` host tool, which
+          # would force a full native CMake configure (Vulkan + wgpu_native,
+          # neither prebuilt for linux). sbrushCodegen() fails loudly if any
+          # header is missing, so a stale checkout can't silently ship old kernels.
+          SBRUSH_SKIP_NATIVE_CODEGEN: '1'
+        run: |
+          pnpm install --frozen-lockfile          # make.mjs deps (yargs, ...)
+          if [ ! -x emsdk/emsdk ]; then
+            node make.mjs install-emsdk           # git-clones + installs pinned emsdk/cmake/ninja
+          fi
+          node make.mjs configure wasm --release
+          node make.mjs build wasm --release
+
+      # The NW.js integration suites boot the real app from index.html ->
+      # build/entry_point.js, and self-skip when the bundle is missing (see the
+      # `canRun` guards in tests/integration/*.test.ts). Without this step the
+      # suite would report green having run nothing.
+      - name: Bundle app (esbuild)
+        run: pnpm build
+
+      # `turbo test`. The NW.js integration pass runs headlessly
+      # (--apptest-headless), and run-split.mjs skips the native-backend pass
+      # outright when sculptcore/build/native-node/sculptcore_node.node is
+      # absent — routing the cross-backend suites into the wasm pass, so nothing
+      # is silently dropped. The native N-API lane needs a full native CMake
+      # build (Vulkan + wgpu_native) and is not built here.
+      #
+      # The wall-clock-dominating suites in tests/integration/slow.mjs are
+      # excluded by construction; they belong on a nightly `pnpm test:slow`.
+      - name: Test
+        run: pnpm test

@@ -10,7 +10,7 @@ const WPROJ = '/examples/ts2.wproj'
 
 const browser = await chromium.launch({
   channel: 'chromium',
-  args: ['--enable-unsafe-webgpu', '--enable-features=Vulkan', '--use-angle=default', '--ignore-gpu-blocklist'],
+  args   : ['--enable-unsafe-webgpu', '--enable-features=Vulkan', '--use-angle=default', '--ignore-gpu-blocklist'],
 })
 
 async function replayAndGrab() {
@@ -21,11 +21,11 @@ async function replayAndGrab() {
   await page.evaluate(async (url) => {
     const buf = await fetch(url).then((r) => r.arrayBuffer())
     await window._appstate.loadFileAsync(buf, {
-      load_library: true,
-      load_screen: false,
-      load_settings: false,
+      load_library   : true,
+      load_screen    : false,
+      load_settings  : false,
       reset_toolstack: true,
-      reset_context: true,
+      reset_context  : true,
     })
   }, WPROJ)
   await page.evaluate(() => {

@@ -48,7 +48,7 @@ function runPass(backend) {
       stdio: 'inherit',
       env  : {...process.env, SC_TEST_BACKEND: backend, SC_TEST_SLOW: slow ? '1' : ''},
     })
-    child.on('exit', (code, signal) => resolve(signal ? 1 : (code ?? 1)))
+    child.on('exit', (code, signal) => resolve(signal ? 1 : code ?? 1))
     child.on('error', (err) => {
       console.error(`[integration:${backend}] failed to spawn jest:`, err)
       resolve(1)

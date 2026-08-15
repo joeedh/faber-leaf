@@ -1,4 +1,5 @@
 {
+  "extends": "./tsconfig.paths.json",
   "compilerOptions": {
     "allowJs"          : true,
     "resolveJsonModule": true,
@@ -16,18 +17,26 @@
     "noImplicitThis"   : true,
     "listEmittedFiles" : false,
     "outDir"           : "types",
-    "paths": {
-      "@framework/api"        : ["./scripts/framework_api.ts"],
-      "@framework/pathux"     : ["./scripts/path.ux/scripts/pathux.ts"],
-      "@addon/mesh/api"       : ["./addons/builtin/mesh/src/api.ts"],
-      "@addon/subsurf/api"    : ["./addons/builtin/subsurf/src/api.ts"],
-      "@addon/mesh_edit/api"  : ["./addons/builtin/mesh_edit/src/api.ts"],
-      "@addon/curve/api"      : ["./addons/builtin/curve/src/api.ts"],
-      "@addon/pbvh_sculpt/api": ["./addons/builtin/pbvh_sculpt/src/api.ts"],
-      "@addon/sculptcore/api" : ["./addons/builtin/sculptcore/src/api.ts"],
-      "@addon/tetmesh/api"    : ["./addons/builtin/tetmesh/src/api.ts"],
-    },
     "types"            : ["node", "jest"],
   },
-  "files"          : ["scripts/typescript_entry.ts", "scripts/data_api/generated/datapaths.ts"],
+  // `include`, not `files`: with an entry-point list, an addon source file only
+  // enters the program if the entry happens to import it, so a type error in an
+  // addon can go unnoticed (success criterion 0c). Sibling workspaces
+  // (sculptcore/, tests/, scripts/path.ux, scripts/mathl) have their own
+  // programs and are checked by their own `turbo typecheck` tasks.
+  "include": [
+    "scripts/**/*.ts",
+    "addons/**/*.ts",
+    "tools/**/*.mjs",
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules",
+    "scripts/path.ux",
+    "scripts/mathl",
+    "build",
+    "dist",
+    "types",
+    "**/pending-port/**",
+  ],
 }

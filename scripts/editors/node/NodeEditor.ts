@@ -428,8 +428,8 @@ NodeEditor {
     loadUIData(this.sidebar, uidata)
   }
 
-  makeHeader(container: Container<ViewContext>, addNoteArea = true, makeDraggable = true): Container<ViewContext> {
-    const header = super.makeHeader(container, addNoteArea, makeDraggable).row()
+  makeHeader(container: Container<ViewContext>, addNoteArea = true): Container<ViewContext> {
+    const header = super.makeHeader(container, addNoteArea).row()
     const menustrip = (this.menuStrip = header.row())
 
     header.style.zIndex = '10'

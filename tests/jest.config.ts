@@ -29,12 +29,7 @@ const config: Config = {
   // Don't try to load helpers as tests. integration/ is its own workspace
   // package (@webgl-app-framework/tests-integration) that runs its suites once
   // per sculptcore backend — see integration/run-split.mjs.
-  testPathIgnorePatterns: [
-    '/node_modules/',
-    '<rootDir>/lib/',
-    '<rootDir>/fixtures/',
-    '<rootDir>/integration/',
-  ],
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/lib/', '<rootDir>/fixtures/', '<rootDir>/integration/'],
 
   // Per-file setup: polyfills jsdom-missing browser globals (URL.createObjectURL etc.)
   setupFiles: ['<rootDir>/lib/jest-setup.ts'],

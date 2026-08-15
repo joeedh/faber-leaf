@@ -1,20 +1,13 @@
 {
-  "compilerOptions": {
-    "allowJs"         : true,
-    "target"          : "es6",
-    "module"          : "es2022",
-    "lib"             : ["dom", "scripthost", "esnext", "ESNext.Disposable"],
-    "pretty"          : true,
-    "esModuleInterop" : true,
-    "isolatedModules" : true,
-    "strictNullChecks": true,
-    "skipLibCheck"    : true,
-    "noEmitOnError"   : false,
-    "declaration"     : false,
-    "noEmit"          : true,
-    "noImplicitThis"  : true,
-    "listEmittedFiles": false,
-    "outDir"          : "types",
-  },
-  "files"          : ["scripts/typescript_entry.ts"],
+  // The frontend program is defined once, at the repo root, and covers
+  // `scripts/**` + `addons/**` together (addons/builtin/* are not workspaces of
+  // their own, so nothing else would ever check them). `include`/`exclude` in a
+  // base config resolve relative to that base, so this inherits the root's
+  // patterns verbatim — `npx tsgo --noEmit` here and at the root build the same
+  // program.
+  //
+  // This used to be `"files": ["scripts/typescript_entry.ts"]`, which resolved
+  // to the nonexistent scripts/scripts/typescript_entry.ts — so the workspace's
+  // `turbo typecheck` task was checking nothing at all.
+  "extends": "../tsconfig.json",
 }

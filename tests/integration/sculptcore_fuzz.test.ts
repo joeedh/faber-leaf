@@ -101,12 +101,12 @@ function runFuzz(electronExe: string, backend: 'wasm' | 'native'): FuzzTestResul
     // else synthesize a failure so the assertion reports the crash.
     if (!fs.existsSync(out)) {
       return {
-        ok: false,
-        error: `electron process died: ${String(err)}`,
-        seed: SEED,
-        iters: ITERS,
+        ok        : false,
+        error     : `electron process died: ${String(err)}`,
+        seed      : SEED,
+        iters     : ITERS,
         ranStrokes: -1,
-        log: [],
+        log       : [],
       }
     }
   }

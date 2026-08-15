@@ -21,6 +21,18 @@ export default defineConfig([
     './types/**',
     './esdocs/**',
     './vendor/**',
+    // Build output. .prettierignore already skips these, but ESLint has no
+    // .gitignore awareness, so `eslint .` was type-aware-linting the esbuild
+    // bundles (43 MB, one 25 MB file) — minutes of work per run for findings
+    // nobody can act on.
+    './build/**',
+    './dist/**',
+    '**/dist/**',
+    './coverage/**',
+    './playwright-report/**',
+    './test-results/**',
+    './tools/.tmp/**',
+    './scripts/extern/**',
   ]),
   {
     files          : ['**/*.{js,mjs,cjs,ts,mts,cts}'],

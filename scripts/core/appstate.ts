@@ -327,7 +327,10 @@ export class AppState {
     }
 
     if (!args.save_library) {
-      return file.finish().buffer as ArrayBuffer
+      // BinaryWriter.finish() already yields the ArrayBuffer, so the `.buffer`
+      // this used to read was `undefined`. Latent: the only caller that reaches
+      // this branch is createSettingsFile(), which nothing calls today.
+      return file.finish()
     }
 
     writeblock(BlockTypes.LIBRARY, this.datalib)

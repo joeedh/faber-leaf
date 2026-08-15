@@ -592,7 +592,7 @@ function brushTest(): BrushTestResult {
       mesh.spatial.setDisplayColorAttr(activeIdx)
       strokeAndMeasure(mesh, colorBrush, SculptTools.COLOR, [0, -R, 0], [0, -1, 0], radius, {
         strength: 1,
-        dabs   : 3,
+        dabs    : 3,
       })
       colorBrush.color.load(savedTargetColor)
 

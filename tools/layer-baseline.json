@@ -1,0 +1,21 @@
+{
+  "$comment": "Ratchet baseline for tools/check-layers.js. Only ever lower these.",
+  "measured": "2026-08-15",
+  "config": ".dependency-cruiser.cjs",
+  "roots": [
+    "scripts",
+    "addons"
+  ],
+  "total": 2483,
+  "rules": {
+    "core-no-mesh": 2,
+    "core-no-view3d-tools": 0,
+    "util-no-mesh": 0,
+    "core-no-addons": 65,
+    "core-no-addons-typeonly": 15,
+    "core-no-addons-transitive": 1632,
+    "core-no-litemesh": 0,
+    "core-no-sculptcore": 0,
+    "no-circular": 769
+  }
+}

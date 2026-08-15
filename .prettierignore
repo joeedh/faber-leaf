@@ -2,9 +2,21 @@ node_modules
 build
 dist
 **/dist/
-scripts/path.ux/
-emsdk/
-#sculptcore/
-vendor/
 patches/
 **/*.min.js
+
+# Submodules — each carries its own prettier config and formats in its own repo.
+# Checking them from here means the parent gate fails on a diff this repo cannot
+# land.
+sculptcore/
+scripts/path.ux/
+scripts/mathl/
+vendor/
+emsdk/
+
+# Vendored third-party sources, generated output, scratch.
+scripts/extern/
+scripts/data_api/generated/
+types/
+esdocs/
+tools/.tmp/
