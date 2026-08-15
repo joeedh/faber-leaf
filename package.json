@@ -5,7 +5,8 @@
   "window": {
     "width": 1400,
     "height": 900,
-    "show": false
+    "show": false,
+    "icon": "assets/logo/favicon/favicon-512.png"
   },
   "chromium-args": "--enable-features=SharedArrayBuffer,WebGPU --allow-running-insecure-content --ignore-gpu-blocklist --enable-unsafe-webgpu",
   "scripts": {

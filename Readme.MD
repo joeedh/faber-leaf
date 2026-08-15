@@ -1,5 +1,9 @@
-## WebGPU-App-Framework
-![alt text](image.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/logo/logo1-with-text-dark.svg">
+  <img src="assets/logo/logo1-with-text-outlined.svg" alt="FaberLeaf" width="420">
+</picture>
+
+![The FaberLeaf viewport](image.png)
 [Try it out here](https://joeedh.github.io/faber-leaf/)
 
 A Blender-inspired 3D content-creation app framework. The realtime renderer is

@@ -9,10 +9,14 @@
   <meta http-equiv="pragma" content="no-cache"/>
 
   <meta charset="utf-8">
-  <meta name="description" content="">
+  <meta name="description" content="FaberLeaf — a WebGPU 3D sculpting and modeling app.">
   <meta name="author" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Faber Leaf</title>
+  <title>FaberLeaf</title>
+
+  <link rel="icon" href="assets/logo/favicon/favicon.ico" sizes="any">
+  <link rel="icon" href="assets/logo/favicon/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/logo/favicon/apple-touch-icon.png">
   <style>
       body, html {
           margin: 0px;
@@ -64,6 +68,13 @@
 
       #loading-overlay.hidden {
           opacity: 0;
+      }
+
+      #loading-logo {
+          width: min(340px, 55vw);
+          height: auto;
+          margin-bottom: 12px;
+          user-select: none;
       }
 
       #loading-spinner {
@@ -185,6 +196,7 @@
 </head>
 <body onload="init()">
 <div id="loading-overlay">
+  <img id="loading-logo" src="assets/logo/logo1-with-text-dark.svg" alt="FaberLeaf">
   <div id="loading-spinner"></div>
   <div id="loading-text">Loading&hellip;</div>
 </div>
