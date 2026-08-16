@@ -917,7 +917,7 @@ export class MeshSnapToMirror extends MeshOp<{
 
         //check sculpt toolmode's symmetry settings too
         for (const mode of ctx.scene.toolmodes) {
-          if (mode instanceof BVHToolMode) {
+          if (mode instanceof PaintToolModeBase) {
             axes |= mode.symmetryAxes
           }
         }
@@ -3341,7 +3341,7 @@ export class OptRemeshParams extends ToolOp<{
 }
 
 import {SolverElem, Solver, VelConstraint} from './mesh_solver.js'
-import {BVHToolMode} from '../../../../scripts/editors/view3d/tools/pbvh.js'
+import {PaintToolModeBase} from '@framework/api'
 import {CurvVert, getCurveVerts, smoothCurvatures} from './mesh_curvature.js'
 import {getFaceSets} from './mesh_facesets.js'
 import {getDynVerts} from './bvh.js'

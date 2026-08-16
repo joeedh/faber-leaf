@@ -502,8 +502,8 @@ export class SculptCorePaintMode extends PaintToolModeBase {
     )
 
     function onchange(this: any): void {
-      const pbvh = this.dataref
-      const mesh = pbvh.ctx.mesh
+      const toolmode = this.dataref
+      const mesh = toolmode.ctx.mesh
 
       if (mesh?.bvh && !mesh.bvh.dead) {
         const bvh = mesh.bvh
@@ -544,7 +544,7 @@ export class SculptCorePaintMode extends PaintToolModeBase {
     st.string('dynTopoStatsLabel', 'dynTopoStatsLabel', 'DynTopo Stats').readOnly()
     st.string('gpuBrushStatsLabel', 'gpuBrushStatsLabel', 'GPU Brush Stats').readOnly()
     /* Only tools sculptcore implements (TOOL_TO_SCULPTBRUSH) are selectable
-     * in this tool mode; the legacy pbvh mode keeps the full enum. */
+     * here; SculptTools still carries entries no kernel backs. */
     const sculptcoreTools = {} as Record<string, number>
     for (const [k, v] of Object.entries(deleteTsEnumIntegers(SculptTools))) {
       // Layer Draw is retired from the picker (sculptLayersV2: the panel's
@@ -581,7 +581,8 @@ export class SculptCorePaintMode extends PaintToolModeBase {
     this.keymap = new KeyMap([
       new HotKey('F', [], 'brush.set_radius()'),
       new HotKey('.', [], 'view3d.view_selected()'),
-      new HotKey('M', ['alt'], 'paint.clear_mask()'),
+      // No Alt+M: `paint.clear_mask` was a legacy-Mesh op and went with the TS
+      // PBVH stack in P5. Restoring it needs a sculptcore-side mask fill.
       new HotKey('K', [], 'litemesh.mark_seam_interactive()'),
       new HotKey('K', ['shift'], 'litemesh.mark_sharp_interactive()'),
     ])

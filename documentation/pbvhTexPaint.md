@@ -1,5 +1,17 @@
 # PBVH Texture Painting (`pbvh_texpaint.ts` / `pbvh_texpaint_blur.ts`)
 
+> **⚠ REMOVED 2026-08-16 — this documents code that is no longer in the tree.**
+> Both files went with the TS PBVH sculpting stack in P5
+> ([plan](plans/2026-08-15-0320-w2-delete-ts-sculpting-stack.md)). They were
+> WebGL2-only and already inoperative on the WebGPU renderer before the delete.
+>
+> This file is **kept deliberately**, as the behavioral specification for the
+> deferred sculptcore port —
+> [plans/2026-08-16-1450-texpaint-sculptcore-port.md](plans/2026-08-16-1450-texpaint-sculptcore-port.md).
+> Read it as "what the replacement must do", not as a guide to live code. Every
+> path, symbol and line reference below is historical; recover the source with
+> `git show <pre-P5-commit>:scripts/editors/view3d/tools/pbvh_texpaint.ts`.
+
 `scripts/editors/view3d/tools/pbvh_texpaint.ts` implements **`TexPaintOp`**, the
 3D texture-painting brush stroke, and `pbvh_texpaint_blur.ts` implements
 **`BrushBlurFBO`**, the optional smear/smudge helper. Together they let you drag

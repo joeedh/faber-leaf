@@ -439,48 +439,6 @@ export type GeneratedDataPath =
   | "toolDefaults.brush.set_radius_mode.mode"
   | "toolDefaults.brush.swap_colors"
   | "toolDefaults.brush.swap_colors.dataPath"
-  | "toolDefaults.bvh"
-  | "toolDefaults.bvh.bvh_deform"
-  | "toolDefaults.bvh.bvh_deform.brush"
-  | "toolDefaults.bvh.bvh_deform.falloff"
-  | "toolDefaults.bvh.bvh_deform.rendermat"
-  | "toolDefaults.bvh.bvh_deform.samples"
-  | "toolDefaults.bvh.bvh_deform.symmetryAxes"
-  | "toolDefaults.bvh.bvh_deform.viewportSize"
-  | "toolDefaults.bvh.hole_filler"
-  | "toolDefaults.bvh.hole_filler.brush"
-  | "toolDefaults.bvh.hole_filler.falloff"
-  | "toolDefaults.bvh.hole_filler.rendermat"
-  | "toolDefaults.bvh.hole_filler.samples"
-  | "toolDefaults.bvh.hole_filler.symmetryAxes"
-  | "toolDefaults.bvh.hole_filler.viewportSize"
-  | "toolDefaults.bvh.paint"
-  | "toolDefaults.bvh.paint.brush"
-  | "toolDefaults.bvh.paint.clear_mask"
-  | "toolDefaults.bvh.paint.clear_mask.value"
-  | "toolDefaults.bvh.paint.drawFaceSet"
-  | "toolDefaults.bvh.paint.dynTopoDepth"
-  | "toolDefaults.bvh.paint.dynTopoLength"
-  | "toolDefaults.bvh.paint.falloff"
-  | "toolDefaults.bvh.paint.grabCo"
-  | "toolDefaults.bvh.paint.grabData"
-  | "toolDefaults.bvh.paint.grabRadiusFactor"
-  | "toolDefaults.bvh.paint.grabTh"
-  | "toolDefaults.bvh.paint.rendermat"
-  | "toolDefaults.bvh.paint.reprojectCustomData"
-  | "toolDefaults.bvh.paint.samples"
-  | "toolDefaults.bvh.paint.symmetryAxes"
-  | "toolDefaults.bvh.paint.useDynTopo"
-  | "toolDefaults.bvh.paint.useMultiResDepth"
-  | "toolDefaults.bvh.paint.viewportSize"
-  | "toolDefaults.bvh.texpaint"
-  | "toolDefaults.bvh.texpaint.brush"
-  | "toolDefaults.bvh.texpaint.doBlur"
-  | "toolDefaults.bvh.texpaint.glSize"
-  | "toolDefaults.bvh.texpaint.rendermat"
-  | "toolDefaults.bvh.texpaint.samples"
-  | "toolDefaults.bvh.texpaint.symmetryAxes"
-  | "toolDefaults.bvh.texpaint.viewSize"
   | "toolDefaults.curve1d"
   | "toolDefaults.curve1d.bspline_add_point"
   | "toolDefaults.curve1d.bspline_add_point.dataPath"
@@ -704,44 +662,13 @@ export type GeneratedDataPath =
   | "toolDefaults.object.toggle_select_all.mode"
   | "toolDefaults.object.toggle_select_all.nodeEditorPath"
   | "toolDefaults.object.toggle_select_all.useNodeEditorGraph"
-  | "toolDefaults.paint"
-  | "toolDefaults.paint.brush"
-  | "toolDefaults.paint.clear_mask"
-  | "toolDefaults.paint.clear_mask.value"
-  | "toolDefaults.paint.drawFaceSet"
-  | "toolDefaults.paint.dynTopoDepth"
-  | "toolDefaults.paint.dynTopoLength"
-  | "toolDefaults.paint.falloff"
-  | "toolDefaults.paint.grabCo"
-  | "toolDefaults.paint.grabData"
-  | "toolDefaults.paint.grabRadiusFactor"
-  | "toolDefaults.paint.grabTh"
-  | "toolDefaults.paint.rendermat"
-  | "toolDefaults.paint.reprojectCustomData"
-  | "toolDefaults.paint.samples"
-  | "toolDefaults.paint.symmetryAxes"
-  | "toolDefaults.paint.useDynTopo"
-  | "toolDefaults.paint.useMultiResDepth"
-  | "toolDefaults.paint.viewportSize"
   | "toolDefaults.sculptcore"
   | "toolDefaults.sculptcore.paint"
   | "toolDefaults.sculptcore.paint.brush"
-  | "toolDefaults.sculptcore.paint.clear_mask"
-  | "toolDefaults.sculptcore.paint.clear_mask.value"
-  | "toolDefaults.sculptcore.paint.drawFaceSet"
-  | "toolDefaults.sculptcore.paint.dynTopoDepth"
-  | "toolDefaults.sculptcore.paint.dynTopoLength"
   | "toolDefaults.sculptcore.paint.falloff"
-  | "toolDefaults.sculptcore.paint.grabCo"
-  | "toolDefaults.sculptcore.paint.grabData"
-  | "toolDefaults.sculptcore.paint.grabRadiusFactor"
-  | "toolDefaults.sculptcore.paint.grabTh"
   | "toolDefaults.sculptcore.paint.rendermat"
-  | "toolDefaults.sculptcore.paint.reprojectCustomData"
   | "toolDefaults.sculptcore.paint.samples"
   | "toolDefaults.sculptcore.paint.symmetryAxes"
-  | "toolDefaults.sculptcore.paint.useDynTopo"
-  | "toolDefaults.sculptcore.paint.useMultiResDepth"
   | "toolDefaults.sculptcore.paint.viewportSize"
   | "toolDefaults.strand"
   | "toolDefaults.strand.create"
@@ -1252,48 +1179,6 @@ declare module "@framework/pathux" {
     "toolDefaults.brush.set_radius_mode.mode": true;
     "toolDefaults.brush.swap_colors": true;
     "toolDefaults.brush.swap_colors.dataPath": true;
-    "toolDefaults.bvh": true;
-    "toolDefaults.bvh.bvh_deform": true;
-    "toolDefaults.bvh.bvh_deform.brush": true;
-    "toolDefaults.bvh.bvh_deform.falloff": true;
-    "toolDefaults.bvh.bvh_deform.rendermat": true;
-    "toolDefaults.bvh.bvh_deform.samples": true;
-    "toolDefaults.bvh.bvh_deform.symmetryAxes": true;
-    "toolDefaults.bvh.bvh_deform.viewportSize": true;
-    "toolDefaults.bvh.hole_filler": true;
-    "toolDefaults.bvh.hole_filler.brush": true;
-    "toolDefaults.bvh.hole_filler.falloff": true;
-    "toolDefaults.bvh.hole_filler.rendermat": true;
-    "toolDefaults.bvh.hole_filler.samples": true;
-    "toolDefaults.bvh.hole_filler.symmetryAxes": true;
-    "toolDefaults.bvh.hole_filler.viewportSize": true;
-    "toolDefaults.bvh.paint": true;
-    "toolDefaults.bvh.paint.brush": true;
-    "toolDefaults.bvh.paint.clear_mask": true;
-    "toolDefaults.bvh.paint.clear_mask.value": true;
-    "toolDefaults.bvh.paint.drawFaceSet": true;
-    "toolDefaults.bvh.paint.dynTopoDepth": true;
-    "toolDefaults.bvh.paint.dynTopoLength": true;
-    "toolDefaults.bvh.paint.falloff": true;
-    "toolDefaults.bvh.paint.grabCo": true;
-    "toolDefaults.bvh.paint.grabData": true;
-    "toolDefaults.bvh.paint.grabRadiusFactor": true;
-    "toolDefaults.bvh.paint.grabTh": true;
-    "toolDefaults.bvh.paint.rendermat": true;
-    "toolDefaults.bvh.paint.reprojectCustomData": true;
-    "toolDefaults.bvh.paint.samples": true;
-    "toolDefaults.bvh.paint.symmetryAxes": true;
-    "toolDefaults.bvh.paint.useDynTopo": true;
-    "toolDefaults.bvh.paint.useMultiResDepth": true;
-    "toolDefaults.bvh.paint.viewportSize": true;
-    "toolDefaults.bvh.texpaint": true;
-    "toolDefaults.bvh.texpaint.brush": true;
-    "toolDefaults.bvh.texpaint.doBlur": true;
-    "toolDefaults.bvh.texpaint.glSize": true;
-    "toolDefaults.bvh.texpaint.rendermat": true;
-    "toolDefaults.bvh.texpaint.samples": true;
-    "toolDefaults.bvh.texpaint.symmetryAxes": true;
-    "toolDefaults.bvh.texpaint.viewSize": true;
     "toolDefaults.curve1d": true;
     "toolDefaults.curve1d.bspline_add_point": true;
     "toolDefaults.curve1d.bspline_add_point.dataPath": true;
@@ -1517,44 +1402,13 @@ declare module "@framework/pathux" {
     "toolDefaults.object.toggle_select_all.mode": true;
     "toolDefaults.object.toggle_select_all.nodeEditorPath": true;
     "toolDefaults.object.toggle_select_all.useNodeEditorGraph": true;
-    "toolDefaults.paint": true;
-    "toolDefaults.paint.brush": true;
-    "toolDefaults.paint.clear_mask": true;
-    "toolDefaults.paint.clear_mask.value": true;
-    "toolDefaults.paint.drawFaceSet": true;
-    "toolDefaults.paint.dynTopoDepth": true;
-    "toolDefaults.paint.dynTopoLength": true;
-    "toolDefaults.paint.falloff": true;
-    "toolDefaults.paint.grabCo": true;
-    "toolDefaults.paint.grabData": true;
-    "toolDefaults.paint.grabRadiusFactor": true;
-    "toolDefaults.paint.grabTh": true;
-    "toolDefaults.paint.rendermat": true;
-    "toolDefaults.paint.reprojectCustomData": true;
-    "toolDefaults.paint.samples": true;
-    "toolDefaults.paint.symmetryAxes": true;
-    "toolDefaults.paint.useDynTopo": true;
-    "toolDefaults.paint.useMultiResDepth": true;
-    "toolDefaults.paint.viewportSize": true;
     "toolDefaults.sculptcore": true;
     "toolDefaults.sculptcore.paint": true;
     "toolDefaults.sculptcore.paint.brush": true;
-    "toolDefaults.sculptcore.paint.clear_mask": true;
-    "toolDefaults.sculptcore.paint.clear_mask.value": true;
-    "toolDefaults.sculptcore.paint.drawFaceSet": true;
-    "toolDefaults.sculptcore.paint.dynTopoDepth": true;
-    "toolDefaults.sculptcore.paint.dynTopoLength": true;
     "toolDefaults.sculptcore.paint.falloff": true;
-    "toolDefaults.sculptcore.paint.grabCo": true;
-    "toolDefaults.sculptcore.paint.grabData": true;
-    "toolDefaults.sculptcore.paint.grabRadiusFactor": true;
-    "toolDefaults.sculptcore.paint.grabTh": true;
     "toolDefaults.sculptcore.paint.rendermat": true;
-    "toolDefaults.sculptcore.paint.reprojectCustomData": true;
     "toolDefaults.sculptcore.paint.samples": true;
     "toolDefaults.sculptcore.paint.symmetryAxes": true;
-    "toolDefaults.sculptcore.paint.useDynTopo": true;
-    "toolDefaults.sculptcore.paint.useMultiResDepth": true;
     "toolDefaults.sculptcore.paint.viewportSize": true;
     "toolDefaults.strand": true;
     "toolDefaults.strand.create": true;

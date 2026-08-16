@@ -17,3 +17,14 @@
      base64 against a ~5MB localStorage quota, so that one migration degrades
      to a move (marker reads `moved`). Only the settings key and the addon
      database are guaranteed to still be there.
+[ ]: 3D texture painting was deleted in P5 (the Faber Leaf "delete the TS
+     sculpting stack" step) along with the rest of the WebGL2 PBVH stack. It
+     was already inoperative on the WebGPU renderer before the delete. The
+     replacement is a sculptcore-side port, planned but deliberately deferred:
+     documentation/plans/2026-08-16-1450-texpaint-sculptcore-port.md
+[ ]: no "clear mask" operator. `paint.clear_mask` was a legacy-Mesh ToolOp
+     (it walked `mesh.verts` writing a mask CustomData layer) and went with
+     the TS PBVH stack in P5, taking the Alt+M hotkey with it. Masking itself
+     is fine — `mask.sbrush` / SculptTools.MASK_PAINT still paint one — but
+     there is no engine-side mask fill, so add a `litemesh.clear_mask` ToolOp
+     over a sculptcore fill and put the hotkey back in sculptcore.ts.

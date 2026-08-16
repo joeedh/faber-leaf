@@ -12,7 +12,7 @@ TypeScript module that:
 - Imports another addon's public surface through `@addon/<id>/api`
 
 Builtin addons today: `mesh`, `mesh_edit`, `curve`, `subsurf`, `tetmesh`,
-`pbvh_sculpt`, `sculptcore`. `mesh` is unique in that it's also the home of
+`sculptcore`. `mesh` is unique in that it's also the home of
 the `Mesh` DataBlock, customdata layers, and the BVH — i.e. the framework
 literally cannot render a model without it.
 
@@ -149,11 +149,13 @@ import type {ViewContext, IAddon, AddonAPI} from '@framework/api'
 - If you need a framework symbol that isn't re-exported yet, **add it to
   `scripts/framework_api.ts`** — do not write `../../../../scripts/foo.js`.
 
-The lone exceptions in the tree are documented in `TODO.md` and represent
-known cross-layer references that need a deeper restructure (a mesh →
-pbvh_sculpt `instanceof` check, and the announcement shims in
-`pbvh_sculpt/src/api.ts` / `sculptcore/src/api.ts` for classes that haven't
-yet physically moved out of `scripts/editors/view3d/tools/`).
+The lone exceptions in the tree are documented in
+`documentation/archive/TODO.md` and represent known cross-layer references that
+need a deeper restructure — today the announcement shim in
+`sculptcore/src/api.ts`, for classes that haven't yet physically moved out of
+`scripts/editors/view3d/tools/`. (The mesh → `pbvh_sculpt` `instanceof` check
+that used to be listed here went away with that addon in P5; mesh now tests
+`instanceof PaintToolModeBase` off `@framework/api`.)
 
 ## `@addon/<id>/api` — peer-addon import surface
 

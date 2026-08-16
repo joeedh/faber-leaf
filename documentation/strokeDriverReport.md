@@ -20,7 +20,7 @@ geometry-free math is unit-testable in isolation:
 | Sculpt ToolOp | `scripts/editors/view3d/tools/sculptcore_ops.ts` (`SculptPaintOp`) | owns the undo/meshlog step, mirroring, dab application into the sculptcore C++/WASM kernel, dyntopo, GPU path. |
 
 The transport object between layers is `PaintSample`
-(`scripts/editors/view3d/tools/pbvh_paintsample.ts:5`).
+(`scripts/editors/view3d/tools/stroke_base.ts:54`).
 
 ```
 pointer event ─▶ StrokeDriverOp.on_pointermove ─▶ driver.push (enqueue)
@@ -211,14 +211,14 @@ driver explicitly does not mirror.
 - Axis bitflag `{X:1, Y:2, Z:4}` is a `FlagProperty` op input
   (`stroke_paint_op.ts:66`), snapshotted from the toolmode in `undoPre` and read
   back via `getSymmetryAxes` (`sculptcore_ops.ts:410`).
-- The mirror table `SymAxisMap` (`pbvh_base.ts:94`) maps each of the 8 axis-bit
+- The mirror table `SymAxisMap` (`stroke_base.ts:351`) maps each of the 8 axis-bit
   combinations to a list of per-component sign-flip `Vector3`s (e.g. X →
   `[[-1,1,1]]`; X+Y+Z → 7 reflections covering all octants).
 - `applyDab` (`sculptcore_ops.ts:387`) applies the primary dab, then for each
   `muls[i]` in `SymAxisMap[sym]` calls `applyDabOne(ctx, ps, muls[i], i+1)`.
 - `applyDabOne` copies the sample and reflects it: `ps = ps.copy();
   ps.mirror(mirrorFlips)`.
-- `PaintSample.mirror(mul)` (`pbvh_paintsample.ts:192`) multiplies positions
+- `PaintSample.mirror(mul)` (`stroke_base.ts:241`) multiplies positions
   (`p`, `dp`, `origp`), **folds `diag(mul)` into `rendermat`** (so the per-pixel
   radius stays flip-invariant), re-derives mirrored `screenP` / `dScreenP`, flips
   all direction vectors (`viewvec`, `viewPlane`, `vieworigin`, `vec`, `dvec`,
@@ -377,8 +377,7 @@ end via `endDynTopoStroke()`.
 - `scripts/editors/view3d/tools/sculptcore_ops.ts` — `SculptPaintOp:66`, `undoPre:171`, `getStrokeMethod:289`, `getObjectMatrix:316`, `makeRayCast:326`, `applyDab:364`, `applyDabOne:423`, dyntopo-due `:550`, GPU decision `:651`, preview/rollback `:685`, `finishStrokeTail:767`, `exec:814`
 - `scripts/editors/view3d/tools/sculptcore_bindings.ts` — `DeviceType:12`, `DYN_CURVE_SAMPLES:43`, `configureBrushDynamics:66`, `pushBrushDeviceInputs:120`, `buildBrushProgram:210`, `configureDynTopoParams:339`, `builSculptcoreBrush:359`
 - `scripts/editors/view3d/tools/sculptcore_gpu_stroke.ts` — `tryBegin:186`, `dab:432`, `finish:518`
-- `scripts/editors/view3d/tools/pbvh_paintsample.ts` — `PaintSample:5`, `mirror:192`
-- `scripts/editors/view3d/tools/pbvh_base.ts` — `SymAxisMap:94`
+- `scripts/editors/view3d/tools/stroke_base.ts` — `PaintSample:54`, `mirror:241`, `SymAxisMap:351`
 - `scripts/editors/view3d/tools/sculptcore.ts` — `on_mousedown:858`, `drawBrush:936`
 - `scripts/brush/brush_base.ts` — `StrokeMethod:61`, `AnchoredLiveMode:71`
 - `tests/integration/sculptcore_anchored_dragdot.test.ts` — the no-compounding regression test

@@ -1139,9 +1139,13 @@ These need the user's call before the corresponding phase starts.
 4. **Curves, tets, hair, subsurf.** Delete outright, or preserve in `archive/`
    as reference for later reimplementation? Recommend: `archive/`, since
    `archive/` already exists and the cost is zero.
-5. **Texture painting.** Accept the gap after `pbvh_texpaint.ts` is deleted, or
-   block W2 on a sculptcore-backed replacement? Recommend: accept the gap,
-   track it in `ImmediateTODOs.md`.
+5. ~~**Texture painting.**~~ **Resolved (2026-08-16): delete now, port plan
+   deferred.** Neither of the two options as posed — the gap is accepted *for
+   now*, but the replacement is specified rather than merely tracked:
+   [2026-08-16-1450-texpaint-sculptcore-port.md](./2026-08-16-1450-texpaint-sculptcore-port.md),
+   explicitly deferred and blocking nothing. Note the "gap" was smaller than it
+   looked: the feature was already inoperative on the WebGPU renderer before P5
+   touched it.
 6. **UV unwrapping.** Port `unwrapping_solve.ts` / `mesh_paramizer.ts` to the
    `IUVSource` interface (they are largely topology-agnostic solvers), or drop?
    Recommend: port — it is the most valuable algorithm code in the deleted set.
@@ -1291,7 +1295,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P2 | [W0 — rename + identity migration](./2026-08-15-0305-w0-rename-faber-leaf.md) | W0 | 2 | P1 | **landed** |
 | P3 | [LeafMesh core — storage, attrs, topo, CDT](./2026-08-15-0310-leafmesh-core-storage-topo-cdt.md) | risk mitigation | 0 | — | **landed** |
 | P4 | [W2a — hoist the stroke base](./2026-08-15-0315-w2-stroke-base-hoist.md) | W2 §0 | 3 | P1 | **landed** |
-| P5 | [W2b — delete the TS sculpting stack](./2026-08-15-0320-w2-delete-ts-sculpting-stack.md) | W2 §1 | 3 | P4 | **written** |
+| P5 | [W2b — delete the TS sculpting stack](./2026-08-15-0320-w2-delete-ts-sculpting-stack.md) | W2 §1 | 3 | P4 | **landed** |
 | P6 | [W1a — `SelMask` format migration](./2026-08-15-0325-w1-selmask-format-migration.md) | W1 §1 | 4 | P1 | **written** |
 | P7 | [W1b — host geometry contract](./2026-08-15-0330-w1-host-geometry-contract.md) | W1 §1, §3(a)(b) | 4 | P6 | **written** |
 | P8 | [W1c — registry hooks + string-key severing](./2026-08-15-0335-w1-registry-hooks-and-string-key-severing.md) | W1 §0, §2 | 5 | P7 | **written** |
@@ -1468,9 +1472,12 @@ ungrounded input just argues a wrong plan more convincingly.
     to die with `pbvh_base.ts`. Struct names guarded by
     `tests/unit/stroke_base_struct_names.test.ts`. **The one sanctioned layer
     regression:** `no-circular` 769 → 773 (total 2483 → 2487), structural and
-    repaid by P5 — see that plan's §5.
+    repaid by P5 — see that plan's §5. **Repaid: P5 landed it at 713.**
+    P4's hoist was also *incomplete* — it left three registered ToolOps behind
+    in `pbvh_base.ts`, two of them geometry-agnostic; P5 caught and hoisted
+    them. See P5 §0.6.
 
-- [ ] **P5 — [W2b: delete the TS sculpting stack](./2026-08-15-0320-w2-delete-ts-sculpting-stack.md)**
+- [x] **P5 — [W2b: delete the TS sculpting stack](./2026-08-15-0320-w2-delete-ts-sculpting-stack.md)**
   - Delete `pbvh*.ts` (9 files, 15,236 lines), the rest of
     `addons/builtin/pbvh_sculpt/` and its `@framework/api` surface,
     `scripts/test/test_sculpt*.js`.
@@ -1485,6 +1492,18 @@ ungrounded input just argues a wrong plan more convincingly.
     / `mesh_remesh.js` are **not** in scope here — they leave with P13.
   - Exit: sculpting via sculptcore still works end-to-end; integration suite
     green.
+  - **Landed 2026-08-16.** 18,324 lines across nine files (not 15,236), plus
+    `scripts/webgpu/texpaint_bridge.ts` (zero callers). `brush_dyntopo.ts`
+    **stayed** — deleting it contradicts keeping the serialized
+    `SculptBrush.dynTopo` field; it is now a doc-commented dead class awaiting
+    P10. `brush_compute.ts` audited: generic seam, stays. There was no
+    `@framework/api` surface unique to `pbvh_sculpt`; the hub instead *gained*
+    `PaintToolModeBase`, retiring a cross-layer import in `mesh_ops.ts`.
+    Decision #5 settled as *delete now, port plan deferred*
+    ([plan](./2026-08-16-1450-texpaint-sculptcore-port.md)). `no-circular`
+    773 → 713, total 2487 → 2318. **The lesson worth carrying to P6+:** `tsgo`
+    cannot see a toolpath string — sweep `'<namespace>\.[a-z_]+'` across the
+    survivors before any delete of a file that registers ToolOps.
 
 - [ ] **P6 — [W1a: `SelMask` format migration](./2026-08-15-0325-w1-selmask-format-migration.md)**
   - This is a **file-format change**, not a refactor. `SelMask` is
@@ -1785,7 +1804,7 @@ ungrounded input just argues a wrong plan more convincingly.
 | 2. Modeling without sculptcore | P12 | before P13 |
 | 3. File compatibility (pin ids vs. rewrite `_origBytes`) | P10 | before P13 |
 | 4. Curves / tets / hair / subsurf | P13 | at the delete |
-| 5. Texture painting | P5 | at the delete |
+| 5. Texture painting | **Resolved** — deleted in P5, port plan deferred (landed 2026-08-16) | — |
 | 6. UV unwrapping | decided in P13 (rescue), executed in P19 | rescue before the delete |
 | 7. Rename's storage keys | **Resolved** — migrate (P2, landed 2026-08-15) | — |
 | 8. Does `faber-leaf-core` model on day one? | P12 | **before P13 is scheduled** — it decides the phase order |

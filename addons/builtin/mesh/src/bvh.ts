@@ -592,7 +592,7 @@ export class BVHNode<
   wireVerts?: Set<IBVHVertex> // is created on demand
 
   constructor(bvh: BVH, min: Vector3, max: Vector3) {
-    this.__id2 = undefined //used by pbvh.js
+    this.__id2 = undefined //scratch id slot for BVH consumers
 
     this.min = new Vector3(min)
     this.max = new Vector3(max)

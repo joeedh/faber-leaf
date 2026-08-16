@@ -16,9 +16,7 @@ import './core/autosave_backend_browser.js'
 import {loadShapes} from './webgl/simplemesh_shapes.js'
 
 import './test/test_base.js'
-import './test/test_sculpt.js'
 import './test/test.js'
-import './test/test_sculpt_run.js'
 
 import * as mesh from '../addons/builtin/mesh/src/mesh.js'
 import * as mesh_types from '../addons/builtin/mesh/src/mesh_types.js'
@@ -55,7 +53,7 @@ import './editors/view3d/tools/tools.js'
 import '../addons/builtin/mesh/src/fbxloader.js'
 
 // The single in-bundle builtin registry. Imported AFTER tools.js so the
-// toolmode class modules (pbvh/sculptcore) are evaluated before the registry
+// toolmode class modules (sculptcore) are evaluated before the registry
 // references them. Registers each in-bundle builtin as an addon source; the
 // unified startAddons() pipeline materializes + enables them. Replaces the
 // per-addon addon_register.js side-effect imports.

@@ -1,5 +1,10 @@
 # Old Texture-Paint Tool (`pbvh_texpaint.ts`)
 
+> **⚠ REMOVED 2026-08-16 — this documents code that is no longer in the tree.**
+> See [pbvhTexPaint.md](pbvhTexPaint.md), which supersedes this file and carries
+> the same warning, and the deferred port plan
+> [plans/2026-08-16-1450-texpaint-sculptcore-port.md](plans/2026-08-16-1450-texpaint-sculptcore-port.md).
+
 `scripts/editors/view3d/tools/pbvh_texpaint.ts` implements `TexPaintOp`, the
 legacy **3D texture-painting** brush stroke. It is a modal `ToolOp` driven from
 the PBVH/BVH sculpt toolmode (`BVHToolMode`): you drag the cursor over a mesh in

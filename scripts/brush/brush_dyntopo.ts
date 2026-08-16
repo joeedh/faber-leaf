@@ -37,6 +37,13 @@ for (const k in DynTopoOverrides) {
 
 const _ddigest = new util.HashDigest()
 
+/**
+ * Legacy PBVH dyntopo settings. Nothing reads these any more — the TS PBVH
+ * stack that consumed them was deleted in P5 and sculptcore uses
+ * `DynTopoSettingsSC`. The class survives only because `SculptBrush.dynTopo`
+ * is a serialized field: removing it is a brush/.wproj format change, which
+ * P5 deferred to P10's generic unknown-data machinery.
+ */
 export class DynTopoSettings {
   static STRUCT = nstructjs.inlineRegister(
     this,

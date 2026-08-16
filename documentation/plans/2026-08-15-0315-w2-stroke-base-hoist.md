@@ -211,12 +211,20 @@ not evidence.
   each symbol is used as a value or as the base class, and type-only edges are
   counted here (`tsPreCompilationDeps: true`).
 
-  **P5 must pay this back.** Deleting the nine `pbvh*.ts` files and the
-  `tools.ts` side-effect import removes seven of the twelve inbound edges and
-  closes the short `stroke_base → view3d → tools.ts → pbvh_base → stroke_base`
-  cycle outright. The rationale is duplicated in `tools/layer-baseline.json`'s
-  `$exception` key so P9 step 1's reconciliation can attribute it without
-  reading this plan.
+  ~~**P5 must pay this back.**~~ **Paid, 2026-08-16: 773 → 713** (total
+  2487 → 2318), below the pre-P4 769. Deleting the nine `pbvh*.ts` files and the
+  `tools.ts` side-effect import removed the inbound edges and closed the short
+  `stroke_base → view3d → tools.ts → pbvh_base → stroke_base` cycle outright.
+  `tools/layer-baseline.json`'s `$exception` key has been replaced by a `$note`
+  recording the repayment; P9 step 1 has nothing left to reconcile.
+
+  **This hoist was incomplete.** `pbvh_base.ts` also held three registered
+  ToolOps, two of which (`brush.set_radius`, `brush.set_radius_mode`) are
+  geometry-agnostic — they touch only `PaintToolModeBase` and `SculptBrush` —
+  and are invoked by the *surviving* sculptcore toolmode's keymap and header
+  strip. They belonged in this hoist. P5 found them (via a toolpath-string
+  sweep, since `tsgo` cannot see a string) and moved them to `stroke_base.ts`.
+  See P5 §0.6.
 
 ## 6. Risks
 

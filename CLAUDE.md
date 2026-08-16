@@ -110,7 +110,7 @@ Note: roughly preserve comments written by the user however if they ask you to a
 ## Addons
 
 The builtin editing features (mesh, mesh_edit, curve, subsurf, tetmesh,
-pbvh_sculpt, sculptcore) live under `addons/builtin/<id>/src/`. See
+sculptcore) live under `addons/builtin/<id>/src/`. See
 [documentation/addons.md](documentation/addons.md) for the full authoring guide
 (esbuild plugin mechanics, internal vs external ship modes, the mesh
 `register_classes.ts` regen). These import/registration rules are always in force:

@@ -1,7 +1,6 @@
 import * as util from '../util/util.js'
 import {AppState} from '../core/appstate.js'
 import {FuncAction, PathSetAction, PromiseAction, RedrawAction, ToolAction, WaitAction} from './test_base.js'
-import {SculptAction} from './test_sculpt.js'
 
 export class TestSet extends Array {
   constructor() {
@@ -97,10 +96,6 @@ export class TestSet extends Array {
 
   tool(toolpath, args, delay) {
     return this.add(new ToolAction(toolpath, args, delay))
-  }
-
-  sculpt(brushtool, args, toolop) {
-    return this.add(new SculptAction(brushtool, undefined, toolop, args))
   }
 
   perfStart(tag = 'time') {

@@ -1,13 +1,15 @@
 {
   "$comment": "Ratchet baseline for tools/check-layers.js. Only ever lower these.",
-  "$exception": [
-    "P4 (2026-08-16) raised no-circular 769 -> 773, the one sanctioned increase.",
-    "Hoisting PaintToolModeBase out of pbvh_base.ts into stroke_base.ts moved a",
-    "cycle participant onto a node with more importers: pbvh_paintsample.ts had 0",
-    "cycle edges, stroke_base.ts has 4 outbound (view3d_toolmode, widgets, view3d,",
-    "proceduralTex) + 12 inbound, while pbvh_base.ts shed 10. P5 deletes the nine",
-    "pbvh*.ts files and the tools.ts side-effect import that close those cycles;",
-    "the number must be back under 769 by then. See P9 step 1 (layer-ratchet plan)."
+  "$note": [
+    "P4's one sanctioned increase (no-circular 769 -> 773, for the",
+    "PaintToolModeBase hoist into stroke_base.ts) is repaid: P5 deleted the nine",
+    "pbvh*.ts files and the tools.ts side-effect import that closed those cycles,",
+    "landing at 713 -- below both the P4 budget and the pre-P4 769. There is no",
+    "outstanding exception. See P9 step 1 (layer-ratchet plan).",
+    "",
+    "713 rather than 712 because the two generic brush-radius ToolOps hoisted",
+    "out of pbvh_base.ts into stroke_base.ts need core/context's ToolContext /",
+    "ViewContext types, which is one new direct edge on an already-cyclic node."
   ],
   "measured": "2026-08-16",
   "config": ".dependency-cruiser.cjs",
@@ -15,16 +17,16 @@
     "scripts",
     "addons"
   ],
-  "total": 2487,
+  "total": 2318,
   "rules": {
     "core-no-mesh": 2,
     "core-no-view3d-tools": 0,
     "util-no-mesh": 0,
-    "core-no-addons": 65,
-    "core-no-addons-typeonly": 15,
-    "core-no-addons-transitive": 1632,
+    "core-no-addons": 25,
+    "core-no-addons-typeonly": 14,
+    "core-no-addons-transitive": 1564,
     "core-no-litemesh": 0,
     "core-no-sculptcore": 0,
-    "no-circular": 773
+    "no-circular": 713
   }
 }

@@ -32,9 +32,6 @@ import * as meshEditAddon from './mesh_edit/src/main.js'
 import curveManifest from './curve/manifest.json'
 import * as curveAddon from './curve/src/main.js'
 
-import pbvhSculptManifest from './pbvh_sculpt/manifest.json'
-import * as pbvhSculptAddon from './pbvh_sculpt/src/main.js'
-
 import sculptcoreManifest from './sculptcore/manifest.json'
 import * as sculptcoreAddon from './sculptcore/src/main.js'
 
@@ -44,5 +41,4 @@ addonManager.registerBuiltin(meshEditManifest, meshEditAddon as IAddon)
 addonManager.registerBuiltin(curveManifest, curveAddon as IAddon)
 // tetmesh is NOT here: it ships as an external per-addon bundle (build/addons/
 // tetmesh/) loaded via the index.json pipeline. See tools/check-addon-duplication.js.
-addonManager.registerBuiltin(pbvhSculptManifest, pbvhSculptAddon as IAddon)
 addonManager.registerBuiltin(sculptcoreManifest, sculptcoreAddon as IAddon)

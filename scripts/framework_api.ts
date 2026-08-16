@@ -66,11 +66,11 @@ export {DataBlock, DataRef, DataRefProperty, DataRefListProperty} from './core/l
 export type {Library, IDataBlockConstructor, BlockLoader, BlockLoaderAddUser} from './core/lib_api.js'
 
 // sceneobject/* and View3DOp — MUST be re-exported BEFORE context.ts.
-// context.ts pulls in editors/all → editors/view3d → tools/addon_register →
-// pbvh_base → mesh.ts (and PropsEditor → mesh_ops_base.ts). Any `class X
-// extends SceneObjectData` (mesh.ts:310) or `class MeshOp extends View3DOp`
-// (mesh_ops_base.ts:105) will TDZ if those base classes aren't bound by the
-// time the context-triggered chain re-enters the mesh addon. Keep these
+// context.ts pulls in editors/all → editors/view3d → tools/tools.ts →
+// the toolmode modules → mesh.ts (and PropsEditor → mesh_ops_base.ts). Any
+// `class X extends SceneObjectData` (mesh.ts:310) or `class MeshOp extends
+// View3DOp` (mesh_ops_base.ts:105) will TDZ if those base classes aren't bound
+// by the time the context-triggered chain re-enters the mesh addon. Keep these
 // re-exports above `ViewContext` to dodge that race.
 export {SceneObject, ObjectFlags, Colors, composeObjectMatrix} from './sceneobject/sceneobject.js'
 export {DrawModes, DrawFlags} from './sceneobject/drawmode.js'
@@ -81,8 +81,8 @@ export {View3DOp} from './editors/view3d/view3d_ops.js'
 
 // tet — TetMesh DataBlock + the geometry helpers the tetmesh addon's ops
 // reach for. TetMesh extends SceneObjectData (above) and is referenced by
-// core/context.ts and the in-bundle sculpt toolmode (pbvh*), so it must stay
-// a single class in the main bundle; the addon imports it through here rather
+// core/context.ts, so it must stay a single class in the main bundle; the
+// addon imports it through here rather
 // than inlining scripts/tet/tetgen.js (which would re-run its module-scope
 // nstructjs/DataBlock/SceneObjectData.register and throw a duplicate-struct
 // error). Placed after SceneObjectData to avoid TDZ.
@@ -120,6 +120,10 @@ export {Shaders, BasicLineShader, MeshIDShader} from './shaders/shaders.js'
 
 // editors/*
 export {ToolMode} from './editors/view3d/view3d_toolmode.js'
+// The stroke-toolmode base every sculpt/paint toolmode derives from. Addons
+// that need to ask "is a paint toolmode active?" test against this rather than
+// a concrete toolmode class.
+export {PaintToolModeBase} from './editors/view3d/tools/stroke_base.js'
 export {SelMask, SelOneToolModes, SelToolModes} from './editors/view3d/selectmode.js'
 export {FindNearest, FindNearestRet, castViewRay, CastModes} from './editors/view3d/findnearest.js'
 export type {ScreenPickResult} from './editors/view3d/findnearest.js'

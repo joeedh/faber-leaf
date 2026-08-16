@@ -4,10 +4,8 @@ import './view3d_panmode'
 
 // The remaining toolmodes are addons. Each module registers itself with
 // ToolMode.register at import time; they are announced to AddonManager (so they
-// show up in the addon system) by addons/builtin/{pbvh_sculpt,sculptcore}'s
-// register() hooks, wired through addons/builtin/builtin_registry.ts.
-import './pbvh.js'
-import './pbvh_base.js'
+// show up in the addon system) by addons/builtin/sculptcore's register() hook,
+// wired through addons/builtin/builtin_registry.ts.
 import './sculptcore.js'
 import './boxmodel.js'
 

@@ -73,11 +73,16 @@ pattern. Should be reviewed during plan §4 cleanup to see if the
 
 ## Cross-addon path imports (still violate @addon/<id>/api boundary)
 
-After the `@framework/api` rewrite, two cross-addon refs remain hard-coded to
+After the `@framework/api` rewrite, cross-addon refs remained hard-coded to
 `scripts/...` paths because the target class is announced by another addon
 but actually lives in the main bundle (pre-extraction):
 
-- `addons/builtin/mesh/src/mesh_ops.ts:3461` — `import {BVHToolMode} from '../../../../scripts/editors/view3d/tools/pbvh.js'` used only for an `instanceof` check at mesh_ops.ts:948. BVHToolMode is the pbvh_sculpt addon's public class; mesh shouldn't know about it. Either: (a) eliminate the `instanceof` check via a behavior interface on ToolMode, or (b) the pbvh_sculpt addon installs a "bvh sculpt is active" predicate into a shared context that mesh consults.
+- ~~`addons/builtin/mesh/src/mesh_ops.ts` — `import {BVHToolMode} from '../../../../scripts/editors/view3d/tools/pbvh.js'` used only for an `instanceof` check.~~
+  **RESOLVED in P5** (delete the TS sculpting stack). `pbvh.ts` is gone; the
+  symmetry-axis gather now tests `instanceof PaintToolModeBase` imported from
+  `@framework/api`. That is option (a) in spirit — the check is against the
+  shared stroke-toolmode base every sculpt/paint toolmode derives from, not
+  against a concrete addon class — and it no longer crosses a layer boundary.
 
 ## lite-mesh → shadernodes coupling (renderengine-sculptcore integration)
 

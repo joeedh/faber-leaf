@@ -1,13 +1,14 @@
 /**
  * The geometry-agnostic half of the sculpt stroke stack: one dab sample, the
- * two ToolProperty types a stroke op declares, the symmetry table, and the
- * toolmode base every paint mode extends.
+ * two ToolProperty types a stroke op declares, the symmetry table, the toolmode
+ * base every paint mode extends, and the two brush-radius ToolOps
+ * (`brush.set_radius`, `brush.set_radius_mode`) that operate on that base.
  *
- * Nothing here knows what is being sculpted. The BVH-driven halves — sample
- * gathering, `PaintOpBase`, `PaintOpMesh` — stay in `pbvh_base.ts`, which now
- * imports this module rather than the other way round. That inversion is the
- * whole point: `SculptCorePaintMode` can extend `PaintToolModeBase` without
- * reaching into files that are being deleted.
+ * Nothing here knows what is being sculpted. This file was hoisted out of the
+ * TS PBVH stack (P4) precisely so `SculptCorePaintMode` could extend
+ * `PaintToolModeBase` without reaching into files P5 then deleted; the
+ * BVH-driven halves that used to live alongside it — sample gathering,
+ * `PaintOpBase`, `PaintOpMesh` — went with that delete.
  *
  * Struct names are load-bearing. `PaintSample`, `PaintSampleProperty`,
  * `BrushProperty` and `PaintToolModeBase` are all on disk in any .wproj saved
@@ -17,21 +18,35 @@
 
 import {Bezier} from '../../../util/bezier.js'
 import {
+  EnumProperty,
+  FloatProperty,
   Matrix4,
   PropFlags,
+  ToolOp,
   ToolProperty,
   Vector2,
   Vector3,
   Vector4,
+  keymap,
   nstructjs,
 } from '../../../path.ux/scripts/pathux.js'
 import {view3dProject} from '../view3d_base'
 import {WidgetFlags} from '../widgets/widgets.js'
 import {ToolMode} from '../view3d_toolmode.js'
-import {BrushRadiusModes, DynTopoSettings, PaintToolSlot, SculptBrush, SculptTools} from '../../../brush/index'
+import {
+  BrushFlags,
+  BrushRadiusModes,
+  DynTopoSettings,
+  PaintToolSlot,
+  SculptBrush,
+  SculptTools,
+} from '../../../brush/index'
 import {ProceduralTex} from '../../../texture/proceduralTex'
 import {enumValues} from '../../../util/enum-utils.js'
+import * as util from '../../../util/util.js'
+import {DataRef, DataRefProperty} from '../../../core/lib_api.js'
 import type {BlockLoader, BlockLoaderAddUser} from '../../../core/lib_api.js'
+import type {ToolContext, ViewContext} from '../../../core/context.js'
 import type {Scene} from '../../../scene/scene'
 import type {StructReader} from '../../../path.ux/scripts/util/nstructjs.js'
 import type {View3D} from '../view3d.js'
@@ -698,3 +713,364 @@ export abstract class PaintToolModeBase extends ToolMode {
     }
   }
 }
+
+/**
+ * Interactive brush-radius drag (`F`). Screen-space geometry throughout: the
+ * pivot is placed one current-radius away from the cursor and the radius scales
+ * by the ratio of cursor-to-pivot distances, so the brush tracks the pointer.
+ *
+ * Geometry-agnostic — it only needs a `PaintToolModeBase` and its brush, which
+ * is why it lives here rather than with any one toolmode.
+ */
+export class SetBrushRadius extends ToolOp<
+  {radius: FloatProperty; brush: DataRefProperty<SculptBrush>},
+  {},
+  ToolContext,
+  ViewContext
+> {
+  last_mpos: Vector2
+  mpos: Vector2
+  start_mpos: Vector2
+  cent_mpos: Vector2
+  first: boolean
+  _undo: {radius?: number; sharedMode?: number; brushref?: DataRef} | undefined
+  rand: util.MersenneRandom
+
+  constructor() {
+    super()
+
+    this.rand = new util.MersenneRandom()
+
+    this.last_mpos = new Vector2()
+    this.mpos = new Vector2()
+    this.start_mpos = new Vector2()
+    this.cent_mpos = new Vector2()
+    this.first = true
+  }
+
+  static canRun(ctx: ToolContext): boolean {
+    return ctx.toolmode instanceof PaintToolModeBase
+  }
+
+  static tooldef(): any {
+    return {
+      uiname  : 'Set Brush Radius',
+      toolpath: 'brush.set_radius',
+      inputs: {
+        radius: new FloatProperty(15.0),
+        brush : new DataRefProperty(SculptBrush),
+      },
+      is_modal: true,
+    }
+  }
+
+  static invoke(ctx: ViewContext, args: any) {
+    const tool = super.invoke(ctx, args) as SetBrushRadius
+
+    const toolmode = ctx.toolmode as PaintToolModeBase
+    if (!(toolmode instanceof PaintToolModeBase)) {
+      return tool
+    }
+
+    const brush = toolmode.getBrush()
+    if (!brush) {
+      return tool
+    }
+
+    if (!('brush' in args)) {
+      tool.inputs.brush.setValue(brush)
+    }
+
+    if (!('radius' in args)) {
+      const radius = brush.flag & BrushFlags.SHARED_SIZE ? toolmode.sharedRadiusFor(brush.radiusMode) : brush.radius
+      tool.inputs.radius.setValue(radius)
+    }
+
+    return tool
+  }
+
+  modalStart(ctx: any): any {
+    this.rand.seed(0)
+    this.first = true
+
+    return super.modalStart(ctx)
+  }
+
+  on_pointermove(e: PointerEvent): void {
+    const mpos = this.mpos
+
+    mpos[0] = e.x
+    mpos[1] = e.y
+
+    const ctx = this.modal_ctx!
+
+    const brush = ctx.datalib.get(this.inputs.brush.getValue())
+    if (!brush) {
+      return
+    }
+
+    if (this.first) {
+      this.first = false
+      // Screen-space pivot, so a WORLD-unit radius has to be converted first.
+      const screenRadius = this._toScreenRadius(ctx, brush, brush.radius)
+      this.cent_mpos.load(mpos).subScalar(screenRadius / devicePixelRatio / Math.sqrt(2.0))
+
+      this.start_mpos.load(mpos)
+      this.last_mpos.load(mpos)
+      return
+    }
+
+    const l1 = mpos.vectorDistance(this.cent_mpos)
+    const l2 = this.last_mpos.vectorDistance(this.cent_mpos)
+
+    if (l2 === 0.0 || l1 === 0.0) {
+      return
+    }
+
+    this.resetTempGeom()
+    this.makeTempLine(this.cent_mpos, this.mpos, 'rgba(25,25,25,0.25)')
+
+    const toolmode = ctx.toolmode
+    if (toolmode instanceof PaintToolModeBase) {
+      toolmode.mpos.load(this.cent_mpos)
+    }
+
+    const ratio = l1 / l2
+    let radius: number
+
+    if (brush.flag & BrushFlags.SHARED_SIZE) {
+      const paintmode = this._paintToolMode(ctx)
+      radius = paintmode ? paintmode.sharedRadiusFor(brush.radiusMode) : brush.radius
+    } else {
+      radius = brush.radius
+    }
+
+    radius *= ratio
+
+    this.last_mpos.load(mpos)
+    this.inputs.radius.setValue(radius)
+
+    this.exec(ctx)
+    window.redraw_viewport_p(false).then(() => {
+      // XXX find less hackish way of getting brush to draw
+      // since drawBrush by default hides it in modal toolops
+      const toolmode = ctx.toolmode
+      if (ctx.view3d && toolmode instanceof PaintToolModeBase) {
+        toolmode.drawBrush(ctx.view3d, true)
+      }
+    })
+  }
+
+  on_pointerup(e: PointerEvent): void {
+    this.modalEnd(false)
+  }
+
+  /** SHARED_SIZE stores the radius on the paint toolmode instead of the brush, and
+   * each paint toolmode keeps its own `sharedBrushRadius` — so this must follow the
+   * active mode. Resolving a fixed mode strands the write in sculptcore mode. */
+  private _paintToolMode(ctx: ToolContext): PaintToolModeBase | undefined {
+    const toolmode = ctx.toolmode
+    return toolmode instanceof PaintToolModeBase ? toolmode : undefined
+  }
+
+  /** Convert `radius` (in the brush's own unit) to screen pixels — this modal's
+   * geometry is screen-space. A WORLD-unit radius converts through the last
+   * dab's world-units-per-pixel; before any dab that factor is unknown. */
+  private _toScreenRadius(ctx: ToolContext, brush: SculptBrush, radius: number): number {
+    const toolmode = this._paintToolMode(ctx)
+    if (brush.radiusMode !== BrushRadiusModes.WORLD || !toolmode || toolmode.lastScreenRadius <= 0) {
+      return radius
+    }
+    const dist = toolmode.lastWorldRadius / toolmode.lastScreenRadius
+    return dist > 0 ? radius / dist : radius
+  }
+
+  exec(ctx: ToolContext): void {
+    const brush = ctx.datalib.get(this.inputs.brush.getValue())
+
+    if (brush) {
+      if (brush.flag & BrushFlags.SHARED_SIZE) {
+        const toolmode = this._paintToolMode(ctx)
+
+        if (toolmode) {
+          // The radius input rides in the brush's own unit; tag the store with it.
+          toolmode.setSharedRadius(this.inputs.radius.getValue(), brush.radiusMode)
+        }
+      } else {
+        brush.radius = this.inputs.radius.getValue()
+      }
+    }
+  }
+
+  undoPre(ctx: ToolContext): void {
+    const brush = ctx.datalib.get(this.inputs.brush.getValue())
+
+    this._undo = {}
+
+    if (brush) {
+      const toolmode = this._paintToolMode(ctx)
+
+      // Capture whichever value exec() will overwrite, or undo restores a stale radius.
+      this._undo.radius = brush.flag & BrushFlags.SHARED_SIZE && toolmode ? toolmode.sharedBrushRadius : brush.radius
+      this._undo.sharedMode = toolmode?.sharedRadiusMode
+      this._undo.brushref = DataRef.fromBlock(brush)
+    }
+  }
+
+  undo(ctx: ToolContext): void {
+    const undo = this._undo
+
+    if (!undo?.brushref || undo.radius === undefined) {
+      return
+    }
+
+    const brush = ctx.datalib.get<SculptBrush>(undo.brushref)
+    if (!brush) {
+      return
+    }
+
+    if (brush.flag & BrushFlags.SHARED_SIZE) {
+      const toolmode = this._paintToolMode(ctx)
+
+      if (toolmode) {
+        toolmode.setSharedRadius(undo.radius, undo.sharedMode ?? toolmode.sharedRadiusMode)
+      }
+    } else {
+      brush.radius = undo.radius
+    }
+  }
+
+  on_keydown(e: KeyboardEvent): void {
+    switch (e.keyCode) {
+      case keymap['Escape']:
+      case keymap['Enter']:
+      case keymap['Space']:
+        this.modalEnd(false)
+        break
+    }
+  }
+}
+
+ToolOp.register(SetBrushRadius)
+
+/**
+ * Switch the unit `brush.radius` is expressed in, rewriting the stored value so
+ * the brush keeps its current on-screen size across the switch (55 px and 55
+ * mesh units are wildly different sizes). The world-units-per-pixel factor comes
+ * from the last primary dab that hit the surface; before any dab there is
+ * nothing to convert through, so the value is left alone.
+ */
+export class SetBrushRadiusMode extends ToolOp<
+  {mode: EnumProperty; brush: DataRefProperty<SculptBrush>},
+  {},
+  ToolContext,
+  ViewContext
+> {
+  _undo: {radius?: number; shared?: number; sharedMode?: number; radiusMode?: number; brushref?: DataRef} | undefined
+
+  static canRun(ctx: ToolContext): boolean {
+    return ctx.toolmode instanceof PaintToolModeBase
+  }
+
+  static tooldef(): any {
+    return {
+      uiname  : 'Set Radius Unit',
+      toolpath: 'brush.set_radius_mode',
+      inputs: {
+        mode: new EnumProperty(BrushRadiusModes.SCREEN, {
+          SCREEN: BrushRadiusModes.SCREEN,
+          WORLD : BrushRadiusModes.WORLD,
+        }),
+        brush: new DataRefProperty(SculptBrush),
+      },
+    }
+  }
+
+  static invoke(ctx: ViewContext, args: any) {
+    const tool = super.invoke(ctx, args) as SetBrushRadiusMode
+
+    const toolmode = ctx.toolmode
+    if (!(toolmode instanceof PaintToolModeBase)) {
+      return tool
+    }
+
+    const brush = toolmode.getBrush()
+    if (brush && !('brush' in args)) {
+      tool.inputs.brush.setValue(brush)
+    }
+
+    return tool
+  }
+
+  /** The paint toolmode owning `sharedBrushRadius` / the tracked radii. */
+  private _paintToolMode(ctx: ToolContext): PaintToolModeBase | undefined {
+    const toolmode = ctx.toolmode
+    return toolmode instanceof PaintToolModeBase ? toolmode : undefined
+  }
+
+  undoPre(ctx: ToolContext): void {
+    const brush = ctx.datalib.get<SculptBrush>(this.inputs.brush.getValue())
+
+    this._undo = {}
+    if (brush) {
+      const toolmode = this._paintToolMode(ctx)
+      this._undo.radius = brush.radius
+      this._undo.shared = toolmode?.sharedBrushRadius
+      this._undo.sharedMode = toolmode?.sharedRadiusMode
+      this._undo.radiusMode = brush.radiusMode
+      this._undo.brushref = DataRef.fromBlock(brush)
+    }
+  }
+
+  undo(ctx: ToolContext): void {
+    const undo = this._undo
+    if (!undo?.brushref || undo.radius === undefined || undo.radiusMode === undefined) {
+      return
+    }
+
+    const brush = ctx.datalib.get<SculptBrush>(undo.brushref)
+    if (!brush) {
+      return
+    }
+
+    const toolmode = this._paintToolMode(ctx)
+    brush.radius = undo.radius
+    brush.radiusMode = undo.radiusMode
+    if (toolmode && undo.shared !== undefined) {
+      toolmode.setSharedRadius(undo.shared, undo.sharedMode ?? toolmode.sharedRadiusMode)
+    }
+  }
+
+  exec(ctx: ToolContext): void {
+    const brush = ctx.datalib.get<SculptBrush>(this.inputs.brush.getValue())
+    if (!brush) {
+      return
+    }
+
+    const mode = this.inputs.mode.getValue() as number
+    if (mode === brush.radiusMode) {
+      return
+    }
+
+    const toolmode = this._paintToolMode(ctx)
+    const screen = toolmode ? toolmode.lastScreenRadius : 0
+    const world = toolmode ? toolmode.lastWorldRadius : 0
+
+    // SHARED_SIZE keeps the live radius on the toolmode, so converting
+    // brush.radius alone would be a no-op in the default configuration.
+    if (brush.flag & BrushFlags.SHARED_SIZE && toolmode) {
+      // sharedRadiusFor converts from the tagged unit (no-op when it already
+      // matches); retagging keeps readers in the other unit from misreading.
+      toolmode.setSharedRadius(toolmode.sharedRadiusFor(mode), mode)
+    } else if (screen > 0 && world > 0) {
+      // Both are only set by a dab that hit the surface; without them the factor
+      // is unknown, so switch the unit and leave the number as the user set it.
+      const dist = world / screen
+      brush.radius = mode === BrushRadiusModes.WORLD ? brush.radius * dist : brush.radius / dist
+    }
+
+    brush.radiusMode = mode
+  }
+}
+
+ToolOp.register(SetBrushRadiusMode)

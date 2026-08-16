@@ -644,48 +644,6 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.brush.set_radius_mode.mode` | prop | EnumProperty | Mode | enum {SCREEN, WORLD} |
 | `toolDefaults.brush.swap_colors` | struct |  |  |  |
 | `toolDefaults.brush.swap_colors.dataPath` | prop | StringProperty | Data Path |  |
-| `toolDefaults.bvh` | struct |  |  |  |
-| `toolDefaults.bvh.bvh_deform` | struct |  |  |  |
-| `toolDefaults.bvh.bvh_deform.brush` | prop | BrushProperty | Brush |  |
-| `toolDefaults.bvh.bvh_deform.falloff` | prop | Curve1DProperty | Falloff |  |
-| `toolDefaults.bvh.bvh_deform.rendermat` | prop | Mat4Property | Rendermat |  |
-| `toolDefaults.bvh.bvh_deform.samples` | prop | PaintSampleProperty | Samples |  |
-| `toolDefaults.bvh.bvh_deform.symmetryAxes` | prop | FlagProperty | Symmetry Axes | enum {X, Y, Z} |
-| `toolDefaults.bvh.bvh_deform.viewportSize` | prop | Vec2Property | Viewport Size |  |
-| `toolDefaults.bvh.hole_filler` | struct |  |  |  |
-| `toolDefaults.bvh.hole_filler.brush` | prop | BrushProperty | Brush |  |
-| `toolDefaults.bvh.hole_filler.falloff` | prop | Curve1DProperty | Falloff |  |
-| `toolDefaults.bvh.hole_filler.rendermat` | prop | Mat4Property | Rendermat |  |
-| `toolDefaults.bvh.hole_filler.samples` | prop | PaintSampleProperty | Samples |  |
-| `toolDefaults.bvh.hole_filler.symmetryAxes` | prop | FlagProperty | Symmetry Axes | enum {X, Y, Z} |
-| `toolDefaults.bvh.hole_filler.viewportSize` | prop | Vec2Property | Viewport Size |  |
-| `toolDefaults.bvh.paint` | struct |  |  |  |
-| `toolDefaults.bvh.paint.brush` | prop | BrushProperty | Brush |  |
-| `toolDefaults.bvh.paint.clear_mask` | struct |  |  |  |
-| `toolDefaults.bvh.paint.clear_mask.value` | prop | FloatProperty | Value |  |
-| `toolDefaults.bvh.paint.drawFaceSet` | prop | IntProperty | Draw Face Set |  |
-| `toolDefaults.bvh.paint.dynTopoDepth` | prop | IntProperty | Dyn Topo Depth |  |
-| `toolDefaults.bvh.paint.dynTopoLength` | prop | FloatProperty | Dyn Topo Length |  |
-| `toolDefaults.bvh.paint.falloff` | prop | Curve1DProperty | Falloff |  |
-| `toolDefaults.bvh.paint.grabCo` | prop | Vec3Property | Grab Co |  |
-| `toolDefaults.bvh.paint.grabData` | prop | FloatArrayProperty | Grab Data |  |
-| `toolDefaults.bvh.paint.grabRadiusFactor` | prop | FloatProperty | Grab Radius Factor |  |
-| `toolDefaults.bvh.paint.grabTh` | prop | FloatProperty | Grab Th |  |
-| `toolDefaults.bvh.paint.rendermat` | prop | Mat4Property | Rendermat |  |
-| `toolDefaults.bvh.paint.reprojectCustomData` | prop | BoolProperty | Reproject Custom Data |  |
-| `toolDefaults.bvh.paint.samples` | prop | PaintSampleProperty | Samples |  |
-| `toolDefaults.bvh.paint.symmetryAxes` | prop | FlagProperty | Symmetry Axes | enum {X, Y, Z} |
-| `toolDefaults.bvh.paint.useDynTopo` | prop | BoolProperty | Use Dyn Topo |  |
-| `toolDefaults.bvh.paint.useMultiResDepth` | prop | BoolProperty | Use Multi Res Depth |  |
-| `toolDefaults.bvh.paint.viewportSize` | prop | Vec2Property | Viewport Size |  |
-| `toolDefaults.bvh.texpaint` | struct |  |  |  |
-| `toolDefaults.bvh.texpaint.brush` | prop | BrushProperty | Brush |  |
-| `toolDefaults.bvh.texpaint.doBlur` | prop | BoolProperty | Do Blur |  |
-| `toolDefaults.bvh.texpaint.glSize` | prop | Vec2Property | Gl Size |  |
-| `toolDefaults.bvh.texpaint.rendermat` | prop | Mat4Property | Rendermat |  |
-| `toolDefaults.bvh.texpaint.samples` | prop | PaintSampleProperty | Samples |  |
-| `toolDefaults.bvh.texpaint.symmetryAxes` | prop | FlagProperty | Symmetry Axes | enum {X, Y, Z} |
-| `toolDefaults.bvh.texpaint.viewSize` | prop | Vec2Property | View Size |  |
 | `toolDefaults.curve1d` | struct |  |  |  |
 | `toolDefaults.curve1d.bspline_add_point` | struct |  |  |  |
 | `toolDefaults.curve1d.bspline_add_point.dataPath` | prop | StringProperty | Data Path |  |
@@ -909,44 +867,13 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.object.toggle_select_all.mode` | prop | EnumProperty | Mode | enum {ADD, SUB, AUTO} |
 | `toolDefaults.object.toggle_select_all.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
 | `toolDefaults.object.toggle_select_all.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
-| `toolDefaults.paint` | struct |  |  |  |
-| `toolDefaults.paint.brush` | prop | BrushProperty | Brush |  |
-| `toolDefaults.paint.clear_mask` | struct |  |  |  |
-| `toolDefaults.paint.clear_mask.value` | prop | FloatProperty | Value |  |
-| `toolDefaults.paint.drawFaceSet` | prop | IntProperty | Draw Face Set |  |
-| `toolDefaults.paint.dynTopoDepth` | prop | IntProperty | Dyn Topo Depth |  |
-| `toolDefaults.paint.dynTopoLength` | prop | FloatProperty | Dyn Topo Length |  |
-| `toolDefaults.paint.falloff` | prop | Curve1DProperty | Falloff |  |
-| `toolDefaults.paint.grabCo` | prop | Vec3Property | Grab Co |  |
-| `toolDefaults.paint.grabData` | prop | FloatArrayProperty | Grab Data |  |
-| `toolDefaults.paint.grabRadiusFactor` | prop | FloatProperty | Grab Radius Factor |  |
-| `toolDefaults.paint.grabTh` | prop | FloatProperty | Grab Th |  |
-| `toolDefaults.paint.rendermat` | prop | Mat4Property | Rendermat |  |
-| `toolDefaults.paint.reprojectCustomData` | prop | BoolProperty | Reproject Custom Data |  |
-| `toolDefaults.paint.samples` | prop | PaintSampleProperty | Samples |  |
-| `toolDefaults.paint.symmetryAxes` | prop | FlagProperty | Symmetry Axes | enum {X, Y, Z} |
-| `toolDefaults.paint.useDynTopo` | prop | BoolProperty | Use Dyn Topo |  |
-| `toolDefaults.paint.useMultiResDepth` | prop | BoolProperty | Use Multi Res Depth |  |
-| `toolDefaults.paint.viewportSize` | prop | Vec2Property | Viewport Size |  |
 | `toolDefaults.sculptcore` | struct |  |  |  |
 | `toolDefaults.sculptcore.paint` | struct |  |  |  |
 | `toolDefaults.sculptcore.paint.brush` | prop | BrushProperty | Brush |  |
-| `toolDefaults.sculptcore.paint.clear_mask` | struct |  |  |  |
-| `toolDefaults.sculptcore.paint.clear_mask.value` | prop | FloatProperty | Value |  |
-| `toolDefaults.sculptcore.paint.drawFaceSet` | prop | IntProperty | Draw Face Set |  |
-| `toolDefaults.sculptcore.paint.dynTopoDepth` | prop | IntProperty | Dyn Topo Depth |  |
-| `toolDefaults.sculptcore.paint.dynTopoLength` | prop | FloatProperty | Dyn Topo Length |  |
 | `toolDefaults.sculptcore.paint.falloff` | prop | Curve1DProperty | Falloff |  |
-| `toolDefaults.sculptcore.paint.grabCo` | prop | Vec3Property | Grab Co |  |
-| `toolDefaults.sculptcore.paint.grabData` | prop | FloatArrayProperty | Grab Data |  |
-| `toolDefaults.sculptcore.paint.grabRadiusFactor` | prop | FloatProperty | Grab Radius Factor |  |
-| `toolDefaults.sculptcore.paint.grabTh` | prop | FloatProperty | Grab Th |  |
 | `toolDefaults.sculptcore.paint.rendermat` | prop | Mat4Property | Rendermat |  |
-| `toolDefaults.sculptcore.paint.reprojectCustomData` | prop | BoolProperty | Reproject Custom Data |  |
 | `toolDefaults.sculptcore.paint.samples` | prop | PaintSampleProperty | Samples |  |
 | `toolDefaults.sculptcore.paint.symmetryAxes` | prop | FlagProperty | Symmetry Axes | enum {X, Y, Z} |
-| `toolDefaults.sculptcore.paint.useDynTopo` | prop | BoolProperty | Use Dyn Topo |  |
-| `toolDefaults.sculptcore.paint.useMultiResDepth` | prop | BoolProperty | Use Multi Res Depth |  |
 | `toolDefaults.sculptcore.paint.viewportSize` | prop | Vec2Property | Viewport Size |  |
 | `toolDefaults.strand` | struct |  |  |  |
 | `toolDefaults.strand.create` | struct |  |  |  |

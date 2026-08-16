@@ -17,9 +17,6 @@
       "@addon/mesh_edit/api": [
         "./addons/builtin/mesh_edit/src/api.ts"
       ],
-      "@addon/pbvh_sculpt/api": [
-        "./addons/builtin/pbvh_sculpt/src/api.ts"
-      ],
       "@addon/sculptcore/api": [
         "./addons/builtin/sculptcore/src/api.ts"
       ],
