@@ -192,7 +192,7 @@ const MESH_HEADER_LEN = 24
 /** The mesh blob format version `serial::writeMesh` stamps. Must match C++
  * `serial::kMeshFormatVersion` (sculptcore/source/mesh/mesh_serialize.h); the
  * cross-language check in tests/unit/lz4.test.ts fails the build on drift. */
-export const MESH_FORMAT_VERSION = 5
+export const MESH_FORMAT_VERSION = 6
 
 function writeU32LE(b: Uint8Array, o: number, v: number): void {
   b[o] = v & 0xff
