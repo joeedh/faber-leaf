@@ -88,6 +88,16 @@ at construction, reverse rings whose sign is wrong, and record in the module
 header that construction may reorder corners. Ops that build faces from
 existing corners (`joinFaces`) re-run the check.
 
+**As implemented, only holes are ever reversed.** The face normal is Newell's
+sum over ring 0, so ring 0 is CCW about it *by definition* — there is no
+"wrong sign" an outer ring can have, and reversing it would only flip the
+normal and leave the relationship unchanged. The rule is therefore
+*Newell-defines-the-normal*: ring 0 is authoritative and untouched, and every
+hole is forced CW against the normal it implies. `fixWinding` re-imposes only
+that second half, which is what makes it meaningful on a face whose positions
+later moved (a mirror, an importer) — the normal flips under a stored hole
+order that no longer matches.
+
 ### 4.2 Question 4 — `v.co` is `Float32Array`; `cdt2d` is `Float64Array`
 
 F32 for `co` keeps the GPU upload zero-copy and matches sculptcore's layout,
@@ -272,9 +282,11 @@ Under `tests/unit/leafmesh/`, all sculptcore-free so they run in every lane.
   old TS hash had).
 - **Euler invariants**: `rebuildDerivedTopo()` is a no-op after any op
   sequence (step 2).
-- **Winding**: `makeFace` reorders a CW outer ring and a CCW hole ring;
-  `fixWinding` is idempotent; signed area of a face with holes equals outer
-  minus holes.
+- **Winding**: `makeFace` leaves ring 0 exactly as given and reverses a hole
+  ring supplied CCW (§4.1 — an outer ring has no wrong sign to correct);
+  `fixWinding` reports 0 changes on a healthy face and reverses a hole once
+  the face normal has flipped under it; signed area of a face with holes
+  equals outer minus holes.
 - **Normals**: a face with a large hole has the same normal as the same face
   without it (the outer-loop-only rule).
 - **Attributes**: `interpCorner` carries UVs across `splitEdge`; `TEMP` layers

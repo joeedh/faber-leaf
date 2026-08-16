@@ -481,15 +481,14 @@ immediately, in parallel with phase 2 (deleting the TS sculpting stack).
    Sculptcore supports both (`freezeTopo`/`thawTopo`). Recommend: live by
    default, with the derived columns dropped on serialize. Add freezing only
    if profiling asks.
-2. **Is hole winding enforced or inferred?** Enforcing (outer CCW, holes CW)
-   makes signed area and point-in-face trivial; inferring is friendlier to
-   importers. Recommend: **enforce on `makeFace` / `addFaceLoop`**, with a
-   `fixWinding()` helper importers call. `cdt2d`'s parity fill is
-   winding-agnostic, so this is about the rest of the system, not the
-   triangulator.
+2. ~~**Is hole winding enforced or inferred?**~~ **Resolved in P3** — enforced
+   on `makeFace` / `addFaceLoop`, with `fixWinding()` for importers. The face
+   normal is Newell's over ring 0, so ring 0 is CCW by definition and is never
+   reordered; only holes are forced CW. See
+   [the P3 plan](2026-08-15-0310-leafmesh-core-storage-topo-cdt.md) §4.1.
 3. **Do nested holes (island-in-hole) need support?** The parity flood-fill
    handles them correctly for free. Recommend: allow, test, do not advertise.
-4. **`Float64Array` or `Float32Array` for `v.co`?** F32 is the zero-copy GPU
-   path; F64 is more robust for modeling ops. Recommend: **F32 for `co`**
-   (matching sculptcore, keeping upload zero-copy) but F64 inside `cdt2d`,
-   where precision actually pays.
+4. ~~**`Float64Array` or `Float32Array` for `v.co`?**~~ **Resolved in P3** —
+   `Float32Array` for `v.co` (zero-copy GPU upload, matching sculptcore's
+   layout), `Float64Array` inside `cdt2d` where the predicates need it. See
+   [the P3 plan](2026-08-15-0310-leafmesh-core-storage-topo-cdt.md) §4.2.

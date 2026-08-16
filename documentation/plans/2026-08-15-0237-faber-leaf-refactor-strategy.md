@@ -1289,7 +1289,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | — | [LeafMesh design](./2026-08-15-0248-leafmesh-design.md) | risk mitigation | 0 | — | **written** |
 | P1 | [CI + layer-gate repair](./2026-08-15-0300-ci-and-layer-gate-repair.md) | new — §2.4 | 1 | — | **written** |
 | P2 | [W0 — rename + identity migration](./2026-08-15-0305-w0-rename-faber-leaf.md) | W0 | 2 | P1 | **landed** |
-| P3 | [LeafMesh core — storage, attrs, topo, CDT](./2026-08-15-0310-leafmesh-core-storage-topo-cdt.md) | risk mitigation | 0 | — | **written** |
+| P3 | [LeafMesh core — storage, attrs, topo, CDT](./2026-08-15-0310-leafmesh-core-storage-topo-cdt.md) | risk mitigation | 0 | — | **landed** |
 | P4 | [W2a — hoist the stroke base](./2026-08-15-0315-w2-stroke-base-hoist.md) | W2 §0 | 3 | P1 | **written** |
 | P5 | [W2b — delete the TS sculpting stack](./2026-08-15-0320-w2-delete-ts-sculpting-stack.md) | W2 §1 | 3 | P4 | **written** |
 | P6 | [W1a — `SelMask` format migration](./2026-08-15-0325-w1-selmask-format-migration.md) | W1 §1 | 4 | P1 | **written** |
@@ -1433,7 +1433,7 @@ ungrounded input just argues a wrong plan more convincingly.
 > against, and that a shipped `.wproj` will encode. It is the most expensive
 > shape in the refactor to get wrong.
 
-- [ ] **P3 — [LeafMesh core: storage, attrs, topo, CDT](./2026-08-15-0310-leafmesh-core-storage-topo-cdt.md)** — **`[xhigh]`**
+- [x] **P3 — [LeafMesh core: storage, attrs, topo, CDT](./2026-08-15-0310-leafmesh-core-storage-topo-cdt.md)** — **`[xhigh]`** — landed 2026-08-15. All seven modules plus five suites, **83 tests**; `grep -rn "leafmesh" scripts/` is empty, as the exit criterion requires. Open questions 2 and 4 settled in the design doc §14. The winding decision came out narrower than the plan's §4.1 draft: the face normal is Newell's over ring 0, so ring 0 is CCW *by definition* and is never reordered — only holes are forced CW ("Newell-defines-the-normal"). The plan's §4.1 and its winding-test bullet were corrected in the same commit. Writing the suites found one real defect: `joinFaces` dropped corner attributes because it built its corner→attrs map *after* the `killFace` calls had freed those corner indices and `makeFace` had handed the same ones back out; the snapshot is now keyed by vertex and taken before the kills.
   - Design steps 1–3 of the [LeafMesh design](./2026-08-15-0248-leafmesh-design.md) §12:
     `elem_array.ts`, `attrs.ts`, `topo.ts`, `cdt2d.ts`, `triangulate.ts`,
     `primitives.ts`.
