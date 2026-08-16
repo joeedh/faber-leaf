@@ -10,8 +10,7 @@
  */
 import * as util from '../../../util/util.js'
 import type {ToolContext, ViewContext} from '../../../core/context.js'
-import {PaintSample} from './pbvh_paintsample.js'
-import {BrushProperty, PaintSampleProperty, PaintToolModeBase} from './pbvh_base.js'
+import {BrushProperty, PaintSample, PaintSampleProperty, PaintToolModeBase} from './stroke_base.js'
 import {BrushFlags, BrushRadiusModes, SculptTools} from '../../../brush/index'
 import {
   AnchoredLiveMode,

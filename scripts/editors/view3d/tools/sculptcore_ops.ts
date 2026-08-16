@@ -24,8 +24,7 @@ import {
   StrokeMethod,
   resolvePlaneDabNormal,
 } from '../../../brush/brush_base'
-import {PaintSample} from './pbvh_paintsample'
-import {SymAxisMap} from './pbvh_base'
+import {PaintSample, SymAxisMap} from './stroke_base.js'
 import type {View3D} from '../view3d'
 import {view3dProject, view3dUnproject} from '../view3d_base'
 import {FeatureFlags} from '../../../core/feature-flag'

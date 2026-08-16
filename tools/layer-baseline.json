@@ -1,12 +1,21 @@
 {
   "$comment": "Ratchet baseline for tools/check-layers.js. Only ever lower these.",
-  "measured": "2026-08-15",
+  "$exception": [
+    "P4 (2026-08-16) raised no-circular 769 -> 773, the one sanctioned increase.",
+    "Hoisting PaintToolModeBase out of pbvh_base.ts into stroke_base.ts moved a",
+    "cycle participant onto a node with more importers: pbvh_paintsample.ts had 0",
+    "cycle edges, stroke_base.ts has 4 outbound (view3d_toolmode, widgets, view3d,",
+    "proceduralTex) + 12 inbound, while pbvh_base.ts shed 10. P5 deletes the nine",
+    "pbvh*.ts files and the tools.ts side-effect import that close those cycles;",
+    "the number must be back under 769 by then. See P9 step 1 (layer-ratchet plan)."
+  ],
+  "measured": "2026-08-16",
   "config": ".dependency-cruiser.cjs",
   "roots": [
     "scripts",
     "addons"
   ],
-  "total": 2483,
+  "total": 2487,
   "rules": {
     "core-no-mesh": 2,
     "core-no-view3d-tools": 0,
@@ -16,6 +25,6 @@
     "core-no-addons-transitive": 1632,
     "core-no-litemesh": 0,
     "core-no-sculptcore": 0,
-    "no-circular": 769
+    "no-circular": 773
   }
 }

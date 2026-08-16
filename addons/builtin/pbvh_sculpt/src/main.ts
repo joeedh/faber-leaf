@@ -11,7 +11,7 @@
 
 import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
 import {BVHToolMode} from '../../../../scripts/editors/view3d/tools/pbvh.js'
-import {PaintToolModeBase} from '../../../../scripts/editors/view3d/tools/pbvh_base.js'
+import {PaintToolModeBase} from '../../../../scripts/editors/view3d/tools/stroke_base.js'
 
 export const addonDefine: IAddonDefine = {
   name       : 'PBVH Sculpt',

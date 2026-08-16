@@ -4,4 +4,4 @@
  */
 
 export {BVHToolMode} from '../../../../scripts/editors/view3d/tools/pbvh.js'
-export {PaintToolModeBase} from '../../../../scripts/editors/view3d/tools/pbvh_base.js'
+export {PaintToolModeBase} from '../../../../scripts/editors/view3d/tools/stroke_base.js'

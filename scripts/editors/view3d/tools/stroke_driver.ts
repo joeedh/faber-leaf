@@ -11,7 +11,7 @@
  * `scripts/util/stroke_math.ts`; this file only adds raycasting, projection and
  * PaintSample construction.
  */
-import {PaintSample} from './pbvh_paintsample.js'
+import {PaintSample} from './stroke_base.js'
 import {Bezier} from '../../../util/bezier.js'
 import {Matrix4, Vector2, Vector3, Vector4} from '../../../path.ux/scripts/pathux.js'
 import {arcLengthWalk, crToBezier, Cubic, evalCubic, lerpV, subCubic, Vec} from '../../../util/stroke_math.js'

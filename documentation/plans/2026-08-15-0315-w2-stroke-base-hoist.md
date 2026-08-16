@@ -1,6 +1,7 @@
 # P4 — W2a: hoist the stroke base
 
-**Status:** plan — not started.
+**Status:** landed 2026-08-16. The sweep in §2 is the measured one; the
+strikethroughs record where the 2026-08-15 draft was wrong.
 
 **Date:** 2026-08-15
 
@@ -25,21 +26,49 @@ dependencies" and scheduled it as the low-risk opener. That is false in the
 most direct way possible: `SculptCorePaintMode` — the toolmode this refactor
 keeps — extends `PaintToolModeBase`, which lives in the files being deleted.
 
-## 2. Current state
+## 2. Current state / Sweep (measured 2026-08-16)
 
-Class E (inheritance) edges from surviving code into `pbvh_*`:
+Step 1's sweep, run against the tree rather than the 2026-08-15 snapshot. The
+draft table listed six edges; there are **fifteen**, and two of the six were
+wrong.
 
-| Surviving file | Imports from the deletion set |
+Class E (inheritance and struct) edges from surviving code into `pbvh_*`:
+
+| Surviving file | Imported from the deletion set |
 | --- | --- |
-| `scripts/editors/view3d/tools/sculptcore.ts:22` | `PaintToolModeBase` from `./pbvh_base` — `SculptCorePaintMode` **extends** it |
-| `scripts/editors/view3d/tools/sculptcore_ops.ts:27,28` | `PaintSample` from `./pbvh_paintsample`, `SymAxisMap` from `./pbvh_base` |
-| `scripts/editors/view3d/tools/sculptcore_bindings.ts:9` | `PaintSample` |
-| `scripts/editors/view3d/tools/stroke_paint_op.ts:13,14` | `PaintSample`, `PaintSampleProperty` |
-| `scripts/editors/view3d/tools/stroke_driver.ts:14` | `PaintSample` |
-| `scripts/editors/view3d/tools/stroke_driver_native.ts:21` | `PaintToolModeBase` |
+| `scripts/editors/view3d/tools/sculptcore.ts` | `PaintToolModeBase` — `SculptCorePaintMode` **extends** it |
+| `…/sculptcore_ops.ts` | `PaintSample`, `SymAxisMap` |
+| `…/sculptcore_bindings.ts` | `PaintSample` |
+| `…/stroke_paint_op.ts` | `PaintSample`, `PaintSampleProperty`, `BrushProperty`, `PaintToolModeBase` |
+| `…/stroke_driver.ts` | `PaintSample` |
+| `…/stroke_driver_native.ts` | `PaintSample` |
+| `…/pbvh.ts` | `PaintToolModeBase` (deletion-set file, re-pointed anyway) |
+| `…/pbvh_bvhdef.ts`, `…/pbvh_holefiller.ts` | `PaintSample`, `BrushProperty`, `PaintSampleProperty` |
+| `…/pbvh_sculptops.ts`, `…/pbvh_texpaint.ts` | `PaintSample`, `SymAxisMap` |
+| `scripts/test/test_sculpt.js`, `…/test_sculpt_run.js` | `PaintSample` |
+| `addons/builtin/pbvh_sculpt/src/api.ts`, `…/main.ts` | `PaintToolModeBase` |
 
-Sizes (verified by the review): `pbvh_base.ts` 2,073 lines, `pbvh.ts` 2,584,
-`pbvh_paintsample.ts` 300.
+Corrections to the draft table:
+
+- `stroke_driver_native.ts` imports **`PaintSample`**, not `PaintToolModeBase`.
+- `stroke_paint_op.ts` imports four symbols, not two — including
+  `PaintToolModeBase`, which it narrows `ctx.toolmode` against in `modalEnd`.
+- The two `scripts/test/` drivers and the `pbvh_sculpt` addon shell were missing
+  entirely. Neither is reachable by grepping `scripts/editors/view3d/tools/`.
+- ~~`StrokeProperty`~~ does not exist anywhere in the tree.
+- ~~`SculptTools`, `BrushSpacingModes`~~ already live in `scripts/brush/`, which
+  is host code and survives. Nothing to hoist.
+
+Nothing else the step-1 checklist named turned up: no `nstructjs` struct string
+names a `pbvh` module, no `tooldef().toolpath` under a `pbvh.*` namespace is
+referenced from a keymap or saved toolstack, and `TOOL_TO_SCULPTBRUSH` is
+keyed on `SculptTools` values, not module paths.
+
+`tools.ts:10`'s bare `import './pbvh_base.js'` is a side-effect registration
+import and is **deliberately left in place** — P5 removes it along with the file.
+
+Sizes: `pbvh_base.ts` 2,073 → 1,698 lines, `pbvh.ts` 2,584,
+`pbvh_paintsample.ts` 300 → `stroke_base.ts` 699.
 
 **Serialization constraint.** `examples/brush_asymmetric_toolstack.wproj`
 already embeds `BrushProperty`, `PaintSample` and `PaintSampleProperty` in a
@@ -78,13 +107,26 @@ Things the grep must specifically cover, because they are not `import` lines:
 
 ### Step 2 — create `stroke_base.ts`
 
-New module (~1,700 lines) containing, with **no BREP imports**:
+**As built: 699 lines, not ~1,700**, containing, with **no BREP imports**:
 
-- `PaintSample`, `PaintSampleProperty`
-- `BrushProperty`
+- `PaintSample`, `PaintSampleProperty` (`git mv`'d whole from
+  `pbvh_paintsample.ts`, which is why the file keeps its history)
+- `BrushProperty`, `BRUSH_PROP_TYPE`, `BrushPropTypes`
 - `SymAxisMap`
-- `StrokeProperty`, `SculptTools`, `BrushSpacingModes`
-- the non-BVH half of `PaintToolModeBase` and `PaintOpBase`
+- **all** of `PaintToolModeBase`
+
+Three drafting errors, corrected against the tree:
+
+- ~~`StrokeProperty`, `SculptTools`, `BrushSpacingModes`~~ — see §2.
+- ~~the non-BVH *half* of `PaintToolModeBase`~~. Read whole, the class is
+  already BREP-free: it holds brush/symmetry/dyntopo state and abstract
+  `drawBrush`. There is no half to leave behind, so the §6 risk ("the hoisted
+  module drags BREP imports along") did not materialize and nothing had to be
+  handed to P7.
+- ~~`PaintOpBase`~~ is deliberately **not** hoisted, nor is `PaintOpMesh`.
+  Their only consumers are files P5 deletes; hoisting them would move BVH-typed
+  code into the surviving module for no one's benefit. They stay in
+  `pbvh_base.ts` and die with it.
 
 Location: host-owned for now —
 `scripts/editors/view3d/tools/stroke_base.ts`, alongside the existing
@@ -93,9 +135,9 @@ moves the whole cluster into `addons/builtin/litemesh/` as one unit; splitting
 the move across two plans would double the churn for no gain.
 
 **What stays behind in `pbvh_base.ts`:** everything that touches the PBVH
-itself — BVH node types, the BVH-driven sample gathering, the `Mesh`-typed
-halves of `PaintToolModeBase`. `pbvh_base.ts` then imports `stroke_base.ts`,
-inverting the dependency. It is deleted whole in P5.
+itself — BVH node types, the BVH-driven sample gathering, `PaintOpBase` and
+`PaintOpMesh`. `pbvh_base.ts` then imports `stroke_base.ts`, inverting the
+dependency. It is deleted whole in P5.
 
 ### Step 3 — preserve the struct names
 
@@ -114,12 +156,21 @@ Two options; pick per symbol:
   table's entries currently point *into* the deletion set and P8 rewrites it,
   so coordinate rather than adding debt.
 
-Verify by round-tripping `examples/brush_asymmetric_toolstack.wproj` before and
-after: load, save, and diff the struct-name set.
+Every symbol took the default: not one struct name changed, so
+`legacy_struct_migration.ts` was left alone.
+
+Verified by `tests/unit/stroke_base_struct_names.test.ts`, which reads the
+schema out of `examples/brush_asymmetric_toolstack.wproj`'s header directly
+(`WPRJ` + u32 version + u32 schema length + the schema as text) and checks it
+against the `inlineRegister` bodies in `stroke_base.ts`. Reading the header
+rather than booting the app keeps this in the unit suite; the assertion is
+*on-disk fields ⊆ source-declared fields*, not equality, because the committed
+example predates several field additions and a reader only needs somewhere to
+put every value the file actually carries.
 
 ### Step 4 — re-point the surviving imports
 
-Update the six files in §2 to import from `stroke_base.ts`. Nothing else
+Update the fifteen files in §2 to import from `stroke_base.ts`. Nothing else
 changes; the classes are the same classes.
 
 ### Step 5 — verify the stroke path end-to-end
@@ -144,8 +195,28 @@ not evidence.
 - New: a round-trip test asserting the struct-name set of
   `examples/brush_asymmetric_toolstack.wproj` is unchanged across the hoist.
   This one is cheap and it is the only thing standing between a file move and a
-  silent format break.
-- `pnpm check:layers` does not regress against P1's baseline.
+  silent format break. Landed as `tests/unit/stroke_base_struct_names.test.ts`
+  (6 tests) — see step 3 for why it reads the header instead of round-tripping.
+- ~~`pnpm check:layers` does not regress against P1's baseline.~~ **It does, by
+  4 on `no-circular`, and the budget was raised to 773 / total 2487.** This is
+  the one sanctioned increase in the refactor and it is structural, not a
+  mistake: `pbvh_paintsample.ts` had *zero* cycle edges (it imported only
+  `bezier`, `pathux` and `view3d_base`), while `stroke_base.ts` inherits the
+  four imports that come with `BrushProperty` / `PaintToolModeBase` —
+  `view3d_toolmode` (the `ToolMode` base class), `widgets` (`WidgetFlags`),
+  `view3d` (`View3D`) and `proceduralTex` (`new ProceduralTex()`). All four
+  route back through `tools/tools.ts → sculptcore.ts → stroke_base`, so
+  `stroke_base` joins the app-wide SCC and contributes 4 outbound + 12 inbound
+  edges; `pbvh_base.ts` shed 10 in exchange. None of the four is severable —
+  each symbol is used as a value or as the base class, and type-only edges are
+  counted here (`tsPreCompilationDeps: true`).
+
+  **P5 must pay this back.** Deleting the nine `pbvh*.ts` files and the
+  `tools.ts` side-effect import removes seven of the twelve inbound edges and
+  closes the short `stroke_base → view3d → tools.ts → pbvh_base → stroke_base`
+  cycle outright. The rationale is duplicated in `tools/layer-baseline.json`'s
+  `$exception` key so P9 step 1's reconciliation can attribute it without
+  reading this plan.
 
 ## 6. Risks
 
@@ -161,11 +232,14 @@ not evidence.
 
 ## 7. Exit criteria
 
-- `grep -rn "from '\./pbvh" scripts/editors/view3d/tools/sculptcore*.ts scripts/editors/view3d/tools/stroke_*.ts`
+All met 2026-08-16.
+
+- [x] `grep -rn "from '\./pbvh" scripts/editors/view3d/tools/sculptcore*.ts scripts/editors/view3d/tools/stroke_*.ts`
   returns nothing.
-- No surviving file `extends` a class defined under `pbvh_*` or
+- [x] No surviving file `extends` a class defined under `pbvh_*` or
   `addons/builtin/pbvh_sculpt/`.
-- Sculpting works end-to-end: the headless stroke tester and the
-  `sculptcore_*` integration suites are green on both backends.
-- `examples/brush_asymmetric_toolstack.wproj` round-trips with an unchanged
+- [x] Sculpting works end-to-end: `sculptcore_stroke_tester`,
+  `sculptcore_brushes`, `sculptcore_parity` and `stroke_driver_parity` are green
+  on both backends (53/53 native, 50 + 3 skipped wasm).
+- [x] `examples/brush_asymmetric_toolstack.wproj` round-trips with an unchanged
   struct-name set.

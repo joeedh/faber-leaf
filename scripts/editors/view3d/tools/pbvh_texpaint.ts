@@ -1,4 +1,4 @@
-import {BrushProperty, PaintSampleProperty} from './pbvh_base'
+import {BrushProperty, PaintSampleProperty} from './stroke_base.js'
 import type {BVHToolMode} from './pbvh'
 import * as util from '../../../util/util.js'
 import {
@@ -36,7 +36,7 @@ import type {View3D} from '../view3d'
 import {Loop, Mesh, UVLayerElem} from '../../../../addons/builtin/mesh/src/mesh'
 import {AttrRef, ColorLayerElem} from '../../../../addons/builtin/mesh/src/mesh_customdata'
 import {getUVWrangler} from '../../../../addons/builtin/mesh/src/unwrapping'
-import {PaintSample} from './pbvh_paintsample'
+import {PaintSample} from './stroke_base.js'
 
 declare global {
   let DDD: number

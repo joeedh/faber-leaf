@@ -6,7 +6,7 @@ import {StructType} from '@litestl/typescript-runtime'
 import {LiteMesh} from '../../../lite-mesh/index'
 import {SculptBrushes} from '@sculptcore/api/sculptcore/brush/SculptBrushes'
 import {SculptTools, BrushFlags, StrokeMethod, isPlaneFamilyTool} from '../../../brush/brush_base'
-import {PaintSample} from './pbvh_paintsample'
+import {PaintSample} from './stroke_base.js'
 import {FalloffKind} from '@sculptcore/api/sculptcore/gpu/FalloffKind'
 import {FeatureFlags} from '../../../core/feature-flag'
 

@@ -19,7 +19,7 @@ import {
 } from '../../../path.ux/pathux'
 import {FeatureFlags} from '../../../core/feature-flag'
 import {ToolMode, type IToolModeDefine} from '../view3d_toolmode'
-import {PaintToolModeBase} from './pbvh_base'
+import {PaintToolModeBase} from './stroke_base.js'
 import {Icons} from '../../icon_enum.js'
 import type {View3D} from '../view3d'
 import {

@@ -43,10 +43,10 @@ duplicate. Sculptcore is the implementation.
 | Path | Size / note |
 | --- | --- |
 | `scripts/editors/view3d/tools/pbvh.ts` | 2,584 lines |
-| `…/pbvh_base.ts` | 2,073 lines — **after** P4 has hoisted `stroke_base.ts` out of it |
+| `…/pbvh_base.ts` | 1,698 lines after P4's hoist (was 2,073); still holds `PaintOpBase` / `PaintOpMesh`, which P4 deliberately left here |
 | `…/pbvh_bvhdef.ts` | |
 | `…/pbvh_holefiller.ts` | |
-| `…/pbvh_paintsample.ts` | 300 lines — **after** P4 |
+| ~~`…/pbvh_paintsample.ts`~~ | **gone** — P4 `git mv`'d it to `stroke_base.ts`, which **survives**. Do not delete it. |
 | `…/pbvh_sculptops.ts` | **6,196 lines — the fifth-largest file in the tree** |
 | `…/pbvh_texpaint.ts`, `…/pbvh_texpaint_blur.ts` | see §5 |
 | `…/pbvh_ui.ts` | |
@@ -54,7 +54,13 @@ duplicate. Sculptcore is the implementation.
 | `scripts/test/test_sculpt.js`, `scripts/test/test_sculpt_run.js` | |
 | the `@framework/api` surface that exists only for `pbvh_sculpt` | see step 4 |
 
-Nine `pbvh*.ts` files, 15,236 lines total.
+Eight `pbvh*.ts` files after P4, ~14,560 lines total.
+
+Also remove `tools.ts:10`'s bare `import './pbvh_base.js'`. P4 left it in place
+on purpose — it is a side-effect registration import, and it is the last edge
+closing the short `stroke_base → view3d → tools.ts → pbvh_base → stroke_base`
+cycle. P4 raised the `no-circular` budget by 4 to land; **P5 pays it back** —
+see that plan's §5 and `tools/layer-baseline.json`'s `$exception`.
 
 **`pbvh_sculptops.ts` is not leaf code.** At 6,196 lines it contains ToolOps
 with registered tool paths, keymap entries, and very likely UI panel references.

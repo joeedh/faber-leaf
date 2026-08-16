@@ -13,11 +13,12 @@ import {
 import {AttrRef} from '../../../../addons/builtin/mesh/src/customdata.js'
 import {Mesh, MeshFlags, Vector3LayerElem, Vertex} from '../../../../addons/builtin/mesh/src/mesh.js'
 import {BVH, BVHFlags, BVHNodeVertex, CDNodeInfo, IsectRet} from '../../../../addons/builtin/mesh/src/bvh.js'
-import {BrushProperty, PaintOpBase, PaintOpMesh, PathPoint, PaintSampleProperty} from './pbvh_base'
+import {PaintOpBase, PaintOpMesh, PathPoint} from './pbvh_base'
+import {BrushProperty, PaintSampleProperty} from './stroke_base.js'
 import {SceneObject} from '../../../sceneobject/sceneobject.js'
 import type {ViewContext} from '../../../core/context.js'
 import {GridBase} from '../../../../addons/builtin/mesh/src/mesh_grids.js'
-import {PaintSample} from './pbvh_paintsample.js'
+import {PaintSample} from './stroke_base.js'
 ;(window as any).testTrilinear = function (seed: number = 0, d: number = 0.5): void {
   let boxverts: any[] = [
     [-d, -d, -d],

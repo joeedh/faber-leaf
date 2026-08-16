@@ -1290,7 +1290,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P1 | [CI + layer-gate repair](./2026-08-15-0300-ci-and-layer-gate-repair.md) | new — §2.4 | 1 | — | **written** |
 | P2 | [W0 — rename + identity migration](./2026-08-15-0305-w0-rename-faber-leaf.md) | W0 | 2 | P1 | **landed** |
 | P3 | [LeafMesh core — storage, attrs, topo, CDT](./2026-08-15-0310-leafmesh-core-storage-topo-cdt.md) | risk mitigation | 0 | — | **landed** |
-| P4 | [W2a — hoist the stroke base](./2026-08-15-0315-w2-stroke-base-hoist.md) | W2 §0 | 3 | P1 | **written** |
+| P4 | [W2a — hoist the stroke base](./2026-08-15-0315-w2-stroke-base-hoist.md) | W2 §0 | 3 | P1 | **landed** |
 | P5 | [W2b — delete the TS sculpting stack](./2026-08-15-0320-w2-delete-ts-sculpting-stack.md) | W2 §1 | 3 | P4 | **written** |
 | P6 | [W1a — `SelMask` format migration](./2026-08-15-0325-w1-selmask-format-migration.md) | W1 §1 | 4 | P1 | **written** |
 | P7 | [W1b — host geometry contract](./2026-08-15-0330-w1-host-geometry-contract.md) | W1 §1, §3(a)(b) | 4 | P6 | **written** |
@@ -1448,7 +1448,7 @@ ungrounded input just argues a wrong plan more convincingly.
 > are bounded by how completely they enumerate call sites, not by how hard they
 > are thought about.
 
-- [ ] **P4 — [W2a: hoist the stroke base](./2026-08-15-0315-w2-stroke-base-hoist.md)**
+- [x] **P4 — [W2a: hoist the stroke base](./2026-08-15-0315-w2-stroke-base-hoist.md)**
   - `sculptcore.ts:22` — `SculptCorePaintMode extends PaintToolModeBase`, which
     lives in `pbvh_sculpt`. The surviving toolmode inherits from the code P5
     deletes; nothing else in W2 can start until that is untangled.
@@ -1459,6 +1459,16 @@ ungrounded input just argues a wrong plan more convincingly.
     Class E sweep for W2 specifically.
   - Exit: `pbvh_sculpt` has no inbound `extends` from surviving code; sculpting
     still works.
+  - **Landed 2026-08-16.** `pbvh_paintsample.ts` was `git mv`'d to
+    `stroke_base.ts` (699 lines, not ~1,700) and grew `SymAxisMap`,
+    `BrushProperty` and *all* of `PaintToolModeBase`; `pbvh_base.ts` now imports
+    it, inverting the dependency. The sweep found fifteen edges, not six —
+    `StrokeProperty` does not exist, `SculptTools`/`BrushSpacingModes` were
+    already host-owned, and `PaintOpBase`/`PaintOpMesh` were deliberately left
+    to die with `pbvh_base.ts`. Struct names guarded by
+    `tests/unit/stroke_base_struct_names.test.ts`. **The one sanctioned layer
+    regression:** `no-circular` 769 → 773 (total 2483 → 2487), structural and
+    repaid by P5 — see that plan's §5.
 
 - [ ] **P5 — [W2b: delete the TS sculpting stack](./2026-08-15-0320-w2-delete-ts-sculpting-stack.md)**
   - Delete `pbvh*.ts` (9 files, 15,236 lines), the rest of

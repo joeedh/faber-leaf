@@ -64,7 +64,8 @@ import {
   VMapFields,
 } from '../../../../addons/builtin/mesh/src/mesh_grids_kdtree.js'
 import {splitEdgesSimple2, splitEdgesSmart2} from '../../../../addons/builtin/mesh/src/mesh_subdivide.js'
-import {calcConcave, PaintOpBase, SymAxisMap, PathPoint, PaintOpMesh} from './pbvh_base'
+import {calcConcave, PaintOpBase, PathPoint, PaintOpMesh} from './pbvh_base'
+import {SymAxisMap} from './stroke_base.js'
 import {trianglesToQuads, TriQuadFlags} from '../../../../addons/builtin/mesh/src/mesh_utils.js'
 import {applyTriangulation, triangulateFace, triangulateQuad} from '../../../../addons/builtin/mesh/src/mesh_tess.js'
 import {MeshLog} from '../../../../addons/builtin/mesh/src/mesh_log.js'
@@ -83,7 +84,7 @@ import {
 import {getCornerFlag, getFaceSets, getSmoothBoundFlag} from '../../../../addons/builtin/mesh/src/mesh_facesets.js'
 import {TetVertex} from '../../../tet/tetgen_types.js'
 import type {ViewContext} from '../../../core/context.js'
-import {PaintSample} from './pbvh_paintsample.js'
+import {PaintSample} from './stroke_base.js'
 
 //grab data field definition
 const GEID = 0

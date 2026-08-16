@@ -11,12 +11,13 @@ import {
   Vertex,
 } from '../../../../addons/builtin/mesh/src/mesh.js'
 import {BVH, BVHFlags, BVHTriFlags, IsectRet} from '../../../../addons/builtin/mesh/src/bvh.js'
-import {BrushProperty, PaintOpBase, PaintOpMesh, PaintSampleProperty, PathPoint} from './pbvh_base'
+import {PaintOpBase, PaintOpMesh, PathPoint} from './pbvh_base'
+import {BrushProperty, PaintSampleProperty} from './stroke_base.js'
 import {applyTriangulation} from '../../../../addons/builtin/mesh/src/mesh_tess.js'
 import {MeshLog} from '../../../../addons/builtin/mesh/src/mesh_log.js'
 import type {GridBase} from '../../../../addons/builtin/mesh/src/mesh_grids.js'
 import type {ViewContext} from '../../../core/context.js'
-import {PaintSample} from './pbvh_paintsample.js'
+import {PaintSample} from './stroke_base.js'
 
 export function fillHoleFromVert(
   mesh: Mesh,

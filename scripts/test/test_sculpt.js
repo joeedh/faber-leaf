@@ -3,7 +3,7 @@ import {getBrushes} from '../brush/brush.ts'
 import {Vector2, Vector3, Vector4, Quat, Matrix4} from '../util/vectormath.js'
 import * as util from '../util/util.js'
 import * as math from '../util/math.js'
-import {PaintSample} from '../editors/view3d/tools/pbvh_paintsample.ts'
+import {PaintSample} from '../editors/view3d/tools/stroke_base.ts'
 
 export class SculptAction extends TestAction {
   constructor(brushtool, delay = 0, op = 'bvh.paint', args = {}) {

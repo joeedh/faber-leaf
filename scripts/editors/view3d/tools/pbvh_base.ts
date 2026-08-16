@@ -1,14 +1,8 @@
 import {bez4, dbez4} from '../../../util/bezier.js'
 import {copyMouseEvent} from '../../../path.ux/scripts/path-controller/util/events.js'
-import type {Scene} from '../../../scene/scene'
 import type {ToolContext, ViewContext} from '../../../core/context.js'
-import type {StructReader} from '../../../path.ux/scripts/util/nstructjs.js'
-import {WidgetFlags} from '../widgets/widgets.js'
-import {ToolMode} from '../view3d_toolmode.js'
-import type {View3D} from '../view3d.js'
-import {PaintSample} from './pbvh_paintsample.js'
+import {BrushProperty, PaintSample, PaintSampleProperty, PaintToolModeBase} from './stroke_base.js'
 import {resolveToolDabPolicy} from './sculptcore_bindings'
-import {PropFlags} from '../../../path.ux/scripts/pathux.js'
 
 import {
   Curve1DProperty,
@@ -20,39 +14,28 @@ import {
   Mat4Property,
   Matrix4,
   ToolOp,
-  ToolProperty,
   Vector2,
   Vector3,
   Vector4,
-  nstructjs,
   PropertySlots,
   IVectorOrHigher,
   Number3,
 } from '../../../path.ux/scripts/pathux.js'
 
-import {
-  BrushFlags,
-  BrushRadiusModes,
-  SculptBrush,
-  SculptTools,
-  BrushSpacingModes,
-  DynTopoSettings,
-  PaintToolSlot,
-} from '../../../brush/index'
-import {ProceduralTex, TexUserFlags, TexUserModes} from '../../../texture/proceduralTex'
-import {DataRefProperty, DataRef, BlockLoader, BlockLoaderAddUser} from '../../../core/lib_api.js'
+import {BrushFlags, BrushRadiusModes, SculptBrush, SculptTools, BrushSpacingModes} from '../../../brush/index'
+import {TexUserFlags, TexUserModes} from '../../../texture/proceduralTex'
+import {DataRefProperty, DataRef} from '../../../core/lib_api.js'
 import {AttrRef, CDFlags} from '../../../../addons/builtin/mesh/src/customdata.js'
 import {TetMesh} from '../../../tet/tetgen.js'
 import {Mesh, Vector3LayerElem, Vertex} from '../../../../addons/builtin/mesh/src/mesh.js'
 import {GridBase} from '../../../../addons/builtin/mesh/src/mesh_grids.js'
-import {BVH, BVHFlags, IBVHVertex, IsectRet} from '../../../../addons/builtin/mesh/src/bvh.js'
+import {BVH, BVHFlags, IBVHVertex} from '../../../../addons/builtin/mesh/src/bvh.js'
 import {GenericIsect} from '../../../util/spatial.js'
 import type {IGenericIsect, ISurfaceSampler} from '../../../util/spatial.js'
 import {MeshFlags} from '../../../../addons/builtin/mesh/src/mesh.js'
 
 import * as util from '../../../util/util.js'
 import {SceneObject, SceneObjectData} from '../../../sceneobject/index.js'
-import {enumValues} from '../../../util/enum-utils.js'
 
 export interface ISampleViewRet {
   origco: Vector3
@@ -91,179 +74,6 @@ export function regenBVH(ctx: any): void {
     ob.data.regenBVH()
   }
 }
-
-export const SymAxisMap: Vector3[][] = [
-  [],
-  [[-1, 1, 1]], //x
-  [[1, -1, 1]], //y
-  [
-    [-1, 1, 1],
-    [-1, -1, 1],
-    [1, -1, 1],
-  ], //x + y
-
-  [[1, 1, -1]], //z
-  [
-    [-1, 1, 1],
-    [1, 1, -1],
-    [-1, 1, -1],
-  ], //x+z
-  [
-    [1, -1, 1],
-    [1, 1, -1],
-    [1, -1, -1],
-  ], //y+z
-
-  [
-    [-1, 1, 1],
-    [1, -1, 1],
-    [1, 1, -1],
-    [-1, -1, 1],
-    [-1, -1, -1],
-    [-1, 1, -1],
-    [1, -1, -1],
-  ], //x+y+z
-].map((v) => v.map((v) => new Vector3(v)))
-
-export let BRUSH_PROP_TYPE: any
-
-export const BrushPropTypes = {
-  BRUSH: 100,
-}
-
-export class BrushProperty extends ToolProperty<SculptBrush, (typeof BrushPropTypes)['BRUSH']> {
-  static STRUCT = nstructjs.inlineRegister(
-    this,
-    `
-BrushProperty {
-  brush    : SculptBrush;
-  _texture : ProceduralTex;
-  hasTex   : bool | !!this.brush.texUser.texture;
-}`
-  )
-
-  brush: SculptBrush
-  _texture: any
-
-  constructor(value?: any) {
-    super(BRUSH_PROP_TYPE)
-
-    this.brush = new SculptBrush()
-    this._texture = new ProceduralTex()
-
-    if (value) {
-      this.setValue(value)
-    }
-  }
-
-  calcMemSize(): number {
-    return this.brush.calcMemSize() + this._texture.calcMemSize()
-  }
-
-  setDynTopoSettings(dynTopo: DynTopoSettings): void {
-    this.brush.dynTopo.load(dynTopo)
-  }
-
-  setValue(brush: SculptBrush): this {
-    brush.copyTo(this.brush, false)
-
-    if (this.brush.texUser.texture) {
-      this.brush.texUser.texture.copyTo(this._texture, true)
-      this.brush.texUser.texture = this._texture
-    }
-
-    return this
-  }
-
-  getValue(): SculptBrush {
-    return this.brush
-  }
-
-  loadSTRUCT(reader: StructReader<this>): void {
-    reader(this)
-    super.loadSTRUCT(reader)
-
-    const structThis = this as typeof this & {hasTex?: boolean}
-
-    const texuser = this.brush.texUser
-    if (structThis.hasTex) {
-      delete structThis.hasTex
-      this.brush.texUser.texture = this._texture
-    } else {
-      this.brush.texUser.texture = undefined
-    }
-  }
-}
-
-BRUSH_PROP_TYPE = ToolProperty.register(BrushProperty)
-
-export let PAINT_SAMPLE_TYPE: any
-
-export class PaintSampleProperty extends ToolProperty<PaintSample[] | Iterable<PaintSample>> {
-  static STRUCT = nstructjs.inlineRegister(
-    this,
-    `
-PaintSampleProperty {
-  data : array(PaintSample);
-}`
-  )
-
-  data: PaintSample[]
-
-  constructor() {
-    super(PAINT_SAMPLE_TYPE)
-    this.data = []
-    this.flag |= PropFlags.NO_DEFAULT
-  }
-
-  calcMemSize(): number {
-    let tot = super.calcMemSize()
-
-    tot += PaintSample.getMemSize() * this.data.length
-
-    return tot
-  }
-
-  push(sample: PaintSample): this {
-    this.data.push(sample)
-    return this
-  }
-
-  getValue(): PaintSample[] {
-    return this.data
-  }
-
-  setValue(b: Iterable<PaintSample>): this {
-    super.setValue(b instanceof Array ? b : Array.from(b))
-    this.data.length = 0
-    for (const item of b) {
-      this.data.push(item)
-    }
-
-    return this
-  }
-
-  copy(): this {
-    const ret = new PaintSampleProperty()
-
-    for (const item of this) {
-      ret.push(item.copy())
-    }
-
-    return ret as unknown as this
-  }
-
-  loadSTRUCT(reader: any): void {
-    reader(this)
-    super.loadSTRUCT(reader)
-  }
-
-  [Symbol.iterator](): Iterator<PaintSample> {
-    return this.data[Symbol.iterator]()
-  }
-}
-
-PAINT_SAMPLE_TYPE = ToolProperty.register(PaintSampleProperty)
 
 export class SetBrushRadius extends ToolOp<
   {radius: FloatProperty; brush: DataRefProperty<SculptBrush>},
@@ -682,199 +492,6 @@ export function calcConcaveLayer(mesh: any): void {
 
   for (const v of mesh.verts) {
     //
-  }
-}
-
-export abstract class PaintToolModeBase extends ToolMode {
-  static STRUCT = nstructjs.inlineRegister(
-    this,
-    `
-  PaintToolModeBase {
-    drawBVH                : bool;
-    drawCavityMap          : bool;
-    drawFlat               : bool;
-    drawWireframe          : bool;
-    drawValidEdges         : bool;
-    drawNodeIds            : bool;
-    drawMask               : bool;
-    drawDispDisField       : bool;
-    editDisplaced          : bool;
-    drawColPatches         : bool;
-    symmetryAxes           : int;
-    tool                   : int;
-    slots                  : iterkeys(PaintToolSlot);
-    sharedBrushRadius      : float;
-    sharedRadiusMode       : int;
-    lastScreenRadius       : float;
-    lastWorldRadius        : float;
-    dynTopo                : DynTopoSettings;
-    reprojectCustomData    : bool;
-  }`
-  )
-
-  mdown = false
-  float = 0
-  lastFaceSet: number
-  editDisplaced: boolean
-  drawDispDisField: boolean
-  reprojectCustomData: boolean
-  sharedBrushRadius: number
-  /** The unit `sharedBrushRadius` is currently expressed in (BrushRadiusModes).
-   * The shared value follows whichever brush last wrote it, so a SHARED_SIZE
-   * brush whose own radiusMode differs must convert through sharedRadiusFor()
-   * — reading raw treats world units as px (sub-pixel dab spacing). */
-  sharedRadiusMode: number
-  /** Screen (px) and world radii of the last primary dab that hit the surface;
-   * their ratio is the world-units-per-pixel that `brush.set_radius_mode`
-   * converts through. 0 = no dab yet, so there is nothing to convert with.
-   * Only the sculptcore dab path populates these. */
-  lastScreenRadius: number
-  lastWorldRadius: number
-  gridEditDepth: number
-  enableMaxEditDepth: boolean
-  dynTopo: DynTopoSettings
-  mpos: Vector2
-  _radius: number | undefined
-  debugSphere: Vector3
-  drawFlat: boolean
-  drawMask: boolean
-  _last_cd_mask: number
-  tool: number
-  slots: Record<number, PaintToolSlot>
-  _brush_lines: {remove(): void}[]
-  drawColPatches: boolean
-  symmetryAxes: number
-  drawBVH: boolean
-  drawCavityMap: boolean
-  drawNodeIds: boolean
-  drawWireframe: boolean
-  drawValidEdges: boolean
-  _last_bvh_key: string
-  _last_hqed: string
-  view3d: View3D
-  _last_enable_mres: string | undefined
-  _last_draw_key: string | undefined
-
-  constructor(manager: any) {
-    super(manager)
-
-    this.lastFaceSet = 1
-
-    this.editDisplaced = false
-    this.drawDispDisField = false
-    this.reprojectCustomData = false
-
-    this.sharedBrushRadius = 55
-    this.sharedRadiusMode = BrushRadiusModes.SCREEN
-    this.lastScreenRadius = 0
-    this.lastWorldRadius = 0
-
-    this.gridEditDepth = 2
-    this.enableMaxEditDepth = false
-
-    this.dynTopo = new DynTopoSettings()
-    //this.dynTopo.flag = DynTopoFlags.COLLAPSE | DynTopoFlags.SUBDIVIDE | DynTopoFlags.FANCY_EDGE_WEIGHTS;
-
-    this.mpos = new Vector2()
-    this._radius = undefined
-
-    this.debugSphere = new Vector3()
-
-    this.drawFlat = false
-    this.drawMask = true
-    this._last_cd_mask = -1
-
-    this.flag |= WidgetFlags.ALL_EVENTS
-
-    this.tool = SculptTools.CLAY
-    this.slots = {}
-
-    this._brush_lines = []
-
-    for (const k in SculptTools) {
-      const tool = (SculptTools as unknown as Record<string, number>)[k]
-      this.slots[tool] = new PaintToolSlot(tool as unknown as SculptTools)
-    }
-
-    this.drawColPatches = false
-    this.symmetryAxes = 1
-    this.drawBVH = false
-    this.drawCavityMap = false
-    this.drawNodeIds = false
-    this.drawWireframe = false
-    this.drawValidEdges = true
-
-    this._last_bvh_key = ''
-    this._last_hqed = ''
-
-    this.view3d = manager !== undefined ? manager.view3d : undefined
-  }
-
-  getBrush(tool: number = this.tool): any {
-    if (!this.ctx) {
-      return undefined
-    }
-
-    return this.slots[tool].resolveBrush(this.ctx)
-  }
-
-  /** `sharedBrushRadius` expressed in `mode` units. Converts through the last
-   * dab's world-units-per-pixel when the shared value's unit differs; before
-   * any dab that factor is unknown and the raw value is returned. */
-  sharedRadiusFor(mode: number): number {
-    if (mode === this.sharedRadiusMode || this.lastScreenRadius <= 0 || this.lastWorldRadius <= 0) {
-      return this.sharedBrushRadius
-    }
-    const dist = this.lastWorldRadius / this.lastScreenRadius
-    return mode === BrushRadiusModes.WORLD ? this.sharedBrushRadius * dist : this.sharedBrushRadius / dist
-  }
-
-  /** Store the shared radius together with the unit it is expressed in. */
-  setSharedRadius(value: number, mode: number): void {
-    this.sharedBrushRadius = value
-    this.sharedRadiusMode = mode
-  }
-
-  abstract drawBrush(view3d: View3D, force?: boolean): void
-
-  protected clearBrushLines(): void {
-    for (const l of this._brush_lines) {
-      l.remove()
-    }
-    this._brush_lines.length = 0
-  }
-
-  dataLink(scene: Scene, getblock: BlockLoader, getblock_addUser: BlockLoaderAddUser): void {
-    for (const k in this.slots) {
-      this.slots[k].dataLink(scene, getblock, getblock_addUser)
-    }
-
-    for (const tool of enumValues(SculptTools)) {
-      if (!(tool in this.slots)) {
-        this.slots[tool as unknown as number] = new PaintToolSlot(tool as SculptTools)
-      }
-    }
-  }
-
-  loadSTRUCT(reader: StructReader<this>): void {
-    reader(this)
-    super.loadSTRUCT(reader)
-
-    //deal with old files
-    if (Array.isArray(this.slots)) {
-      const slots = this.slots
-      this.slots = {}
-
-      for (const slot of slots) {
-        this.slots[slot.tool] = slot
-      }
-    }
-
-    // also happens in old files
-    if ('brush' in this) {
-      this.tool = (this as unknown as any)['brush'].tool
-      delete this.brush
-    }
   }
 }
 
