@@ -17,8 +17,27 @@
  * string with multiple `defines` maps.
  */
 
+import {
+  MATERIAL_BASE_VERTEX_ATTRS,
+  VertexScalarType,
+  buildVertexBufferLayout,
+  type VertexAttrDesc,
+} from '../core/vertex_layout.js'
 import type {PipelineDescriptor} from '../webgpu/pipeline.js'
 import {preprocess, type PreprocessOptions} from './preprocess.js'
+
+/**
+ * The part of a material's requested-attribute set (`RequestedAttrDesc` in
+ * `shadernodes/shader_nodes_wgsl.ts`) that the vertex layout needs. Structural
+ * on purpose: the shader registry does not depend on the node graph.
+ */
+export interface MaterialVertexAttr {
+  name: string
+  /** Vertex `@location` the generator assigned, always ≥ 2. */
+  slot: number
+  /** Component count (2 / 3 / 4). Requested attrs are always float. */
+  elemSize: number
+}
 
 /**
  * Per-frame uniform layout. Stable across every shader; populated once
@@ -1345,27 +1364,53 @@ export function buildPipelineDescriptor(
 }
 
 /**
- * Build a `PipelineDescriptor` for a per-material WGSL shader emitted by
- * `WgslShaderGenerator`, for the fixed-layout (non-LiteMesh) draw path
- * (SimpleMesh / scene objects). Pinned to `LIT_MESH_VERTEX_LAYOUT` +
- * `DEFAULT_COLOR_TARGET`: those meshes upload the fixed
- * position/normal/uv/color buffers regardless of which varyings the
- * material reads (unread `@location`s are simply ignored).
+ * The vertex layout a material's own WGSL declares: the base
+ * position/normal interface every generated `VsIn` opens with, plus one slot
+ * per `AttributeNode` read, at the `@location` the generator assigned it.
  *
- * NB: the generated VsIn is now *dynamic* — a material with an
- * `AttributeNode` declares extra `@location(2+)` inputs that this fixed
- * layout does not supply. Those materials only render correctly through
- * the LiteMesh/sculptcore draw path (which builds matching per-attribute
- * vertex buffers); see `documentation/shader-attributes.md`.
+ * This is the host geometry contract's §10 seam — the layout follows the
+ * *material*, not the geometry type, so an `AttributeNode` material renders
+ * through every draw path rather than only the sculptcore one.
  */
-export function buildMaterialPipelineDescriptor(wgsl: string, label: string): PipelineDescriptor {
+export function buildMaterialVertexLayout(
+  requestedAttrs: readonly MaterialVertexAttr[] = []
+): Array<GPUVertexBufferLayout | null> {
+  const attrs: VertexAttrDesc[] = [...MATERIAL_BASE_VERTEX_ATTRS]
+
+  for (const req of requestedAttrs) {
+    if (req.slot < MATERIAL_BASE_VERTEX_ATTRS.length) {
+      throw new Error(`material attribute "${req.name}" claims reserved vertex slot ${req.slot}`)
+    }
+    attrs.push({
+      name    : req.name,
+      slot    : req.slot,
+      scalar  : VertexScalarType.FLOAT32,
+      elemSize: req.elemSize,
+    })
+  }
+
+  return buildVertexBufferLayout(attrs)
+}
+
+/**
+ * Build a `PipelineDescriptor` for a per-material WGSL shader emitted by
+ * `WgslShaderGenerator`. `vertexBuffers` comes from
+ * {@link buildMaterialVertexLayout} at the call site; there is deliberately no
+ * default, because a fixed default is exactly how the layout stopped matching
+ * the shader it was compiled against.
+ */
+export function buildMaterialPipelineDescriptor(
+  wgsl: string,
+  label: string,
+  vertexBuffers: Array<GPUVertexBufferLayout | null>
+): PipelineDescriptor {
   return {
     label,
     wgsl,
-    vertexBuffers: LIT_MESH_VERTEX_LAYOUT,
-    colorTargets : [DEFAULT_COLOR_TARGET],
-    primitive    : {topology: 'triangle-list'},
-    depthStencil : DEFAULT_DEPTH_STATE,
+    vertexBuffers,
+    colorTargets: [DEFAULT_COLOR_TARGET],
+    primitive   : {topology: 'triangle-list'},
+    depthStencil: DEFAULT_DEPTH_STATE,
   }
 }
 

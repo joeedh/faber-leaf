@@ -21,6 +21,8 @@ import {Shaders} from '@framework/api'
 import {ChunkedSimpleMesh, LayerTypes, SimpleMesh} from '@framework/api'
 
 import {DataBlock} from '@framework/api'
+import type {AssertExtends, IGeometrySource, IInvalidatable} from '@framework/api'
+import {InvalidationKind} from '@framework/api'
 import {IDataDefine, SceneObjectData} from '@framework/api'
 import {FindNearestRet} from '@framework/api'
 import {Icons} from '@framework/api'
@@ -6011,6 +6013,37 @@ mesh.Mesh {
     }
   }
 
+  /**
+   * The invalidation protocol — documentation/geometry-contract.md §5. The
+   * caller states what *it* changed; this method decides what to rebuild. The
+   * `regen*` methods below stay as the implementation and are no longer the
+   * vocabulary the host is expected to know.
+   */
+  invalidate(what: InvalidationKind): void {
+    if ((what & InvalidationKind.ALL) === InvalidationKind.ALL) {
+      this.regenAll()
+    }
+
+    if (what & InvalidationKind.TOPOLOGY) {
+      this.regenTessellation()
+    }
+
+    if (what & (InvalidationKind.TOPOLOGY | InvalidationKind.POSITIONS)) {
+      this.regenBVH()
+    }
+
+    const redraws =
+      InvalidationKind.TOPOLOGY | InvalidationKind.POSITIONS | InvalidationKind.ATTRIBUTES | InvalidationKind.MATERIALS
+    if (what & redraws) {
+      this.regenRender()
+    }
+
+    if (what & InvalidationKind.SELECTION) {
+      this.regenElementsDraw()
+      this.regenUVEditor()
+    }
+  }
+
   regenBVH() {
     if (this.bvh) {
       this._bvh_freelist = this.bvh.destroy(this)
@@ -7241,6 +7274,10 @@ mesh.Mesh {
 }
 
 setMeshClass(Mesh)
+
+/** Conformance to the host geometry contract; see documentation/geometry-contract.md §2. */
+export type _MeshIsGeometrySource = AssertExtends<Mesh, IGeometrySource>
+export type _MeshIsInvalidatable = AssertExtends<Mesh, IInvalidatable>
 
 const g = window as unknown as any
 g['_debug_recalc_all_normals'] = function (force = false) {

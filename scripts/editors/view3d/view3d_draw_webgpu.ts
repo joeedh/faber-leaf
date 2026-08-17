@@ -41,7 +41,11 @@ import {setActiveWebGpuContext, createDrawQueue} from '../../render/queue_factor
 import {View3DFlags} from './view3d_base.js'
 import {getWebGpuDebug} from '../debug/webgpu_debug.js'
 import * as view3d_shaders from '../../shaders/shaders.js'
-import {buildMaterialPipelineDescriptor} from '../../shaders/wgsl_shaders.js'
+import {
+  buildMaterialPipelineDescriptor,
+  buildMaterialVertexLayout,
+  type MaterialVertexAttr,
+} from '../../shaders/wgsl_shaders.js'
 import type {Pipeline} from '../../webgpu/pipeline.js'
 import {LightGenWgsl, type IRenderLights} from '../../shadernodes/shader_lib_wgsl.js'
 import {sharedLinearSampler} from '../../shadernodes/shader_nodes_wgsl.js'
@@ -487,7 +491,11 @@ function ensureMaterialPipeline(
     console.log(`[webgpu] mat-${mat.lib_id} WGSL:\n${def.wgsl}`)
   }
 
-  const desc = buildMaterialPipelineDescriptor(def.wgsl, `material-${mat.lib_id}`)
+  const desc = buildMaterialPipelineDescriptor(
+    def.wgsl,
+    `material-${mat.lib_id}`,
+    buildMaterialVertexLayout(def.requestedAttrs)
+  )
   const interchangeable = new Set<GPUTextureFormat>(['bgra8unorm', 'rgba8unorm'])
   desc.colorTargets = desc.colorTargets.map((t) =>
     interchangeable.has(t.format) ? {...t, format: wgpu.surfaceFormat} : t
@@ -761,6 +769,7 @@ interface MaterialLike {
   ) => {
     wgsl: string
     setUniforms: (graph: unknown, uniforms: Record<string, unknown>) => void
+    requestedAttrs?: MaterialVertexAttr[]
   }
 }
 

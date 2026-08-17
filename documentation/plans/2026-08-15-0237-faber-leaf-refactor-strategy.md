@@ -383,27 +383,37 @@ compiles without `Mesh` but cannot do anything with what replaces it.
 **(a) `IGeometrySource` — what the host is allowed to ask geometry.**
 Generalize the existing `SceneObjectData` contract into an explicit, documented
 interface. The obvious half — bounds, transform, draw submission, the four
-picking entry points, selection state, undo push/pop — maps onto
-`SceneObjectData:153,186,220,274,305,346,348,352,354` and is roughly **eight of
-the twenty-two things the host actually demands today**. The rest, all of which
+picking entry points, selection state — maps onto
+`SceneObjectData:163,191,196,230,284,315,356,358,362,364` and is roughly **eight
+of the twenty-two things the host actually demands today**. The rest, all of which
 the host uses and none of which can be dropped:
 
 | Capability | Where the host demands it |
 | --- | --- |
-| Kind identity + factory + import | `core/data_kinds.ts:1-58`; `sceneobject_base.ts:405`; `context.ts:222,318,362` |
+| Kind identity + factory + import | `core/data_kinds.ts:1-57`; `sceneobject_base.ts:394,428`; `context.ts:226,323,372` |
 | Element iteration + stable eids | `transform_types.ts:78,92-93,334,340-341,470,485,552-553`; `view3d_draw.ts:170-222` |
 | Invalidation / regen protocol (9 methods) | `transform_types.ts:367-368,498,500,670-671,699,712,716-717`; `PropsEditor.ts:166,189-196,235-237` |
 | Spatial acceleration | `transform_types.ts:110-115` (`mesh.getBVH().closestVerts`); `PropsEditor.ts:633-637` |
-| Material slots + shader/attribute negotiation | `sceneobject_base.ts:56-58`; `renderengine_realtime.ts:1226-1299` |
+| Material slots + shader/attribute negotiation | `sceneobject_base.ts:66-68`; `renderengine_realtime.ts:1226-1299` |
 | CustomData layers | `PropsEditor.ts:138,168,367-387,494-513`; `api_define.ts:312` |
-| Self-description (`defineAPI` / `getTools` / `buildPropertiesTab` / `_ownSelectMask`) | `sceneobject_base.ts:72,101,128,181,419` |
-| Graph participation (`inputs.depend`, `exec`, `SAVE_PROXY`) | `sceneobject_base.ts:80,124`; `sceneobject.ts:279-293` |
-| Datablock lifecycle (`copy`, `copyAddUsers`, `dataLink`, `destroy`, `swapDataBlockContents`, `onContextLost`) | `sceneobject_base.ts:149,358,360`; `sceneobject.ts:269,364-380,410-417` |
-| Undo beyond push/pop (`calcUndoMem`) | `toolstack.js:7-8,29-41`; `transform_ops.ts:265-294` |
-| `applyMatrix` (bake into coords) | `sceneobject_base.ts:67` |
+| Self-description (`defineAPI` / `getTools` / `buildPropertiesTab` / `_ownSelectMask`) | `sceneobject_base.ts:82,111,138,191,442` |
+| Graph participation (`inputs.depend`, `exec`, `SAVE_PROXY`) | `sceneobject_base.ts:90-98,134`; `sceneobject.ts:279-293` |
+| Datablock lifecycle (`copy`, `copyAddUsers`, `dataLink`, `destroy`, `swapDataBlockContents`, `onContextLost`) | `sceneobject_base.ts:159,368,370`; `sceneobject.ts:269,364-380,410-417` |
+| `applyMatrix` (bake into coords) | `sceneobject_base.ts:77` |
 | Triangle extraction for export | `stlformat.js:13,33,40-43`; `app_ops.js:203-228` |
-| Symmetry / mirror state | `transform_types.ts:85,246` |
+| Symmetry / mirror state | `transform_types.ts:87,246` |
 | Active / highlight element (shader uniforms) | `view3d_draw.ts:302-368` |
+
+**Undo is not on this list, and that is a correction.** An earlier revision put
+"undo push/pop" in the obvious half and gave `calcUndoMem` a row of its own.
+P7's sweep (2026-08-17) found `SceneObjectData` has no undo surface whatsoever:
+geometry undo runs through `ITransDataType.undoPre`/`undo`
+(`transform_ops.ts:284-294`) and, for CustomData edits, through `PropsEditor`'s
+own `saveUndoMesh`/`loadUndoMesh` (`:136,163`); `calcUndoMem` is an
+`ITransDataType` method (`transform_base.ts:121`), budgeted by
+`toolstack.js:7-8,29-41` via `transform_ops.ts:265-294`. A geometry provider
+does not implement undo — it implements enough that the *host* can. This moves
+the capability under (b), where it was always being satisfied.
 
 Anything the host currently learns by `instanceof Mesh` must become a method here
 or a `data_kinds` descriptor field. `SelMask` moves *out* of mesh vocabulary and
@@ -412,14 +422,21 @@ provider claims at registration — subject to the format constraints in §4 W1
 step 1, which are severe.
 
 **(b) `ITransDataType` — the second geometry interface, and it already exists.**
-`scripts/editors/view3d/transform/transform_base.ts:108-141` defines 13 required
-methods; `transform_ops.ts:177` hardcodes the type list `['mesh','object','litemesh']`;
-and `MeshTransType` is **745 lines living in the host** (`transform_types.ts:38-782`).
-Proportional edit, per-element transform, and snapping all run through it. It is
-not a subset of `IGeometrySource` and must be planned as its own surface, with
-its registration moved onto `AddonAPI` (today
-`scripts/lite-mesh/litemesh_transtype.ts:202` is a bare module-scope
-`TransDataType.register(...)`, which this project's own addon rules forbid).
+`scripts/editors/view3d/transform/transform_base.ts:108-141` defines 12 required
+methods (a 13th, `calcPropCurve`, is commented out at `:112`);
+`transform_ops.ts:177` hardcodes the type list `['mesh','object','litemesh']` as
+the `StringSetProperty` default that `getTransTypes` (`:197-213`) then resolves;
+and `MeshTransType` is **743 lines living in the host**
+(`transform_types.ts:38-780`). Proportional edit, per-element transform,
+snapping, **and undo** — `undoPre` / `undo` / `calcUndoMem` — all run through it.
+It is not a subset of `IGeometrySource` and must be planned as its own surface,
+with its registration moved onto `AddonAPI`. There are **four** bare module-scope
+`TransDataType.register(...)` calls today, which this project's own addon rules
+forbid: `transform_types.ts:782` and `:1041`,
+`scripts/editors/view3d/widgets/widget_utils.ts:154`, and
+`scripts/lite-mesh/litemesh_transtype.ts:202`. Note the third — a *widget*
+registers as a trans type, so this registry already holds a non-geometry
+implementor and must not be narrowed to geometry.
 
 **(c) `IUVSource` — the mesh-agnostic UV contract (W4).** See §4 W4.
 
@@ -1297,7 +1314,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P4 | [W2a — hoist the stroke base](./2026-08-15-0315-w2-stroke-base-hoist.md) | W2 §0 | 3 | P1 | **landed** |
 | P5 | [W2b — delete the TS sculpting stack](./2026-08-15-0320-w2-delete-ts-sculpting-stack.md) | W2 §1 | 3 | P4 | **landed** |
 | P6 | [W1a — `SelMask` format migration](./2026-08-15-0325-w1-selmask-format-migration.md) | W1 §1 | 4 | P1 | **landed** |
-| P7 | [W1b — host geometry contract](./2026-08-15-0330-w1-host-geometry-contract.md) | W1 §1, §3(a)(b) | 4 | P6 | **written** |
+| P7 | [W1b — host geometry contract](./2026-08-15-0330-w1-host-geometry-contract.md) | W1 §1, §3(a)(b) | 4 | P6 | **landed** |
 | P8 | [W1c — registry hooks + string-key severing](./2026-08-15-0335-w1-registry-hooks-and-string-key-severing.md) | W1 §0, §2 | 5 | P7 | **written** |
 | P9 | [W1d — layer ratchet to `error`](./2026-08-15-0340-w1-layer-ratchet.md) | W1 §3 | 6 | P8 | **written** |
 | P10 | [Serialization + file-compat hardening](./2026-08-15-0345-serialization-and-file-compat-hardening.md) | W1 §5 (promoted) | 7 | P8 | **written** |
@@ -1540,7 +1557,7 @@ ungrounded input just argues a wrong plan more convincingly.
 > the entire target architecture rests on (§3). P8, P11, P12, P15 and P18 all
 > implement against them; getting the boundary wrong is not a local mistake.
 
-- [ ] **P7 — [W1b: host geometry contract](./2026-08-15-0330-w1-host-geometry-contract.md)** — **`[xhigh]`**
+- [x] **P7 — [W1b: host geometry contract](./2026-08-15-0330-w1-host-geometry-contract.md)** — **`[xhigh]`**
   - Write down §3's four interfaces as real, documented TS:
     `IGeometrySource` (the 14-row capability table), `ITransDataType`,
     `IUVSource` (declared here, implemented in P18), and the `AddonAPI`
@@ -1555,6 +1572,32 @@ ungrounded input just argues a wrong plan more convincingly.
     `scheduleRawGLPass` caveat.
   - Exit: an interface document plus at least two implementors compiling against
     it (LiteMesh and the BREP), with no new host branch on concrete type.
+  - **Landed 2026-08-17.** `documentation/geometry-contract.md` (11 sections)
+    plus five new core modules — `geometry_contract.ts` (vocabulary and optional
+    capabilities, importing nothing but path.ux vector types), `vertex_layout.ts`,
+    `file_formats.ts`, `props_panels.ts`, `uv_sources.ts` — and 28 tests across
+    four suites. Five departures worth carrying forward. **(1)** §2's required
+    surface could not live in `core/`: declaring it there drags `editors/all`,
+    `render/queue`, `findnearest`, `context` and `lib_api` into core, measured at
+    +46 `core-no-addons-transitive` / +27 `no-circular`, so it is declared on
+    `sceneobject_base.ts`, which already imports all of them. **(2)** Nine regen
+    names collapse to **eight**, not nine — `recalcNormals()` is a computation the
+    caller schedules, and folding it into `POSITIONS` would make the per-element
+    site in `applyTransform` O(mesh · n). **(3)** The material vertex layout
+    follows the **material**, not the geometry kind: both compile sites are
+    per-material and shared across kinds, so `vertexAttrs` on a kind descriptor is
+    the provider's declaration of what it always binds, not the pipeline input.
+    **(4)** "No module-scope registration" is an **addon** rule — three of the four
+    transform types are host code with no `register()` hook and stay module-scope
+    with a stated reason; only `MeshTransType` moved, and its class stays in the
+    host until P11. **(5)** `AddonAPI`, `transform_ops.ts` and `transform_base.ts`
+    cannot be imported into a unit suite at all, so their wiring is pinned against
+    source text. `core-no-addons-transitive` 1564 → 1472, total 2277 → 2185, every
+    other counter unmoved. **The lesson worth carrying to P8+:** a hardcoded list
+    hides a crash. Deriving transform's default type set from the registry made an
+    unregistered name reachable and exposed an unchecked `getClass` dereference
+    that had been latent the whole time — every list this refactor replaces should
+    be read as "and what happens when this is empty?"
 
 > **⏸ Pause — compact, then drop back to `high`.** P8 is a call-site sweep
 > against the contract P7 just fixed, and P9 is a ratchet. Both are won by

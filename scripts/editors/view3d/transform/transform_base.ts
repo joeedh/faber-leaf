@@ -170,15 +170,46 @@ export class TransDataType {
     return new StringSetProperty(default_value, def)
   }
 
-  static getClass(name: string): ITransDataType {
+  /** `undefined` when nothing is registered under that name — a saved tool
+   * input can outlive the addon that contributed its type. */
+  static getClass(name: string): ITransDataType | undefined {
     return TransDataMap[name]
+  }
+
+  /**
+   * Every registered type's name, sorted — the default for a transform op's
+   * `types` input. `TransformOp.getTransTypes` filters by `isValid`, so a type
+   * that does not apply to the op in hand costs nothing; a hardcoded list costs
+   * a newly contributed geometry type its transform outright. See
+   * documentation/geometry-contract.md §8.
+   */
+  static defaultTypeNames(): string[] {
+    return TransDataTypes.map((cls) => cls.transformDefine().name).sort()
   }
 
   static register(type: ITransDataType): void {
     const def = type.transformDefine()
 
+    if (TransDataTypes.indexOf(type) >= 0) {
+      return
+    }
+
     TransDataTypes.push(type)
     TransDataMap[def.name] = type
+  }
+
+  /** Counterpart to {@link register}, so an addon that contributes a transform
+   * type can be disabled. See documentation/geometry-contract.md §8. */
+  static unregister(type: ITransDataType): void {
+    const i = TransDataTypes.indexOf(type)
+    if (i >= 0) {
+      TransDataTypes.splice(i, 1)
+    }
+
+    const def = type.transformDefine()
+    if (TransDataMap[def.name] === type) {
+      delete TransDataMap[def.name]
+    }
   }
 
   static calcPropCurve(dis: number, propmode: number, propradius: number): number {

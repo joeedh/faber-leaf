@@ -26,6 +26,8 @@ import {GPUType} from '@sculptcore/api/sculptcore/gpu/GPUType'
 import {GPUCmdType} from '@sculptcore/api/sculptcore/gpu/GPUCmdType'
 import {IWasmInterface} from '@sculptcore/api/api'
 
+import {VertexScalarType, buildVertexBufferLayout, type VertexAttrDesc} from '../core/vertex_layout.js'
+
 import {GpuBuffer, GpuBufferUsage} from './buffer.js'
 import {Pipeline, PipelineCache, type PipelineDescriptor} from './pipeline.js'
 
@@ -59,22 +61,24 @@ function gpuTypeBytes(t: GPUType): number {
   }
 }
 
-function gpuTypeWGSLFormat(t: GPUType, elemsize: number): GPUVertexFormat {
+/** sculptcore's buffer element type in the contract's vertex-fetch vocabulary
+ * (`core/vertex_layout.ts`), which owns the format/stride tables from there. */
+function gpuTypeToVertexScalar(t: GPUType): VertexScalarType {
   switch (t) {
     case GPUType.FLOAT32:
-      return `float32x${Math.max(1, Math.min(elemsize, 4))}` as GPUVertexFormat
+      return VertexScalarType.FLOAT32
     case GPUType.FLOAT16:
-      return (elemsize >= 4 ? 'float16x4' : 'float16x2') as GPUVertexFormat
+      return VertexScalarType.FLOAT16
     case GPUType.UINT8:
-      return (elemsize >= 4 ? 'unorm8x4' : 'unorm8x2') as GPUVertexFormat
+      return VertexScalarType.UNORM8
     case GPUType.UINT16:
-      return (elemsize >= 4 ? 'uint16x4' : 'uint16x2') as GPUVertexFormat
+      return VertexScalarType.UINT16
     case GPUType.UINT32:
-      return `uint32x${Math.max(1, Math.min(elemsize, 4))}` as GPUVertexFormat
+      return VertexScalarType.UINT32
     case GPUType.INT32:
-      return `sint32x${Math.max(1, Math.min(elemsize, 4))}` as GPUVertexFormat
+      return VertexScalarType.SINT32
     default:
-      return 'float32x4'
+      return VertexScalarType.FLOAT32
   }
 }
 
@@ -388,28 +392,27 @@ export class WebGPUBatchExecutor {
     // off the buffer shape lets sculptcore feed vec3 normals into a
     // WGSL `vec4f` declaration without the pipeline rejecting the bind.
     const attrs = Array.from(this.vecMember<{name: string}>(sdef.attrs))
-    const slotShape: Array<{stride: number; format: GPUVertexFormat} | null> = attrs.map((a) => {
+    const slotAttrs: VertexAttrDesc[] = []
+    attrs.forEach((a, slot) => {
       const found = cmdAttrs.find((b) => b.name === a.name)
-      if (!found) return null
-      const elemsize = found.elemsize
-      const stride = elemsize * gpuTypeBytes(found.type)
-      return {stride, format: gpuTypeWGSLFormat(found.type, elemsize)}
+      if (!found) return
+      slotAttrs.push({
+        name: a.name,
+        slot,
+        scalar     : gpuTypeToVertexScalar(found.type),
+        elemSize   : found.elemsize,
+        arrayStride: found.elemsize * gpuTypeBytes(found.type),
+      })
     })
 
-    const shapeKey = slotShape.map((s) => (s ? `${s.format}@${s.stride}` : '_')).join(',')
+    const shapeKey = slotAttrs.map((a) => `${a.slot}:${a.scalar}x${a.elemSize}@${a.arrayStride}`).join(',')
     const targetKey = this.colorTargets.map((t) => t.format).join('+')
     const cacheKey = `${sdefPtr}|${topology}|${shapeKey}|${targetKey}|${this.opts.cullMode ?? 'none'}`
 
     let pipeline = this.pipelinesByShader.get(cacheKey)
     if (pipeline) return pipeline
 
-    const vertexBuffers: Array<GPUVertexBufferLayout | null> = slotShape.map((s, slot) => {
-      if (!s) return null
-      return {
-        arrayStride: s.stride,
-        attributes : [{shaderLocation: slot, offset: 0, format: s.format}],
-      }
-    })
+    const vertexBuffers = buildVertexBufferLayout(slotAttrs)
 
     // Pad pass attachments the fragment doesn't write with writeMask 0 (a
     // nonzero-writeMask target with no shader output fails pipeline creation);

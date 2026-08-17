@@ -19,7 +19,14 @@ import {
   HotKey,
 } from '../path.ux/scripts/pathux'
 import * as pathux from '../path.ux/scripts/pathux'
-import {DataBlock, DataRef, DataRefProperty, DataRefListProperty, IDataBlockConstructor} from '../core/lib_api'
+import {
+  DataBlock,
+  DataRef,
+  DataRefProperty,
+  DataRefListProperty,
+  IDataBlockConstructor,
+  type Library,
+} from '../core/lib_api'
 import {SceneObjectData} from '../sceneobject/sceneobject_base'
 import {
   registerDataAPI,
@@ -55,6 +62,14 @@ import * as graph from '../core/graph'
 import * as graphsockets from '../core/graphsockets'
 import * as sceneobject from '../sceneobject/index'
 import {ViewContext} from '../core/context'
+import type {ToolContext} from '../core/context'
+import {registerDataKind, unregisterDataKind, type IDataKindDescriptor} from '../core/data_kinds'
+import {getDefaultSceneBuilder, setDefaultSceneBuilder, type DefaultSceneBuilder} from '../core/default_file'
+import {registerFileMigrator, unregisterFileMigrator, type IFileMigrator} from '../core/file_migrations'
+import {registerFileFormat, unregisterFileFormat, type IFileFormat} from '../core/file_formats'
+import {registerUVSource, unregisterUVSource, type IUVSourceProvider} from '../core/uv_sources'
+import {registerPropsPanel, unregisterPropsPanel, type IPropsPanel} from '../core/props_panels'
+import {TransDataType, type ITransDataType} from '../editors/view3d/transform/transform_base'
 
 /** is a constructor a subclass of another constructor? */
 export function subclassOf<T>(testCls: unknown, cls2: T): testCls is T {
@@ -227,6 +242,15 @@ export class AddonAPI<T> {
   _graphNodes = new Set<graph.Node['graph_id']>()
 
   /**
+   * Undo thunks for the non-class registries below (data kinds, transform
+   * types, file formats, ...). Every `register*` pushes exactly one;
+   * `unregisterAll` runs them in reverse. Keeping the undo next to the do is
+   * what makes "everything registered here is unregisterable" checkable by
+   * reading one method rather than auditing a dispatcher.
+   */
+  private _undoRegistrations: (() => void)[] = []
+
+  /**
    * Namespaces exported by this addon for other addons to consume. Populated
    * by `api.exportNamespace(name, exports)` from inside the addon's
    * `register()`. Other addons reach these via `api.getAddon(id).exports[name]`
@@ -318,6 +342,79 @@ export class AddonAPI<T> {
   /** Returns another loaded addon's API by manifest id, or undefined. */
   getAddon(id: string): AddonAPI<unknown> | undefined {
     return window._addons?.getAddonAPI(id)
+  }
+
+  /**
+   * Is the addon with this manifest id loaded? An addon that needs an optional
+   * subsystem can hard-depend on it, crash at first use, or ask and degrade;
+   * only the third lets a distribution ship without the subsystem, which is the
+   * point of the layered architecture. See geometry-contract.md §9.
+   */
+  has(id: string): boolean {
+    return this.getAddon(id) !== undefined
+  }
+
+  // -------------------------------------------------------------------------
+  // Non-class registries (documentation/geometry-contract.md §9)
+  //
+  // Each of these pairs a global `register*` with the matching `unregister*`,
+  // because module-scope registration works exactly once and cannot be undone —
+  // an addon that registers at module scope can be loaded but never unloaded.
+  // -------------------------------------------------------------------------
+
+  /**
+   * Declare a data kind: its capabilities, vertex attributes, importer hooks.
+   * This is how a geometry type becomes visible to the host without the host
+   * naming it (`documentation/geometry-contract.md` §2.1).
+   */
+  registerDataKind(desc: IDataKindDescriptor<ToolContext>): void {
+    registerDataKind(desc)
+    this._undoRegistrations.push(() => unregisterDataKind(desc.id))
+  }
+
+  /** Contribute a transform type (§8). Replaces module-scope `TransDataType.register`. */
+  registerTransType(type: ITransDataType): void {
+    TransDataType.register(type)
+    this._undoRegistrations.push(() => TransDataType.unregister(type))
+  }
+
+  /**
+   * Supply the contents of the default scene, so a distribution's startup file
+   * is not hardcoded in core. There is one slot; registering replaces whatever
+   * held it, and unloading restores the previous occupant.
+   */
+  registerDefaultSceneBuilder(fn: DefaultSceneBuilder): void {
+    const prev = getDefaultSceneBuilder()
+    setDefaultSceneBuilder(fn)
+    this._undoRegistrations.push(() => {
+      if (getDefaultSceneBuilder() === fn) {
+        setDefaultSceneBuilder(prev)
+      }
+    })
+  }
+
+  /** Register a per-version file migration owned by this addon's data. */
+  registerFileMigrator(m: IFileMigrator<Library>): void {
+    registerFileMigrator(m)
+    this._undoRegistrations.push(() => unregisterFileMigrator(m.id))
+  }
+
+  /** Register an interchange file format (STL, OBJ, ...). */
+  registerFileFormat(fmt: IFileFormat<ToolContext>): void {
+    registerFileFormat(fmt)
+    this._undoRegistrations.push(() => unregisterFileFormat(fmt.id))
+  }
+
+  /** Register the UV source for a data kind. Declared ahead of its implementors; see §11. */
+  registerUVSource(provider: IUVSourceProvider): void {
+    registerUVSource(provider)
+    this._undoRegistrations.push(() => unregisterUVSource(provider.kindId))
+  }
+
+  /** Contribute a properties-editor panel, instead of the host branching on type. */
+  registerPropsPanel(panel: IPropsPanel<ToolContext>): void {
+    registerPropsPanel(panel)
+    this._undoRegistrations.push(() => unregisterPropsPanel(panel.id))
   }
 
   get argv() {
@@ -575,6 +672,17 @@ export class AddonAPI<T> {
       }
     }
 
+    // Reverse order, so a slot-style registration (the default-scene builder)
+    // unwinds to whatever held it before this addon did.
+    for (const undo of this._undoRegistrations.reverse()) {
+      try {
+        undo()
+      } catch (error) {
+        console.error('Failed to unregister an addon contribution', error)
+      }
+    }
+
+    this._undoRegistrations = []
     this.classes = new AddonClasses()
     this.menuContributions = {}
     return this

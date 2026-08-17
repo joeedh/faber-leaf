@@ -1,6 +1,7 @@
 import {isect_ray_plane, Matrix4, ToolOp, Vector2, Vector3, Vector4} from '../../../path.ux/scripts/pathux.js'
 import {castViewRay} from '../findnearest.js'
 import {SelMask} from '../../../core/select_types.js'
+import {InvalidationKind} from '../../../core/geometry_contract.js'
 import {SnapModes, TransformOp} from './transform_ops.js'
 import {MeshFlags, MeshTypes} from '../../../../addons/builtin/mesh/src/mesh_base.js'
 import {Edge, Face, Vertex} from '../../../../addons/builtin/mesh/src/mesh_types.js'
@@ -272,9 +273,7 @@ export class InsetTransformOp extends TransformOp {
       }
     }
 
-    mesh.regenTessellation()
-    mesh.regenRender()
-    mesh.regenBVH()
+    mesh.invalidate(InvalidationKind.TOPOLOGY)
     window.redraw_viewport(true)
   }
 

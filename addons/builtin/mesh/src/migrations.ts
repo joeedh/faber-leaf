@@ -11,7 +11,7 @@
  */
 
 import {registerFileMigrator} from '@framework/api'
-import type {Library} from '@framework/api'
+import type {IFileMigrator, Library} from '@framework/api'
 import {GridBase} from './mesh_grids.js'
 
 function forEachGriddedMesh(
@@ -30,7 +30,7 @@ function forEachGriddedMesh(
   }
 }
 
-registerFileMigrator({
+const flagNormalsUpdate: IFileMigrator<Library> = {
   id         : 'mesh.grid.v5.flagNormalsUpdate',
   fromVersion: 4,
   apply: ({datalib}) => {
@@ -41,9 +41,9 @@ registerFileMigrator({
       }
     })
   },
-})
+}
 
-registerFileMigrator({
+const flagIdsRegen: IFileMigrator<Library> = {
   id         : 'mesh.grid.v6.flagIdsRegen',
   fromVersion: 5,
   apply: ({datalib}) => {
@@ -54,4 +54,7 @@ registerFileMigrator({
       }
     })
   },
-})
+}
+
+registerFileMigrator(flagNormalsUpdate)
+registerFileMigrator(flagIdsRegen)

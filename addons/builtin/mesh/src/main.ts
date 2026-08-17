@@ -14,7 +14,15 @@
  */
 
 import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
-import {SelMask, setInsetHoleOp, setShapesObjLoader} from '@framework/api'
+import {
+  GeometryCapability,
+  MATERIAL_BASE_VERTEX_ATTRS,
+  MeshTransType,
+  SelMask,
+  VertexScalarType,
+  setInsetHoleOp,
+  setShapesObjLoader,
+} from '@framework/api'
 import {ALL_MESH_REGISTRATIONS} from './register_classes.js'
 import * as mesh from './mesh.js'
 import {setMeshTools} from './mesh.js'
@@ -120,6 +128,27 @@ export function register(api: AddonAPI<IAddon>) {
   api.exportNamespace('unwrapping', {...unwrapping})
 
   api.registerAll(...ALL_MESH_REGISTRATIONS)
+
+  api.registerDataKind({
+    id          : 'mesh',
+    uiName      : 'Mesh',
+    factory     : mesh.Mesh,
+    usesMaterial: true,
+    capabilities: [GeometryCapability.INVALIDATION],
+    // SimpleIsland uploads one buffer per LayerType at the canonical slots
+    // (WGSL_VERTEX_SLOTS) regardless of what the material reads; see
+    // documentation/geometry-contract.md §10.
+    vertexAttrs: [
+      ...MATERIAL_BASE_VERTEX_ATTRS,
+      {name: 'uv', slot: 2, scalar: VertexScalarType.FLOAT32, elemSize: 2},
+      {name: 'color', slot: 3, scalar: VertexScalarType.FLOAT32, elemSize: 4},
+    ],
+  })
+
+  // The mesh's transform bridge (§8). The class still lives in host code —
+  // P11 moves it here alongside the geometry it transforms — but the
+  // registration is the addon's, so disabling the addon takes it with it.
+  api.registerTransType(MeshTransType)
 }
 
 export function unregister() {}

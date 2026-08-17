@@ -10,18 +10,20 @@
  * Migrators run in ascending `fromVersion` order. Each migrator is responsible
  * for inspecting the load context, mutating in place, and stopping cleanly if
  * the data it cares about isn't present (e.g. the mesh addon is disabled).
+ *
+ * `Lib` is the datalib, left generic so this module imports nothing: a registry
+ * on the host's import graph puts every core module that reads it there too.
+ * `AddonAPI` binds it to the real `Library`.
  */
 
-import type {Library} from './lib_api'
-
 /** Context passed to every migrator. */
-export interface IFileMigrationContext {
+export interface IFileMigrationContext<Lib = unknown> {
   fromVersion: number
   toVersion: number
-  datalib: Library
+  datalib: Lib
 }
 
-export interface IFileMigrator {
+export interface IFileMigrator<Lib = unknown> {
   /** Stable id, used for logging and de-duping. */
   id: string
 
@@ -29,7 +31,7 @@ export interface IFileMigrator {
   fromVersion: number
 
   /** Apply the migration. Should be idempotent if possible. */
-  apply(ctx: IFileMigrationContext): void
+  apply(ctx: IFileMigrationContext<Lib>): void
 }
 
 const _migrators: IFileMigrator[] = []

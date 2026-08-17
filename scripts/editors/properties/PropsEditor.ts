@@ -36,6 +36,7 @@ import {CDFlags} from '../../../addons/builtin/mesh/src/customdata'
 import {loadUndoMesh, saveUndoMesh} from '../../../addons/builtin/mesh/src/mesh_ops_base'
 import type {ToolContext, ViewContext} from '../../core/context'
 import messageBus from '../../core/bus'
+import {InvalidationKind} from '../../core/geometry_contract'
 import {FeatureFlagManager} from '../../core/feature-flag'
 import {ToolMode} from '../view3d/view3d_toolmode'
 import {SceneObject} from '../../sceneobject/sceneobject'
@@ -163,7 +164,6 @@ export class ChangeActCDLayerOp<
       const mesh2 = loadUndoMesh(ctx, undo.data!)
 
       mesh.swapDataBlockContents(mesh2)
-      mesh.regenElementsDraw()
 
       for (const v of mesh.verts) {
         v.flag |= MeshFlags.UPDATE
@@ -186,9 +186,7 @@ export class ChangeActCDLayerOp<
       }
     }
 
-    mesh.regenBVH()
-    mesh.regenUVEditor()
-    mesh.regenAll()
+    mesh.invalidate(InvalidationKind.ALL)
 
     //force immediate execution of dependency graph
     //so disp layers are properly handled
@@ -232,9 +230,7 @@ export class ChangeActCDLayerOp<
       }
     }
 
-    mesh.regenAll()
-    mesh.regenBVH()
-    mesh.regenUVEditor()
+    mesh.invalidate(InvalidationKind.ALL)
 
     mesh.graphUpdate()
     window.updateDataGraph(true) //force immediate execution of data graph

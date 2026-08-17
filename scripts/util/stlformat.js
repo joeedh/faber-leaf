@@ -1,4 +1,6 @@
 import {BinaryWriter} from './binarylib.js'
+import {invalidatableOf} from '../core/data_kinds.js'
+import {InvalidationKind} from '../core/geometry_contract.js'
 
 export function exportSTLMesh(meshes) {
   let tottri = 0
@@ -7,7 +9,7 @@ export function exportSTLMesh(meshes) {
     if (mesh.bvh) {
       //might be in sculpt mode, in which case tesselation may not be
       //fully up to date
-      mesh.regenTessellation()
+      invalidatableOf(mesh)?.invalidate(InvalidationKind.TOPOLOGY)
     }
 
     let ltris = mesh.loopTris

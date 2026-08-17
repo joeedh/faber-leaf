@@ -14,22 +14,30 @@
     "P6 (W1a) moved SelMask out of editors/view3d/selectmode.ts into",
     "core/select_types.ts, so the ~30 modules that only wanted the mask no longer",
     "pull in a view3d editor module: no-circular 713 -> 673, core-no-addons",
-    "25 -> 24."
+    "25 -> 24.",
+    "",
+    "P7 (W1b) made core/data_kinds.ts a leaf -- it now imports only",
+    "core/geometry_contract.ts, with a generic Ctx in place of ToolContext and",
+    "GeometryDataRef in place of SceneObjectData -- so the registry no longer",
+    "reaches an addon through core/context: core-no-addons-transitive",
+    "1564 -> 1472. The four registries AddonAPI gained in the same step",
+    "(file_formats, props_panels, uv_sources, file_migrations) follow the same",
+    "rule and cost nothing."
   ],
-  "measured": "2026-08-16",
+  "measured": "2026-08-17",
   "config": ".dependency-cruiser.cjs",
   "roots": [
     "scripts",
     "addons"
   ],
-  "total": 2277,
+  "total": 2185,
   "rules": {
     "core-no-mesh": 2,
     "core-no-view3d-tools": 0,
     "util-no-mesh": 0,
     "core-no-addons": 24,
     "core-no-addons-typeonly": 14,
-    "core-no-addons-transitive": 1564,
+    "core-no-addons-transitive": 1472,
     "core-no-litemesh": 0,
     "core-no-sculptcore": 0,
     "no-circular": 673

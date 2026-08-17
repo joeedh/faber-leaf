@@ -9,6 +9,9 @@ import {
   ITransDataType,
 } from './transform_base.js'
 import {MeshTransType, MeshTransVert} from './transform_types.js'
+// Re-exported so `@framework/api` can hand the mesh addon its transform type
+// without the hub taking a direct edge on transform_types.js (§8).
+export {MeshTransType} from './transform_types.js'
 import {
   ToolOp,
   UndoFlags,
@@ -30,6 +33,7 @@ import {
   ToolDef,
 } from '../../../path.ux/scripts/pathux.js'
 import {SelMask} from '../../../core/select_types.js'
+import {InvalidationKind} from '../../../core/geometry_contract.js'
 import {Vector2, Vector3, EulerOrders, Vector4, Quat, Matrix4} from '../../../util/vectormath.js'
 import {View3DOp} from '../view3d_ops.js'
 import {isect_ray_plane} from '../../../path.ux/scripts/util/math.js'
@@ -174,7 +178,7 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
       is_modal: true,
 
       inputs: {
-        types           : TransDataType.buildTypesProp(['mesh', 'object', 'litemesh']).private(),
+        types           : TransDataType.buildTypesProp(TransDataType.defaultTypeNames()).private(),
         value           : new Vec3Property(),
         space           : new Mat4Property().private(),
         snapMode        : new EnumProperty(SnapModes.NONE, SnapModes),
@@ -200,10 +204,12 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
     }
 
     this._types = []
-    for (let type of this.inputs.types.getValue()) {
-      type = TransDataType.getClass(type)
+    for (const name of this.inputs.types.getValue()) {
+      // A name can outlive its type: it is saved in the op's inputs, and the
+      // addon that contributed the type can be disabled between runs (§8).
+      const type = TransDataType.getClass(name)
 
-      if (!type.isValid(ctx, this)) {
+      if (!type || !type.isValid(ctx, this)) {
         continue
       }
       this._types.push(type)
@@ -361,7 +367,7 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
     ctx.clearModalFlag(ModalFlags.TRANSFORMING)
 
     for (const ob of ctx.selectedMeshObjects) {
-      ;(ob.data as Mesh).regenRender()
+      ;(ob.data as Mesh).invalidate(InvalidationKind.POSITIONS)
     }
 
     return super.modalEnd(was_canceled)
@@ -1747,7 +1753,7 @@ export class InflateOp<Inputs extends PropertySlots = {}, Outputs extends Proper
 
         mtd.data1.co.load(mtd.data2).addFac(mtd.no, factor)
         mtd.data1.flag |= MeshFlags.UPDATE
-        mtd.mesh!.regenRender()
+        mtd.mesh!.invalidate(InvalidationKind.POSITIONS)
       }
     }
 
@@ -1941,7 +1947,7 @@ export class ToSphereOp<Inputs extends PropertySlots = {}, Outputs extends Prope
 
         mtd.data1.co.load(mtd.data2).interp(co, factor)
         mtd.data1.flag |= MeshFlags.UPDATE
-        mtd.mesh!.regenRender()
+        mtd.mesh!.invalidate(InvalidationKind.POSITIONS)
       }
     }
 

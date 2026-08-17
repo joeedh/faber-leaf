@@ -199,4 +199,6 @@ export const LiteMeshTransType: ITransDataType<number, Vector3, LiteMeshTransEle
   },
 }
 
+// Still module-scope: LiteMesh is host code and has no `register(api)` hook.
+// P12 moves it into an addon, and this registration goes with it (§8).
 TransDataType.register(LiteMeshTransType)

@@ -13,6 +13,8 @@ import type {ToolContext, ViewContext} from '../core/context'
 import type {SceneObject} from './sceneobject'
 import type {View3D} from '../editors/all'
 import type {DrawQueue, FrameContext} from '../render/queue'
+import {resolveKindId} from '../core/geometry_contract'
+import type {AssertExtends} from '../core/geometry_contract'
 
 /** Empty area-pick result (no elements). */
 function emptyPickResult(): ScreenPickResult {
@@ -426,20 +428,121 @@ SceneObjectData {
    * the concrete data classes that live in mesh/light/etc. addons.
    */
   static dataKindOf(data: SceneObjectData | undefined): string | undefined {
-    if (!data) return undefined
-    const ctor = data.constructor as unknown as {
-      dataDefine?: () => IDataDefine
-      _cachedDataKind?: string
-    }
-    if (typeof ctor._cachedDataKind === 'string') return ctor._cachedDataKind
-    if (typeof ctor.dataDefine !== 'function') return undefined
-    const def = ctor.dataDefine()
-    const kind = def.dataKind ?? (def.name ? def.name.toLowerCase() : undefined)
-    ctor._cachedDataKind = kind
-    return kind
+    return resolveKindId(data)
   }
 
   static buildPropertiesTab(container: Container<ViewContext>) {
     container.label('Object Data Properties')
   }
 }
+
+// ---------------------------------------------------------------------------
+// The host geometry contract, required surface (documentation/geometry-contract.md §2)
+//
+// These interfaces live here rather than in `core/geometry_contract.ts` because
+// they are the only half of the contract that must name host types — a viewport,
+// a draw queue, a pick result. That file imports nothing, deliberately; this one
+// already imports all of it to declare the class below.
+// ---------------------------------------------------------------------------
+
+/**
+ * The per-instance surface the host calls every frame and every edit (§2.2).
+ *
+ * Undo is deliberately absent: a provider does not manage history. The host's
+ * undo runs through `ITransDataType` and through editor-owned snapshots.
+ */
+export interface IGeometryInstance {
+  /** World-space AABB. A conservative box is acceptable; a wrong one is not. */
+  getBoundingBox(): [Vector3, Vector3]
+
+  /** Bake a matrix into the provider's own coordinates. */
+  applyMatrix(matrix?: Matrix4): unknown
+
+  /** This instance's own `SelMask` bits (see `core/select_types.ts`). */
+  _ownSelectMask(): number
+
+  drawQ(view3d: View3D, queue: DrawQueue, frame: FrameContext, object: SceneObject): void
+  drawWireframeQ(view3d: View3D, queue: DrawQueue, frame: FrameContext, object: SceneObject): void
+  drawOutlineQ(view3d: View3D, queue: DrawQueue, frame: FrameContext, object: SceneObject): void
+  drawIdsQ(view3d: View3D, queue: DrawQueue, frame: FrameContext, selectMask: number, object: SceneObject): void
+
+  castViewRay(
+    ctx: ViewContext,
+    view3d: View3D,
+    object: SceneObject,
+    selectMask: number,
+    mpos: Vector2
+  ): FindNearestRet[] | undefined
+
+  findNearest(
+    ctx: ViewContext,
+    view3d: View3D,
+    object: SceneObject,
+    selectMask: number,
+    mpos: Vector2,
+    limit?: number
+  ): FindNearestRet[] | undefined
+
+  castScreenCircle(
+    ctx: ViewContext,
+    view3d: View3D,
+    object: SceneObject,
+    selectMask: number,
+    mpos: Vector2,
+    radius: number
+  ): ScreenPickResult
+
+  castScreenRect(
+    ctx: ViewContext,
+    view3d: View3D,
+    object: SceneObject,
+    selectMask: number,
+    min: Vector2,
+    max: Vector2
+  ): ScreenPickResult
+}
+
+/**
+ * Datablock lifecycle (§2.3). Mostly inherited; a provider overrides only where
+ * it holds resources the base class cannot see. `onContextLost` is the one whose
+ * absence stays invisible until a device reset.
+ */
+export interface IGeometryLifecycle {
+  copy(addLibUsers?: boolean): unknown
+  copyAddUsers(): unknown
+  dataLink(getblock: BlockLoader, getblock_addUser: BlockLoaderAddUser): void
+  onContextLost(e: Event): void
+}
+
+/** Graph participation (§2.4). `graphUpdate` is separate from invalidation. */
+export interface IGeometryGraphNode {
+  exec(ctx: ToolContext): void
+}
+
+/**
+ * The required instance surface: what a provider must implement to be a
+ * first-class scene citizen. Everything beyond this is opt-in.
+ */
+export type IGeometrySource = IGeometryInstance & IGeometryLifecycle & IGeometryGraphNode
+
+/**
+ * Self-description (§2.5) — how a provider contributes UI and data-API paths
+ * without the host knowing it exists. These are statics, so they live on the
+ * constructor rather than the instance.
+ */
+export interface IGeometrySourceStatics {
+  defineAPI(api: DataAPI, struct?: DataStruct): DataStruct
+  getTools(): unknown
+  buildPropertiesTab(container: Container<ViewContext>): void
+}
+
+/** {@link IGeometrySourceStatics} plus constructibility, for a concrete kind. */
+export interface IGeometrySourceConstructor extends IGeometrySourceStatics {
+  new (): IGeometrySource
+}
+
+// The required surface was derived from the class above, so every subclass
+// conforms for free. These assertions catch drift in either direction — a base
+// method that changes shape, or a contract clause no provider supplies.
+export type _SceneObjectDataIsGeometrySource = AssertExtends<SceneObjectData, IGeometrySource>
+export type _SceneObjectDataStatics = AssertExtends<typeof SceneObjectData, IGeometrySourceStatics>

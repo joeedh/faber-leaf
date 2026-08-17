@@ -21,7 +21,12 @@ import type {Pipeline} from '../webgpu/pipeline.js'
 import {GpuBuffer} from '../webgpu/buffer.js'
 import {GpuTexture, createSampler} from '../webgpu/texture.js'
 import {TextureUsage} from '../webgpu/flags.js'
-import {buildMaterialPipelineDescriptor, buildPipelineDescriptor, lookupWgslShader} from '../shaders/wgsl_shaders.js'
+import {
+  buildMaterialPipelineDescriptor,
+  buildMaterialVertexLayout,
+  buildPipelineDescriptor,
+  lookupWgslShader,
+} from '../shaders/wgsl_shaders.js'
 import {LightGenWgsl, type IRenderLights} from '../shadernodes/shader_lib_wgsl.js'
 import {getActiveWebGpuViewport, ensureCanvasDepth} from '../editors/view3d/view3d_draw_webgpu.js'
 import * as bluenoise from '../shadernodes/bluenoise_mask.js'
@@ -705,7 +710,11 @@ export class RealtimeEngine extends RenderEngine {
       return undefined
     }
 
-    const desc = buildMaterialPipelineDescriptor(def.wgsl, `engine-material-${mat.lib_id}`)
+    const desc = buildMaterialPipelineDescriptor(
+      def.wgsl,
+      `engine-material-${mat.lib_id}`,
+      buildMaterialVertexLayout(def.requestedAttrs)
+    )
     // BasePass target is rgba16float — rewrite the registry's default
     // bgra8unorm color target so the pipeline matches our RenderTarget.
     // When SSS is on the fragment emits a 2-location FsOut (lit color + SSS

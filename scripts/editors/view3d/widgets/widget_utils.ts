@@ -151,6 +151,8 @@ export class TransMovWidget extends TransDataType {
 
   static update(ctx, elemlist) {}
 }
+// Host-owned: this is the widget-drag pseudo-type, not a geometry kind, and
+// `isValid` keeps it out of ordinary transform ops (§8).
 TransDataType.register(TransMovWidget)
 
 export class MovWidgetTranslateOp extends TranslateOp {

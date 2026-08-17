@@ -4,6 +4,7 @@ import {keymap} from '../../../path.ux/scripts/util/simple_events.js'
 import {MeshFlags, MeshTypes} from '../../../../addons/builtin/mesh/src/mesh_base.js'
 import type {Mesh, Vertex, Face} from '../../../../addons/builtin/mesh/src/mesh.js'
 import {SelMask} from '../../../core/select_types.js'
+import {InvalidationKind} from '../../../core/geometry_contract.js'
 import {SceneObject, ObjectFlags} from '../../../sceneobject/sceneobject.js'
 import {PropModes, TransDataType, TransDataElem, TransDataList, ITransDataType} from './transform_base.js'
 import * as util from '../../../util/util.js'
@@ -364,7 +365,7 @@ export const MeshTransType: ITransDataType<Vertex, Vector3, MeshTransVert> = {
   ): void {
     const td = elem as MeshTransVert
 
-    td.mesh!.regenBVH()
+    td.mesh!.invalidate(InvalidationKind.POSITIONS)
     td.mesh!.graphUpdate()
 
     const v = td.data1
@@ -495,10 +496,7 @@ export const MeshTransType: ITransDataType<Vertex, Vector3, MeshTransVert> = {
       f.flag |= MeshFlags.UPDATE
     }
 
-    mesh.regenRender()
-    if (mesh.haveNgons) {
-      mesh.regenTessellation()
-    }
+    mesh.invalidate(mesh.haveNgons ? InvalidationKind.TOPOLOGY : InvalidationKind.POSITIONS)
   },
 
   getCenter(
@@ -663,13 +661,15 @@ export const MeshTransType: ITransDataType<Vertex, Vector3, MeshTransVert> = {
     const mesh = ctx.mesh!
 
     if (mesh.haveNgons) {
-      mesh.regenTessellation()
+      mesh.invalidate(InvalidationKind.TOPOLOGY)
     }
 
     if (elemlist === undefined) {
+      // recalcNormals stays an explicit call: normals are a computation whose
+      // O(mesh) cost the caller schedules, not an invalidation. See
+      // documentation/geometry-contract.md §5.
       mesh.recalcNormals()
-      mesh.regenElementsDraw()
-      mesh.regenRender()
+      mesh.invalidate(InvalidationKind.POSITIONS)
       mesh.graphUpdate()
 
       return
@@ -712,8 +712,7 @@ export const MeshTransType: ITransDataType<Vertex, Vector3, MeshTransVert> = {
       mesh.flagElemUpdate(v)
     }
 
-    mesh.regenElementsDraw()
-    mesh.regenRender()
+    mesh.invalidate(InvalidationKind.POSITIONS)
     mesh.outputs.depend.graphUpdate()
     return /*
 
@@ -779,7 +778,10 @@ export const MeshTransType: ITransDataType<Vertex, Vector3, MeshTransVert> = {
   },
 }
 
-TransDataType.register(MeshTransType)
+// MeshTransType is registered by the mesh addon's `register()` hook
+// (addons/builtin/mesh/src/main.ts), not here — see
+// documentation/geometry-contract.md §8. The type itself still lives in host
+// code; P11 moves it into the addon alongside the geometry it transforms.
 
 export class ObjectTransform {
   invmatrix: Matrix4
@@ -1038,4 +1040,6 @@ export const ObjectTransType: ITransDataType<
   },
 }
 
+// Host-owned and unconditional: SceneObject is core, not addon geometry, so
+// there is no `register(api)` hook to move this to (§8).
 TransDataType.register(ObjectTransType)

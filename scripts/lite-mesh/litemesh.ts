@@ -33,6 +33,11 @@ import {GenericIsect} from '../util/spatial'
 import type {SculptCorePaintMode} from '../editors/view3d/tools/sculptcore'
 import type {DrawQueue, FrameContext} from '../render/queue'
 import {isWebGPU} from '../core/renderer_flag'
+import type {AssertExtends, IInvalidatable} from '../core/geometry_contract'
+import {GeometryCapability, InvalidationKind} from '../core/geometry_contract'
+import {registerDataKind} from '../core/data_kinds'
+import {MATERIAL_BASE_VERTEX_ATTRS} from '../core/vertex_layout'
+import type {IGeometrySource} from '../sceneobject/sceneobject_base'
 import {getSerializeCacheMode, getDeferredBlobCollector, getDeferredBlobResolver} from '../core/serialize_cache'
 import {FeatureFlags} from '../core/feature-flag'
 import {makeBlobPlaceholder, readBlobPlaceholder} from '../core/autosave_format'
@@ -4412,6 +4417,36 @@ export class LiteMesh extends SceneObjectData {
     })
   }
 
+  /**
+   * The invalidation protocol — documentation/geometry-contract.md §5. Almost
+   * everything a LiteMesh draws is derived lazily inside the engine, so only
+   * the bounds cache needs flagging; the empty `regen*` methods below are kept
+   * so the mapping stays visible rather than becoming an unexplained gap.
+   *
+   * `range` is deliberately not taken: the engine's per-vertex GPU flagging
+   * (`markVertsMovedGPU`) consumes a bound handle vector, and rebuilding one
+   * from an `Int32Array` on every call would cost more than it saves.
+   */
+  invalidate(what: InvalidationKind): void {
+    if (what & (InvalidationKind.TOPOLOGY | InvalidationKind.POSITIONS)) {
+      this.regenBounds()
+    }
+
+    if (what & InvalidationKind.TOPOLOGY) {
+      this.regenTessellation()
+    }
+
+    const redraws =
+      InvalidationKind.TOPOLOGY | InvalidationKind.POSITIONS | InvalidationKind.ATTRIBUTES | InvalidationKind.MATERIALS
+    if (what & redraws) {
+      this.regenRender()
+    }
+
+    if (what & InvalidationKind.SELECTION) {
+      this.regenElementsDraw()
+    }
+  }
+
   regenRender() {
     //
   }
@@ -4424,3 +4459,20 @@ export class LiteMesh extends SceneObjectData {
 DataBlock.register(LiteMesh)
 SceneObjectData.register(LiteMesh)
 registerDataAPI(LiteMesh)
+
+// LiteMesh is still host code, so its kind descriptor is registered here rather
+// than through an addon's `register()` hook. P11/P12 move it.
+registerDataKind({
+  id          : 'litemesh',
+  uiName      : 'Lite Mesh',
+  usesMaterial: true,
+  capabilities: [GeometryCapability.INVALIDATION],
+  // The always-present set. Everything a material asks for beyond this is
+  // built per-material by `setRequestedAttrs`, at the slot the generator
+  // assigned — see documentation/geometry-contract.md §10.
+  vertexAttrs : MATERIAL_BASE_VERTEX_ATTRS,
+})
+
+/** Conformance to the host geometry contract; see documentation/geometry-contract.md §2. */
+export type _LiteMeshIsGeometrySource = AssertExtends<LiteMesh, IGeometrySource>
+export type _LiteMeshIsInvalidatable = AssertExtends<LiteMesh, IInvalidatable>

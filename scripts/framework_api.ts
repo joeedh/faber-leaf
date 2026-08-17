@@ -65,6 +65,47 @@ export type {INumberList} from './util/polyfill.d'
 export {DataBlock, DataRef, DataRefProperty, DataRefListProperty} from './core/lib_api.js'
 export type {Library, IDataBlockConstructor, BlockLoader, BlockLoaderAddUser} from './core/lib_api.js'
 
+// The host geometry contract (documentation/geometry-contract.md). Enums are
+// runtime values; everything else is types. Providers assert conformance with
+// `AssertExtends` next to their class declaration.
+export {
+  AttrType,
+  ELEMENT_DOMAIN_COUNT,
+  ElementDomain,
+  GeometryCapability,
+  InvalidationKind,
+  hasCapability,
+} from './core/geometry_contract.js'
+export type {
+  AssertExtends,
+  ElementHandle,
+  ElementHandles,
+  GeometryDataRef,
+  IActiveElementSource,
+  IAttributeLayerInfo,
+  IAttributeSource,
+  IDeclaredAttribute,
+  IElementSource,
+  IGeometryKindCapabilities,
+  IInvalidatable,
+  ISpatialQueryable,
+  ISymmetryAware,
+  ITriangleSource,
+} from './core/geometry_contract.js'
+// The vertex-layout half of the same contract (§10).
+export {
+  MATERIAL_BASE_VERTEX_ATTRS,
+  VertexScalarType,
+  buildVertexBufferLayout,
+  vertexFormatFor,
+  vertexShapeForAttrType,
+  vertexStrideFor,
+} from './core/vertex_layout.js'
+export type {VertexAttrDesc, VertexAttrShape} from './core/vertex_layout.js'
+// `core/data_kinds.ts` is deliberately NOT re-exported here: it reaches
+// `core/context.ts`, and the hub is on context's own import path, so a re-export
+// closes a cycle. Addons register a kind through `AddonAPI.registerDataKind`.
+
 // sceneobject/* and View3DOp — MUST be re-exported BEFORE context.ts.
 // context.ts pulls in editors/all → editors/view3d → tools/tools.ts →
 // the toolmode modules → mesh.ts (and PropsEditor → mesh_ops_base.ts). Any
@@ -75,7 +116,15 @@ export type {Library, IDataBlockConstructor, BlockLoader, BlockLoaderAddUser} fr
 export {SceneObject, ObjectFlags, Colors, composeObjectMatrix} from './sceneobject/sceneobject.js'
 export {DrawModes, DrawFlags} from './sceneobject/drawmode.js'
 export {SceneObjectData} from './sceneobject/sceneobject_base.js'
-export type {IDataDefine} from './sceneobject/sceneobject_base.js'
+export type {
+  IDataDefine,
+  IGeometryGraphNode,
+  IGeometryInstance,
+  IGeometryLifecycle,
+  IGeometrySource,
+  IGeometrySourceConstructor,
+  IGeometrySourceStatics,
+} from './sceneobject/sceneobject_base.js'
 export {StandardTools} from './sceneobject/stdtools.js'
 export {View3DOp} from './editors/view3d/view3d_ops.js'
 
@@ -100,6 +149,7 @@ export {default as bus} from './core/bus.js'
 export {EDGE_LINKED_LISTS} from './core/const.js'
 export {registerOpaqueCustomDataElem} from './core/missing_addon.js'
 export {registerFileMigrator} from './core/file_migrations.js'
+export type {IFileMigrationContext, IFileMigrator} from './core/file_migrations.js'
 export {setDefaultSceneBuilder} from './core/default_file.js'
 export * as platform from './core/platform.js'
 
@@ -127,7 +177,11 @@ export {PaintToolModeBase} from './editors/view3d/tools/stroke_base.js'
 export {SelMask, SelOneToolModes, SelToolModes} from './core/select_types.js'
 export {FindNearest, FindNearestRet, castViewRay, CastModes} from './editors/view3d/findnearest.js'
 export type {ScreenPickResult} from './editors/view3d/findnearest.js'
-export {InflateOp, TranslateOp, TransformOp} from './editors/view3d/transform/transform_ops.js'
+// MeshTransType rides transform_ops.js rather than transform_types.js: the hub
+// already depends on the former, and a direct edge to the latter closes four
+// more cycles through the mesh addon it imports. The type is the BREP mesh's
+// transform bridge — its own addon registers it (§8), and P11 moves the class.
+export {InflateOp, MeshTransType, TranslateOp, TransformOp} from './editors/view3d/transform/transform_ops.js'
 export {
   InflateWidget,
   RotateWidget,
