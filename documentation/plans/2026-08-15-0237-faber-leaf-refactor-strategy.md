@@ -1296,7 +1296,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P3 | [LeafMesh core — storage, attrs, topo, CDT](./2026-08-15-0310-leafmesh-core-storage-topo-cdt.md) | risk mitigation | 0 | — | **landed** |
 | P4 | [W2a — hoist the stroke base](./2026-08-15-0315-w2-stroke-base-hoist.md) | W2 §0 | 3 | P1 | **landed** |
 | P5 | [W2b — delete the TS sculpting stack](./2026-08-15-0320-w2-delete-ts-sculpting-stack.md) | W2 §1 | 3 | P4 | **landed** |
-| P6 | [W1a — `SelMask` format migration](./2026-08-15-0325-w1-selmask-format-migration.md) | W1 §1 | 4 | P1 | **written** |
+| P6 | [W1a — `SelMask` format migration](./2026-08-15-0325-w1-selmask-format-migration.md) | W1 §1 | 4 | P1 | **landed** |
 | P7 | [W1b — host geometry contract](./2026-08-15-0330-w1-host-geometry-contract.md) | W1 §1, §3(a)(b) | 4 | P6 | **written** |
 | P8 | [W1c — registry hooks + string-key severing](./2026-08-15-0335-w1-registry-hooks-and-string-key-severing.md) | W1 §0, §2 | 5 | P7 | **written** |
 | P9 | [W1d — layer ratchet to `error`](./2026-08-15-0340-w1-layer-ratchet.md) | W1 §3 | 6 | P8 | **written** |
@@ -1505,7 +1505,7 @@ ungrounded input just argues a wrong plan more convincingly.
     cannot see a toolpath string — sweep `'<namespace>\.[a-z_]+'` across the
     survivors before any delete of a file that registers ToolOps.
 
-- [ ] **P6 — [W1a: `SelMask` format migration](./2026-08-15-0325-w1-selmask-format-migration.md)**
+- [x] **P6 — [W1a: `SelMask` format migration](./2026-08-15-0325-w1-selmask-format-migration.md)**
   - This is a **file-format change**, not a refactor. `SelMask` is
     `MeshTypes` — the same bits are persisted as raw ints in `scene.ts:350`
     (`ToolMode.selectMask`), `view3d_toolmode.ts:549`, and `boxmodel.ts:31-43`,
@@ -1521,6 +1521,20 @@ ungrounded input just argues a wrong plan more convincingly.
     `scripts/lite-mesh/litemesh_base.ts:1`.
   - Exit: `grep -r "addons/builtin/mesh" scripts/lite-mesh/` returns nothing,
     **and** a pre-migration `.wproj` opens with its selection mode intact.
+  - **Landed 2026-08-16** (`a6d4cf78`). Three persisted fields, not two:
+    `boxmodel.ts` also carries `storedSelectMask` through `ToolMode.STRUCT`.
+    Nine keymap literals, not six. `selectmode.ts` was `git mv`'d whole (34
+    importers re-pointed, no shim). Two departures from the plan: `getStdTools`
+    needed a **popcount** test rather than a bare `&`-test — a scene mask may
+    name exactly one object type (tetmesh does) and must still route to that
+    type's tools — and the name form required a `FlagProperty.parseArg`
+    override upstream, since `EnumPropertyBase.parseArg` resolves only a single
+    key. Step 4's "allocation must be stable across runs" requirement was
+    **dropped**: step 2 covers every persisted path, so numeric object bits are
+    in-memory only. `no-circular` 713 → 673, `core-no-addons` 25 → 24, total
+    2318 → 2277. **The lesson worth carrying to P7+:** a bit layout that is
+    read back from disk is an API — freezing it in writing costs one comment
+    block and is what let the object half become a registry at all.
 
 > **⏸ Pause — compact, then switch to `xhigh`.** P7 writes the four interfaces
 > the entire target architecture rests on (§3). P8, P11, P12, P15 and P18 all
