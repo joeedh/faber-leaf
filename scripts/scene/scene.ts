@@ -16,7 +16,7 @@ import {
 import {ObjectFlags, SceneObject} from '../sceneobject/sceneobject'
 import {DependSocket, FloatSocket} from '../core/graphsockets.js'
 import {Light} from '../light/light.js'
-import {SelMask} from '../editors/view3d/selectmode.js'
+import {SelMask, normalizeSelMask, selMaskToNames} from '../core/select_types.js'
 import {Icons} from '../editors/icon_enum.js'
 import {PropModes} from '../editors/view3d/transform/transform_base.js'
 import {Collection} from './collection'
@@ -347,7 +347,7 @@ Scene {
   objects      : ObjectList;
   active       : int | obj.active !== undefined ? obj.active.lib_id : -1;
   time         : float;
-  selectMask   : int;
+  selectMask   : string | obj.selectMaskName;
   cursor3D     : mat4;
   envlight     : EnvLight;
   toolmode_i   : string | obj.constructor.toolModeProp.keys[obj.toolmode_i];
@@ -383,6 +383,12 @@ propIslandOnly : bool;
 
   selectMask = SelMask.OBJECT
   toolmodes: ToolMode[] = [] //we cache toolmode instances, these are saved in files too
+
+  /** Write-side of the frozen name form of `selectMask`; see `core/select_types.ts`. */
+  get selectMaskName(): string {
+    return selMaskToNames(this.selectMask)
+  }
+
   toolmode_map: {[k: string]: ToolMode} = {}
   toolmode_namemap: {[k: string]: ToolMode} = {}
   static toolModeProp = makeToolModeEnum()
@@ -826,6 +832,9 @@ propIslandOnly : bool;
 
     reader(this)
     super.loadSTRUCT(reader)
+
+    //files written before APP_VERSION 8 store this as a raw int
+    this.selectMask = normalizeSelMask(this.selectMask, SelMask.OBJECT)
 
     this.objects.scene = this
     this.objects.onselect = this._onselect.bind(this)

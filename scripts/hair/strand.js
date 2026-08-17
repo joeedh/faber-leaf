@@ -5,7 +5,7 @@ import * as math from '../util/math.js'
 import {DataBlock} from '../core/lib_api.js'
 import {SceneObjectData} from '../sceneobject/sceneobject_base.js'
 import {Node, NodeFlags} from '../core/graph.js'
-import {SelMask} from '../editors/view3d/selectmode.js'
+import {SelMask} from '../core/select_types.js'
 import {Icons} from '../editors/icon_enum.js'
 import {StrandFlags} from './strand_base.js'
 import {Strand} from './strand_types.js'
@@ -138,8 +138,9 @@ export class StrandSet extends SceneObjectData {
 
   static dataDefine() {
     return {
-      name      : 'strands',
-      selectMask: SelMask.STRANDS,
+      name          : 'strands',
+      selectMask    : SelMask.STRANDS,
+      selectTypeName: 'STRANDS',
     }
   }
 

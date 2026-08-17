@@ -5,7 +5,7 @@ import {Shaders} from '../shaders/shaders.js'
 import {nstructjs, DataAPI, DataStruct} from '../path.ux/scripts/pathux.js'
 import {BlockLoader, BlockLoaderAddUser, DataBlock, DataRef} from '../core/lib_api.js'
 import {Camera, IUniformsBlock} from '../webgl/webgl.js'
-import {SelMask} from '../editors/view3d/selectmode.js'
+import {SelMask} from '../core/select_types.js'
 import {NodeFlags} from '../core/graph.js'
 import {SimpleMesh, LayerTypes} from '../webgl/simplemesh.js'
 import {CameraTypes} from './camera_types.js'
@@ -301,9 +301,10 @@ export class CameraData extends SceneObjectData {
 
   static dataDefine() {
     return {
-      name      : '',
-      selectMask: SelMask.CAMERA, //valid selection modes for StandardTools, see SelMask
-      tools     : undefined,
+      name          : '',
+      selectMask    : SelMask.CAMERA, //valid selection modes for StandardTools, see SelMask
+      selectTypeName: 'CAMERA',
+      tools         : undefined,
     }
   }
 

@@ -14,7 +14,7 @@
  */
 
 import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
-import {setInsetHoleOp, setShapesObjLoader} from '@framework/api'
+import {SelMask, setInsetHoleOp, setShapesObjLoader} from '@framework/api'
 import {ALL_MESH_REGISTRATIONS} from './register_classes.js'
 import * as mesh from './mesh.js'
 import {setMeshTools} from './mesh.js'
@@ -86,7 +86,32 @@ export const addonDefine: IAddonDefine = {
   description: 'Mesh DataBlock, custom data, BVH, and mesh utilities.',
 }
 
+/**
+ * `SelMask`'s geometry bits used to be *defined* as `MeshTypes.VERTEX` etc. P6
+ * froze them as literals in the host so the host stops importing this addon;
+ * this catches the two drifting apart while both still exist.
+ */
+function assertSelMaskAgreement(): void {
+  const pairs: [string, number, number][] = [
+    ['VERTEX', mesh_base.MeshTypes.VERTEX, SelMask.VERTEX],
+    ['EDGE', mesh_base.MeshTypes.EDGE, SelMask.EDGE],
+    ['FACE', mesh_base.MeshTypes.FACE, SelMask.FACE],
+    ['HANDLE', mesh_base.MeshTypes.HANDLE, SelMask.HANDLE],
+  ]
+
+  for (const [name, meshBit, selBit] of pairs) {
+    if (meshBit !== selBit) {
+      throw new Error(
+        `MeshTypes.${name} (${meshBit}) no longer matches SelMask.${name} (${selBit}); ` +
+          'the selection wire format is frozen — see scripts/core/select_types.ts'
+      )
+    }
+  }
+}
+
 export function register(api: AddonAPI<IAddon>) {
+  assertSelMaskAgreement()
+
   // Keep these namespaces in sync with `addons/builtin/mesh/src/api.ts` so the
   // typed `@addon/mesh/api` shim resolves to the same surface at runtime.
   api.exportNamespace('mesh', meshExports)

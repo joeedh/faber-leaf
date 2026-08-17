@@ -6,6 +6,7 @@ import {INodeDef, INodeSocketSet, Node, NodeFlags, NodeInheritFlag} from '../cor
 import {DependSocket} from '../core/graphsockets'
 import type {Material} from '../core/material'
 import {aabb_ray_isect} from '../util/isect.js'
+import {registerSelectType} from '../core/select_types.js'
 import {FindNearestRet} from '../editors/view3d/findnearest.js'
 import type {ScreenPickResult} from '../editors/view3d/findnearest.js'
 import type {ToolContext, ViewContext} from '../core/context'
@@ -32,6 +33,15 @@ export function setSceneObjectMaterialClass(cls: abstract new (...args: any[]) =
 export interface IDataDefine {
   name: string
   selectMask?: number
+  /**
+   * Name of this type's `SelMask` bit. Declaring one enrolls the type in the
+   * select-type registry (`core/select_types.ts`), which hands out the bit and
+   * folds it into `SelMask.OBJECT`; read it back as `SelMask[selectTypeName]`.
+   * A new type therefore never picks a number — masks persist as names, so the
+   * number is in-memory only. The builtin types declare the name they already
+   * hold, and registration checks the two agree.
+   */
+  selectTypeName?: string
   tools: any
   /**
    * Stable data-kind id used by core/context queries and the data_kinds
@@ -390,6 +400,19 @@ SceneObjectData {
 
     if (!def.hasOwnProperty('selectMask')) {
       throw new Error('dataDefine() is missing selectMask field')
+    }
+
+    if (def.selectTypeName) {
+      // The first dataDefine() of a brand-new type sees SelMask[name] undefined
+      // (hence 0) — that is the allocation call, so only a mismatching non-zero
+      // mask is an error.
+      const bit = registerSelectType(def.selectTypeName)
+
+      if (def.selectMask && def.selectMask !== bit) {
+        throw new Error(
+          `${def.name || cls.name}: dataDefine().selectMask should be SelMask.${def.selectTypeName} (${bit}), got ${def.selectMask}`
+        )
+      }
     }
 
     ObjectDataTypes.push(cls as unknown as IObjectDataConstructor)

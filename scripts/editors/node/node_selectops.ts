@@ -8,7 +8,7 @@ import {
   StringProperty,
 } from '../../path.ux/scripts/pathux.js'
 import {NodeGraphOp} from './node_ops.js'
-import {SelToolModes, SelOneToolModes} from '../view3d/selectmode.js'
+import {SelToolModes, SelOneToolModes} from '../../core/select_types.js'
 import type {ToolContext, ViewContext} from '../../core/context'
 import {NodeEditorBase} from './NodeEditor.js'
 import {Editor} from '../editor_base.js'

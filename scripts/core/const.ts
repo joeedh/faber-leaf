@@ -1,7 +1,8 @@
 // Deliberately import-free: app_storage / identity_migration / addon storage all
 // need APP_KEY_NAME, and a dependency here would drag the pathux bundle in with it.
 
-export const APP_VERSION = 7
+// 8: selection masks persist as names, not ints (scripts/core/select_types.ts)
+export const APP_VERSION = 8
 
 /** Namespace for every persistent per-app key (localStorage, IndexedDB).
  *  Renaming it strands existing profiles — `core/identity_migration.ts` carries

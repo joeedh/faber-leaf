@@ -30,7 +30,7 @@ import {dist_to_line_2d} from '../../../path.ux/scripts/util/math.js'
 import {CallbackNode, NodeFlags} from '../../../core/graph.js'
 import {DependSocket} from '../../../core/graphsockets.js'
 import * as util from '../../../util/util.js'
-import {SelMask} from '../selectmode.js'
+import {SelMask} from '../../../core/select_types.js'
 import {Colors} from '../../../sceneobject/sceneobject.js'
 import {ObjectFlags} from '../../../sceneobject/sceneobject.js'
 

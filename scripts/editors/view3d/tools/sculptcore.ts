@@ -32,7 +32,7 @@ import {
   SculptTools,
   StrokeMethod,
 } from '../../../brush/brush_base.js'
-import {SelMask} from '../selectmode.js'
+import {SelMask} from '../../../core/select_types.js'
 import type {Mesh} from '../../../../addons/builtin/mesh/src/mesh'
 import {BVHFlags} from '../../../../addons/builtin/mesh/src/bvh'
 import type {ISurfaceSampler} from '../../../util/spatial'

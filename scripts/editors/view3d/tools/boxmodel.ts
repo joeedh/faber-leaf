@@ -22,8 +22,9 @@ import {
 } from '../../../path.ux/pathux'
 import {ToolMode, type IToolModeDefine} from '../view3d_toolmode'
 import {Icons} from '../../icon_enum.js'
-import {SelMask} from '../selectmode.js'
+import {SelMask, normalizeSelMask, selMaskToNames} from '../../../core/select_types.js'
 import type {ViewContext} from '../../../core/context'
+import type {StructReader} from '../../../path.ux/scripts/util/nstructjs'
 import {SelectLoopLiteMeshOp, SelectNearestLiteMeshOp, localRay} from '../../../lite-mesh/litemesh_modeling_ops'
 import {LiteMesh} from '../../../lite-mesh/litemesh'
 
@@ -32,7 +33,7 @@ export class BoxModelToolMode extends ToolMode {
     this,
     `
 BoxModelToolMode {
-    boxModelSelMode      : int;
+    boxModelSelMode      : string | obj.boxModelSelModeName;
     drawSelectionOverlay : bool;
     drawWireframe        : bool;
     drawPoints           : bool;
@@ -45,6 +46,12 @@ BoxModelToolMode {
   /** Active element-selection domains (SelMask.VERTEX|EDGE|FACE bitmask). The
    * selection ops read this to decide which `select` layers to write. */
   boxModelSelMode = SelMask.VERTEX
+
+  /** Write-side of the frozen name form of `boxModelSelMode`; see `core/select_types.ts`. */
+  get boxModelSelModeName(): string {
+    return selMaskToNames(this.boxModelSelMode)
+  }
+
   /** Draw the selection overlay (selected verts/edges/faces + active). */
   drawSelectionOverlay = true
   /** Draw the full wireframe overlay (every edge, dim). */
@@ -355,6 +362,13 @@ BoxModelToolMode {
       new HotKey('D', [], 'litemesh.subdivide()'),
       new HotKey('R', ['ctrl'], 'litemesh.loop_cut()'),
     ])
+  }
+
+  loadSTRUCT(reader: StructReader<this>): void {
+    super.loadSTRUCT(reader)
+
+    //files written before APP_VERSION 8 store this as a raw int
+    this.boxModelSelMode = normalizeSelMask(this.boxModelSelMode, SelMask.VERTEX)
   }
 }
 

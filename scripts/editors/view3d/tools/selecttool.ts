@@ -1,7 +1,7 @@
 import {FindNearest} from '../findnearest.js'
 import {ObjectFlags, SceneObject} from '../../../sceneobject/sceneobject.js'
 import {ToolMode} from '../view3d_toolmode.js'
-import {SelMask, SelOneToolModes} from '../selectmode.js'
+import {SelMask, SelOneToolModes} from '../../../core/select_types.js'
 import {Mesh} from '../../../../addons/builtin/mesh/src/mesh.js'
 import {Shaders} from '../../../shaders/shaders.js'
 import {Vector2} from '../../../util/vectormath.js'

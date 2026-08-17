@@ -29,7 +29,7 @@ import {
   ContextLike,
   ToolDef,
 } from '../../../path.ux/scripts/pathux.js'
-import {SelMask} from '../selectmode.js'
+import {SelMask} from '../../../core/select_types.js'
 import {Vector2, Vector3, EulerOrders, Vector4, Quat, Matrix4} from '../../../util/vectormath.js'
 import {View3DOp} from '../view3d_ops.js'
 import {isect_ray_plane} from '../../../path.ux/scripts/util/math.js'

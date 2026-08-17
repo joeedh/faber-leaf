@@ -33,7 +33,7 @@ import {
 import type {ViewContext, ToolContext} from '../core/context'
 import type {SceneObject} from '../sceneobject/sceneobject'
 import type {View3D} from '../editors/view3d/view3d'
-import {SelMask, SelToolModes} from '../editors/view3d/selectmode'
+import {SelMask, SelToolModes} from '../core/select_types'
 import {SculptPaintOp} from '../editors/view3d/tools/sculptcore_ops'
 import {TranslateOp} from '../editors/view3d/transform/transform_ops'
 import {LiteMesh, IMeshLogSelect} from './litemesh'

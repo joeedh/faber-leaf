@@ -25,6 +25,7 @@ import type {MeshDrawInterface} from './view3d_draw'
 import type {BoundingBox} from './view3d_utils'
 import type {StructReader} from '../../path.ux/scripts/util/nstructjs'
 import {updateToolModeAPI} from '../../scene/scene_utils'
+import {normalizeSelMask, selMaskToNames} from '../../core/select_types.js'
 
 export interface IToolModeDefine {
   name: string
@@ -537,16 +538,24 @@ set view3d(val) {
     return false
   }
 
+  /** Write-side of the frozen name form of `storedSelectMask`; see `core/select_types.ts`. */
+  get storedSelectMaskName(): string {
+    return this.storedSelectMask === -1 ? '' : selMaskToNames(this.storedSelectMask)
+  }
+
   loadSTRUCT(reader: StructReader<this>) {
     reader(this)
     super.loadSTRUCT(reader)
+
+    //files written before APP_VERSION 8 store this as a raw int; '' means unset
+    this.storedSelectMask = normalizeSelMask(this.storedSelectMask, -1)
   }
 }
 
 ToolMode.STRUCT = `
 ToolMode {
   transformWidget  : int;
-  storedSelectMask : int;
+  storedSelectMask : string | obj.storedSelectMaskName;
 }
 `
 nstructjs.register(ToolMode)

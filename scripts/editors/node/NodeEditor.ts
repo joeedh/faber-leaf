@@ -25,7 +25,7 @@ import * as util from '../../util/util.js'
 import {ShaderNodeTypes} from '../../shadernodes/shader_nodes.js'
 
 import {VelPanPanOp} from '../velpan.js'
-import {SelOneToolModes} from '../view3d/selectmode.js'
+import {SelOneToolModes} from '../../core/select_types.js'
 import {Node, NodeFlags} from '../../core/graph.js'
 import {Overdraw} from '../../path.ux/scripts/util/ScreenOverdraw.js'
 import {ModalFlags} from '../../core/modalflags.js'

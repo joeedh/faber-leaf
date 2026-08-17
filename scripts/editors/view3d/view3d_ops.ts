@@ -1,7 +1,7 @@
 import {Vector3, Vector2, Vector4, Matrix4, Quat} from '../../util/vectormath.js'
 import {PropertySlots, ToolOp, UndoFlags, eventWasTouch, keymap, Overdraw} from '../../path.ux/scripts/pathux.js'
 import {Icons} from '../icon_enum.js'
-import {SelMask} from './selectmode.js'
+import {SelMask} from '../../core/select_types.js'
 import {CallbackNode} from '../../core/graph.js'
 import {DependSocket} from '../../core/graphsockets.js'
 import {CastModes, castViewRay} from './findnearest.js'

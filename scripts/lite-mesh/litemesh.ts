@@ -16,7 +16,7 @@ import {
 } from './litemesh_types'
 import {SceneObjectData} from '../sceneobject/sceneobject_base'
 import {BlockLoader, BlockLoaderAddUser, DataBlock} from '../core/lib_api'
-import {SelMask} from '../editors/view3d/selectmode'
+import {SelMask} from '../core/select_types'
 import {NodeFlags} from '../core/graph'
 import {DrawBatch, MeshLog, SpatialTree, Mesh as WasmMesh} from '@sculptcore/api'
 import type {Multires, VdmStore} from '@sculptcore/api'
@@ -494,10 +494,11 @@ export class LiteMesh extends SceneObjectData {
 
   static dataDefine() {
     return {
-      name      : 'LiteMesh',
-      selectMask: SelMask.MESH,
-      tools     : undefined,
-      dataKind  : 'litemesh',
+      name          : 'LiteMesh',
+      selectMask    : SelMask.MESH,
+      selectTypeName: 'MESH',
+      tools         : undefined,
+      dataKind      : 'litemesh',
     }
   }
 

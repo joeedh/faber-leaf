@@ -1,7 +1,7 @@
 import {WidgetFlags} from '../widgets/widgets'
 import {ToolModes, ToolMode} from '../view3d_toolmode'
 import {Icons} from '../../icon_enum.js'
-import {SelMask} from '../selectmode.js'
+import {SelMask} from '../../../core/select_types.js'
 import {nstructjs} from '../../../path.ux/scripts/pathux.js'
 
 export class PanToolMode extends ToolMode {

@@ -1,7 +1,7 @@
 import {Vector3} from '../../util/vectormath.js'
 import {Mesh, MeshFlags, MeshTypes} from '../../../addons/builtin/mesh/src/mesh.js'
 import {LayerTypes} from '../../webgl/simplemesh.js'
-import {SelMask} from './selectmode.js'
+import {SelMask} from '../../core/select_types.js'
 import {Shaders} from '../../shaders/shaders.js'
 import {View3DFlags} from './view3d_base.js'
 import type {View3D} from './view3d.js'

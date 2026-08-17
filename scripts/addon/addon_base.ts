@@ -44,7 +44,7 @@ import {
   IEditorConstructor,
 } from '../editors/editor_base'
 import {Icons} from '../editors/icon_enum'
-import {SelMask} from '../editors/view3d/selectmode'
+import {SelMask} from '../core/select_types'
 import {TransformOp} from '../editors/view3d/transform/transform_ops'
 import * as widget_tools from '../editors/view3d/widgets/widget_tools'
 import * as widgets from '../editors/view3d/widgets/widgets'

@@ -1,9 +1,9 @@
 import {Vector3, Matrix4} from '../util/vectormath.js'
 import {FlagProperty, ToolOp} from '../path.ux/scripts/pathux.js'
-import {SelMask} from '../editors/view3d/selectmode.js'
+import {SelMask} from '../core/select_types.js'
 
 import {StandardTools} from './stdtools.js'
-import {SelToolModes, SelOneToolModes} from '../editors/view3d/selectmode.js'
+import {SelToolModes, SelOneToolModes} from '../core/select_types.js'
 import {ObjectSelectOneOp} from './selectops.js'
 import {composeObjectMatrix, ObjectFlags, SceneObject} from './sceneobject.js'
 import {ObjectDataTypes} from './sceneobject_base.js'
@@ -105,7 +105,12 @@ export class ObjectTools extends StandardTools {
 export function getStdTools(ctx) {
   let selmask = ctx.selectMask
 
-  if (selmask == SelMask.OBJECT) {
+  // Whole-object mode is any mask spanning more than one object type. Not
+  // `== SelMask.OBJECT`: that union grows as geometry types register, so an
+  // equality test silently stops matching. A mask naming exactly one type
+  // (e.g. SelMask.TETMESH) still falls through to that type's own tools.
+  let objbits = selmask & SelMask.OBJECT
+  if (objbits && (objbits & (objbits - 1)) !== 0) {
     return ObjectTools
   }
 

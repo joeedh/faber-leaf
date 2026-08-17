@@ -9,7 +9,12 @@
     "",
     "713 rather than 712 because the two generic brush-radius ToolOps hoisted",
     "out of pbvh_base.ts into stroke_base.ts need core/context's ToolContext /",
-    "ViewContext types, which is one new direct edge on an already-cyclic node."
+    "ViewContext types, which is one new direct edge on an already-cyclic node.",
+    "",
+    "P6 (W1a) moved SelMask out of editors/view3d/selectmode.ts into",
+    "core/select_types.ts, so the ~30 modules that only wanted the mask no longer",
+    "pull in a view3d editor module: no-circular 713 -> 673, core-no-addons",
+    "25 -> 24."
   ],
   "measured": "2026-08-16",
   "config": ".dependency-cruiser.cjs",
@@ -17,16 +22,16 @@
     "scripts",
     "addons"
   ],
-  "total": 2318,
+  "total": 2277,
   "rules": {
     "core-no-mesh": 2,
     "core-no-view3d-tools": 0,
     "util-no-mesh": 0,
-    "core-no-addons": 25,
+    "core-no-addons": 24,
     "core-no-addons-typeonly": 14,
     "core-no-addons-transitive": 1564,
     "core-no-litemesh": 0,
     "core-no-sculptcore": 0,
-    "no-circular": 713
+    "no-circular": 673
   }
 }

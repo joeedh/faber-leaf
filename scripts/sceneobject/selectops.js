@@ -2,7 +2,7 @@ import {Vector2} from '../util/vectormath.js'
 import {IntProperty, BoolProperty, EnumProperty, ToolOp, ListProperty} from '../path.ux/scripts/pathux.js'
 import {ObjectFlags} from './sceneobject.js'
 
-import {SelMask, SelToolModes, SelOneToolModes} from '../editors/view3d/selectmode.js'
+import {SelMask, SelToolModes, SelOneToolModes} from '../core/select_types.js'
 
 export class ObjectSelectOpBase extends ToolOp {
   constructor() {

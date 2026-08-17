@@ -56,7 +56,7 @@ import {NodeViewer} from '../editors/node/NodeViewer.js'
 import {MenuBarEditor} from '../editors/menu/MainMenu.js'
 import {RGBASocket, Vec4Socket, Vec2Socket, Vec3Socket, FloatSocket} from '../core/graphsockets.js'
 import {VelPan, VelPanFlags} from '../editors/velpan.js'
-import {SelMask} from '../editors/view3d/selectmode.js'
+import {SelMask} from '../core/select_types.js'
 import {ToolContext} from '../core/context.js'
 import type {ViewContext} from '../core/context.js'
 // LiteMesh self-registers at module scope; api_define is its only importer.

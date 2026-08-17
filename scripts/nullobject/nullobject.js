@@ -2,7 +2,7 @@ import {SceneObjectData} from '../sceneobject/sceneobject_base.js'
 import '../path.ux/scripts/util/struct.js'
 import {DataBlock} from '../core/lib_api.js'
 import {NodeFlags} from '../core/graph.js'
-import {SelMask} from '../editors/view3d/selectmode.js'
+import {SelMask} from '../core/select_types.js'
 import {Shaders} from '../shaders/shaders.js'
 import {Shapes} from '../webgl/simplemesh_shapes.js'
 import {Node} from '../core/graph.js'
@@ -58,9 +58,10 @@ export class NullObject extends SceneObjectData {
 
   static dataDefine() {
     return {
-      name      : 'NullObject',
-      selectMask: SelMask.NULLOBJECT,
-      tools     : undefined,
+      name          : 'NullObject',
+      selectMask    : SelMask.NULLOBJECT,
+      selectTypeName: 'NULLOBJECT',
+      tools         : undefined,
     }
   }
 }

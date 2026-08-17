@@ -17,7 +17,7 @@ import {
 import {Shapes} from '../webgl/simplemesh_shapes.js'
 import {Shaders} from '../shaders/shaders.js'
 import {SceneObjectData} from '../sceneobject/sceneobject_base.js'
-import {SelMask} from '../editors/view3d/selectmode.js'
+import {SelMask} from '../core/select_types.js'
 
 export const LightFlags = {
   SELECT: 1,
@@ -123,9 +123,10 @@ Light {
 
   static dataDefine() {
     return {
-      name      : 'Light',
-      selectMask: SelMask.LIGHT,
-      dataKind  : 'light',
+      name          : 'Light',
+      selectMask    : SelMask.LIGHT,
+      selectTypeName: 'LIGHT',
+      dataKind      : 'light',
       //tools      :
     }
   }

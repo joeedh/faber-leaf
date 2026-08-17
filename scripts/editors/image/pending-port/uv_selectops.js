@@ -13,7 +13,7 @@ import {
   ToolOp,
 } from '../../path.ux/scripts/pathux.js'
 import {MeshTypes, MeshFlags} from '../../../addons/builtin/mesh/src/mesh_base.js'
-import {SelOneToolModes, SelToolModes} from '../view3d/selectmode.js'
+import {SelOneToolModes, SelToolModes} from '../../../core/select_types.js'
 import {Icons} from '../icon_enum.js'
 import {Vector2, Vector3, Vector4, Matrix4, Quat} from '../../util/vectormath.js'
 //import {FindNearest} from '../view3d/findnearest.js';

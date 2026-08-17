@@ -10,7 +10,7 @@ import {SceneObjectData} from '../sceneobject/sceneobject_base.js'
 import {StandardTools} from '../sceneobject/stdtools.js'
 import {Node, NodeFlags} from '../core/graph.js'
 import {DependSocket} from '../core/graphsockets.js'
-import {SelMask} from '../editors/view3d/selectmode.js'
+import {SelMask} from '../core/select_types.js'
 import {DataBlock} from '../core/lib_api.js'
 import {SimpleMesh, LayerTypes, PrimitiveTypes, ChunkedSimpleMesh} from '../webgl/simplemesh.ts'
 import {Shaders} from '../shaders/shaders.js'
@@ -74,8 +74,9 @@ export class TetMesh extends SceneObjectData {
 
   static dataDefine() {
     return {
-      name      : 'TetMesh',
-      selectMask: SelMask.TETMESH, //valid selection modes for StandardTools, see SelMask
+      name          : 'TetMesh',
+      selectMask    : SelMask.TETMESH, //valid selection modes for StandardTools, see SelMask
+      selectTypeName: 'TETMESH',
     }
   }
 

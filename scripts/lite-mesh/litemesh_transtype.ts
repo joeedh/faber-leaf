@@ -18,7 +18,7 @@
  */
 import {Vector3, Matrix4} from '../path.ux/scripts/pathux'
 import {ITransDataType, TransDataType, TransDataElem, TransDataList} from '../editors/view3d/transform/transform_base'
-import {SelMask} from '../editors/view3d/selectmode'
+import {SelMask} from '../core/select_types'
 import {LiteMesh} from './litemesh'
 import type {ToolContext} from '../core/context'
 import type {SceneObject} from '../sceneobject/sceneobject'

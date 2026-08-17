@@ -124,7 +124,7 @@ export {ToolMode} from './editors/view3d/view3d_toolmode.js'
 // that need to ask "is a paint toolmode active?" test against this rather than
 // a concrete toolmode class.
 export {PaintToolModeBase} from './editors/view3d/tools/stroke_base.js'
-export {SelMask, SelOneToolModes, SelToolModes} from './editors/view3d/selectmode.js'
+export {SelMask, SelOneToolModes, SelToolModes} from './core/select_types.js'
 export {FindNearest, FindNearestRet, castViewRay, CastModes} from './editors/view3d/findnearest.js'
 export type {ScreenPickResult} from './editors/view3d/findnearest.js'
 export {InflateOp, TranslateOp, TransformOp} from './editors/view3d/transform/transform_ops.js'

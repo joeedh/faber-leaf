@@ -46,7 +46,7 @@ export function makeCurvToolMode(api) {
       super.defineKeyMap()
 
       let km = this.keymap
-      km.add(new api.pathux.HotKey('R', [], 'view3d.rotate(selmask=17)'))
+      km.add(new api.pathux.HotKey('R', [], "view3d.rotate(selmask='VERTEX|HANDLE')"))
 
       return this.keymap
     }

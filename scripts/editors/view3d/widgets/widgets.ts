@@ -20,7 +20,7 @@ import {OptionalIf} from '../../../util/optionalIf.js'
 import type {ToolContext, ViewContext} from '../../../core/context.js'
 import {util, math, ToolOp, PropertySlots, IVector4} from '../../../path.ux/pathux.js'
 import {IUniformsBlock} from '../../../webgl/webgl.js'
-import {SelMask} from '../selectmode.js'
+import {SelMask} from '../../../core/select_types.js'
 
 export type IDistToMouse = [number, number, number?]
 

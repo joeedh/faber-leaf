@@ -21,7 +21,7 @@ import {dist_to_line_2d} from '../../../path.ux/scripts/util/math.js'
 import {CallbackNode, Node, NodeFlags} from '../../../core/graph.js'
 import {DependSocket} from '../../../core/graphsockets.js'
 import * as util from '../../../util/util.js'
-import {SelMask} from '../selectmode.js'
+import {SelMask} from '../../../core/select_types.js'
 
 import {View3DFlags} from '../view3d_base.js'
 import {WidgetBase, WidgetSphere, WidgetArrow, WidgetFlags, WidgetManager} from './widgets.js'

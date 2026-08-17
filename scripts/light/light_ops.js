@@ -20,7 +20,7 @@ import {dist_to_line_2d} from '../path.ux/scripts/util/math.js'
 import {CallbackNode, Node, NodeFlags} from '../core/graph.js'
 import {DependSocket, Vec3Socket} from '../core/graphsockets.js'
 import * as util from '../util/util.js'
-import {SelMask} from '../editors/view3d/selectmode.js'
+import {SelMask} from '../core/select_types.js'
 import {Icons} from '../editors/icon_enum.js'
 import {SceneObject} from '../sceneobject/sceneobject.js'
 

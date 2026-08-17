@@ -652,11 +652,11 @@ export function registerToolMode(api) {
       this.keymap = new KeyMap([
         new HotKey('A', [], "mesh.toggle_select_all(mode='AUTO')"),
         new HotKey('A', ['ALT'], "mesh.toggle_select_all(mode='SUB')"),
-        new HotKey('G', [], 'view3d.translate(selmask=17)'),
-        new HotKey('S', [], 'view3d.scale(selmask=17)'),
-        new HotKey('R', [], 'view3d.rotate(selmask=17)'),
-        new HotKey('L', [], 'mesh.select_linked(selmask=1)'),
-        new HotKey('I', ['CTRL'], 'mesh.select_inverse(selmask=1)'),
+        new HotKey('G', [], "view3d.translate(selmask='VERTEX|HANDLE')"),
+        new HotKey('S', [], "view3d.scale(selmask='VERTEX|HANDLE')"),
+        new HotKey('R', [], "view3d.rotate(selmask='VERTEX|HANDLE')"),
+        new HotKey('L', [], "mesh.select_linked(selmask='VERTEX')"),
+        new HotKey('I', ['CTRL'], "mesh.select_inverse(selmask='VERTEX')"),
       ])
 
       return this.keymap
