@@ -1624,7 +1624,7 @@ ungrounded input just argues a wrong plan more convincingly.
     `registerFileFormat`, `has('sculptcore')`).
   - Exit: booting with the mesh addon force-disabled reaches an empty viewport
     instead of a constructor throw.
-  - **Landed 2026-08-17.** Every host→BREP edge above is now a registry lookup or
+  - **Landed 2026-08-17** (`ddcc020c`). Every host→BREP edge above is now a registry lookup or
     gone: two new contribution registries (`core/keymap_contributions.ts`,
     `core/legacy_struct_migration.ts`), a Data-API subtree hook
     (`data_api/api_define_registry.ts`), and four new `AddonAPI` cases
