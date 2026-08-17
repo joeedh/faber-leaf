@@ -30,8 +30,11 @@ import {
 import {SceneObjectData} from '../sceneobject/sceneobject_base'
 import {
   registerDataAPI,
+  registerContextStruct as registerContextStructImpl,
+  unregisterContextStruct,
   isDataAPIDefined,
   markDataAPIDefined,
+  type ContextStructContribution,
   type DefineAPIClass,
 } from '../data_api/api_define_registry'
 import {ToolMode} from '../editors/view3d/view3d_toolmode'
@@ -51,6 +54,7 @@ import {
   IEditorConstructor,
 } from '../editors/editor_base'
 import {Icons} from '../editors/icon_enum'
+import {UIBase, type IUIBaseConstructor} from '../path.ux/scripts/core/ui_base'
 import {SelMask} from '../core/select_types'
 import {TransformOp} from '../editors/view3d/transform/transform_ops'
 import * as widget_tools from '../editors/view3d/widgets/widget_tools'
@@ -69,6 +73,11 @@ import {registerFileMigrator, unregisterFileMigrator, type IFileMigrator} from '
 import {registerFileFormat, unregisterFileFormat, type IFileFormat} from '../core/file_formats'
 import {registerUVSource, unregisterUVSource, type IUVSourceProvider} from '../core/uv_sources'
 import {registerPropsPanel, unregisterPropsPanel, type IPropsPanel} from '../core/props_panels'
+import {registerKeymapEntries as registerKeymapEntriesImpl, unregisterKeymapEntries} from '../core/keymap_contributions'
+import {
+  registerLegacyStructNames as registerLegacyStructNamesImpl,
+  unregisterLegacyStructNames,
+} from '../core/legacy_struct_migration'
 import {TransDataType, type ITransDataType} from '../editors/view3d/transform/transform_base'
 
 /** is a constructor a subclass of another constructor? */
@@ -412,9 +421,50 @@ export class AddonAPI<T> {
   }
 
   /** Contribute a properties-editor panel, instead of the host branching on type. */
-  registerPropsPanel(panel: IPropsPanel<ToolContext>): void {
+  registerPropsPanel(panel: IPropsPanel): void {
     registerPropsPanel(panel)
     this._undoRegistrations.push(() => unregisterPropsPanel(panel.id))
+  }
+
+  /**
+   * Register a path.ux custom element. `UIBase.register` is idempotent and
+   * `UIBase.unregister` is a documented no-op — the platform's custom-element
+   * registry is append-only — so re-enabling an addon reuses the same tag.
+   */
+  registerUIElement(cls: IUIBaseConstructor): void {
+    UIBase.register(cls)
+    this._undoRegistrations.push(() => UIBase.unregister(cls))
+  }
+
+  /**
+   * Contribute hotkeys to an editor's keymap (`'view3d'`). A host default keymap
+   * must not name an addon's ToolOp — the hotkey would outlive the tool.
+   */
+  registerKeymapEntries(keymapId: string, keymap: KeyMap): void {
+    const ownerId = this.addonId ?? 'unknown'
+    registerKeymapEntriesImpl(keymapId, ownerId, keymap)
+    this._undoRegistrations.push(() => unregisterKeymapEntries(ownerId, keymapId))
+  }
+
+  /**
+   * Attach a struct under the ToolContext data-API tree (`ctx.mesh`). Builtin
+   * addons contribute through `addons/builtin/builtin_data_api.ts` instead:
+   * `getDataAPI()` runs in the AppState constructor, before any `register(api)`.
+   */
+  registerContextStruct(contribution: ContextStructContribution): void {
+    registerContextStructImpl(contribution)
+    this._undoRegistrations.push(() => unregisterContextStruct(contribution.path))
+  }
+
+  /**
+   * Contribute legacy nstructjs struct-name migrations for structs this addon
+   * owns, mapping each old embedded name onto its module-qualified one. Core
+   * keeps only the host-owned entries; see plan §2.4.
+   */
+  registerLegacyStructNames(entries: Record<string, string>): void {
+    const ownerId = this.addonId ?? 'unknown'
+    registerLegacyStructNamesImpl(ownerId, entries)
+    this._undoRegistrations.push(() => unregisterLegacyStructNames(ownerId))
   }
 
   get argv() {

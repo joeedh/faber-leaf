@@ -15,9 +15,6 @@ import {
 import * as editors from '../editors/all.js'
 
 import '../tet/wiregen_ops.js'
-import '../../addons/builtin/mesh/src/mesh_bevel.js'
-import '../../addons/builtin/mesh/src/mesh_ops.js'
-import '../../addons/builtin/mesh/src/mesh_extrudeops.js'
 
 import '../image/image_ops.js'
 import '../image/image.js'
@@ -30,16 +27,11 @@ import '../light/light_ops.js'
 import {ResourceBrowser} from '../editors/resbrowser/resbrowser.js'
 import {resourceManager} from '../core/resource.js'
 import '../core/image.js'
-import {buildCDAPI} from '../../addons/builtin/mesh/src/customdata.js'
 // CameraData self-registers at module scope; this side-effect import pulls it into
 // the bundle.
 import '../camera/camera.js'
 
-import {buildProcMeshAPI} from '../../addons/builtin/mesh/src/mesh_gen.js'
-
 import {NodeSocketClasses} from '../core/graph.js'
-
-import '../../addons/builtin/mesh/src/mesh_createops.js'
 
 let STRUCT = nstructjs.STRUCT
 import '../editors/view3d/widgets/widget_tools.js' //ensure widget tools are all registered
@@ -89,6 +81,8 @@ import {AppSettings} from '../core/settings.js'
 // `class → api_define → class` cycle. Imported here for local use and re-exported.
 import {
   registerDataAPI,
+  getContextStructs,
+  getDataAPIBuilders,
   getDataAPIRegistry,
   isDataAPIDefined,
   markDataAPIDefined,
@@ -309,7 +303,13 @@ export function getDataAPI(): MyDataAPI {
   api_define_nodesockets(dataApi)
   api_define_shadernode(dataApi) // Node.defineAPI on ShaderNode's struct (not ShaderNode.defineAPI)
   api_define_graph(dataApi) // Graph free struct (nodes list)
-  buildCDAPI(dataApi) // customdata element structs — Mesh.defineAPI attaches CustomData by ref, so it must exist first
+
+  // Provider builders that must run first, because a class `defineAPI` attaches
+  // their structs by reference (the mesh addon's customdata elements are the
+  // case that exists). Contributed through `api_define_registry.ts`.
+  for (const builder of getDataAPIBuilders('before-classes')) {
+    builder.build(dataApi)
+  }
 
   // Every participating class populates its own struct via `defineAPI`; `defineOnce`
   // runs each registered class exactly once. Order is irrelevant — subclass `defineAPI`s
@@ -325,24 +325,27 @@ export function getDataAPI(): MyDataAPI {
   // class structs (e.g. buildProcMeshAPI chains DataBlock.defineAPI), so they
   // must run after the registry pass.
   buildProcTextureAPI(dataApi, api_define_datablock)
-  buildProcMeshAPI(dataApi)
   api_define_graphclasses(dataApi)
+
+  for (const builder of getDataAPIBuilders('after-classes')) {
+    builder.build(dataApi)
+  }
 
   // ── Attach pass ─────────────────────────────────────────────────────────
   // Build the ToolContext tree: wire the now-populated class structs (fetched by
   // reference via mapStruct(_, false)) under named paths, plus the inline root lists.
   cstruct.struct('shadernetwork', 'shadernetwork', 'ShaderNetwork', dataApi.mapStruct(ShaderNetwork, false))
   cstruct.struct('graph', 'graph', 'Graph', dataApi.mapStruct(Graph))
-  // Fetch the Mesh struct by its stable nstructjs name so core never imports the
-  // addon-owned Mesh class. The bridge registered Mesh and the registry pass ran its
-  // defineAPI, so the struct exists by now.
-  const meshStruct = dataApi.getStructByName('mesh.Mesh')
-  if (meshStruct === undefined) {
-    throw new Error(
-      "api_define: struct 'mesh.Mesh' not found — the addons/builtin/builtin_data_api.ts bridge must be imported before getDataAPI() runs"
+  // Provider-contributed subtrees (`ctx.mesh`, …). An absent provider means an
+  // absent subtree — never a throw, which is what a name lookup used to give.
+  for (const contribution of getContextStructs()) {
+    cstruct.struct(
+      contribution.path,
+      contribution.path,
+      contribution.uiName,
+      dataApi.mapStruct(contribution.cls, false)
     )
   }
-  cstruct.struct('mesh', 'mesh', 'Mesh', meshStruct)
 
   // Library: keep the dynamic-registration wiring (libraryStruct, read by the
   // onBlockRegister hook) and the parent-level attaches in the driver shim.

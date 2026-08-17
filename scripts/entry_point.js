@@ -18,39 +18,15 @@ import {loadShapes} from './webgl/simplemesh_shapes.js'
 import './test/test_base.js'
 import './test/test.js'
 
-import * as mesh from '../addons/builtin/mesh/src/mesh.js'
-import * as mesh_types from '../addons/builtin/mesh/src/mesh_types.js'
-import * as customdata from '../addons/builtin/mesh/src/customdata'
-import * as mesh_customdata from '../addons/builtin/mesh/src/mesh_customdata.js'
-import * as mesh_base from '../addons/builtin/mesh/src/mesh_base.js'
-
 // Inversion bridge: registers the builtin-addon classes (Mesh, Vertex, Element,
 // BVHSettings, CurveSpline) into the core data-API registry. Must be imported
 // before preinit() (which constructs AppState → getDataAPI), so the registry is
 // populated when getDataAPI walks it. See addons/builtin/builtin_data_api.ts.
 import '../addons/builtin/builtin_data_api.js'
 
-// Registers the default-scene-with-cube builder against core/default_file. Once
-// mesh moves into a builtin addon (plan §6 step 6) this side-effect import goes
-// away and the addon's register() hook performs the registration.
-import '../addons/builtin/mesh/src/default_scene.js'
-
-// Registers mesh-grid file-version migrations against core/file_migrations.
-// Once mesh moves out of the main bundle this side-effect import disappears.
-import '../addons/builtin/mesh/src/migrations.js'
-
-// Mesh-specific Open-dialog wrapper around ImportOBJOp. Was previously in
-// core/app_ops.js, moved here to keep core from importing mesh. See plan §3.
-import '../addons/builtin/mesh/src/import_obj_op.js'
-
 // View3D toolmode registrations. Was previously in core/appstate.ts; moved
 // here so core stops importing from editors/view3d/tools. See plan §3 / §12.
 import './editors/view3d/tools/tools.js'
-
-// FBX loader (relocated with the mesh subsystem into addons/builtin/mesh/).
-// Side-effect import — registers the FBX loader against the global so other
-// callers can use it.
-import '../addons/builtin/mesh/src/fbxloader.js'
 
 // The single in-bundle builtin registry. Imported AFTER tools.js so the
 // toolmode class modules (sculptcore) are evaluated before the registry
@@ -58,8 +34,6 @@ import '../addons/builtin/mesh/src/fbxloader.js'
 // unified startAddons() pipeline materializes + enables them. Replaces the
 // per-addon addon_register.js side-effect imports.
 import '../addons/builtin/builtin_registry.js'
-
-export {mesh, mesh_types, customdata, mesh_customdata, mesh_base}
 
 import addon, {startAddons} from './addon/addon.js'
 
@@ -69,9 +43,9 @@ import addon, {startAddons} from './addon/addon.js'
 // See documentation/plans/native-electron.md (Workstream F).
 import './lite-mesh/litemesh_test_scene.js'
 
-// Overrides the mesh subsystem's startup cube (imported above) with a LiteMesh
-// sphere + sculptcore startup toolmode. Must come AFTER the mesh default_scene
-// import so this builder wins. See ImmediateTODOs #2.
+// Overrides the mesh subsystem's startup cube with a LiteMesh sphere +
+// sculptcore startup toolmode. Must come AFTER builtin_registry, which pulls in
+// the mesh addon's default_scene, so this builder wins. See ImmediateTODOs #2.
 import './lite-mesh/litemesh_default_scene.js'
 
 import {getAppArgv, getArg} from './core/app_argv.js'

@@ -11,18 +11,19 @@
  * applies to every kind. Panels are returned sorted by `(order, id)`; neither
  * registration order nor addon load order may be load-bearing.
  *
- * `Ctx` is the app context, left generic so this module does not import the
- * host it serves — the same rule `core/geometry_contract.ts` follows, and for
- * the same reason. `AddonAPI` binds it to the real `ToolContext`.
+ * The context is typed as path.ux's structural `ContextLike` so this module does
+ * not import the host it serves — the same rule `core/geometry_contract.ts`
+ * follows, and for the same reason. `PropsEditor` re-binds it to `ViewContext`
+ * at the one call site.
  */
 
-import type {Container} from '../path.ux/scripts/pathux'
+import type {Container, ContextLike} from '../path.ux/scripts/pathux'
 import type {GeometryDataRef} from './geometry_contract'
 
 /** Matches any data kind. */
 export const ANY_DATA_KIND = '*'
 
-export interface IPropsPanel<Ctx = unknown> {
+export interface IPropsPanel {
   /** Stable id, unique across all kinds. Also the de-dup key. */
   id: string
 
@@ -40,10 +41,10 @@ export interface IPropsPanel<Ctx = unknown> {
    * kind alone cannot express (a modifier being present, say) — not to
    * re-derive the kind, which `kindId` already selected on.
    */
-  poll?(ctx: Ctx, data: GeometryDataRef): boolean
+  poll?(ctx: ContextLike, data: GeometryDataRef): boolean
 
   /** Add widgets to `container`. Called on rebuild, so it must be idempotent. */
-  build(container: Container, ctx: Ctx, data: GeometryDataRef): void
+  build(container: Container, ctx: ContextLike, data: GeometryDataRef): void
 }
 
 const _panels = new Map<string, IPropsPanel>()

@@ -30,26 +30,20 @@ import {nstructjs} from '../path.ux/scripts/pathux.js'
  * where applicable, the collision-mangled bundle name). New module-qualified
  * names are never keys, so this pass is a no-op for files written after the
  * migration. Generated from `.migration-ref/name-map.json` (renamed entries).
+ *
+ * The table below holds only the *host-owned* structs. Entries whose target
+ * lives in an addon are contributed by that addon through
+ * {@link registerLegacyStructNames}, so a renamed struct's migration entry
+ * travels with the struct rather than accumulating in core (plan §2.4).
  */
-export const LEGACY_STRUCT_NAME_MAP: Record<string, string> = {
+export const HOST_LEGACY_STRUCT_NAMES: Record<string, string> = {
   BSplineCurve        : 'curve1d.BSplineCurve',
   BVHToolMode         : 'view3d.BVHToolMode',
   BoolProperty        : 'toolprop.BoolProperty',
   BounceCurve         : 'curve1d.BounceCurve',
   CodeEditor          : 'code_editor.CodeEditor',
-  CotanVert           : 'mesh.CotanVert',
   CurvToolMode        : 'curvetest.CurvToolMode',
-  CurvVert            : 'mesh.CurvVert',
-  CurvVert2           : 'mesh.CurvVert2',
-  CurvVert22          : 'mesh.CurvVert2',
-  CurvVert2Settings   : 'mesh.CurvVert2Settings',
-  CurveToolBase       : 'curve.CurveToolBase',
-  DFieldElem          : 'mesh.DFieldElem',
-  DFieldSettings      : 'mesh.DFieldSettings',
   DataPathBrowser     : 'editors.DataPathBrowser',
-  DispLayerSettings   : 'mesh.DispLayerSettings',
-  DispLayerVert       : 'mesh.DispLayerVert',
-  DispLayerVert3      : 'mesh.DispLayerVert',
   DrawerEditor        : 'editors.DrawerEditor',
   EaseCurve           : 'curve1d.EaseCurve',
   ElasticCurve        : 'curve1d.ElasticCurve',
@@ -62,13 +56,9 @@ export const LEGACY_STRUCT_NAME_MAP: Record<string, string> = {
   IntProperty         : 'toolprop.IntProperty',
   ListProperty        : 'toolprop.ListProperty',
   Mat4Property        : 'toolprop.Mat4Property',
-  MeshEditor          : 'mesh_edit.MeshEditor',
-  MeshToolBase        : 'mesh_edit.MeshToolBase',
   MixNode             : 'shader.MixNode',
   MorphEditor         : 'morph.MorphEditor',
   MorphToolMode       : 'morph.MorphToolMode',
-  MultiGridData       : 'mesh.MultiGridData',
-  MultiGridSettings   : 'mesh.MultiGridSettings',
   NodeGroup           : 'graph.NodeGroup',
   NodeGroupInputs     : 'graph.NodeGroupInputs',
   NodeGroupInst       : 'graph.NodeGroupInst',
@@ -81,38 +71,79 @@ export const LEGACY_STRUCT_NAME_MAP: Record<string, string> = {
   PVert               : 'subsurf_tester.PVert',
   PanToolMode         : 'view3d.PanToolMode',
   ParamToolMode       : 'parameterizer.ParamToolMode',
-  ParamVert           : 'mesh.ParamVert',
-  ParamVertSettings   : 'mesh.ParamVertSettings',
   PatchTester         : 'subsurf_tester.PatchTester',
   QuatProperty        : 'toolprop.QuatProperty',
   RandCurve           : 'curve1d.RandCurve',
   SimpleCurveBase     : 'curve1d.SimpleCurveBase',
-  SolverElem          : 'mesh.SolverElem',
-  SolverSettings      : 'mesh.SolverSettings',
   Strand              : 'hair.Strand',
   StrandSet           : 'hair.StrandSet',
   StrandTool          : 'strand.StrandTool',
   StringSetProperty   : 'toolprop.StringSetProperty',
   SubsurfTangentTester: 'subsurf_tester.SubsurfTangentTester',
-  TetMeshTool         : 'tetmesh.TetMeshTool',
   Vec2Property        : 'toolprop.Vec2Property',
   Vec3Property        : 'toolprop.Vec3Property',
   Vec4Property        : 'toolprop.Vec4Property',
   _NumberPropertyBase : 'toolprop._NumberPropertyBase',
 }
 
-// Built once: matches any old name as a standalone identifier token. The
-// leading `(?<![.\w])` guard means a module-qualified NEW name (e.g.
-// `hair.Strand`) does NOT match the bare key (`Strand`), so files written after
-// the migration skip parsing entirely. Used only as a cheap pre-check —
-// correctness does not depend on it (the parse loop renames by exact equality).
-const LEGACY_NAME_RE = new RegExp(
-  '(?<![.\\w])(?:' +
-    Object.keys(LEGACY_STRUCT_NAME_MAP)
-      .map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-      .join('|') +
-    ')(?![\\w])'
-)
+const contributions = new Map<string, Record<string, string>>()
+
+/** Invalidated whenever a contribution is added or removed. */
+let mergedMap: Record<string, string> | undefined
+let mergedRE: RegExp | undefined
+
+/**
+ * Contribute legacy struct-name entries owned by `ownerId` (an addon id).
+ * Registering twice under the same id replaces the previous set.
+ */
+export function registerLegacyStructNames(ownerId: string, entries: Record<string, string>): void {
+  contributions.set(ownerId, entries)
+  mergedMap = undefined
+  mergedRE = undefined
+}
+
+export function unregisterLegacyStructNames(ownerId: string): void {
+  contributions.delete(ownerId)
+  mergedMap = undefined
+  mergedRE = undefined
+}
+
+/** The host table plus every live contribution. Host entries never lose. */
+export function getLegacyStructNameMap(): Record<string, string> {
+  if (mergedMap === undefined) {
+    mergedMap = {}
+    for (const entries of contributions.values()) {
+      Object.assign(mergedMap, entries)
+    }
+    Object.assign(mergedMap, HOST_LEGACY_STRUCT_NAMES)
+  }
+  return mergedMap
+}
+
+// Matches any old name as a standalone identifier token. The leading
+// `(?<![.\w])` guard means a module-qualified NEW name (e.g. `hair.Strand`) does
+// NOT match the bare key (`Strand`), so files written after the migration skip
+// parsing entirely. Used only as a cheap pre-check — correctness does not depend
+// on it (the parse loop renames by exact equality).
+function legacyNameRE(): RegExp {
+  if (mergedRE === undefined) {
+    mergedRE = new RegExp(
+      '(?<![.\\w])(?:' +
+        Object.keys(getLegacyStructNameMap())
+          .map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+          .join('|') +
+        ')(?![\\w])'
+    )
+  }
+  return mergedRE
+}
+
+/** Test-only helper — clears every contribution, leaving the host table. */
+export function _resetLegacyStructNamesForTests(): void {
+  contributions.clear()
+  mergedMap = undefined
+  mergedRE = undefined
+}
 
 const StructEnum = nstructjs.parser.StructEnum as Record<string, number>
 
@@ -120,7 +151,7 @@ const StructEnum = nstructjs.parser.StructEnum as Record<string, number>
  * Recursively rewrite any struct-name references buried in a field's
  * TypeDescriptor tree. Returns true if anything was renamed.
  */
-function renameTypeRefs(type: any): boolean {
+function renameTypeRefs(type: any, map: Record<string, string>): boolean {
   if (!type || typeof type !== 'object') {
     return false
   }
@@ -129,7 +160,7 @@ function renameTypeRefs(type: any): boolean {
     case StructEnum.STRUCT:
     case StructEnum.TSTRUCT: {
       // .data holds the referenced struct name
-      const repl = LEGACY_STRUCT_NAME_MAP[type.data]
+      const repl = map[type.data]
       if (repl !== undefined) {
         type.data = repl
         return true
@@ -141,10 +172,10 @@ function renameTypeRefs(type: any): boolean {
     case StructEnum.ITERKEYS:
     case StructEnum.STATIC_ARRAY:
       // container types nest the element descriptor under .data.type
-      return renameTypeRefs(type.data && type.data.type)
+      return renameTypeRefs(type.data && type.data.type, map)
     case StructEnum.OPTIONAL:
       // optional(T) nests the descriptor directly under .data
-      return renameTypeRefs(type.data)
+      return renameTypeRefs(type.data, map)
     default:
       return false
   }
@@ -158,9 +189,11 @@ function renameTypeRefs(type: any): boolean {
  * proceed (the loader's existing missing-struct handling then applies).
  */
 export function remapLegacyStructSchema(structsText: string): string {
-  if (!structsText || !LEGACY_NAME_RE.test(structsText)) {
+  if (!structsText || !legacyNameRE().test(structsText)) {
     return structsText
   }
+
+  const map = getLegacyStructNameMap()
 
   try {
     const parser = nstructjs.parser.struct_parse
@@ -179,14 +212,14 @@ export function remapLegacyStructSchema(structsText: string): string {
         fields: {type: unknown}[]
       }
 
-      const repl = LEGACY_STRUCT_NAME_MAP[stt.name]
+      const repl = map[stt.name]
       if (repl !== undefined) {
         stt.name = repl
         changed = true
       }
 
       for (const f of stt.fields) {
-        if (renameTypeRefs(f.type)) {
+        if (renameTypeRefs(f.type, map)) {
           changed = true
         }
       }

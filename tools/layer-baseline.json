@@ -22,7 +22,21 @@
     "reaches an addon through core/context: core-no-addons-transitive",
     "1564 -> 1472. The four registries AddonAPI gained in the same step",
     "(file_formats, props_panels, uv_sources, file_migrations) follow the same",
-    "rule and cost nothing."
+    "rule and cost nothing.",
+    "",
+    "P8 (W1c) cut entry_point.js's five `import * as mesh...` re-exports and its",
+    "three mesh side-effect imports (they moved into the addon's own main.ts),",
+    "moved the properties editor's CustomData/BVH/procedural panels behind the",
+    "props-panel registry, and split View3D's keymap and core's legacy",
+    "struct-name table into per-addon contributions. The host's module graph no",
+    "longer reaches the mesh subsystem through its entry point:",
+    "core-no-addons 24 -> 19, core-no-addons-typeonly 14 -> 12,",
+    "core-no-addons-transitive 1472 -> 1152, no-circular 673 -> 631.",
+    "",
+    "core-no-mesh stays at 2: both are the roadmap's Class A type-only leaks",
+    "(`import type {Mesh}` in core/lib_api.ts and core/context.ts), which erase",
+    "at compile time and disappear when Mesh does. They are explicitly not P8's",
+    "job -- see the strategy doc's Class A section."
   ],
   "measured": "2026-08-17",
   "config": ".dependency-cruiser.cjs",
@@ -30,16 +44,16 @@
     "scripts",
     "addons"
   ],
-  "total": 2185,
+  "total": 1816,
   "rules": {
     "core-no-mesh": 2,
     "core-no-view3d-tools": 0,
     "util-no-mesh": 0,
-    "core-no-addons": 24,
-    "core-no-addons-typeonly": 14,
-    "core-no-addons-transitive": 1472,
+    "core-no-addons": 19,
+    "core-no-addons-typeonly": 12,
+    "core-no-addons-transitive": 1152,
     "core-no-litemesh": 0,
     "core-no-sculptcore": 0,
-    "no-circular": 673
+    "no-circular": 631
   }
 }

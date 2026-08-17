@@ -22,6 +22,8 @@ export function register(api: AddonAPI<IAddon>) {
   // Keep in sync with addons/builtin/tetmesh/src/api.ts.
   api.exportNamespace('tetmesh', {TetMeshTool})
   api.registerAll(MakeTetMesh, TetSmoothVerts, TetToMesh, Tetrahedralize, TetTest, TetFixNormalsOp, TetMeshTool)
+
+  api.registerLegacyStructNames({TetMeshTool: 'tetmesh.TetMeshTool'})
 }
 export function unregister() {}
 export function handleArgv() {}

@@ -146,6 +146,12 @@ describe('AddonAPI registration is undoable', () => {
     'registerFileFormat',
     'registerUVSource',
     'registerPropsPanel',
+    // P8 (W1c) added these four so the mesh addon can hand back its keymap,
+    // its ToolContext data-API subtree and its legacy struct names.
+    'registerUIElement',
+    'registerKeymapEntries',
+    'registerContextStruct',
+    'registerLegacyStructNames',
   ]
 
   test('every §9 case exists as a method', () => {

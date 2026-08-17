@@ -58,11 +58,20 @@ import * as bvh from './bvh.js'
 import {MeshOp, MeshDeformOp, saveUndoMesh, loadUndoMesh} from './mesh_ops_base.js'
 import {MeshOpBaseUV} from './mesh_uvops_base.js'
 import {KDrawModes} from './mesh_curvature_test.js'
+import {CDLayerPanel, ChangeActCDLayerOp, MESH_PROPS_PANELS} from './props_panels.js'
 
 // Side-effect import: registers `OpaqueCustomDataElem` with core's
 // `missing_addon` hook so files referencing unloaded customdata classes can
 // round-trip. See plan §3.
 import './missing_customdata.js'
+
+// Side-effect imports that used to sit in `scripts/entry_point.js`, where they
+// pulled the mesh subsystem into the host's own module graph: the startup-cube
+// scene builder, the mesh-grid file migrations, and the FBX loader's
+// `window._testFBX` debug hook.
+import './default_scene.js'
+import './migrations.js'
+import './fbxloader.js'
 
 const meshExports = {
   ...mesh,
@@ -149,6 +158,40 @@ export function register(api: AddonAPI<IAddon>) {
   // P11 moves it here alongside the geometry it transforms — but the
   // registration is the addon's, so disabling the addon takes it with it.
   api.registerTransType(MeshTransType)
+
+  // Hotkeys for mesh's own ToolOps. These used to sit in View3D's default
+  // keymap, where they outlived the tools they named.
+  api.registerKeymapEntries('view3d', new api.KeyMap([new api.HotKey('W', [], 'mesh.vertex_smooth()')]))
+
+  // Legacy nstructjs names for mesh's CustomData elements, split out of core's
+  // table. `CurvVert22` / `DispLayerVert3` are collision-mangled bundle names.
+  api.registerLegacyStructNames({
+    CotanVert        : 'mesh.CotanVert',
+    CurvVert         : 'mesh.CurvVert',
+    CurvVert2        : 'mesh.CurvVert2',
+    CurvVert22       : 'mesh.CurvVert2',
+    CurvVert2Settings: 'mesh.CurvVert2Settings',
+    DFieldElem       : 'mesh.DFieldElem',
+    DFieldSettings   : 'mesh.DFieldSettings',
+    DispLayerSettings: 'mesh.DispLayerSettings',
+    DispLayerVert    : 'mesh.DispLayerVert',
+    DispLayerVert3   : 'mesh.DispLayerVert',
+    MultiGridData    : 'mesh.MultiGridData',
+    MultiGridSettings: 'mesh.MultiGridSettings',
+    ParamVert        : 'mesh.ParamVert',
+    ParamVertSettings: 'mesh.ParamVertSettings',
+    SolverElem       : 'mesh.SolverElem',
+    SolverSettings   : 'mesh.SolverSettings',
+  })
+
+  // The properties-editor contributions the host used to build by branching on
+  // concrete type (plan §3.3).
+  api.register(ChangeActCDLayerOp)
+  api.registerUIElement(CDLayerPanel)
+
+  for (const panel of MESH_PROPS_PANELS) {
+    api.registerPropsPanel(panel)
+  }
 }
 
 export function unregister() {}

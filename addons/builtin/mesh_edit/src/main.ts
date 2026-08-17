@@ -36,6 +36,11 @@ export function register(api: AddonAPI<IAddon>) {
     'mesh.make_ico_sphere()',
     'mesh.make_cylinder()',
   ])
+
+  api.registerLegacyStructNames({
+    MeshEditor  : 'mesh_edit.MeshEditor',
+    MeshToolBase: 'mesh_edit.MeshToolBase',
+  })
 }
 
 export function unregister() {}

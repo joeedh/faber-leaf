@@ -52,3 +52,80 @@ export function isDataAPIDefined(cls: DefineAPIClass): boolean {
 export function markDataAPIDefined(cls: DefineAPIClass): void {
   _definedDataAPI.add(cls)
 }
+
+// ---------------------------------------------------------------------------
+// Contributions: the two things a provider needs that a bare class list cannot
+// express — a struct attached under the ToolContext tree, and a non-class
+// builder that has to run at a specific point in `getDataAPI()`'s three passes.
+// ---------------------------------------------------------------------------
+
+/**
+ * A named subtree under the `ToolContext` struct: `ctx.mesh`, `ctx.scene`, …
+ * The provider names the class; `getDataAPI()` resolves it by reference, so the
+ * attach is mangle-proof and needs no stable string name.
+ */
+export interface ContextStructContribution {
+  /** Path under `ToolContext`, e.g. `'mesh'`. Also the contribution's id. */
+  path: string
+  uiName: string
+  cls: DefineAPIClass
+}
+
+const contextStructs = new Map<string, ContextStructContribution>()
+
+export function registerContextStruct(contribution: ContextStructContribution): void {
+  if (contextStructs.has(contribution.path)) {
+    throw new Error(`context struct "${contribution.path}" is already registered`)
+  }
+  contextStructs.set(contribution.path, contribution)
+}
+
+export function unregisterContextStruct(path: string): void {
+  contextStructs.delete(path)
+}
+
+/** Sorted by path: attach order is not load-bearing and must not vary. */
+export function getContextStructs(): ContextStructContribution[] {
+  return Array.from(contextStructs.values()).sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0))
+}
+
+/**
+ * When a builder runs relative to the pass that calls every registered class's
+ * `defineAPI`. `before-classes` is for structs a class attaches *by reference*
+ * (they must already exist); `after-classes` is for builders that chain from a
+ * populated class struct.
+ */
+export type DataAPIBuildPhase = 'before-classes' | 'after-classes'
+
+export interface DataAPIBuilder {
+  /** Unique id, also the sort key within a phase. */
+  id: string
+  phase: DataAPIBuildPhase
+  build(api: DataAPI): void
+}
+
+const dataAPIBuilders = new Map<string, DataAPIBuilder>()
+
+export function registerDataAPIBuilder(builder: DataAPIBuilder): void {
+  if (dataAPIBuilders.has(builder.id)) {
+    throw new Error(`data-API builder "${builder.id}" is already registered`)
+  }
+  dataAPIBuilders.set(builder.id, builder)
+}
+
+export function unregisterDataAPIBuilder(id: string): void {
+  dataAPIBuilders.delete(id)
+}
+
+/** Sorted by id within the phase, for the same reason as {@link getContextStructs}. */
+export function getDataAPIBuilders(phase: DataAPIBuildPhase): DataAPIBuilder[] {
+  return Array.from(dataAPIBuilders.values())
+    .filter((b) => b.phase === phase)
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+}
+
+/** Test-only helper — clears both contribution registries. */
+export function _resetDataAPIContributionsForTests(): void {
+  contextStructs.clear()
+  dataAPIBuilders.clear()
+}

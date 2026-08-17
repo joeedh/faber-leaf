@@ -45,6 +45,7 @@ import {Icons} from '../icon_enum'
 import {NoneWidget} from './widgets/widget_tools'
 import {View3DFlags, CameraModes, view3dProject, view3dUnproject} from './view3d_base'
 import {castViewRay} from './findnearest'
+import {getKeymapEntries} from '../../core/keymap_contributions'
 import {SelMask} from '../../core/select_types'
 import type {Library} from '../../core/lib_api'
 import {RenderEngine, RenderSettings} from '../../renderengine/renderengine_base'
@@ -541,6 +542,10 @@ View3D {
     }
 
     ret.push(this.keymap!)
+    // Read per-dispatch rather than merged into `this.keymap`: an addon enabled
+    // after this editor was built must still get its hotkeys, and a disabled one
+    // must lose them.
+    ret = ret.concat(getKeymapEntries('view3d'))
 
     return ret
   }
@@ -677,7 +682,6 @@ View3D {
     this.keymap = new KeyMap([
       new HotKey('G', [], 'view3d.translate()'),
       new HotKey('S', [], 'view3d.scale()'),
-      new HotKey('W', [], 'mesh.vertex_smooth()'),
       new HotKey('.', [], 'view3d.view_selected()'),
 
       new HotKey('Space', [], () => {

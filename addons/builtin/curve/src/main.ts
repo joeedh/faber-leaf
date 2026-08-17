@@ -25,6 +25,8 @@ export function register(api: AddonAPI<IAddon>) {
   // Keep in sync with addons/builtin/curve/src/api.ts.
   api.exportNamespace('curve', {CurveSpline, KnotDataLayer, CurveToolBase, CurveToolOverlay})
   api.registerAll(CurveSpline, KnotDataLayer, CurveToolBase, CurveToolOverlay)
+
+  api.registerLegacyStructNames({CurveToolBase: 'curve.CurveToolBase'})
 }
 
 export function unregister() {}

@@ -1315,7 +1315,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P5 | [W2b — delete the TS sculpting stack](./2026-08-15-0320-w2-delete-ts-sculpting-stack.md) | W2 §1 | 3 | P4 | **landed** |
 | P6 | [W1a — `SelMask` format migration](./2026-08-15-0325-w1-selmask-format-migration.md) | W1 §1 | 4 | P1 | **landed** |
 | P7 | [W1b — host geometry contract](./2026-08-15-0330-w1-host-geometry-contract.md) | W1 §1, §3(a)(b) | 4 | P6 | **landed** |
-| P8 | [W1c — registry hooks + string-key severing](./2026-08-15-0335-w1-registry-hooks-and-string-key-severing.md) | W1 §0, §2 | 5 | P7 | **written** |
+| P8 | [W1c — registry hooks + string-key severing](./2026-08-15-0335-w1-registry-hooks-and-string-key-severing.md) | W1 §0, §2 | 5 | P7 | **landed** |
 | P9 | [W1d — layer ratchet to `error`](./2026-08-15-0340-w1-layer-ratchet.md) | W1 §3 | 6 | P8 | **written** |
 | P10 | [Serialization + file-compat hardening](./2026-08-15-0345-serialization-and-file-compat-hardening.md) | W1 §5 (promoted) | 7 | P8 | **written** |
 | P11 | [LeafMesh host integration](./2026-08-15-0350-leafmesh-host-integration.md) | risk mitigation | 8 | P3, P8 | **written** |
@@ -1603,7 +1603,7 @@ ungrounded input just argues a wrong plan more convincingly.
 > against the contract P7 just fixed, and P9 is a ratchet. Both are won by
 > enumeration — a subagent sweep is worth more here than a bigger model.
 
-- [ ] **P8 — [W1c: registry hooks + string-key severing](./2026-08-15-0335-w1-registry-hooks-and-string-key-severing.md)**
+- [x] **P8 — [W1c: registry hooks + string-key severing](./2026-08-15-0335-w1-registry-hooks-and-string-key-severing.md)**
   - **Step 0 — sever the invisible edges first.** `api_define.ts:339-344`
     (`getStructByName('mesh.Mesh')` throws from the AppState constructor),
     `view3d.ts:680` `'mesh.vertex_smooth()'`, the `selmask=17` keymap strings
@@ -1624,6 +1624,35 @@ ungrounded input just argues a wrong plan more convincingly.
     `registerFileFormat`, `has('sculptcore')`).
   - Exit: booting with the mesh addon force-disabled reaches an empty viewport
     instead of a constructor throw.
+  - **Landed 2026-08-17.** Every host→BREP edge above is now a registry lookup or
+    gone: two new contribution registries (`core/keymap_contributions.ts`,
+    `core/legacy_struct_migration.ts`), a Data-API subtree hook
+    (`data_api/api_define_registry.ts`), and four new `AddonAPI` cases
+    (`registerUIElement`, `registerKeymapEntries`, `registerContextStruct`,
+    `registerLegacyStructNames`). `core-no-addons` 24 → 19,
+    `core-no-addons-typeonly` 14 → 12, `core-no-addons-transitive` 1472 → 1152,
+    `no-circular` 673 → 631, total 2185 → 1816 — the largest single move so far.
+    Four departures. **(1)** `view3d_draw.ts` was **deleted**, not relocated: no
+    entry point imports it (`typescript_entry.ts:17` imports the unrelated
+    `view3d_draw_webgpu.ts`), `BasicMeshDrawer` is constructed nowhere, and its
+    one type-only consumer now names a one-method `IGeometryDrawer` it owns.
+    **(2)** `IPropsPanel` could not be generic over its context — path.ux's
+    `Container<Ctx>` is invariant, so `Container<ContextLike>` and
+    `Container<ViewContext>` are mutually unassignable; the interface uses
+    structural `ContextLike` and the host re-binds with one documented cast.
+    **(3)** The CustomData-layer UI moved into the addon rather than becoming
+    kind-agnostic — genericizing it means inventing the attribute vocabulary a
+    phase early, for a second consumer that does not exist. **(4)** The keymap
+    failure mode is asynchronous: `execTool` *rejects* rather than throwing, so
+    `KeyMap.handle`'s `try`/`catch` never sees an unbound hotkey and it became a
+    silent unhandled rejection — fixed in `HotKey.exec` (path-controller).
+    Deferred to P14: the force-disable boot gate and the props-panel DOM-shape
+    assertion; neither mechanism exists yet (see the plan's §5). **The lesson
+    worth carrying to P9+:** the edges that survive a `check:layers` sweep are
+    the ones it cannot see — a struct name, a toolpath literal, a legacy-name
+    table. Three of P8's four boot-blocking edges were string-keyed, and the
+    grep tests in `tests/unit/host_string_keys.test.ts` are the only thing that
+    keeps them severed.
 
 - [ ] **P9 — [W1d: layer ratchet to `error`](./2026-08-15-0340-w1-layer-ratchet.md)**
   - Re-baseline against P1's repaired rules — the count that matters is the one

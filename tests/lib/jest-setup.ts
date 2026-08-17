@@ -48,6 +48,13 @@ if (typeof g.structuredClone !== 'function') {
   }
 }
 
+// jsdom ships no PointerEvent, and path.ux's ui_tabs.ts subclasses it at module
+// scope — so any test that imports the pathux barrel dies on import. MouseEvent
+// carries everything the class actually reads.
+if (typeof g.PointerEvent !== 'function') {
+  g.PointerEvent = g.MouseEvent
+}
+
 // Side-effect import — installs fake-indexeddb on globalThis at module load.
 // Must come AFTER structuredClone is polyfilled.
 import 'fake-indexeddb/auto'

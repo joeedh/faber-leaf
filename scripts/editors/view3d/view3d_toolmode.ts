@@ -21,7 +21,6 @@ import {View3D} from '../all'
 import {DrawLine, ITempText} from './view3d'
 import {IUniformsBlock, ShaderProgram} from '../../webgl/webgl'
 import type {Mesh} from '../../../addons/builtin/mesh/src/mesh'
-import type {MeshDrawInterface} from './view3d_draw'
 import type {BoundingBox} from './view3d_utils'
 import type {StructReader} from '../../path.ux/scripts/util/nstructjs'
 import {updateToolModeAPI} from '../../scene/scene_utils'
@@ -561,6 +560,16 @@ ToolMode {
 nstructjs.register(ToolMode)
 
 type MeshId = string | number
+
+/**
+ * All the host asks of a cached per-geometry drawer: that it can release its GL
+ * resources. Structural rather than a named base class, so the drawer itself can
+ * live in whichever addon owns the geometry it draws.
+ */
+export interface IGeometryDrawer {
+  destroy(gl: WebGL2RenderingContext): void
+}
+
 export class MeshCache {
   meshid: MeshId
   meshes: {[k: MeshId]: ChunkedSimpleMesh | SimpleMesh}
@@ -569,7 +578,7 @@ export class MeshCache {
    *  mesh.updateGen is not this
    */
   gen?: number
-  drawer?: MeshDrawInterface
+  drawer?: IGeometryDrawer
 
   constructor(meshid: MeshId) {
     this.meshid = meshid

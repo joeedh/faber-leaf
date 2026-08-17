@@ -102,6 +102,9 @@ export {
   vertexStrideFor,
 } from './core/vertex_layout.js'
 export type {VertexAttrDesc, VertexAttrShape} from './core/vertex_layout.js'
+// Properties-editor panel contributions (§9). A leaf like the two above.
+export {ANY_DATA_KIND} from './core/props_panels.js'
+export type {IPropsPanel} from './core/props_panels.js'
 // `core/data_kinds.ts` is deliberately NOT re-exported here: it reaches
 // `core/context.ts`, and the hub is on context's own import path, so a re-export
 // closes a cycle. Addons register a kind through `AddonAPI.registerDataKind`.
