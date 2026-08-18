@@ -178,6 +178,79 @@ independent by an A/B run with the leafmesh entry stripped from
 P8's `registerDataKind` took `factory` / `capabilities` / `usesMaterial` without
 extension.
 
+## 4c. Step 3 as landed (2026-08-18)
+
+`src/serialize.ts` (278 lines) is the blob; `leafmesh.ts` gained the field that
+carries it into a `.wproj`, plus the `serialize()` hook behind it and a
+`loadSTRUCT` that rehydrates the mesh and drops the carrier:
+
+```
+leafmesh.LeafMeshData {
+  _data        : arraybuffer(byte) | this.serialize();
+  symmetryAxes : int;
+}
+```
+
+**Layout.** A 16-byte header (two magic words, a version, a reserved word), five
+element counts, then the authoritative columns in a fixed order — `v.co`,
+`e.v1`, `e.v2`, `c.v`, `c.next`, `l.c`, `l.next`, `f.l` — then a layer count and,
+per layer, `(domain, type, flags, ctorTag)`, `(size, 0)`, an f64 fill, a
+length-prefixed name, and the column data. Everything is kept 4-byte aligned so a
+column is a bulk copy rather than a `DataView` loop; the reader copies out of the
+blob rather than viewing into it, because the `Uint8Array` nstructjs hands back
+carries no alignment guarantee of its own. Byte order is the host's, as it is for
+LiteMesh's engine blob.
+
+Decisions worth recording:
+
+- **Dense on disk, live mesh untouched.** §5 originally said to `compact()`
+  before writing; that bullet is corrected in place. Saving must not move an
+  element out from under a handle holder, so `denseOrder()` builds the same remap
+  table `compact()` would and the writer gathers through it.
+- **The fill is written as an f64**, not packed into the u32 header words
+  alongside the layer's domain/type/flags/width. A column's fill is an ordinary
+  `number` and is routinely fractional; a `0.5` mask fill truncates to `0` the
+  moment it goes through an integer field, and every page allocated lazily
+  afterwards is then wrong. `tests/unit/leafmesh/serialize.test.ts` pins that
+  case specifically.
+- **A layer's width is checked, not trusted.** On load the layer is re-declared
+  through `attrs.add(...)`, which owns the width for a known name; if the file
+  disagrees the load throws rather than reinterpreting the bytes.
+- **Only `persistentLayers()` are written**, which is where the `TEMP` exclusion
+  §5 asks for already lives — so the LiteMesh failure mode (spatial `.node`
+  attributes bloating and then corrupting files) is structurally unavailable.
+- **`loadSTRUCT` clears the active and highlight handles.** The file is
+  renumbered on the way in, so a saved handle would name a different element.
+  Selection survives because it is an ordinary attribute layer (§4b), not a
+  handle.
+- **An empty or truncated `_data` loads as an empty mesh**, not as a throw: the
+  file still opens and the block is visibly empty rather than absent.
+
+**Tests.** `tests/unit/leafmesh/serialize.test.ts`, 7 tests: a cube round-trips;
+a hole-bearing face keeps both rings, in order; tombstones never reach the file;
+attribute layers survive and `TEMP` ones do not; a `0.5` float fill survives; an
+empty mesh round-trips; and a foreign blob and a future version each throw with a
+distinguishable message.
+
+**Probe.** End to end through `.wproj` with the addon *absent* in the middle —
+build a cube with a corner `uv` layer, a vertex selection and `symmetryAxes = 5`;
+save; disable `leafmesh`; load (the block parks as a `MissingDataBlock`, 1023
+bytes, `lib_id` kept); re-save while parked; re-enable; load. Result: the block
+comes back as a real `LeafMeshData` on its original object, 8 verts / 12 edges /
+6 faces, `uv[0] == 0.25`, `symmetryAxes == 5`, selection `[0,1,2]`, 12 triangles,
+`validateAndRepair()` returning 0.
+
+**Two host defects found — both P10's, neither a P7/P8 contract gap.** The probe
+above failed twice before it passed, in `AddonAPI.unregisterAll` and in the
+`MissingDataBlock` save path. Neither fix contains anything LeafMesh-shaped —
+the teardown bug was reproduced against `curve` and `mesh` unchanged — so §2's
+rule does not apply: this is not a host change made to accommodate a new geometry
+type, it is a bug in the previous phase that a new geometry type was the first to
+walk into. They are recorded and fixed as a **P10 commit**, under §11 of
+[2026-08-15-0345-serialization-and-file-compat-hardening.md](2026-08-15-0345-serialization-and-file-compat-hardening.md),
+so P11's own diff keeps `scripts/` empty per criterion 12. `file_compat.test.ts`
+gained the enable/disable cycle that would have caught them.
+
 ## 5. Serialization
 
 - **Authoritative columns only.** `v.co`, `e.v1/v2`, `c.v`, `c.next`, `l.c`,
@@ -186,10 +259,13 @@ extension.
   are rebuilt by `rebuildDerivedTopo()` on load (P3). (This list said
   `f.listCount` was authoritative; it is not — `topo.ts:975`, inside
   `rebuildDerivedTopo`, recomputes it from the loop ring. Corrected 2026-08-18.)
-- **Compact before writing.** `compact()` returns remap tables (P3); apply them
-  to the columns being written so a file never carries tombstones. Anything
-  holding indices across the compaction — nothing should, at save time — is a
-  bug.
+- **Dense on disk, but do not compact the live mesh.** (This bullet said
+  "compact before writing", calling `compact()` on the mesh being saved.
+  Corrected 2026-08-18: saving is not allowed to move an element out from under
+  a handle holder — a toolmode's active element, an undo step, a modal
+  operator's cached indices — and `compact()` does exactly that. `serialize.ts`
+  builds the same remap table `compact()` would, uses it to write dense columns,
+  and leaves the mesh alone. The file still never carries tombstones.)
 - Follow LiteMesh's precedent: a `_data` blob field
   (`iter(byte)` + a `serialize()` hook), which keeps the per-element read out of
   nstructjs's per-byte path. That path is a measured startup hotspot for large
@@ -261,7 +337,8 @@ consumer of that mechanism.
 2. ~~`leafmesh.ts` — DataBlock + `SceneObjectData`, against P7's interfaces.
    Compile before implementing: the type errors are the contract's to-do
    list.~~ **Done 2026-08-18 — see §4b.**
-3. `serialize.ts` — round-trip a primitive from P3 through `.wproj`.
+3. ~~`serialize.ts` — round-trip a primitive from P3 through `.wproj`.~~
+   **Done 2026-08-18 — see §4c.**
 4. `draw.ts` — flat render first, then the attribute-driven material (§7).
 5. `pick.ts` — click-select, box, circle.
 6. OBJ import (§6).

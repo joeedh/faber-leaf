@@ -24,3 +24,5 @@ export type {Tri} from './triangulate.js'
 
 export {makeCube, makeGrid, makePlane, makeTube, makeUVSphere} from './primitives.js'
 export type {PrimitiveResult} from './primitives.js'
+
+export {LEAFMESH_BLOB_VERSION, deserializeLeafMesh, serializeLeafMesh} from './serialize.js'

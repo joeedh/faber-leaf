@@ -49,6 +49,7 @@ import {DataAPI, DataStruct, nstructjs} from '@framework/pathux'
 
 import {AttrFlags, AttrType, DOMAIN_COUNT, Domain} from './attrs.js'
 import {ELEM_NONE} from './elem_array.js'
+import {deserializeLeafMesh, serializeLeafMesh} from './serialize.js'
 import {LeafMesh} from './topo.js'
 import {TriangulationCache, triangulateMesh} from './triangulate.js'
 
@@ -88,6 +89,7 @@ export class LeafMeshData extends SceneObjectData {
     this,
     `
 leafmesh.LeafMeshData {
+  _data        : arraybuffer(byte) | this.serialize();
   symmetryAxes : int;
 }`
   )
@@ -107,6 +109,9 @@ leafmesh.LeafMeshData {
   private _active = new Int32Array(DOMAIN_COUNT).fill(ELEM_NONE)
   private _highlight = new Int32Array(DOMAIN_COUNT).fill(ELEM_NONE)
   private _activeAttr: (string | undefined)[] = new Array(DOMAIN_COUNT).fill(undefined)
+
+  /** Blob carrier: populated by nstructjs during load, consumed by loadSTRUCT. */
+  _data?: number[] | Uint8Array | ArrayBuffer
 
   // ------------------------------------------------------------ registration
 
@@ -166,6 +171,30 @@ leafmesh.LeafMeshData {
     }
 
     return mstruct
+  }
+
+  // ----------------------------------------------------------- serialization
+
+  /** The `_data` blob: authoritative columns only, see serialize.ts. */
+  serialize(): Uint8Array {
+    return serializeLeafMesh(this.mesh)
+  }
+
+  loadSTRUCT(reader: nstructjs.StructReader<this>): void {
+    reader(this)
+    super.loadSTRUCT(reader)
+
+    // An older or truncated block loads as an empty mesh rather than throwing;
+    // the file still opens, and the block is visibly empty rather than absent.
+    if (this._data instanceof ArrayBuffer || this._data?.length) {
+      this.mesh = deserializeLeafMesh(new Uint8Array(this._data as ArrayBuffer))
+    }
+    this._data = undefined
+
+    // The loader renumbers, so a saved handle would name a different element.
+    this._active.fill(ELEM_NONE)
+    this._highlight.fill(ELEM_NONE)
+    this.triCache.invalidate()
   }
 
   // --------------------------------------------------------------- lifecycle
