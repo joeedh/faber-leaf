@@ -164,6 +164,10 @@ export type {IUniformsBlock, ShaderProgram} from './webgl/webgl.js'
 export * as webgl from './webgl/webgl.js'
 export {Shapes, setShapesObjLoader} from './webgl/simplemesh_shapes.js'
 
+// webgpu/* — a provider that brings its own Drawable creates its own vertex
+// buffers, so it needs the usage flags the DOM lib declares as types only.
+export {BufferUsage, MapMode, ShaderStage, TextureUsage} from './webgpu/flags.js'
+
 // render/* — backend-agnostic DrawQueue dispatch
 export {WebGLDrawQueueAdapter} from './render/queue.js'
 export type {DrawQueue, FrameContext, Submission, Drawable} from './render/queue.js'
