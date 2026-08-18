@@ -43,11 +43,16 @@ import type {
   ISpatialQueryable,
   ISymmetryAware,
   ITriangleSource,
+  DrawQueue,
+  FrameContext,
+  SceneObject,
+  View3D,
   ViewContext,
 } from '@framework/api'
 import {DataAPI, DataStruct, nstructjs} from '@framework/pathux'
 
 import {AttrFlags, AttrType, DOMAIN_COUNT, Domain} from './attrs.js'
+import {LeafMeshDrawable} from './draw.js'
 import {ELEM_NONE} from './elem_array.js'
 import {deserializeLeafMesh, serializeLeafMesh} from './serialize.js'
 import {LeafMesh} from './topo.js'
@@ -103,6 +108,9 @@ leafmesh.LeafMeshData {
 
   /** Per-face triangle memo; keyed on `mesh.topoStamp`, so it self-invalidates. */
   triCache = new TriangulationCache()
+
+  /** Draw-side vertex buffers; created on the first frame, not on load. */
+  private _drawable?: LeafMeshDrawable
 
   symmetryAxes = 0
 
@@ -256,6 +264,9 @@ leafmesh.LeafMeshData {
     }
     if (what & InvalidationKind.TOPOLOGY) {
       this.mesh.topoStamp++
+    }
+    if (what & (InvalidationKind.TOPOLOGY | InvalidationKind.POSITIONS | InvalidationKind.ATTRIBUTES)) {
+      this._drawable?.invalidate()
     }
 
     this.updateGen = (this.updateGen ?? 0) + 1
@@ -504,6 +515,39 @@ leafmesh.LeafMeshData {
     }
 
     return {positions, indices, normals: accumulateNormals(positions, indices)}
+  }
+
+  // -------------------------------------------------------------------- draw
+
+  /**
+   * The vertex buffers this mesh draws from. Held rather than rebuilt per frame
+   * so a static mesh uploads once; every mutation path reaches it through
+   * {@link invalidate}.
+   */
+  get drawable(): LeafMeshDrawable {
+    if (this._drawable === undefined) {
+      this._drawable = new LeafMeshDrawable(this.mesh, this.triCache)
+    }
+    return this._drawable
+  }
+
+  drawQ(view3d: View3D, queue: DrawQueue, frame: FrameContext, object: SceneObject): void {
+    if (frame.program === undefined) {
+      return
+    }
+    queue.submit({pipeline: frame.program, mesh: this.drawable})
+  }
+
+  onContextLost(e: Event): void {
+    super.onContextLost(e)
+    this._drawable?.dispose()
+    this._drawable = undefined
+  }
+
+  destroy(): void {
+    super.destroy()
+    this._drawable?.dispose()
+    this._drawable = undefined
   }
 
   // ---------------------------------------------------------- active element

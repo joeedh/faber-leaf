@@ -26,3 +26,6 @@ export {makeCube, makeGrid, makePlane, makeTube, makeUVSphere} from './primitive
 export type {PrimitiveResult} from './primitives.js'
 
 export {LEAFMESH_BLOB_VERSION, deserializeLeafMesh, serializeLeafMesh} from './serialize.js'
+
+export {buildDrawGeometry, drawAttrNames, gatherDrawAttr, recalcVertexNormals, resolveDrawAttr} from './draw_buffers.js'
+export type {DrawGeometry} from './draw_buffers.js'

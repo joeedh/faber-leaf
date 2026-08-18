@@ -251,6 +251,72 @@ walk into. They are recorded and fixed as a **P10 commit**, under §11 of
 so P11's own diff keeps `scripts/` empty per criterion 12. `file_compat.test.ts`
 gained the enable/disable cycle that would have caught them.
 
+## 4d. Step 4a as landed (2026-08-18) — flat render
+
+Two modules, split on whether they can see the host:
+
+- `src/draw_buffers.ts` (190 lines) — pure CPU, imports nothing from `scripts/`,
+  so plain jest can exercise it. Flattens the triangulation into **unshared
+  triangle corners**: `buildDrawGeometry` (position + normal, `triCount * 9`
+  floats each), `recalcVertexNormals` (area-weighted, into the derived `v.no`
+  column `topo.ts` declares but never fills), and `gatherDrawAttr` /
+  `resolveDrawAttr` / `drawAttrNames` for the attribute half.
+- `src/draw.ts` (200 lines) — `LeafMeshDrawable implements Drawable`. Owns one
+  CPU array and one `GPUBuffer` per slot, binds slot 0 = position, 1 = normal,
+  and (step 4b) any requested attribute at the slot the shader generator
+  assigned.
+
+`leafmesh.ts` gained `get drawable()`, `drawQ`, and the two lifecycle overrides
+that free the buffers (`onContextLost`, `destroy`); `invalidate()` forwards
+TOPOLOGY | POSITIONS | ATTRIBUTES to the drawable. `main.ts` declares
+`vertexAttrs: LEAFMESH_VERTEX_ATTRS` on the kind descriptor.
+
+Decisions worth recording:
+
+- **Unshared corners, not an index buffer.** An attribute layer may live on any
+  domain — a UV on a corner, a material index on a face — and one shared vertex
+  cannot carry two values of one attribute. Three vertices per triangle costs
+  memory and buys a single gather routine that is correct for every domain.
+- **LeafMesh brings its own `Drawable` rather than filling a `SimpleMesh`.**
+  `SimpleIsland.drawGPU` binds a fixed buffer per layer *type* — uv at slot 2,
+  colour at 3 — and a material's `AttributeNode` reads start at slot 2 as well.
+  That collision is the first entry under
+  [geometry-contract.md](../geometry-contract.md) §11, which says the fix
+  belongs to whatever replaces the BREP mesh, not to this plan. Binding by name
+  at the slot the generator assigned sidesteps it entirely.
+- **No host edit was needed to get a device.** `WebGPUDrawQueueAdapter.submit`
+  already calls a duck-typed `_uploadGpuBuffers(device)` on the submitted mesh
+  and pre-binds a shared zero buffer to every pipeline slot the mesh does not
+  supply, so an addon `Drawable` is a first-class citizen of the queue as it
+  stands. The underscore is the adapter's name for the hook, not ours.
+- **`vertexAttrs` stops at the base pair.** Everything past slot 1 follows the
+  *material*, not the geometry (geometry-contract §10.2), so the kind descriptor
+  declares position and normal and nothing else.
+- **`camera.ts:163,165` did not surface.** §7 asked for a report if the
+  `scheduleRawGLPass` throw appeared here; it did not — P8's call-site fix
+  holds.
+
+**Tests.** `tests/unit/leafmesh/draw_buffers.test.ts`, 16 tests: a quad
+flattens to unshared corners; every corner position matches its vertex; an
+empty mesh yields empty buffers; a flat grid gets unit +z normals and a cube
+gets outward ones; area weighting favours the larger triangle; corner beats
+vertex in name resolution; a missing name gathers to `undefined`; vertex, face
+and corner layers each gather onto the right element; a narrow layer zero-fills
+with w = 1 and a wide one truncates; a `Byte` layer is copied numerically
+rather than normalized; and `drawAttrNames` skips dot-prefixed and boolean
+layers and deduplicates across domains.
+
+**Probe.** Headless NW.js, WebGPU up: empty the scene to one light, render and
+capture; add a size-4 LeafMesh cube, render and capture again; diff. **60,627
+pixels changed** (3.1% of a 1745×1122 canvas), mean colour of the changed
+region **(97, 97, 97)** — lit grey, which is exactly what `BASIC_LIT_MESH_WGSL`
+produces with vertex colour `#ifdef`-ed out. `drawable.triCount === 12` for the
+cube's six quads.
+
+**One contract gap, G1 below** — the WebGPU usage-flag constants were not on the
+hub. Fixed as its own P7 commit, so this step's diff keeps `scripts/` empty per
+criterion 12.
+
 ## 5. Serialization
 
 - **Authoritative columns only.** `v.co`, `e.v1/v2`, `c.v`, `c.next`, `l.c`,
@@ -303,7 +369,8 @@ So:
   vertex layout from it via the generalized builder.
 - Prove it: **a material with an `AttributeNode` reading a LeafMesh-authored
   attribute layer must render**, through both compile sites
-  (`renderengine_realtime.ts:708`, `view3d_draw_webgpu.ts:490`). That is
+  (`renderengine_realtime.ts:713`, `view3d_draw_webgpu.ts:494` — the plan's
+  2026-08-15 line numbers, 708/490, drifted by the P7/P8 commits). That is
   criterion 13, and it is not proved by the mesh appearing on screen in a flat
   colour.
 - If `camera.ts:163,165`'s `scheduleRawGLPass` throw surfaces here, P8 was
@@ -340,6 +407,8 @@ consumer of that mechanism.
 3. ~~`serialize.ts` — round-trip a primitive from P3 through `.wproj`.~~
    **Done 2026-08-18 — see §4c.**
 4. `draw.ts` — flat render first, then the attribute-driven material (§7).
+   Flat render **done 2026-08-18 — see §4d**; the attribute-driven half is the
+   second half of this step.
 5. `pick.ts` — click-select, box, circle.
 6. OBJ import (§6).
 7. The criterion-12 audit: `git diff --stat scripts/` for the whole plan must be
@@ -387,3 +456,26 @@ consumer of that mechanism.
   and closed in P7 or P8.
 - `pnpm check:layers` unchanged (LeafMesh introduces no host edges by
   construction); `pnpm test` and `pnpm typecheck` green.
+
+## Contract gaps (found 2026-08-18)
+
+Per §2, each entry is: what LeafMesh needed, which host file would otherwise
+have been special-cased, and how P7/P8 was extended instead.
+
+### G1 — WebGPU usage-flag constants were not on the hub
+
+**Needed.** A provider that brings its own `Drawable` creates its own vertex
+buffers, so it calls `device.createBuffer({usage: VERTEX | COPY_DST})`. The TS
+DOM lib in use declares `GPUBufferUsage` as a *type* and not as a runtime
+value, which is why `scripts/webgpu/flags.ts` mirrors the spec-fixed numbers in
+the first place.
+
+**Would have been special-cased as.** A second private copy of the same
+constants inside `addons/builtin/leafmesh/src/draw.ts` — spec-fixed, so it
+would have worked, and would have been the addon quietly re-deriving a host
+primitive rather than importing one.
+
+**Fixed in P7 as.** `framework_api.ts` re-exports `BufferUsage`, `TextureUsage`,
+`ShaderStage` and `MapMode` from `scripts/webgpu/flags.js`. The hub rule in
+CLAUDE.md already covers this case — "if a symbol is missing from the hub, add
+it there" — and every addon that draws needs them, not just this one.

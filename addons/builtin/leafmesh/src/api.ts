@@ -33,3 +33,6 @@ export type {PrimitiveResult} from './primitives.js'
 export {LEAFMESH_BLOB_VERSION, deserializeLeafMesh, serializeLeafMesh} from './serialize.js'
 
 export {LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry} from './leafmesh.js'
+
+export {LEAFMESH_VERTEX_ATTRS, LeafMeshDrawable} from './draw.js'
+export type {RequestedDrawAttr} from './draw.js'

@@ -9,12 +9,13 @@
  *
  * `"dependencies": []` — the first builtin with none. See P11 §4.
  *
- * This module registers the kind descriptor and the data class; draw, picking,
- * serialization and OBJ import arrive in P11 steps 3-6, and the descriptor
- * grows `vertexAttrs` / `importExtensions` with them.
+ * This module registers the kind descriptor and the data class; picking and OBJ
+ * import arrive in P11 steps 5-6, and the descriptor grows `importExtensions`
+ * with them.
  */
 
 import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
+import {LEAFMESH_VERTEX_ATTRS} from './draw.js'
 import * as leafmesh from './index.js'
 import {LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry} from './leafmesh.js'
 
@@ -39,6 +40,7 @@ export function register(api: AddonAPI<IAddon>) {
     factory     : LeafMeshData,
     capabilities: LEAFMESH_CAPABILITIES,
     usesMaterial: true,
+    vertexAttrs : LEAFMESH_VERTEX_ATTRS,
   })
 }
 
