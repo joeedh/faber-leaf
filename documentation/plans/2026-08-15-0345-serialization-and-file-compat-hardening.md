@@ -748,3 +748,55 @@ flag; `documentation/native-electron-test-harness.md` says so.
   named here.
 - The three dying fixtures are rehomed and the new concrete-struct-field
   fixtures are committed.
+
+## 11. Two defects found later (2026-08-18, during P11)
+
+P11 §5 asks for a `.wproj` round-trip that survives the owning addon being
+absent, on the grounds that LeafMesh is a good second test of this plan's
+machinery. It was: the probe failed twice, in this plan's code, and neither
+failure is LeafMesh-shaped. Both are fixed under `scripts/`, as a P10 commit
+rather than a P11 one, because P11's exit criterion 12 requires its own diff to
+leave `scripts/` untouched.
+
+**Why §8's suite missed both.** `file_compat.test.ts` exercises a build that
+*never enabled* curve, not one that turned it off. `AddonManager.disable` returns
+early when the record is already disabled, so the teardown path never ran — and
+because `nstructjs.inlineRegister` fires as a static-field initializer at module
+*import*, the curve structs were sitting in the manager the whole time regardless
+of the addon's state. Confirmed by running the suite against a build with both
+fixes reverted: 18/18 still pass. The suite now cycles curve on and off twice
+before it loads the fixture, which puts it on the harder path — with the cycle
+in and the fixes reverted, 8 of 19 fail, the full-build boot dying in
+`CurveSpline.loadSTRUCT` on exactly the `undefined` schema described below;
+with the fixes, 19/19.
+
+**1. Teardown unregistered a class once per list it was filed under.**
+`AddonAPI.register` files a class under *every* matching list, so a
+`SceneObjectData` subclass — which is also a `DataBlock` — lands in two.
+`unregisterAll` then called `unregister(cls)` twice, and the second
+`DataBlock.unregister` hit path.ux's `Array.remove`, which throws `item not in
+array`. That aborted the loop before `_undoRegistrations` ran, so the addon's
+data kind stayed registered and the *next* enable failed with `data kind
+"<id>" is already registered`. Not addon-specific: curve and mesh fail
+identically. Fixed by deduping on identity and logging rather than propagating a
+per-class failure, so one bad class cannot strand the rest of the teardown.
+
+**2. A parked block's bytes outlived the schema needed to read them.**
+`MissingDataBlock` keeps the payload, but a `.wproj` describes its contents with
+one `write_scripts()` of the *live* manager, and disabling the addon had just
+removed its structs from that manager. So a partial build could save the bytes
+and then never read them back: the next load, with the addon returned, died on
+`this.structs[cls.structName]` being `undefined`. The `onUnknownClass` hook
+already did the equivalent for the placeholder kinds it handles
+(`registerMissingStructGlobally`); the DataBlock path never reaches that hook,
+because appstate resolves block classes itself. Fixed by
+`preserveMissingBlockSchemas(istruct)`, called from that branch.
+
+It preserves *every* struct the file declares and this build lacks, not just the
+one that was parked, and that is not laziness: a DATABLOCK record carries the
+block's `blockDefine().typeName` (`"leafmesh"`), never its struct name
+(`"leafmesh.LeafMeshData"`), and with the addon absent nothing maps one to the
+other. A first attempt keyed on the record's `clsname` and silently no-oped for
+exactly that reason. Everything a file declares and this build does not know is,
+by construction, from something not loaded — which is precisely the set that has
+to survive.

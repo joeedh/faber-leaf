@@ -716,9 +716,22 @@ export class AddonAPI<T> {
       }
     }
 
+    // A class that is both a DataBlock and a SceneObjectData is filed under two
+    // lists, and unregistering it twice throws ("item not in array"), which
+    // would abort the rest of the teardown and leave the addon un-re-enableable.
+    const seen = new Set<unknown>()
     for (const k in this.classes) {
       for (const cls of this.classes[k as keyof typeof this.classes]) {
-        this.unregister(cls)
+        if (seen.has(cls)) {
+          continue
+        }
+        seen.add(cls)
+
+        try {
+          this.unregister(cls)
+        } catch (error) {
+          console.error('Failed to unregister an addon class', cls, error)
+        }
       }
     }
 

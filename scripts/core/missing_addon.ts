@@ -313,6 +313,38 @@ function registerMissingStructGlobally(clsname: string, fileSchema: FileSchema):
 }
 
 /**
+ * Preserve the *file's* schema for every struct this build does not know, so the
+ * next `write_scripts()` re-emits them and a later load — with the owning addon
+ * back — can still read the bytes `MissingDataBlock` kept. Without this the
+ * placeholder's payload survives a save while the addon is off, but the schema
+ * needed to interpret it does not, and the next load dies on
+ * `this.structs[cls.structName]`.
+ *
+ * It cannot be narrowed to the one class that was parked: a DATABLOCK record
+ * names the block's `blockDefine().typeName` ("leafmesh"), never its struct name
+ * ("leafmesh.LeafMeshData"), and with the addon absent nothing maps one to the
+ * other. Everything the file declares and this build lacks is, by construction,
+ * from something not loaded — which is exactly what has to survive.
+ *
+ * The `onUnknownClass` hook does the same for the placeholder kinds it handles;
+ * the DataBlock path never reaches that hook, because appstate resolves block
+ * classes itself.
+ */
+export function preserveMissingBlockSchemas(istruct: unknown): void {
+  const structs = (istruct as {structs?: Record<string, FileSchema>} | undefined)?.structs
+  if (!structs) {
+    return
+  }
+
+  const manager = getManager()
+  for (const name in structs) {
+    if (!(name in manager.structs)) {
+      registerMissingStructGlobally(name, structs[name])
+    }
+  }
+}
+
+/**
  * Re-attach the base graph save-getters that `write_scripts(include_code=false)`
  * stripped from the embedded file schema. Without them the writer packs live
  * objects where ints/arrays are expected (see plan "Why getter re-injection is

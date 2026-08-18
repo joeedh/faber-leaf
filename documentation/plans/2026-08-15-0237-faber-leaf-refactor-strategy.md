@@ -1695,6 +1695,11 @@ ungrounded input just argues a wrong plan more convincingly.
   that plan: §4.2a (the struct-path sweep), §4.3a, §5a ("curve + tet + hair" is
   really just curve — `TetMesh` and `strands` are core blocks) and §5b (the
   `graph_missing_nodes.test.ts` row below does *not* die with the mesh addon).
+  Two defects escaped and were found by P11's second use of this machinery — a
+  double-unregister in addon teardown, and a parked block outliving the schema
+  needed to read it. Both fixed 2026-08-18 and recorded in that plan's §11;
+  `file_compat.test.ts` never caught them because it exercised a build that had
+  never enabled the addon rather than one that turned it off.
   - Builds the unloaded-addon round-trip invariant from §4 W1 step 5. It applies
     to *any* addon that is not loaded — disabled, uninstalled, absent from
     `faber-leaf-core`, or deleted — so this is written once, generically, and not

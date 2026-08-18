@@ -20,8 +20,12 @@
  * Two headless boots, both under addon set B (the default set, which does *not*
  * enable curve):
  *
- * - boot 1 loads the fixture, makes an unrelated edit, re-saves it, and re-loads
- *   its own output;
+ * - boot 1 cycles curve on and off twice, loads the fixture, makes an unrelated
+ *   edit, re-saves it, and re-loads its own output. The cycle matters: with
+ *   curve off by default, `disable` would return early and the teardown path
+ *   would never run, so the re-save would be describing bytes from an addon
+ *   this build had never *had* rather than one it had turned off — the weaker
+ *   of the two cases, and the one that hides a dropped struct schema;
  * - boot 2 enables curve **and** tetmesh — adding as well as removing an addon
  *   relative to A, which is what criterion 8 asks for — and opens boot 1's
  *   output.
@@ -92,6 +96,8 @@ interface PartialResult {
   error?: string
   stack?: string
   curveEnabled?: boolean
+  /** enable → disable → enable → disable, taken before the fixture is loaded. */
+  cycle?: {ok: boolean; reason: string | null}[]
   afterLoad?: PartialProbe
   afterResave?: PartialProbe
   resavedBytes?: number
@@ -180,7 +186,14 @@ function partialBuildEval(fixture: string, resaved: string): string {
   try {
 ${EVAL_PRELUDE}
     const am = window._addons
-    am.disable('curve')
+
+    // Turn curve *on* and back off twice before anything else. Left alone this
+    // build never enables curve, so disable() returns early and the teardown
+    // path -- the one that drops the addon's struct schemas, and that used to
+    // throw on a class filed as both DataBlock and SceneObjectData -- was never
+    // entered. Everything below then runs against a build that had the addon
+    // and turned it off, which is the harder of the two cases.
+    const cycle = [am.enable('curve'), am.disable('curve'), am.enable('curve'), am.disable('curve')]
 
     const probe = () => {
       const lib = _appstate.datalib
@@ -233,6 +246,7 @@ ${EVAL_PRELUDE}
     return {
       ok          : true,
       curveEnabled: am.idmap.get('curve').enabled,
+      cycle       : cycle.map((r) => ({ok: r.ok, reason: r.reason ?? null})),
       afterLoad,
       afterResave,
       resavedBytes: buf.byteLength,
@@ -364,6 +378,19 @@ describeMaybe('cross-build .wproj compatibility (P10)', () => {
 
   test('the reading build really does not have the addon that wrote the file', () => {
     expect(partial.curveEnabled).toBe(false)
+  })
+
+  test('an addon survives being enabled and disabled repeatedly', () => {
+    // A class filed under two of AddonAPI's lists — every SceneObjectData is
+    // also a DataBlock — used to be unregistered twice, and the second throw
+    // aborted the teardown before it could undo the addon's registrations. The
+    // second enable is the one that noticed, with "already registered".
+    expect(partial.cycle).toEqual([
+      {ok: true, reason: null},
+      {ok: true, reason: null},
+      {ok: true, reason: null},
+      {ok: true, reason: null},
+    ])
   })
 
   test('criterion 5: the unknown block keeps its bytes across load → save → load', () => {
