@@ -41,7 +41,7 @@ import {calcTransCenter} from './transform_query.js'
 import {CastModes, castViewRay} from '../findnearest.js'
 
 import {ModalFlags} from '../../../core/modalflags.js'
-import {MeshFlags, MeshTypes} from '../../../../addons/builtin/mesh/src/mesh_base.js'
+import {MeshFlags} from '../../../../addons/builtin/mesh/src/mesh_base.js'
 
 import type {ViewContext} from '../../../core/context.js'
 import type {Mesh} from '../../../../addons/builtin/mesh/src/mesh.js'
@@ -1713,7 +1713,7 @@ export class InflateOp<Inputs extends PropertySlots = {}, Outputs extends Proper
 
     const factor = this.inputs.factor.getValue()
 
-    const norSelOnly = this.inputs.selmask.getValue() & MeshTypes.FACE
+    const norSelOnly = this.inputs.selmask.getValue() & SelMask.FACE
     const n = new Vector3()
 
     function calcNormal(v: {no: Vector3; faces: Iterable<{flag: number; no: Vector3}>}) {

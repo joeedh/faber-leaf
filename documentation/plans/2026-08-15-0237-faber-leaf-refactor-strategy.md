@@ -1316,7 +1316,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P6 | [W1a — `SelMask` format migration](./2026-08-15-0325-w1-selmask-format-migration.md) | W1 §1 | 4 | P1 | **landed** |
 | P7 | [W1b — host geometry contract](./2026-08-15-0330-w1-host-geometry-contract.md) | W1 §1, §3(a)(b) | 4 | P6 | **landed** |
 | P8 | [W1c — registry hooks + string-key severing](./2026-08-15-0335-w1-registry-hooks-and-string-key-severing.md) | W1 §0, §2 | 5 | P7 | **landed** |
-| P9 | [W1d — layer ratchet to `error`](./2026-08-15-0340-w1-layer-ratchet.md) | W1 §3 | 6 | P8 | **written** |
+| P9 | [W1d — layer ratchet to `error`](./2026-08-15-0340-w1-layer-ratchet.md) | W1 §3 | 6 | P8 | **landed** |
 | P10 | [Serialization + file-compat hardening](./2026-08-15-0345-serialization-and-file-compat-hardening.md) | W1 §5 (promoted) | 7 | P8 | **written** |
 | P11 | [LeafMesh host integration](./2026-08-15-0350-leafmesh-host-integration.md) | risk mitigation | 8 | P3, P8 | **written** |
 | P12 | [LeafMesh modeling toolmode](./2026-08-15-0355-leafmesh-modeling-toolmode.md) | open decisions #2, #8 | 8 | P11 | **written** |
@@ -1654,14 +1654,31 @@ ungrounded input just argues a wrong plan more convincingly.
     grep tests in `tests/unit/host_string_keys.test.ts` are the only thing that
     keeps them severed.
 
-- [ ] **P9 — [W1d: layer ratchet to `error`](./2026-08-15-0340-w1-layer-ratchet.md)**
-  - Re-baseline against P1's repaired rules — the count that matters is the one
-    P1 published, not the vacuous 288/0 the current config reports.
-  - Drive the remaining violations to zero, then flip `core-no-mesh`,
-    `core-no-addons`, `util-no-mesh` to `severity: error` and add
-    `core-no-litemesh` + `core-no-sculptcore`.
-  - Any rule that cannot be driven to zero gets an explicit, dated exemption
-    with the plan that closes it — not a silent `warn`.
+- [x] **P9 — [W1d: layer ratchet to `error`](./2026-08-15-0340-w1-layer-ratchet.md)**
+  — landed 2026-08-18. Reconciled in full against P1's published table (that
+  plan's `## Reconciliation`): no unexplained increase anywhere in the chain,
+  and P4's single sanctioned +4 was repaid by P5.
+  - Ten code changes took `core-no-addons` 19 → 0, `core-no-addons-typeonly`
+    12 → 7, `core-no-addons-transitive` 1152 → 800, `no-circular` 631 → 586.
+  - **Six of seven rules are now `severity: error` and read zero**:
+    `core-no-mesh`, `core-no-view3d-tools`, `util-no-mesh`, `core-no-addons`,
+    `core-no-litemesh`, `core-no-sculptcore`.
+  - **Departure — `core-no-addons-transitive` stays `warn` (800), owned by
+    P13.** Every surviving route runs through a BREP-consumer intermediate, and
+    dependency-cruiser 17.4.0's `IReachabilityToRestrictionType` admits only
+    `path` / `pathNot` / `reachable`, so "reachable except via X" is
+    inexpressible. It flips for free once P13 deletes the intermediates —
+    **added to P13's exit criteria.** See that plan's §8a for the three
+    rejected alternatives.
+  - **Departure — three exemption groups, not two**, and they are a *named
+    rule* (`brep-consumers-no-addons`, budget 13) rather than a carve-out, so
+    the exempted edges stay counted and ratcheted instead of going invisible.
+    All 20 remaining violations are BREP code or BREP types; there is no third
+    category.
+  - Gate is now tested: `tests/unit/layer_gate.test.ts` drives
+    `tools/layer-gate.mjs` from canned cruise JSON (11 cases).
+  - **Open — needs a repo admin:** marking the `layers` job a *required* status
+    check on the protected branch. Last item on the plan's exit criteria.
   - Exit: success criterion #1.
 
 > **⏸ Pause — compact, then switch to `xhigh`.** P10 is the one plan whose
@@ -1907,7 +1924,7 @@ its content. All three must be answered before phase 9 is scheduled.
 | 0a. PR workflow blocks on test/typecheck/lint/layers | P1 |
 | 0b. `check:layers` runs clean and measures the right paths | P1 |
 | 0c. `typecheck` covers every addon source file | P1 |
-| 1. `check:layers` at `error` from a published baseline | P9 |
+| 1. `check:layers` at `error` from a published baseline | P9 (six rules, landed 2026-08-18), P13 (`core-no-addons-transitive`) |
 | 2. No `addons/builtin/mesh` references — incl. Class E/F greps | P8 (sever), P13 (delete) |
 | 3. Deinitialized submodule still installs/builds/boots | P16 |
 | 4. Default sculptcore-present lane still gates merges | P1 (lane), P16 (keep it working) |

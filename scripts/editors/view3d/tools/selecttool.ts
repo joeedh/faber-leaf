@@ -2,7 +2,7 @@ import {FindNearest} from '../findnearest.js'
 import {ObjectFlags, SceneObject} from '../../../sceneobject/sceneobject.js'
 import {ToolMode} from '../view3d_toolmode.js'
 import {SelMask, SelOneToolModes} from '../../../core/select_types.js'
-import {Mesh} from '../../../../addons/builtin/mesh/src/mesh.js'
+import type {SceneObjectData} from '../../../sceneobject/sceneobject_base.js'
 import {Shaders} from '../../../shaders/shaders.js'
 import {Vector2} from '../../../util/vectormath.js'
 import {View3DFlags} from '../view3d_base.js'
@@ -223,7 +223,7 @@ view3d.ObjectEditor {
     uniforms: IUniformsBlock,
     program: ShaderProgram,
     object: SceneObject,
-    mesh: Mesh
+    data: SceneObjectData
   ): boolean {
     if (this.view3d.flag & (View3DFlags.SHOW_RENDER | View3DFlags.ONLY_RENDER)) {
       return false

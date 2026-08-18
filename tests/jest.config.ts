@@ -42,7 +42,9 @@ const config: Config = {
   forceExit: true,
 
   transform: {
-    '^.+\\.(t|j)sx?$': [
+    // .mjs included so tests can drive the repo's ESM tooling scripts (tools/*.mjs)
+    // directly; without it jest loads them as CJS and chokes on `export`.
+    '^.+\\.[mc]?[tj]sx?$': [
       '@swc/jest',
       {
         jsc: {

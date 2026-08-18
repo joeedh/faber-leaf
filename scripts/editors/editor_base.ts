@@ -985,7 +985,6 @@ import {MakeMaterialOp, Material} from '../core/material'
 import {INodeSocketSet, SocketFlags} from '../core/graph'
 import {DependSocket} from '../core/graphsockets'
 import {ImageBlock} from '../image/image'
-import type {Mesh} from '../../addons/builtin/mesh/src/mesh'
 import type {ImageEditor} from './all'
 import type {ViewContext, ToolContext} from '../core/context'
 import messageBus from '../core/bus'
@@ -1487,7 +1486,7 @@ export class MaterialChooser extends Container<ViewContext> {
     }
 
     this.button('Add Material', () => {
-      const obData = this.ctx.api.getValue<Mesh>(this.ctx, this.getAttribute('datapath')!)
+      const obData = this.ctx.api.getValue<SceneObjectData>(this.ctx, this.getAttribute('datapath')!)
       if (obData === undefined) {
         console.log('Invalid sceneobject data at ' + this.getAttribute('datapath'))
         this.ctx.error('Invalid sceneobject data at ' + this.getAttribute('datapath'))
@@ -1522,7 +1521,7 @@ export class MaterialChooser extends Container<ViewContext> {
       if (this.on_change) {
         this.on_change(id)
 
-        objectData = this.ctx.api.getValue<Mesh>(this.ctx, this.getAttribute('datapath')!)
+        objectData = this.ctx.api.getValue<SceneObjectData>(this.ctx, this.getAttribute('datapath')!)
         if (objectData !== undefined && id !== undefined) {
           this.setActive(objectData, id)
         }

@@ -33,8 +33,6 @@ import {
   StrokeMethod,
 } from '../../../brush/brush_base.js'
 import {SelMask} from '../../../core/select_types.js'
-import type {Mesh} from '../../../../addons/builtin/mesh/src/mesh'
-import {BVHFlags} from '../../../../addons/builtin/mesh/src/bvh'
 import type {ISurfaceSampler} from '../../../util/spatial'
 import type {LiteMesh} from '../../../lite-mesh/index'
 import {BrushRadiusModes, DynTopoSettings, DynTopoSettingsSC, SculptBrush} from '../../../brush/index'
@@ -506,16 +504,7 @@ export class SculptCorePaintMode extends PaintToolModeBase {
       const mesh = toolmode.ctx.mesh
 
       if (mesh?.bvh && !mesh.bvh.dead) {
-        const bvh = mesh.bvh
-
-        for (const node of bvh.nodes) {
-          if (node.leaf) {
-            node.flag |= BVHFlags.UPDATE_DRAW
-            bvh.updateNodes.add(node)
-          }
-        }
-
-        bvh.update()
+        mesh.bvh.redrawAll()
         window.redraw_viewport(true)
       }
     }

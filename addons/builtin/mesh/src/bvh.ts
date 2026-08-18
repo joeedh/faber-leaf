@@ -4909,6 +4909,22 @@ export class BVH<
     rec(this.root)
   }
 
+  /**
+   * Rebuild every leaf's draw buffers. For overlay toggles (wireframe, mask,
+   * BVH display) that change how existing geometry is drawn without changing
+   * it — so the host can ask for a redraw without knowing BVHFlags.
+   */
+  redrawAll = function (this: BVH<OPT & {dead: false}>) {
+    for (const node of this.nodes) {
+      if (node.leaf) {
+        node.flag |= BVHFlags.UPDATE_DRAW
+        this.updateNodes.add(node)
+      }
+    }
+
+    this.update()
+  }
+
   update = function (this: BVH<OPT & {dead: false}>) {
     if (this.dead) {
       console.error('BVH is dead!')

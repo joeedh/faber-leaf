@@ -8,10 +8,10 @@
  *   - the total warning count exceeds the budget (--max-warnings / baseline total);
  *   - any single rule exceeds its per-rule budget in tools/layer-baseline.json.
  *
- * Every rule is still `severity: warn` while the Faber Leaf refactor is in flight,
- * so the per-rule budget is the only thing keeping the numbers monotone. P9 is what
- * flips severities to `error`; until then, lowering a number means lowering it here
- * too (`--update-baseline`) in the same PR.
+ * P9 flipped every rule that reads zero to `error`. The rest are held monotone by
+ * their per-rule budget, so lowering a number means lowering it here too
+ * (`--update-baseline`) in the same PR. The decision half lives in layer-gate.mjs
+ * so it can be unit-tested against canned cruise JSON.
  *
  * dependency-cruiser is driven through its programmatic API rather than the CLI:
  * `execFile('npx.cmd', ...)` without a shell is a `spawn EINVAL` on Windows, and
@@ -26,6 +26,7 @@ import extractTSConfig from 'dependency-cruiser/config-utl/extract-ts-config'
 import {readFileSync, writeFileSync} from 'node:fs'
 import {fileURLToPath} from 'node:url'
 import path from 'node:path'
+import {evaluate, tally} from './layer-gate.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(__dirname, '..')
@@ -33,9 +34,6 @@ const repoRoot = path.resolve(__dirname, '..')
 const CONFIG = '.dependency-cruiser.cjs'
 const CRUISE_ROOTS = ['scripts', 'addons']
 const BASELINE = path.join(__dirname, 'layer-baseline.json')
-
-/** Severities that fail the run outright, regardless of any budget. */
-const EXIT_SEVERITIES = new Set(['error'])
 
 function parseArgv(argv) {
   const opts = {
@@ -113,25 +111,6 @@ async function runCruise() {
   return typeof result.output === 'string' ? JSON.parse(result.output) : result.output
 }
 
-/** rule name -> {severity, count, violations}, seeded with every configured rule so a
- *  rule that starts firing is a budget overrun rather than an unnoticed new key. */
-function tally(cruiseResult, ruleNames) {
-  const rules = new Map(ruleNames.map((name) => [name, {count: 0, severity: 'warn', violations: []}]))
-
-  for (const violation of cruiseResult.summary.violations) {
-    const name = violation.rule.name
-    if (!rules.has(name)) {
-      rules.set(name, {count: 0, severity: violation.rule.severity, violations: []})
-    }
-    const entry = rules.get(name)
-    entry.count++
-    entry.severity = violation.rule.severity
-    entry.violations.push(violation)
-  }
-
-  return rules
-}
-
 function printTable(rules, budgets) {
   const nameWidth = Math.max(4, ...[...rules.keys()].map((n) => n.length))
   const pad = (s, n) => String(s).padEnd(n)
@@ -174,8 +153,10 @@ async function main() {
   console.log(`check-layers: cruising ${CRUISE_ROOTS.join(' + ')} with ${CONFIG}`)
 
   const cruiseResult = await runCruise()
-  const ruleNames = (await extractDepcruiseConfig(path.join(repoRoot, CONFIG))).forbidden.map((r) => r.name)
-  const rules = tally(cruiseResult, ruleNames)
+  const {forbidden} = await extractDepcruiseConfig(path.join(repoRoot, CONFIG))
+  const ruleNames = forbidden.map((r) => r.name)
+  const ruleSeverities = Object.fromEntries(forbidden.map((r) => [r.name, r.severity]))
+  const rules = tally(cruiseResult, ruleNames, ruleSeverities)
 
   const {error, warn, info, totalCruised} = cruiseResult.summary
   console.log(`check-layers: ${totalCruised} modules, ${error} error / ${warn} warn / ${info} info`)
@@ -199,6 +180,9 @@ async function main() {
   if (opts.updateBaseline) {
     const next = {
       $comment: baseline?.$comment ?? 'Ratchet baseline for tools/check-layers.js. Only ever lower these.',
+      // Carried over rather than regenerated: $note is the hand-written audit trail
+      // for every sanctioned movement, and losing it silently defeats the ratchet.
+      $note   : baseline?.$note,
       measured: new Date().toISOString().slice(0, 10),
       config  : CONFIG,
       roots   : CRUISE_ROOTS,
@@ -210,23 +194,7 @@ async function main() {
     return 0
   }
 
-  const failures = []
-
-  for (const [name, entry] of rules) {
-    if (EXIT_SEVERITIES.has(entry.severity) && entry.count > 0) {
-      failures.push(`${name}: ${entry.count} violation(s) at severity ${entry.severity}`)
-      continue
-    }
-    const budget = baseline?.rules?.[name]
-    if (budget !== undefined && entry.count > budget) {
-      failures.push(`${name}: ${entry.count} > budget ${budget} (+${entry.count - budget})`)
-    }
-  }
-
-  const totalBudget = opts.maxWarnings ?? baseline?.total
-  if (totalBudget !== undefined && totalBudget !== null && warn > totalBudget) {
-    failures.push(`total warnings: ${warn} > budget ${totalBudget} (+${warn - totalBudget})`)
-  }
+  const failures = evaluate(rules, {baseline, maxWarnings: opts.maxWarnings, warnCount: warn})
 
   if (failures.length > 0) {
     console.error('check-layers: FAILED')

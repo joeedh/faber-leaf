@@ -4,7 +4,6 @@ import {UIBase} from '../../path.ux/scripts/core/ui_base.js'
 import {MakeMaterialOp} from '../../core/material.js'
 import {Icons} from '../icon_enum.js'
 import {nstructjs, type DataAPI, type DataStruct, type Container, type IAreaDef} from '../../path.ux/scripts/pathux.js'
-import {Mesh} from '../../../addons/builtin/mesh/src/mesh.js'
 import type {Material} from '../../core/material'
 import type {ViewContext} from '../../core/context'
 import type {StructReader} from '../../path.ux/scripts/util/nstructjs'
@@ -155,10 +154,12 @@ export class MaterialEditor extends NodeEditorBase {
 
     let updateKey = ob.name
 
-    if (ob.data instanceof Mesh) {
-      updateKey += ':ME:' + ob.data.name
+    // Material slots are a SceneObjectData concern, not a mesh one: any data kind
+    // that declares usesMaterial carries the host-owned `materials` array.
+    if (ob.data !== undefined && ob.data.usesMaterial) {
+      updateKey += ':' + ob.data.lib_id + ':' + ob.data.name
       for (const mat of ob.data.materials) {
-        updateKey += ':' + mat.lib_id
+        updateKey += ':' + mat?.lib_id
       }
     }
 

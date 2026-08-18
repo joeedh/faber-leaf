@@ -31,7 +31,11 @@ import {Icons} from '../../icon_enum.js'
 import {ConstraintSpaces} from '../transform/transform_base.js'
 import {InsetTransformOp} from '../transform/transform_inset.js'
 import type {ViewContext} from '../../../core/context.js'
-import type {Mesh} from '../../../../addons/builtin/mesh/src/mesh.js'
+
+/** The part of a BREP mesh `TransformWidget.validate` reads. Erased with the BREP at P13. */
+interface BrepSelectedVerts {
+  verts: {selected: Iterable<unknown>}
+}
 
 // Late-bound by the mesh addon's register hook so this file does not
 // statically depend on the mesh addon (which would cycle back through
@@ -109,7 +113,7 @@ export class TransformWidget extends WidgetBase {
 
     if (selmask & SelMask.GEOM) {
       for (const ob of ctx.selectedMeshObjects) {
-        for (const v of (ob.data as Mesh).verts.selected) {
+        for (const v of (ob.data as unknown as BrepSelectedVerts).verts.selected) {
           return true
         }
       }

@@ -20,7 +20,7 @@ import type {AppState} from '../../core/appstate'
 import {View3D} from '../all'
 import {DrawLine, ITempText} from './view3d'
 import {IUniformsBlock, ShaderProgram} from '../../webgl/webgl'
-import type {Mesh} from '../../../addons/builtin/mesh/src/mesh'
+import type {SceneObjectData} from '../../sceneobject/sceneobject_base'
 import type {BoundingBox} from './view3d_utils'
 import type {StructReader} from '../../path.ux/scripts/util/nstructjs'
 import {updateToolModeAPI} from '../../scene/scene_utils'
@@ -532,7 +532,7 @@ set view3d(val) {
     uniforms: IUniformsBlock,
     program: ShaderProgram,
     object: SceneObject,
-    mesh: Mesh
+    data: SceneObjectData
   ) {
     return false
   }

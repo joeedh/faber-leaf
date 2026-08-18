@@ -33,7 +33,6 @@ import {loadShader} from '../../shaders/shaders'
 import {SimpleMesh, LayerTypes} from '../../webgl/simplemesh'
 import {Vector3, Vector2, Vector4, Matrix4, Vector3Like} from '../../util/vectormath'
 import {OrbitTool, TouchViewTool, PanTool, ZoomTool} from './view3d_ops'
-import '../../../addons/builtin/mesh_edit/src/mesheditor'
 import {KeyMap, HotKey} from '../editor_base'
 import {calcTransCenter, calcTransMatrix, calcTransAABB} from './transform/transform_query'
 import {CallbackNode, Node} from '../../core/graph'
@@ -54,7 +53,6 @@ import {Overdraw} from '../../path.ux/scripts/util/ScreenOverdraw'
 import {WidgetBase} from './widgets/widgets'
 import {OptionalIfNot} from '../../util/optionalIf'
 import type {ViewContext} from '../../core/context'
-import type {Mesh} from '../../../addons/builtin/mesh/src/mesh'
 import {BusMessage} from '../../core/bus'
 import type {StructReader} from '../../path.ux/scripts/util/nstructjs'
 import * as sculptcore_demo from '../../sculptcore_demo'
@@ -1775,7 +1773,7 @@ View3D {
           scene.toolmode.ctx = this.ctx
         }
 
-        if (scene.toolmode.drawObject(gl!, uniforms, program, ob, ob.data as Mesh)) {
+        if (scene.toolmode.drawObject(gl!, uniforms, program, ob, ob.data)) {
           continue
         }
       }
