@@ -1,0 +1,11 @@
+{
+  "id": "leafmesh",
+  "name": "Leaf Mesh",
+  "version": "1.0.0",
+  "author": "joeedh",
+  "entry": "src/main.ts",
+  "dependencies": [],
+  "description": "Corner-based polygon mesh geometry type; faces are loop lists, so holes are storage, not decoration.",
+  "buildMode": "prebuilt",
+  "defaultEnabled": false
+}

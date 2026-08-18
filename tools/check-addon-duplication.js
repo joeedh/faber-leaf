@@ -27,11 +27,13 @@ import fs from 'fs'
  * bundle). Add an id here only after its main-bundle static importers have
  * been severed (relative cross-addon imports converted to `@addon/<id>/api`).
  *
- * Phase 0/1: empty (no-op gate). Phase 2: ['tetmesh'].
+ * Phase 0/1: empty (no-op gate). Phase 2: ['tetmesh']. Faber Leaf P11 adds
+ * 'leafmesh', which is external from birth — it has no host imports, so nothing
+ * ever forced it in-bundle.
  *
  * @type {string[]}
  */
-export const EXTERNAL_IDS = ['tetmesh']
+export const EXTERNAL_IDS = ['tetmesh', 'leafmesh']
 
 /**
  * Builtin addons compiled INTO the main bundle (registered via

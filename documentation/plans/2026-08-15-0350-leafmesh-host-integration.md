@@ -1,6 +1,6 @@
 # P11 — LeafMesh host integration
 
-**Status:** plan — not started.
+**Status:** in progress — step 1 landed 2026-08-18 (see §4a).
 
 **Date:** 2026-08-15
 
@@ -71,12 +71,61 @@ P14 makes it real; leave it off rather than writing a field that is silently
 dropped (`manifest.ts:9-47` does not declare it, `validateManifest:123-135` does
 not read it, `install.ts:113` does not act on it).
 
+## 4a. Step 1 as landed (2026-08-18)
+
+`manifest.json`, `src/main.ts`, `src/api.ts`. `register(api)` publishes the
+namespace and calls `registerDataKind({id: 'leafmesh', uiName: 'Leaf Mesh'})` —
+no `factory`, no `capabilities`, no `vertexAttrs`, because there is no data
+class yet to claim them for. Those fields grow with steps 2 and 4.
+
+**LeafMesh ships external, not in-bundle.** This plan did not pin it and the
+design doc §12 said "in-bundle in the default distribution", which is now
+corrected there to match. The two builtin flavours are not interchangeable: an in-bundle builtin is statically
+imported by `addons/builtin/builtin_registry.ts` and compiled into the main
+bundle; an external one is its own `build/addons/<id>/` esbuild build,
+dynamic-imported at runtime and listed in `build/addons/index.json`. The
+in-bundle set exists for the *duplication-unavoidable* subsystems — mesh and
+sculptcore are in the main bundle because the app's `data_api` eagerly imports
+them — and LeafMesh is the opposite of that: a leaf with no host imports at all.
+
+External is also the stronger criterion-12 proof, and mechanically so rather
+than by assertion. Its bundle's esbuild metafile lists exactly eight inputs,
+every one of them `addons/builtin/leafmesh/src/*`, and `'leafmesh'` was added to
+`EXTERNAL_IDS` in `tools/check-addon-duplication.js` so the build fails if any
+leafmesh module ever also lands in the main bundle. A module that cannot be in
+the main bundle cannot reach `scripts/` by relative path.
+
+Consequences worth knowing before step 2:
+
+- **It needs a build.** `pnpm build` runs `tools/build-addons.js`, but a bare
+  `node tools/esbuilder.js`-only workflow will leave `build/addons/leafmesh/`
+  stale. Rebuild addons after touching anything under `src/`.
+- **`--include-fixtures`.** `node tools/build-addons.js` alone drops
+  `api_consumer` and `test_addon` from `index.json` and breaks their suites; the
+  flag is not optional in a checkout that runs the addon tests.
+- **`defaultEnabled: false`**, matching every other builtin. Tests enable it
+  explicitly. P13 is where the default flips, if it ever does.
+
+Verified by booting NW.js headless (`--apptest-headless --app-storage-dir <tmp>
+--eval … --dump`): `leafmesh` appears in `mgr.addons` with `dependencies: []`,
+`mgr.enable('leafmesh')` returns `{ok: true}` (so `register()` and
+`registerDataKind` did not throw), and `api.exports.leafmesh` carries the same
+19 value exports `src/api.ts` re-exports. `git diff --stat scripts/` empty;
+`pnpm check:layers` unchanged (all ten rules at delta 0); `npx tsgo --noEmit`
+clean.
+
+**No contract gap found.** Nothing under `scripts/` had to change for a
+zero-dependency addon to register a data kind, which is P8's `registerDataKind`
+hook and P7's `IDataKindDescriptor` doing exactly their job.
+
 ## 5. Serialization
 
 - **Authoritative columns only.** `v.co`, `e.v1/v2`, `c.v`, `c.next`, `l.c`,
-  `l.next`, `f.l`, `f.listCount`, plus every non-`TEMP`, non-`DERIVED`
-  attribute layer. Disk and radial cycles, `c.e`, `c.prev`, `c.l`, `l.size`,
-  `l.f` are rebuilt by `rebuildDerivedTopo()` on load (P3).
+  `l.next`, `f.l`, plus every non-`TEMP`, non-`DERIVED` attribute layer. Disk
+  and radial cycles, `c.e`, `c.prev`, `c.l`, `l.size`, `l.f` and `f.listCount`
+  are rebuilt by `rebuildDerivedTopo()` on load (P3). (This list said
+  `f.listCount` was authoritative; it is not — `topo.ts:975`, inside
+  `rebuildDerivedTopo`, recomputes it from the loop ring. Corrected 2026-08-18.)
 - **Compact before writing.** `compact()` returns remap tables (P3); apply them
   to the columns being written so a file never carries tombstones. Anything
   holding indices across the compaction — nothing should, at save time — is a
@@ -146,8 +195,9 @@ consumer of that mechanism.
 
 ## 9. Plan of record
 
-1. `manifest.json` + `main.ts` + `api.ts`; register nothing but the kind
-   descriptor. Confirm the app boots and the addon appears in the addon list.
+1. ~~`manifest.json` + `main.ts` + `api.ts`; register nothing but the kind
+   descriptor. Confirm the app boots and the addon appears in the addon
+   list.~~ **Done 2026-08-18 — see §4a.**
 2. `leafmesh.ts` — DataBlock + `SceneObjectData`, against P7's interfaces.
    Compile before implementing: the type errors are the contract's to-do list.
 3. `serialize.ts` — round-trip a primitive from P3 through `.wproj`.

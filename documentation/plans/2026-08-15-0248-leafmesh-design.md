@@ -435,10 +435,19 @@ addons/builtin/leafmesh/
     └── primitives.ts        # cube, plane, grid, sphere, cylinder-with-hole    ~200
 ```
 
-It is an **addon with zero dependencies**, in-bundle in the default
-distribution. Nothing under `scripts/` imports it, which is what keeps
-`core-no-addons` enforceable at `severity: error` and makes LeafMesh the proof
-that the addon path is sufficient.
+It is an **addon with zero dependencies**. Nothing under `scripts/` imports it,
+which is what keeps `core-no-addons` enforceable at `severity: error` and makes
+LeafMesh the proof that the addon path is sufficient.
+
+This paragraph said "in-bundle in the default distribution"; P11 shipped it
+**external** instead (its own `build/addons/leafmesh/` build, dynamic-imported
+at runtime), and the sentence is corrected here rather than left to contradict
+the code. The reason is the proof, not the packaging: an in-bundle addon can
+relative-import `scripts/` and nothing notices, whereas an external one that
+does so duplicates a main-bundle module and trips the duplication guard in
+`tools/check-addon-duplication.js`. External turns criterion 12 from an
+assertion into a build failure. "Default distribution" is unaffected — that is
+`defaultEnabled`, a separate manifest field. See the P11 plan §4a.
 
 Build order within refactor phase 5–6:
 
