@@ -415,6 +415,62 @@ vertex/edge/face click-select, box-select and circle-select, exercised against
 a square face with a square hole (a ray through the hole must miss while one
 through the material hits) as well as the P3 primitives.
 
+## 4g. Step 6 as landed (2026-08-18) — OBJ import
+
+Split the same way as steps 4 and 5:
+
+| file | imports `scripts/`? | holds |
+| --- | --- | --- |
+| `obj_read.ts` | no | the parser: `v` / `vt` / `vn` / `f`, index resolution, ring repair, the corner UV layer |
+| `obj.ts` | yes | `TextDecoder` → `LeafMeshData`, the scene-object wiring, and `LEAFMESH_OBJ_FORMAT` |
+
+§6's headline claim holds and is the suite's first test: `f 1 2 3 4 5 6` imports
+as **one hexagon**, where the BREP reader
+(`addons/builtin/mesh/src/objloader.js`) fans anything past a quad.
+
+Decisions worth recording:
+
+- **OBJ cannot express a hole ring, so the importer never fabricates one.**
+  Every `f` line becomes `makeFace([ring])` — a single loop. §10's test line is
+  amended above to say what the format can actually round-trip.
+- **`fixWinding` is not called**, because it would do nothing on a single-ring
+  face. See §6's corrected bullet.
+- **`vn` is counted and discarded.** Vertex normals are derived from the
+  topology at draw time (P11 step 4), so an authored normal could only ever
+  disagree with what is rendered. `stats.normalsIgnored` records that it
+  happened rather than hiding it.
+- **Negative indices resolve against the table so far**, per the OBJ spec —
+  `-1` is the most recently defined `v`, not the last one in the file. The BREP
+  reader has no negative-index handling at all.
+- **Repeated vertices in a ring are dropped, not rejected.** `makeFace` refuses
+  a ring naming a vertex twice, and files in the wild do it; keeping first
+  occurrences salvages the face and `stats.repaired` counts it.
+- **Unknown keywords are skipped in silence** (`usemtl`, `g`, `s`, `mtllib`,
+  `o`). An importer that refuses a file over material groups it does not model
+  is worse than one that imports the geometry. `stats.warnings` is capped at
+  `OBJ_MAX_WARNINGS = 32` so a badly broken file cannot grow an unbounded array.
+- **UVs are written after the topology is built.** `mesh.attrs.add` hands back a
+  column whose typed array reallocates as corners are added, so the corner→uv
+  pairs are buffered and applied once at the end.
+- **Registered twice, deliberately**: `api.registerFileFormat(...)` is what a
+  file dialog enumerates, and `importExtensions` on the kind descriptor is what
+  a "which kind claims this file?" query reads. Both point at the same parser.
+- **FBX is out of scope**, per §6. Nothing here reaches toward it.
+
+**The BREP `app.import_obj()` is left in place.** Both importers are registered
+at once; the BREP one is still on the File menu and still owned by the mesh
+addon. Removing it is P13's job, and having both live is what makes a
+regression attributable.
+
+Tests: `tests/unit/leafmesh/obj_read.test.ts`, 16 cases — the n-gon, the
+boundary hole, `
+` line endings, negative indices, out-of-range references,
+ring repair, `vn` discard, corner UVs (including a face mixing uv-bearing and
+bare references), the warning cap, and appending into a mesh that already has
+geometry.
+
+Two contract gaps, G4 and G5 below.
+
 ## 5. Serialization
 
 - **Authoritative columns only.** `v.co`, `e.v1/v2`, `c.v`, `c.next`, `l.c`,
@@ -449,8 +505,12 @@ OBJ against LeafMesh:
   BREP importer silently fanned. This is the cheapest possible demonstration of
   why faces-are-loop-lists was the right call.
 - Corner UVs (`vt`) land on the CORNER domain, matching P3's convention.
-- Winding: OBJ does not guarantee it. Call `fixWinding()` (P3 §4.1) on import —
-  this is exactly the importer case the enforcement decision provided for.
+- Winding: OBJ does not guarantee it. (This bullet said to call `fixWinding()`
+  on import. Corrected 2026-08-18: `fixWinding(f)` only reverses a face's *hole*
+  rings to oppose its outer one, and `makeFace` already does that through
+  `prepareRings`. An OBJ face has exactly one ring, so the call is a no-op.
+  A mesh-wide face-orientation pass — the thing an inconsistently-wound OBJ
+  actually needs — does not exist in `topo.ts` and is out of scope here.)
 - **FBX is out of scope.** Say so; do not let it creep in.
 - Register the format through P7's `registerFileFormat` case, not by editing a
   host format table.
@@ -509,7 +569,7 @@ consumer of that mechanism.
    material in §4e.**
 5. ~~`pick.ts` — click-select, box, circle.~~ **Done 2026-08-18 — see
    §4f.**
-6. OBJ import (§6).
+6. ~~OBJ import (§6).~~ **Done 2026-08-18 — see §4g.**
 7. The criterion-12 audit: `git diff --stat scripts/` for the whole plan must be
    **empty**.
 
@@ -524,8 +584,11 @@ consumer of that mechanism.
   attributes, selection, and material slots intact.
 - Round-trip with the addon **absent** (P10's machinery): the block's bytes and
   `lib_id` survive.
-- OBJ: a file with an n-gon and a file with a hole-bearing face import with the
-  correct face count — not a fanned approximation.
+- OBJ: a file with an n-gon and a file with a hole import with the correct face
+  count — not a fanned approximation. (Amended 2026-08-18: "hole-bearing face"
+  is unreachable through OBJ, which has no syntax for a hole ring — an importer
+  that produced one would be inventing it. The case tested is a *boundary* hole:
+  an open surface whose faces must all survive as authored.)
 - Picking: vertex/edge/face click-select, box-select, circle-select on a mesh
   with holes.
 - The BREP is still present during all of this. That is deliberate — P13 has a
@@ -637,3 +700,39 @@ rebuild `view3d_draw_webgpu.ts`'s own TODO defers. What P11 owes is the record:
 the two sites cannot diverge *observably* today, so a fix applied to one and
 not the other will not be caught by rendering, and they are kept in step by
 hand. Also written into [geometry-contract.md](../geometry-contract.md) §11.
+
+### G4 — `IFileFormat` was not on the hub
+
+**Needed.** An addon contributing an importer has to name the type it is
+implementing. `AddonAPI.registerFileFormat` takes an `IFileFormat<ToolContext>`,
+and `@framework/api` did not export it.
+
+**Would have been special-cased as.** A structural duplicate of the interface
+inside `obj.ts`, or the object typed as `any` at the registration call.
+
+**Fixed in P7 as.** `framework_api.ts` re-exports `IFileFormat` from
+`core/file_formats.js`. That module imports nothing at all — it says so in its
+own header — so it rides the hub without closing a cycle, which is why
+`core/data_kinds.ts` is still deliberately *not* re-exported (it reaches
+`core/context.ts`).
+
+### G5 — nothing in the host drove the import registry
+
+**Needed.** A registered importer has to be reachable from the UI. It was not:
+`listImportFormats` / `formatForFilename` had no caller anywhere under
+`scripts/` outside their own module and a unit test. The File menu hardcodes
+`app.import_obj()`, a ToolOp owned by the *mesh* addon that reads OBJ text and
+hands it to `ImportOBJOp` — so the registry was write-only and P7's
+"contribute a format" case was unfinished.
+
+**Would have been special-cased as.** A second hardcoded menu entry
+(`leafmesh.import_obj()`), which is exactly the host format table §6 says not to
+edit — and it would have had to be added again for the next format.
+
+**Fixed in P7 as.** `scripts/core/app_ops.js` gained `FileImportOp`
+(`app.import_file`), shaped like the existing `FileExportSTL`: it builds the
+open-dialog filters from `listImportFormats()`, reads the chosen file as bytes,
+dispatches through `formatForFilename(...).importFromBytes`, and errors when
+nothing claims the extension. Core still knows no format names. The menu entry
+is added *beside* `app.import_obj()`, not in place of it — the BREP path keeps
+working until P13.

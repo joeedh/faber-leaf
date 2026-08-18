@@ -32,3 +32,6 @@ export type {DrawGeometry} from './draw_buffers.js'
 
 export {DEPTH_TIEBREAK_PX, elementPoint, nearestByDomain, pickScreenCircle, pickScreenRect, rayCastMesh} from './pick_geom.js'
 export type {LeafMeshPickElem, PickCandidate, PickDomainName, Point3, Projector, RayHit} from './pick_geom.js'
+
+export {OBJ_MAX_WARNINGS, OBJ_UV_LAYER, readOBJ} from './obj_read.js'
+export type {ObjReadResult, ObjReadStats} from './obj_read.js'

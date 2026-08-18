@@ -9,15 +9,15 @@
  *
  * `"dependencies": []` — the first builtin with none. See P11 §4.
  *
- * This module registers the kind descriptor and the data class; picking and OBJ
- * import arrive in P11 steps 5-6, and the descriptor grows `importExtensions`
- * with them.
+ * This module registers the kind descriptor, the data class, and the OBJ
+ * importer.
  */
 
 import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
 import {LEAFMESH_VERTEX_ATTRS} from './draw.js'
 import * as leafmesh from './index.js'
 import {LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry} from './leafmesh.js'
+import {LEAFMESH_OBJ_FORMAT} from './obj.js'
 
 export const addonDefine: IAddonDefine = {
   name       : 'Leaf Mesh',
@@ -35,13 +35,19 @@ export function register(api: AddonAPI<IAddon>) {
   // non-undefined, so this list and leafmesh.ts's AssertExtends block have to
   // agree; they share LEAFMESH_CAPABILITIES so that they cannot drift.
   api.registerDataKind({
-    id          : 'leafmesh',
-    uiName      : 'Leaf Mesh',
-    factory     : LeafMeshData,
-    capabilities: LEAFMESH_CAPABILITIES,
-    usesMaterial: true,
-    vertexAttrs : LEAFMESH_VERTEX_ATTRS,
+    id              : 'leafmesh',
+    uiName          : 'Leaf Mesh',
+    factory         : LeafMeshData,
+    capabilities    : LEAFMESH_CAPABILITIES,
+    usesMaterial    : true,
+    vertexAttrs     : LEAFMESH_VERTEX_ATTRS,
+    importExtensions: LEAFMESH_OBJ_FORMAT.extensions,
   })
+
+  // The format registry is what a file dialog reads; the kind's
+  // `importExtensions` above is what a "which kind claims this file" query
+  // reads. Both point at the same parser (P11 §6).
+  api.registerFileFormat(LEAFMESH_OBJ_FORMAT)
 }
 
 export function unregister() {}
