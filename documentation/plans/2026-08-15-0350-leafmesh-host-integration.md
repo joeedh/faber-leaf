@@ -356,6 +356,65 @@ Decisions worth recording:
 to a provider that was not LiteMesh. Fixed as its own P8 commit; this step's
 addon diff keeps `scripts/` empty per criterion 12.
 
+## 4f. Step 5 as landed (2026-08-18) — picking
+
+The four `SceneObjectData` overrides §8 asked for — `castViewRay`,
+`findNearest`, `castScreenCircle`, `castScreenRect` — split across two files
+for the same reason `draw.ts` / `draw_buffers.ts` are split: the framework-facing
+half is unreachable from plain jest, so the geometry lives where it can be
+tested.
+
+| file | imports `scripts/`? | holds |
+| --- | --- | --- |
+| `pick_geom.ts` | no | Möller–Trumbore raycast, representative points, the screen circle/rect queries, `nearestByDomain` |
+| `pick.ts` | yes | clip←local composition, ray unprojection, mask→domain mapping, `FindNearestRet` / `ScreenPickResult` packing |
+
+`leafmesh.ts` does nothing but delegate. `pick_geom.ts` takes the viewport as a
+`Projector` callback — object-local point in, screen point plus depth out,
+`undefined` for anything at or behind the eye — which is what keeps it clean of
+`scripts/` without stubbing a camera.
+
+Decisions worth recording:
+
+- **Brute force, and the capability declined**, per §8. Every face is
+  intersected, every element of every requested domain is projected. No
+  `getBVH()` reach-through, no faked spatial-acceleration capability.
+- **Elements travel as `{type, index}` records**, LiteMesh's shape rather than
+  the BREP addon's `Element` objects — LeafMesh elements are integer handles, so
+  the domain has to travel with the index. `ScreenPickResult.elements` is
+  `unknown[]` precisely so core never learns either shape.
+- **Depth is NDC z, not clip `w`.** `View3D.project` returns `w` and writes NDC
+  z into the point. Under an orthographic camera `w` is constant, so keying the
+  depth tiebreak on it would silently disable the tiebreak on half the
+  viewports. `w > 0` is used for one thing only: rejecting points behind the eye.
+- **A face's representative point is its outer-ring centroid.** A face with a
+  hole should answer with a point on the material, not one dragged toward the
+  middle of the hole.
+- **An empty mask picks vertices**, matching LiteMesh — brush and box select are
+  vertex-centric everywhere else too.
+- **`Point3` is `Readonly<{0,1,2}>`, not `ArrayLike<number>`.** path.ux vectors
+  deliberately type indices past their length as `number | undefined`
+  (`genVectormath.ts`, "to prevent mixing of incompatible vectors"), so they do
+  not satisfy `ArrayLike<number>` and a structural parameter has to say what it
+  actually needs.
+
+**Known limitation — no occlusion test.** LeafMesh has no acceleration
+structure and does not read a depth buffer, so a click near the silhouette of a
+closed mesh can see through it. The mitigation is `DEPTH_TIEBREAK_PX = 6` in
+`nearestByDomain`: inside a 6 px band of the leading candidate, the one nearer
+the camera wins. That stops the far side of a cube from out-picking the near
+side, and it is computed in two passes so the answer cannot depend on the order
+candidates arrive in. A real occlusion test waits on P12 deciding whether
+LeafMesh needs a spatial structure at all.
+
+**No contract gap.** `git diff --stat scripts/` for this step is empty — P7 and
+P8 already carried everything picking needed, which is the outcome §2 asks for.
+
+Tests: `tests/unit/leafmesh/pick_geom.test.ts`, 22 cases, covering §10's line —
+vertex/edge/face click-select, box-select and circle-select, exercised against
+a square face with a square hole (a ray through the hole must miss while one
+through the material hits) as well as the P3 primitives.
+
 ## 5. Serialization
 
 - **Authoritative columns only.** `v.co`, `e.v1/v2`, `c.v`, `c.next`, `l.c`,
@@ -448,7 +507,8 @@ consumer of that mechanism.
 4. ~~`draw.ts` — flat render first, then the attribute-driven material
    (§7).~~ **Done 2026-08-18 — flat render in §4d, the attribute-driven
    material in §4e.**
-5. `pick.ts` — click-select, box, circle.
+5. ~~`pick.ts` — click-select, box, circle.~~ **Done 2026-08-18 — see
+   §4f.**
 6. OBJ import (§6).
 7. The criterion-12 audit: `git diff --stat scripts/` for the whole plan must be
    **empty**.

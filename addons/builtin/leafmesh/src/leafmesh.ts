@@ -46,8 +46,11 @@ import type {
   ITriangleSource,
   MaterialAttrRequest,
   DrawQueue,
+  FindNearestRet,
   FrameContext,
   SceneObject,
+  ScreenPickResult,
+  Vector2,
   View3D,
   ViewContext,
 } from '@framework/api'
@@ -56,6 +59,7 @@ import {DataAPI, DataStruct, nstructjs} from '@framework/pathux'
 import {AttrFlags, AttrType, DOMAIN_COUNT, Domain} from './attrs.js'
 import {LeafMeshDrawable} from './draw.js'
 import {ELEM_NONE} from './elem_array.js'
+import * as pick from './pick.js'
 import {deserializeLeafMesh, serializeLeafMesh} from './serialize.js'
 import {LeafMesh} from './topo.js'
 import {TriangulationCache, triangulateMesh} from './triangulate.js'
@@ -563,6 +567,57 @@ leafmesh.LeafMeshData {
     super.destroy()
     this._drawable?.dispose()
     this._drawable = undefined
+  }
+
+  // ----------------------------------------------------------------- picking
+
+  /**
+   * Geometric viewport picking (P11 §8), delegated to `pick.ts`. Brute force:
+   * LeafMesh has no acceleration structure and declines to pretend otherwise,
+   * which the geometry contract permits precisely because it exposes queries
+   * rather than trees.
+   */
+  castViewRay(
+    ctx: ViewContext,
+    view3d: View3D,
+    object: SceneObject,
+    selectMask: number,
+    mpos: Vector2
+  ): FindNearestRet[] | undefined {
+    return pick.castViewRay(this, view3d, object, selectMask, mpos)
+  }
+
+  findNearest(
+    ctx: ViewContext,
+    view3d: View3D,
+    object: SceneObject,
+    selectMask: number,
+    mpos: Vector2,
+    limit = 25
+  ): FindNearestRet[] | undefined {
+    return pick.findNearest(this, view3d, object, selectMask, mpos, limit)
+  }
+
+  castScreenCircle(
+    ctx: ViewContext,
+    view3d: View3D,
+    object: SceneObject,
+    selectMask: number,
+    mpos: Vector2,
+    radius: number
+  ): ScreenPickResult {
+    return pick.castScreenCircle(this, view3d, object, selectMask, mpos, radius)
+  }
+
+  castScreenRect(
+    ctx: ViewContext,
+    view3d: View3D,
+    object: SceneObject,
+    selectMask: number,
+    min: Vector2,
+    max: Vector2
+  ): ScreenPickResult {
+    return pick.castScreenRect(this, view3d, object, selectMask, min, max)
   }
 
   // ---------------------------------------------------------- active element

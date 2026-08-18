@@ -29,3 +29,6 @@ export {LEAFMESH_BLOB_VERSION, deserializeLeafMesh, serializeLeafMesh} from './s
 
 export {buildDrawGeometry, drawAttrNames, gatherDrawAttr, recalcVertexNormals, resolveDrawAttr} from './draw_buffers.js'
 export type {DrawGeometry} from './draw_buffers.js'
+
+export {DEPTH_TIEBREAK_PX, elementPoint, nearestByDomain, pickScreenCircle, pickScreenRect, rayCastMesh} from './pick_geom.js'
+export type {LeafMeshPickElem, PickCandidate, PickDomainName, Point3, Projector, RayHit} from './pick_geom.js'
