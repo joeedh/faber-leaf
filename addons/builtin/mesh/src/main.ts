@@ -65,11 +65,11 @@ import {OpaqueCustomDataElem} from './missing_customdata.js'
 
 // Side-effect imports that used to sit in `scripts/entry_point.js`, where they
 // pulled the mesh subsystem into the host's own module graph: the startup-cube
-// scene builder, the mesh-grid file migrations, and the FBX loader's
-// `window._testFBX` debug hook.
+// scene builder and the FBX loader's `window._testFBX` debug hook.
 import './default_scene.js'
-import './migrations.js'
 import './fbxloader.js'
+
+import {registerMeshFileMigrators, unregisterMeshFileMigrators} from './migrations.js'
 
 const meshExports = {
   ...mesh,
@@ -126,6 +126,10 @@ function assertSelMaskAgreement(): void {
 
 export function register(api: AddonAPI<IAddon>) {
   assertSelMaskAgreement()
+
+  // Every file migration that reads a Mesh block (plan §4.4a). Registered
+  // here, not as a module side effect, so disabling mesh takes them with it.
+  registerMeshFileMigrators()
 
   // Lets core round-trip files naming a customdata class no loaded addon
   // defines. Not an `api.register` — the placeholder is deliberately kept out
@@ -198,6 +202,7 @@ export function register(api: AddonAPI<IAddon>) {
 }
 
 export function unregister() {
+  unregisterMeshFileMigrators()
   registerOpaqueCustomDataElem(null)
 }
 export function handleArgv() {}

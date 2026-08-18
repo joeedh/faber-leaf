@@ -1060,26 +1060,14 @@ export class AppState {
     }
   }
 
+  /**
+   * Host-owned file migrations: the ones about the *file* rather than about a
+   * subsystem's data. Anything that has to read a datablock an addon owns is
+   * contributed through `registerFileMigrator` and leaves with that addon —
+   * mesh's three grid migrations live in `addons/builtin/mesh/src/migrations.ts`
+   * (plan §4.4a).
+   */
   do_versions(version: number, datalib: Library): void {
-    if (version < 4) {
-      for (const mesh of datalib.mesh) {
-        const cd_grid = mesh.loops.customData.getLayerIndex('QuadTreeGrid')
-
-        if (cd_grid < 0) {
-          continue
-        }
-
-        for (const l of mesh.loops) {
-          const grid = l.customData[cd_grid] as unknown as {updateNormalQuad(l: unknown): void; pruneDeadPoints(): void}
-          grid.updateNormalQuad(l)
-          grid.pruneDeadPoints()
-        }
-      }
-    }
-
-    // Mesh-grid migrations (v5: flagNormalsUpdate, v6: flagIdsRegen) live in
-    // scripts/mesh/migrations.ts and register themselves with the
-    // file_migrations registry. See plan §3.
     runFileMigrations({fromVersion: version, toVersion: APP_VERSION, datalib})
 
     if (version < 7) {

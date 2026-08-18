@@ -354,6 +354,55 @@ genuinely mesh-shaped ones are contributed through P7's
 `registerFileMigrator` case and leave with the addon. Getting this wrong means
 P13 deletes a migration every old file needs.
 
+### 4.4a. Decision (closed 2026-08-18): split by what the migration reads
+
+The 2026-08-15 citations were partly stale, and one of them was never a
+migration at all. Verified against the tree before the split:
+
+- `addons/builtin/mesh/src/migrations.ts:33,46` — the two module-scope
+  `registerFileMigrator(...)` calls. Both were side effects at import time,
+  which is exactly what the addon rules forbid.
+- `scripts/core/file_migrations.ts:60-62` — still the `runFileMigrations` skip /
+  break window. Unchanged; nothing was owed here.
+- `scripts/core/appstate.ts:1013-1028` — the `version < 4` QuadTreeGrid repair,
+  inline in `do_versions`. This is the one real host->mesh coupling §4.4 was
+  pointing at.
+- `appstate.ts:657-664` — the header parse (magic, version, compression flag).
+  Not a migration; §4.4 listed it in error. It is the call site the version
+  guard landed on in §6a, and it stays in the host.
+
+**The line is what a migration reads, not where it happens to sit.** A migration
+that has to walk `datalib.mesh` cannot outlive the mesh addon, so it belongs to
+the addon regardless of how format-shaped it looks; a migration that only reads
+blocks core owns stays in the host, because contributing it through the registry
+would just make core's own upgrade path depend on an addon being enabled.
+
+Applying that:
+
+| Migration | Reads | Home |
+| --- | --- | --- |
+| `mesh.grid.v4.quadtreeRepair` (`fromVersion: 3`) | `datalib.mesh` loop grids | mesh addon (moved) |
+| `mesh.grid.v5.flagNormalsUpdate` (`fromVersion: 4`) | same | mesh addon (already) |
+| `mesh.grid.v6.flagIdsRegen` (`fromVersion: 5`) | same | mesh addon (already) |
+| `version < 7` grab-brush dynTopo reset | `datalib.brush` (`scripts/brush/`) | host |
+| `mergeDefaultBrushes` on any version change | `datalib.brush` | host |
+| `do_versions_post` `version < 1` / `< 3` | `scene`, screen UI | host |
+
+Ordering survives the move because `runFileMigrations` sorts ascending by
+`fromVersion`: `quadtreeRepair` at 3 still runs before 4 and 5, which is the
+order it had inline.
+
+Registration moved with it. The three migrators are now a
+`registerMeshFileMigrators()` / `unregisterMeshFileMigrators()` pair called from
+mesh's `register(api)` / `unregister()`, not from module scope — so disabling
+mesh actually takes them out of the registry, and P13 deleting the addon deletes
+the migrations rather than orphaning a dangling registration.
+
+The consequence to be honest about: after this split, a build with mesh disabled
+no longer repairs v3 grid data on load. That is the intended meaning of "leaves
+with the addon" — such a build has no class to repair the grids with anyway, and
+under §4.2 the blocks are preserved verbatim instead.
+
 ## 5. Fixtures
 
 Three existing fixtures die with the mesh addon and must be rehomed **before**
@@ -542,7 +591,11 @@ forward-version guard.
    forward-version guard (`BREAKING_FILE_VERSIONS` +
    `AppState.checkFileVersion`) ships in v9 anyway, so a future break can be
    refused by name rather than surfacing as corruption.
-7. Split the file migrations (§4.4).
+7. ~~Split the file migrations (§4.4).~~
+   **Done 2026-08-18 — see §4.4a.** The `version < 4` QuadTreeGrid repair
+   moved out of `AppState.do_versions` into the mesh addon, joining the two
+   grid migrators already there; all three now register from `register(api)`
+   instead of module scope. Host keeps the brush and scene migrations.
 8. Rehome the three dying fixtures.
 
 Steps 1–4 are the ones that must be complete before P13 is scheduled. Steps 5–6
