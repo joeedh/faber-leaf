@@ -20,7 +20,11 @@ that is already shipping.
 break). **Closes:** success criteria 5, 6, 7, 8; contributes to 9.
 
 > Line references spot-checked on 2026-08-15 against `vendor/nstructjs`.
-> Re-verify the rest before editing.
+> **Re-verified in full on 2026-08-18** as step 1 of §7. The `vendor/nstructjs`,
+> `missing_addon.ts`, `sceneobject.ts`, `migrations.ts`, `file_migrations.ts` and
+> `scene.ts` citations were all still exact; the `lib_api.ts` and `appstate.ts`
+> ones had drifted by 2-3 lines and are corrected below. Findings that change the
+> plan's own premises are in §4.1a and §4.2a.
 
 ---
 
@@ -66,9 +70,9 @@ Seven known defects in the preserve-unknown-data path:
 
 | Site | |
 | --- | --- |
-| `scripts/core/lib_api.ts:1033`, `:1041`, `:1044-1046` | |
+| `scripts/core/lib_api.ts:1031`, `:1042`, `:1044-1046` | |
 | `scripts/core/lib_api.ts:615-617` | |
-| `scripts/core/appstate.ts:806` | |
+| `scripts/core/appstate.ts:808` | |
 | `scripts/sceneobject/sceneobject.ts:413-416` | |
 | `scripts/core/missing_addon.ts:34-44`, `:82-89`, `:262` | |
 | `addons/builtin/mesh/src/missing_customdata.ts:44` | the addon-side mirror of the same bug |
@@ -89,6 +93,35 @@ So the placeholder must:
 - present itself to the `Library` as a real block for reference-resolution
   purposes, so `DataRef`s resolve to it,
 - and re-serialize under the original identity, not the placeholder's.
+
+### 4.1a The live defect, confirmed (measured 2026-08-18)
+
+`MissingDataBlock.fromUnknownBlock` (`missing_addon.ts:82-89`) sets
+`_origClsname`, `_origBytes`, `name` and `lib_type` — and **never `lib_id`**. The
+block therefore reaches `BlockSet.push` with `lib_id === -1` and is handed a
+fresh one (`lib_api.ts:615-617`), so every inbound `DataRef` dangles. Criterion
+6's failure, reproduced exactly as §4.1 predicts it.
+
+Three sites compound it:
+
+- `Library.loadSTRUCT` (`lib_api.ts:1031-1046`) discards the **entire
+  `BlockSet`** (`this.libs.remove(lib)`) when its `type` string matches no
+  registered `BlockType`. Preserving blocks is pointless if the set that holds
+  them is dropped first.
+- `SceneObject.dataLink` (`sceneobject.ts:413-416`) replaces an unresolvable
+  `data` reference with a `NullObject` and logs. It captures the original
+  `lib_id` into a local and then drops it, so the association is destroyed in
+  memory before the save that overwrites it on disk.
+- `missing_customdata.ts:44` registers the placeholder from **module scope**,
+  which the repo's addon rules forbid outright ("no module-scope
+  `*.register(...)` side effects — they bypass the per-addon registry and can't
+  be cleanly unregistered"). It belongs in the mesh addon's `register(api)` hook.
+  This is the "addon-side mirror" the §4.1 table means.
+
+Byte preservation itself is already working: `appstate.ts:347-356` re-emits
+`_origClsname` + `_origBytes` verbatim rather than re-packing. Criterion 5 is
+therefore much closer to passing than criterion 6, and the two must not share a
+test.
 
 ### 4.2 The second struct path (criterion 7)
 
@@ -128,6 +161,61 @@ This is a change in `vendor/nstructjs`, which is a submodule. Budget:
 `array(abstract(T))` is already safe. `array(T)` is not. That distinction is the
 one to grep the codebase for.
 
+### 4.2a Sweep results (§7 step 1, measured 2026-08-18)
+
+The blast radius is **seven declarations, every one of them inside the mesh
+addon**, and every element type is mesh-internal:
+
+| Site | Declaration |
+| --- | --- |
+| `addons/builtin/mesh/src/mesh.ts:323` | `_elists : array(mesh.ElementList)` |
+| `addons/builtin/mesh/src/customdata.ts:640` | `_layers : array(mesh.LayerSet)` |
+| `addons/builtin/mesh/src/mesh_types.ts:2442` | `__loops : iter(mesh.Loop)` |
+| `addons/builtin/mesh/src/mesh_types.ts:2843` | `lists : array(mesh.LoopList)` |
+| `addons/builtin/mesh/src/mesh_grids.ts:611` | `points : array(mesh.GridVert)` |
+| `addons/builtin/mesh/src/mesh_grids_kdtree.ts:418` | `nodes : array(mesh_grid.CompressedKdNode)` |
+| `addons/builtin/mesh/src/mesh_grids_quadtree.ts:322` | `nodes : array(mesh_grid.CompressedQuadNode)` |
+
+The last two are invisible to the obvious sweep: their `STRUCT` is assembled at
+runtime by `makeCompressedNodeStruct()`, so the struct name never appears as a
+literal beside a `STRUCT =`. Any re-run of this sweep must scan references across
+whole files, not only inside literal `STRUCT` bodies.
+
+**§4.2's stated consequence is wrong, and is corrected here.** "A curve or tet
+datablock throws on save in a build without its addon" does not happen. A
+`DataBlock` is not written through a struct field at all: `appstate.ts:343-370`
+writes the block list by hand, and a `MissingDataBlock` short-circuits to raw
+bytes at `:347-356` without ever entering `do_pack`.
+
+More generally the scalar concrete path is **unreachable today**, because every
+field in the tree that can receive a placeholder is declared `abstract(...)`:
+
+| Field | Placeholder it can receive |
+| --- | --- |
+| `scripts/scene/scene.ts:354` — `toolmodes : array(abstract(ToolMode))` | `MissingToolMode` |
+| `scripts/core/graph.ts:1340` — `nodes : iter(abstract(graph.Node))` | `MissingNode` |
+| `scripts/core/graph.ts` — `graph.KeyValPair.val : abstract(Object)` | `MissingNodeSocket` (sockets ride inside `KeyValPair`) |
+| `scripts/graph/node_group.js:13-14` — `abstract(graph.NodeSocketType)` | `MissingNodeSocket` |
+| six `array(abstract(mesh.CustomDataElem \| mesh.CustomDataLayer))` sites | `OpaqueCustomDataElem` |
+
+So §4.2 is a **latent** trap rather than a live one: it fires the first time
+anyone declares a concrete `struct(T)` / `array(T)` over a type another addon can
+subclass — which P12's LeafMesh and P17's sculptcore-less build both make likely.
+Fix it anyway, because the cost is small and the failure is silent, but schedule
+it behind §4.1a, which *is* live.
+
+Two corrections to §4.2's budget:
+
+- **The containers need no separate fix.** There are five recursion sites, not
+  one — `StructArrayField:1142`, `StructIterField:1398`, `StructIterKeysField:1759`,
+  `StructStaticArrayField:2042`, `StructOptionalField:2191` — and all five call
+  `do_pack`, which dispatches on the *element* type descriptor
+  (`struct_intern2.ts:348-379`). A single fix in `StructStructField.pack:735`
+  covers every container form. What the containers need is **test coverage**, not
+  code.
+- The scalar hook to copy is `StructTStructField.pack:854-855`, verified still
+  exact.
+
 ### 4.3 Struct-id stability (criterion 8, open decision #3)
 
 nstructjs assigns struct ids by **global registration order** and embeds them in
@@ -166,8 +254,8 @@ was written under, or neither option is verifiable.
 
 The mesh addon currently owns file migrations that are not mesh-specific:
 `addons/builtin/mesh/src/migrations.ts:33,46`,
-`scripts/core/file_migrations.ts:60-62`, `scripts/core/appstate.ts:1010-1025`,
-`appstate.ts:654-660`.
+`scripts/core/file_migrations.ts:60-62`, `scripts/core/appstate.ts:1013-1028`,
+`appstate.ts:657-664`.
 
 Split: host-owned format migrations move to `file_migrations.ts` and stay;
 genuinely mesh-shaped ones are contributed through P7's
@@ -179,9 +267,26 @@ P13 deletes a migration every old file needs.
 Three existing fixtures die with the mesh addon and must be rehomed **before**
 P13:
 
-- `tests/.../graph_missing_nodes.test.ts:8-13`
-- `tests/.../scene-fixture.ts:14-19,22-47`
+- `tests/integration/graph_missing_nodes.test.ts:8-13`
+- `tests/lib/scene-fixture.ts:14-19,22-47`
 - `examples/error-test.wproj`
+
+Two things the 2026-08-15 snapshot did not record, both found in step 1:
+
+- **`scene-fixture.ts` is a scaffold, not a fixture.** `makeHeadlessAppState`,
+  `saveSceneToBytes` and `loadSceneFromBytes` all throw `NotImplementedError`.
+  So step 4 is not "rehome a fixture", it is "build the harness every fixture in
+  the §5 table needs". Budget for that explicitly. Its header also cites a plan
+  by an absolute path from another machine
+  (`/root/.claude/plans/we-will-be-working-peppy-wreath.md`) — repoint it at this
+  document while rewriting.
+- **The jsdom/swc unit harness cannot import the real modules.**
+  `graph_missing_nodes.test.ts:8-13` says so directly: `graph.ts` and
+  `missing_addon.ts` transitively pull in path.ux, which the transform can't
+  handle, so that test drives `vendor/nstructjs` directly with stand-in classes
+  instead. P10's round-trip tests therefore belong in the **NW.js integration**
+  workspace, not `tests/unit/` — or they will quietly test stand-ins rather than
+  the shipping code.
 
 Watch `scripts/scene/scene.ts:354`'s serialized toolmode array: it will
 contaminate every newly built fixture with whatever toolmodes the authoring
@@ -224,9 +329,10 @@ Record the decision, and the release it lands in, in P20's
 
 ## 7. Plan of record
 
-1. **Sweep.** Grep for every `struct(T)` / `array(T)` / `iter(T)` declaration
+1. ~~**Sweep.** Grep for every `struct(T)` / `array(T)` / `iter(T)` declaration
    whose `T` is owned by an addon. That set is the blast radius of §4.2. Record
-   it in this document.
+   it in this document.~~ **Done 2026-08-18 — see §4.2a**, which also corrects
+   §4.2's premise and re-prioritises the work behind §4.1a.
 2. Fix `vendor/nstructjs`: `StructStructField.pack` + the `do_pack` container
    recursion, with tests in nstructjs's own suite. Submodule commit + gitlink
    bump.
