@@ -88,6 +88,10 @@ function resolveNwjsExe(): string | undefined {
 function runAutosaveTest(nwExe: string, backend: 'wasm' | 'native'): AutosaveTestResult {
   const out = Path.join(fs.mkdtempSync(Path.join(os.tmpdir(), 'scautosave-')), `${backend}.json`)
   const env = {...process.env}
+  // Real autosave writes real backup files; without this they land in the
+  // checkout's own `.sculptcore/autosave`, where the launch-time GC then prunes
+  // the developer's own recovery snapshots.
+  const stateDir = fs.mkdtempSync(Path.join(os.tmpdir(), 'scautosave-state-'))
   execFileSync(
     nwExe,
     [
@@ -95,6 +99,8 @@ function runAutosaveTest(nwExe: string, backend: 'wasm' | 'native'): AutosaveTes
       ...isolatedProfileArgs(),
       '--apptest-headless',
       '--no-devtools',
+      '--app-storage-dir',
+      stateDir,
       '--backend',
       backend,
       '--gen-scene',
@@ -112,6 +118,7 @@ function runAutosaveTest(nwExe: string, backend: 'wasm' | 'native'): AutosaveTes
   )
   if (!fs.existsSync(out)) throw new Error(`${backend} dump not written to ${out}`)
   const dump = JSON.parse(fs.readFileSync(out, 'utf-8')) as {autosavetest?: AutosaveTestResult}
+  fs.rmSync(stateDir, {recursive: true, force: true})
   if (!dump.autosavetest) throw new Error(`${backend} dump has no autosavetest result`)
   return dump.autosavetest
 }

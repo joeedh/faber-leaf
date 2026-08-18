@@ -1308,7 +1308,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | # | Plan | Workstream | Phase (§5) | Depends on | Status |
 | --- | --- | --- | --- | --- | --- |
 | — | [LeafMesh design](./2026-08-15-0248-leafmesh-design.md) | risk mitigation | 0 | — | **written** |
-| P1 | [CI + layer-gate repair](./2026-08-15-0300-ci-and-layer-gate-repair.md) | new — §2.4 | 1 | — | **written** |
+| P1 | [CI + layer-gate repair](./2026-08-15-0300-ci-and-layer-gate-repair.md) | new — §2.4 | 1 | — | **landed** |
 | P2 | [W0 — rename + identity migration](./2026-08-15-0305-w0-rename-faber-leaf.md) | W0 | 2 | P1 | **landed** |
 | P3 | [LeafMesh core — storage, attrs, topo, CDT](./2026-08-15-0310-leafmesh-core-storage-topo-cdt.md) | risk mitigation | 0 | — | **landed** |
 | P4 | [W2a — hoist the stroke base](./2026-08-15-0315-w2-stroke-base-hoist.md) | W2 §0 | 3 | P1 | **landed** |
@@ -1317,7 +1317,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P7 | [W1b — host geometry contract](./2026-08-15-0330-w1-host-geometry-contract.md) | W1 §1, §3(a)(b) | 4 | P6 | **landed** |
 | P8 | [W1c — registry hooks + string-key severing](./2026-08-15-0335-w1-registry-hooks-and-string-key-severing.md) | W1 §0, §2 | 5 | P7 | **landed** |
 | P9 | [W1d — layer ratchet to `error`](./2026-08-15-0340-w1-layer-ratchet.md) | W1 §3 | 6 | P8 | **landed** |
-| P10 | [Serialization + file-compat hardening](./2026-08-15-0345-serialization-and-file-compat-hardening.md) | W1 §5 (promoted) | 7 | P8 | **written** |
+| P10 | [Serialization + file-compat hardening](./2026-08-15-0345-serialization-and-file-compat-hardening.md) | W1 §5 (promoted) | 7 | P8 | **landed** |
 | P11 | [LeafMesh host integration](./2026-08-15-0350-leafmesh-host-integration.md) | risk mitigation | 8 | P3, P8 | **written** |
 | P12 | [LeafMesh modeling toolmode](./2026-08-15-0355-leafmesh-modeling-toolmode.md) | open decisions #2, #8 | 8 | P11 | **written** |
 | P13 | [W1e — delete the TS BREP](./2026-08-15-0400-w1-delete-ts-brep.md) | W1 §4 | 9 | P5, P9, P10, P12 | **written** |
@@ -1686,7 +1686,15 @@ ungrounded input just argues a wrong plan more convincingly.
 > be re-created. It also reaches into `vendor/nstructjs` and has to close the
 > struct-id question (open decision #3) for a format that is already shipping.
 
-- [ ] **P10 — [Serialization + file-compat hardening](./2026-08-15-0345-serialization-and-file-compat-hardening.md)** — **`[xhigh]`**
+- [x] **P10 — [Serialization + file-compat hardening](./2026-08-15-0345-serialization-and-file-compat-hardening.md)**
+  — landed 2026-08-18, all eight steps of that plan's §7. Criteria 5–8 are four
+  named assertions in `tests/integration/file_compat.test.ts`; the concrete
+  `struct(T)` / `array(T)` path is covered in `vendor/nstructjs`'s own suite;
+  criterion 9's half is `addon_set_settings_compat.test.ts` (§8a). Open decisions
+  #3 and #9 are settled above. Four corrections to this entry are recorded in
+  that plan: §4.2a (the struct-path sweep), §4.3a, §5a ("curve + tet + hair" is
+  really just curve — `TetMesh` and `strands` are core blocks) and §5b (the
+  `graph_missing_nodes.test.ts` row below does *not* die with the mesh addon).
   - Builds the unloaded-addon round-trip invariant from §4 W1 step 5. It applies
     to *any* addon that is not loaded — disabled, uninstalled, absent from
     `faber-leaf-core`, or deleted — so this is written once, generically, and not
@@ -1905,17 +1913,18 @@ ungrounded input just argues a wrong plan more convincingly.
 | --- | --- | --- |
 | 1. Built-in geometry type | **Resolved** — LeafMesh (P3, P11) | — |
 | 2. Modeling without sculptcore | P12 | before P13 |
-| 3. File compatibility (pin ids vs. rewrite `_origBytes`) | P10 | before P13 |
+| 3. File compatibility (pin ids vs. rewrite `_origBytes`) | **Resolved** — pin ids (`stableStructId` in nstructjs, `APP_VERSION` 8→9); P10 §4.3a, landed 2026-08-18 | — |
 | 4. Curves / tets / hair / subsurf | P13 | at the delete |
 | 5. Texture painting | **Resolved** — deleted in P5, port plan deferred (landed 2026-08-16) | — |
 | 6. UV unwrapping | decided in P13 (rescue), executed in P19 | rescue before the delete |
 | 7. Rename's storage keys | **Resolved** — migrate (P2, landed 2026-08-15) | — |
 | 8. Does `faber-leaf-core` model on day one? | P12 | **before P13 is scheduled** — it decides the phase order |
-| 9. One-way format break | P10, documented in P20 | before the first external embedder |
+| 9. One-way format break | **Resolved — there is no one-way break**; the forward-version guard ships in v9 anyway (P10 §6a, landed 2026-08-18). Embedder-facing wording still P20 | — |
 | 10. Does the sculptcore submodule go away? | **Resolved — no** (§7) | — |
 
 Decisions 3, 8 and 9 are the ones that change the *shape* of the plan rather than
-its content. All three must be answered before phase 9 is scheduled.
+its content. All three must be answered before phase 9 is scheduled. 3 and 9 are
+closed; 8 is still open.
 
 ### 9.5 Where the success criteria are closed
 

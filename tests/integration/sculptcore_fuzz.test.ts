@@ -17,9 +17,13 @@
  * Electron process itself dies (segfault) — exactly the failure modes the
  * dyntopo crash would produce.
  *
- * Prerequisites (else self-skips, logged): a resolvable Electron and the app
- * bundle (`pnpm build`). The native leg additionally needs the N-API addon
- * (`make.mjs build node`); without it only the WASM leg runs.
+ * Prerequisites (else self-skips, logged): a resolvable Electron, `electron/main.js`
+ * and the app bundle (`pnpm build`). The native leg additionally needs the N-API
+ * addon (`make.mjs build node`); without it only the WASM leg runs.
+ *
+ * XXX: the desktop shell is NW.js now and `electron/main.js` no longer exists,
+ * so this suite always skips. Port it onto `nwjs_boot.ts` like its neighbours or
+ * delete it — a fuzz soak that never runs is worse than no fuzz soak.
  */
 
 import {execFileSync} from 'node:child_process'
@@ -33,6 +37,7 @@ const __filename = fileURLToPath(import.meta.url)
 const REPO_ROOT = Path.resolve(Path.dirname(__filename), '../..')
 const BUNDLE = Path.join(REPO_ROOT, 'build', 'entry_point.js')
 const NATIVE_ADDON = Path.join(REPO_ROOT, 'sculptcore', 'build', 'native-node', 'sculptcore_node.node')
+const ELECTRON_MAIN = Path.join(REPO_ROOT, 'electron', 'main.js')
 
 const ITERS = Number(process.env.FUZZ_ITERS ?? '40')
 const SEED = Number(process.env.FUZZ_SEED ?? '305419896') // 0x1234abcd
@@ -79,7 +84,7 @@ function runFuzz(electronExe: string, backend: 'wasm' | 'native'): FuzzTestResul
     execFileSync(
       electronExe,
       [
-        Path.join(REPO_ROOT, 'electron', 'main.js'),
+        ELECTRON_MAIN,
         '--headless',
         '--no-devtools',
         '--backend',
@@ -117,14 +122,19 @@ function runFuzz(electronExe: string, backend: 'wasm' | 'native'): FuzzTestResul
 }
 
 const electronExe = resolveElectronExe()
+// The NW.js migration deleted electron/main.js but left electron/node_modules,
+// so the exe still resolves and a launch just hangs to the 600s timeout.
+const haveMain = fs.existsSync(ELECTRON_MAIN)
 const haveBundle = fs.existsSync(BUNDLE)
 const haveNative = fs.existsSync(NATIVE_ADDON)
 const backends = selectedBackends(haveNative)
-const canRun = !!electronExe && haveBundle && backends.length > 0
+const canRun = !!electronExe && haveMain && haveBundle && backends.length > 0
 
 if (!canRun) {
   const why = [
     !electronExe && 'electron not resolvable (electron/ workspace)',
+    !haveMain &&
+      `${Path.relative(REPO_ROOT, ELECTRON_MAIN)} is gone (the shell is NW.js now — this suite needs porting)`,
     !haveBundle && `app bundle missing (${Path.relative(REPO_ROOT, BUNDLE)}; run pnpm build)`,
   ]
     .filter(Boolean)

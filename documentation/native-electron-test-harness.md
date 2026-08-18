@@ -76,6 +76,7 @@ through untouched to the renderer harness):
 | `--backend native\|wasm` | Select the sculptcore backend (`globalThis.__SCULPTCORE_BACKEND`). `native` loads the N-API addon and falls back to `wasm` if the `.node` is absent. |
 | `--list-scenes` | Print registered scene names. |
 | `--exit` | Quit the app once the scenario completes (via `nw.App.quit()`). |
+| `--app-storage-dir <path>` | Put all app state (`settings.json`, `feature-flags.json`, `startup.bin`, `autosave/`) there instead of `<cwd>/.sculptcore`. Parsed in `scripts/core/app_storage.ts`, not the harness, so it applies to any boot. |
 
 A normal launch (`pnpm run nwjs`) sets none of these and is unaffected.
 
@@ -123,7 +124,9 @@ structured results.
 ## Multiple instances & per-worktree profile
 
 The Chromium `--user-data-dir` holds **only** Chromium internals (single-instance
-lock, GPU cache, Crashpad) — **no** app state (that lives in `<cwd>/.sculptcore`).
+lock, GPU cache, Crashpad) — **no** app state (that lives in `<cwd>/.sculptcore`,
+where `cwd` is the *app* directory: NW.js sets it, so a spawned test cannot move
+its state by choosing a working directory — pass `--app-storage-dir` instead).
 NW.js keys its default `--user-data-dir` on the manifest `name`, which is
 identical in every git worktree, so two worktrees could not run NW.js at once and
 their crash dumps collided. `nwjs/launch.mjs` instead derives the profile
@@ -144,6 +147,9 @@ never clobbers another's window, lock, or dumps. Within one worktree:
 The shared per-worktree `.sculptcore` (`settings.json`, `feature-flags.json`,
 `startup.bin`, `autosave/`) is written so instances can share it safely:
 
+- A test boot that touches settings, flags or the startup file should pass
+  `--app-storage-dir <tmp>`; without it, it writes into the checkout's own
+  `.sculptcore` and replaces the developer's startup scene.
 - `scripts/core/app_storage.ts` writes **atomically** (tmp + rename, with a
   Windows EPERM retry) and exposes an **optimistic-CAS** `updateText` (read →
   merge → commit-if-unchanged, retry on conflict) plus a `version` change token.

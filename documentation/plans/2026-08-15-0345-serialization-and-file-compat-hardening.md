@@ -666,13 +666,59 @@ test:
 - Plus the end-to-end: full build writes curve+tet+hair → partial build opens,
   edits something unrelated, saves → full build opens and the curve/tet/hair
   objects are live.
-- And criterion 9's half: settings + startup file load in a build with a
-  different addon set.
+- ~~And criterion 9's half: settings + startup file load in a build with a
+  different addon set.~~ **Done 2026-08-18 — see §8a.**
 
 ~~Run the nstructjs suite in CI (it is a workspace package; P1's `test` job
 should already cover it — verify).~~ **Verified 2026-08-18.** `vendor/nstructjs`
 is listed in `pnpm-workspace.yaml` and its `test` script (`vitest run`) is one
 of the tasks `turbo test` runs, so `unknown_struct_field.test.ts` is gated.
+
+### 8a. Criterion 9's half, and the storage flag it needed (2026-08-18)
+
+`tests/integration/addon_set_settings_compat.test.ts` — two NW.js boots sharing
+one app-storage directory. Boot A turns on every default-off *in-bundle* builtin
+(curve, subsurf, mesh_edit), renames its mesh object, writes settings and saves
+the startup file. The blob is then edited into what a *fuller* build's blob looks
+like from here — `curve` switched off, `mesh_edit`'s key removed entirely, and a
+key for `ghost_addon`, an id no build in the tree has — and boot B reads both
+files back. 7 tests, ~19s.
+
+The startup-file assertion is the one with a trap under it: `genDefaultFile`
+catches a failed load and falls back to the default scene, and that scene has the
+same object *shape* as the fixture, so a test that only counted objects would
+pass on the fallback. Boot A therefore renames its LiteMesh object and boot B
+looks for that name.
+
+Two behaviours worth recording, both found by running it rather than reading:
+
+- **A settings key for an addon this build does not have is kept, not dropped.**
+  `_loadAddons` does delete unknown ids, but `syncAddonList()` then saves, and
+  `save()` merges against what is on disk and re-reads the committed result — so
+  the key comes back, in memory and on disk. That is the right outcome for
+  criterion 9 (uninstalling sculptcore must not silently forget its settings),
+  but it is the opposite of what `_loadAddons`'s comment describes, so the test
+  pins the behaviour rather than the comment.
+- **An addon the blob never mentions comes back at its own default**, not
+  enabled — `syncAddonList()` captures the record's current state.
+- **Only in-bundle builtins can be used here.** `tetmesh` ships as an external
+  per-addon bundle (`build/addons/tetmesh/` via the `index.json` pipeline, see
+  `addons/builtin/builtin_registry.ts`), so it is simply absent unless that
+  pipeline ran, and `mgr.enable('tetmesh')` writes no settings key. An earlier
+  draft used it and passed only because it was still reading the developer's own
+  `settings.json`, which already had the key; once `--app-storage-dir` really
+  isolated the boot, it failed. The suite now asserts set A persisted each id
+  before editing the blob, so an absent addon says so instead of surfacing as a
+  `TypeError` in `beforeAll`.
+
+**`--app-storage-dir <path>`** (`scripts/core/app_storage.ts`) was added to make
+this testable at all. Under NW.js `process.cwd()` is the *app* directory, not the
+launcher's, so a spawned boot cannot isolate its state by choosing a working
+directory: the first probe run wrote `settings.json` and `startup.bin` straight
+into the checkout's own `.sculptcore`. The comment in `app_storage.ts` asserting
+the opposite ("NW.js inherits the launcher's cwd") was wrong and is corrected.
+Any test boot that touches settings, flags or the startup file must pass the
+flag; `documentation/native-electron-test-harness.md` says so.
 
 ## 9. Risks
 

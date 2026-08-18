@@ -3,10 +3,12 @@
  *
  * Browser builds keep using `localStorage` (blobs base64-encoded under their
  * existing keys, so web behavior is unchanged). The NW.js build instead writes
- * discrete files under a `.sculptcore` directory at `<cwd>/.sculptcore` (the
- * repo root when launched via `pnpm run nwjs` or the test harness). The
+ * discrete files under a `.sculptcore` directory at `<cwd>/.sculptcore`. The
  * renderer computes this itself — NW.js merges the Node + browser contexts, so
  * `require('fs')`/`require('path')` and `process.cwd()` are available directly.
+ * Note `cwd` is the *app* directory (NW.js sets it), not the launcher's, so a
+ * spawned test cannot isolate its state by choosing a working directory — that
+ * is what `--app-storage-dir` is for.
  *
  * The API is synchronous on purpose: `fs.*Sync` is available under NW.js,
  * letting the existing sync save/load call sites stay sync. NW.js starts fresh
@@ -14,6 +16,7 @@
  */
 
 import * as util from '../util/util'
+import {getArg} from './app_argv'
 import {APP_KEY_NAME} from './const'
 
 export interface AppStorage {
@@ -113,6 +116,7 @@ interface NodeFsSync {
 }
 interface NodePath {
   join(...parts: string[]): string
+  resolve(...parts: string[]): string
 }
 
 class NwjsAppStorage implements AppStorage {
@@ -231,9 +235,11 @@ function buildStorage(): AppStorage {
       const fs = req('fs') as NodeFsSync
       const pathlib = req('path') as NodePath
       const proc = (globalThis as {process?: {cwd(): string}}).process
-      // <cwd>/.sculptcore — the repo root when launched via `pnpm run nwjs` or
-      // the test harness (NW.js inherits the launcher's cwd, never chdir's).
-      const baseDir = pathlib.join(proc!.cwd(), '.sculptcore')
+      // `--app-storage-dir <path>` moves all app state somewhere else, so a test
+      // boot never writes into the developer's own `.sculptcore` (cwd is the app
+      // dir under NW.js, so a spawned process cannot isolate itself otherwise).
+      const override = getArg('app-storage-dir')
+      const baseDir = override ? pathlib.resolve(override) : pathlib.join(proc!.cwd(), '.sculptcore')
       return new NwjsAppStorage(baseDir, fs, pathlib)
     } catch (err) {
       console.warn('app_storage: NW.js fs backend unavailable, using localStorage', err)
