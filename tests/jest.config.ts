@@ -7,7 +7,10 @@
  *   find the actual .ts source (the build is bundled by esbuild in production)
  *
  * Tests live under tests/{unit,integration,build}/**.test.ts. tests/lib/ holds shared
- * helpers (scene-fixture etc.) and is excluded from collection.
+ * helpers (jest-setup, png_gray) and is excluded from collection. Save/load
+ * round-trips are NOT built here: this environment cannot import the real
+ * serialization modules, so they live in the NW.js `tests/integration`
+ * workspace instead (P10 §5, §5a correction 3).
  */
 
 import type {Config} from 'jest'

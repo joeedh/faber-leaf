@@ -498,6 +498,52 @@ step 8's problem (delete or repoint), not step 4's.
   written with the screen, and it is a real one-way asymmetry between the two
   halves of the format.
 
+### 5b. What step 8 did with the three, and one thing §5 got wrong (2026-08-18)
+
+Re-verified against the tree first. §5's framing — "three existing fixtures die
+with the mesh addon" — holds for one of them, is beside the point for a second,
+and is simply wrong about the third.
+
+**`examples/error-test.wproj` → `tests/integration/fixtures/legacy-v7-mesh-scene.wproj`.**
+The one genuine fixture of the three, and it was sitting unreferenced in
+`examples/` where nothing would have noticed it rotting. It is a **file version
+7** scene — written before stable struct ids (§4.3), before the forward-version
+guard (§6a), before the migration split (§4.4a) — carrying a `Mesh` block, a
+`Light`, and a `curve` `BlockSet` with nothing in it. Verified by boot: it
+loads, re-saves and re-opens clean today, and the empty `curve` set already
+exercises "unknown library type, preserving its blocks".
+
+Nothing in the tree can write a v7 file any more, which is exactly why it is
+worth committing: every other fixture here is regenerable, so none of them can
+catch a migration being deleted. `git mv`d (history follows), given a `.json`
+recording what the authoring build wrote, and covered by
+`tests/integration/legacy_file_compat.test.ts` — six assertions, of which
+"nothing decodes as a `MissingDataBlock`" is the one that deliberately flips
+when P13 moves `Mesh` behind the addon boundary.
+
+**`tests/lib/scene-fixture.ts` → deleted.** Correction 3 of §5a already
+established that the harness is `tools/gen-file-compat-fixtures.mjs`, not this.
+All three of its functions threw `NotImplementedError`, nothing imported it, and
+the API it documented — a jsdom-hosted `makeHeadlessAppState` — is the one §5
+proves cannot exist, because that environment cannot import the real
+serialization modules. Repointing its stale `/root/.claude/plans/...` citation
+would have preserved a trap for the next author, so the citation moved into
+`tests/jest.config.ts` as a sentence saying where round-trip tests actually go.
+
+**`tests/integration/graph_missing_nodes.test.ts` — does not die with the mesh
+addon.** Verified: zero references to mesh in the file. It drives
+`vendor/nstructjs` directly through stand-in classes, and §5's own second bullet
+explains why. Its lines 8-13 were cited as *evidence* for where P10's tests
+belong; §5 then listed the file itself as a dying fixture, which does not
+follow.
+
+What it does carry is real, and is fixture-shaped: the stand-in `Sock` mirrors
+`graph.NodeSocketType`, and nothing pinned it. If the real struct drifts the
+suite keeps passing while testing a fiction. Step 8 closed that instead — three
+assertions against `scripts/core/graph.ts`'s source text, covering the field
+list and the two declarations the seam actually rests on (`edges`'s
+`array(e, int) | e.graph_id` packing, and `node`'s int transform).
+
 ## 6. Open decision #9 — the one-way format break
 
 Answer both halves explicitly:
@@ -596,7 +642,12 @@ forward-version guard.
    moved out of `AppState.do_versions` into the mesh addon, joining the two
    grid migrators already there; all three now register from `register(api)`
    instead of module scope. Host keeps the brush and scene migrations.
-8. Rehome the three dying fixtures.
+8. ~~Rehome the three dying fixtures.~~
+   **Done 2026-08-18 — see §5b.** `examples/error-test.wproj` became the
+   committed `legacy-v7-mesh-scene` fixture with its own suite;
+   `tests/lib/scene-fixture.ts` was deleted as a scaffold for a harness §5
+   proves cannot exist; `graph_missing_nodes.test.ts` turned out not to depend
+   on the mesh addon at all, and got its stand-ins pinned to `graph.ts` instead.
 
 Steps 1–4 are the ones that must be complete before P13 is scheduled. Steps 5–6
 must be complete before the *first release* that changes the addon set.

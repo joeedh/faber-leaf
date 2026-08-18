@@ -1,0 +1,20 @@
+{
+  "note": "Committed as-is. Was examples/error-test.wproj (git history follows the rename); rehomed here by P10 step 8. Nothing regenerates it — it is valuable precisely because no build in the tree can write a v7 file any more.",
+  "fileVersion": 7,
+  "compressed": false,
+  "writtenBy": "a build predating stable struct ids (APP_VERSION 9), the forward-version guard, and the mesh migration split",
+  "blockCounts": {
+    "object": 2,
+    "light": 1,
+    "material": 1,
+    "screen": 1,
+    "collection": 1,
+    "scene": 1,
+    "mesh": 1
+  },
+  "objects": [
+    {"name": "Object", "dataCls": "Mesh", "dataName": "Mesh"},
+    {"name": "Object2", "dataCls": "Light", "dataName": "Light"}
+  ],
+  "emptyLibTypes": ["curve"]
+}

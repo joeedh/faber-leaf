@@ -28,7 +28,10 @@
  *      schema restores correct object→int packing (reinjectGraphGetters).
  */
 
+import fs from 'node:fs'
+import Path from 'node:path'
 import * as nstructjs from 'nstructjs'
+import {REPO_ROOT} from './nwjs_boot'
 import {isDefaultBackendPass} from './split'
 
 type AnyManager = any
@@ -215,5 +218,40 @@ describeOnce('unknown graph node/socket preservation seam', () => {
     const final: any = finalMgr.readObject(new Uint8Array(data2), SubSock)
     expect(final.edges).toEqual([9, 11]) // ints survived the object→int→object trip
     expect(final.graph_id).toBe(3)
+  })
+})
+
+/**
+ * The stand-ins above are a fixture, and a fixture that drifts from what it
+ * stands in for passes while proving nothing (P10 step 8). `graph.ts` cannot be
+ * imported here, so pin the two declarations that carry the seam against its
+ * source text: `edges`'s int-packing transform is the whole subject of the
+ * getter-reinjection test, and `node` is what makes the abstract dispatch fire.
+ */
+describeOnce('the stand-ins still mirror the real graph structs', () => {
+  const GRAPH_TS = fs.readFileSync(Path.join(REPO_ROOT, 'scripts', 'core', 'graph.ts'), 'utf8')
+
+  const socketStruct = () => {
+    const start = GRAPH_TS.indexOf('graph.NodeSocketType {')
+    expect(start).toBeGreaterThan(-1)
+    return GRAPH_TS.slice(start, GRAPH_TS.indexOf('}', start))
+  }
+
+  test('NodeSocketType still declares every field Sock stands in for', () => {
+    const declared = socketStruct()
+      .split(/\r?\n/)
+      .map((l) => l.trim().split(':')[0].trim())
+
+    for (const field of ['graph_id', 'node', 'edges', 'name', 'socketName', 'socketType']) {
+      expect([field, declared.includes(field)]).toEqual([field, true])
+    }
+  })
+
+  test('edges is still an int-packed array, which is what the reinjection test fixes', () => {
+    expect(socketStruct()).toMatch(/edges\s*:\s*array\(e,\s*int\)\s*\|\s*e\.graph_id;/)
+  })
+
+  test('node is still packed as an int through a transform', () => {
+    expect(socketStruct()).toMatch(/node\s*:\s*int\s*\|/)
   })
 })
