@@ -1,4 +1,4 @@
-import {BlockLoader, BlockLoaderAddUser, DataBlock} from '../core/lib_api.js'
+import {BlockLoader, BlockLoaderAddUser, DataBlock, DataRef} from '../core/lib_api.js'
 import {registerDataAPI} from '../data_api/api_define_registry.js'
 import {
   nstructjs,
@@ -408,12 +408,29 @@ SceneObject {
   }
 
   dataLink(getblock: BlockLoader, getblock_addUser: BlockLoaderAddUser) {
-    const lib_id = this.data
-    this.data = getblock_addUser(this.data, this) as OBDATA
-    if (this.data === undefined) {
-      console.log('failed to load scene object data! id:', lib_id)
-      this.data = new NullObject() as unknown as OBDATA
+    const ref = this.data as unknown as DataRef | undefined
+    const block = getblock_addUser(this.data, this)
+
+    if (block instanceof SceneObjectData) {
+      this.data = block as OBDATA
+      return
     }
+
+    // Either the reference dangled, or it resolved to a MissingDataBlock
+    // standing in for an unloaded addon's type. Either way this object needs
+    // something drawable; the stand-in keeps the original id so the next save
+    // preserves the reference instead of rewriting it to the stand-in's own.
+    console.log('failed to load scene object data! ref:', ref)
+
+    const stub = new NullObject()
+
+    if (ref !== undefined && typeof ref.lib_id === 'number' && ref.lib_id >= 0) {
+      stub.lib_id = ref.lib_id
+      stub.lib_type = ref.lib_type
+      stub.name = ref.name
+    }
+
+    this.data = stub as unknown as OBDATA
   }
 
   draw(view3d: View3D, gl: WebGL2RenderingContext, uniforms: any, program: ShaderProgram = Shaders.BasicLitMesh): void {

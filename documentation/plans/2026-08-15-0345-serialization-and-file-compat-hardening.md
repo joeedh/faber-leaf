@@ -70,11 +70,11 @@ Seven known defects in the preserve-unknown-data path:
 
 | Site | |
 | --- | --- |
-| `scripts/core/lib_api.ts:1031`, `:1042`, `:1044-1046` | |
+| `scripts/core/lib_api.ts:1031`, `:1042`, `:1044-1046` | now `:1058`, `:1067-1080` |
 | `scripts/core/lib_api.ts:615-617` | |
-| `scripts/core/appstate.ts:808` | |
-| `scripts/sceneobject/sceneobject.ts:413-416` | |
-| `scripts/core/missing_addon.ts:34-44`, `:82-89`, `:262` | |
+| `scripts/core/appstate.ts:808` | now `:745-749` |
+| `scripts/sceneobject/sceneobject.ts:413-416` | now `:410-433` |
+| `scripts/core/missing_addon.ts:34-44`, `:82-89`, `:262` | now `:34-43`, `:157-172`, `:222` |
 | `addons/builtin/mesh/src/missing_customdata.ts:44` | the addon-side mirror of the same bug |
 
 The load-bearing one is **parsing the preserved bytes far enough to recover
@@ -122,6 +122,37 @@ Byte preservation itself is already working: `appstate.ts:347-356` re-emits
 `_origClsname` + `_origBytes` verbatim rather than re-packing. Criterion 5 is
 therefore much closer to passing than criterion 6, and the two must not share a
 test.
+
+**Resolved 2026-08-18.** All five sites are fixed:
+
+- `missing_addon.ts` gained `recoverBlockHeader(istruct, bytes)` (`:92`), which
+  decodes the payload's `DataBlock` prefix through a `BlockHeaderShell` whose
+  `static structName = 'DataBlock'`. Reading it through the *per-file* manager
+  means the fields come back under the schema the file was written with, not
+  this build's. It sanity-checks `lib_id`/`name` and returns undefined rather
+  than inventing an identity, so an older or truncated payload degrades to the
+  old behaviour. `fromUnknownBlock` (`:157`) now applies the recovered
+  `lib_id`/`lib_flag`/`lib_users`/`name`, and `BlockSet.push` preserves any
+  `lib_id >= 0`.
+- `Library.loadSTRUCT` (`lib_api.ts:1067-1080`) keeps a `BlockSet` whose type
+  string matches no registered class, recording the original name in
+  `_origTypeName` and re-typing the set to `MissingDataBlock`. `BlockSet.STRUCT`
+  writes `savedTypeName()` (`:508`, `:527`) so the re-save does not rename the
+  whole set to the placeholder's type.
+- `DataRef.fromBlock` (`lib_api.ts:460`) reads the block's *instance*
+  `lib_type` instead of its constructor's `blockDefine().typeName`. Identical
+  for every ordinary block — the instance field is initialized from that static
+  — but a placeholder now reports the type it stands in for.
+- `SceneObject.dataLink` (`sceneobject.ts:410`) keeps the original id. It
+  substitutes a `NullObject` only for the *drawable* role and copies
+  `lib_id`/`lib_type`/`name` onto it, so `DataRef.fromBlock` re-emits the
+  original reference on save. The stand-in is deliberately not a
+  `MissingDataBlock`: making the placeholder a `SceneObjectData` would put
+  `scripts/core/missing_addon.ts -> scripts/sceneobject/sceneobject_base.ts`
+  into the big core/scene cycle, and the `no-circular` budget only moves down.
+- `missing_customdata.ts` no longer registers from module scope; the mesh
+  addon publishes `OpaqueCustomDataElem` from its `register(api)` hook and
+  clears it in `unregister()` (`addons/builtin/mesh/src/main.ts`).
 
 ### 4.2 The second struct path (criterion 7)
 
@@ -333,11 +364,15 @@ Record the decision, and the release it lands in, in P20's
    whose `T` is owned by an addon. That set is the blast radius of §4.2. Record
    it in this document.~~ **Done 2026-08-18 — see §4.2a**, which also corrects
    §4.2's premise and re-prioritises the work behind §4.1a.
-2. Fix `vendor/nstructjs`: `StructStructField.pack` + the `do_pack` container
+2. ~~Fix `vendor/nstructjs`: `StructStructField.pack` + the `do_pack` container
    recursion, with tests in nstructjs's own suite. Submodule commit + gitlink
-   bump.
-3. Fix the seven `lib_api` / `appstate` / `sceneobject` / `missing_addon`
-   defects, with `lib_id` recovery as the acceptance criterion.
+   bump.~~ **Done 2026-08-18** — submodule `8b50385`, gitlink `1966699d`. One
+   fix in `StructStructField.pack` covers every container form, because all five
+   container handlers funnel through `do_pack`.
+3. ~~Fix the seven `lib_api` / `appstate` / `sceneobject` / `missing_addon`
+   defects, with `lib_id` recovery as the acceptance criterion.~~
+   **Done 2026-08-18 — see the resolution note in §4.1a.** Criteria 5 and 6 are
+   now believed to hold; step 4's fixtures are what will prove it.
 4. Build and commit the fixtures (§5).
 5. Close open decision #3 and implement the chosen id scheme, with the version
    bump and the compatibility table.

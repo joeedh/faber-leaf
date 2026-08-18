@@ -1,13 +1,12 @@
 /**
  * `OpaqueCustomDataElem` — placeholder for a `CustomDataElem` subclass whose
  * addon isn't loaded. Lives in the mesh addon because `CustomDataElem` is
- * mesh-defined; core's `missing_addon.ts` registers it via the
- * `registerOpaqueCustomDataElem` hook so the layer rule
- * `core-no-addons` stays clean. See plan §3.
+ * mesh-defined; the addon publishes it to core's `missing_addon.ts` from its
+ * `register(api)` hook (see `main.ts`) so the layer rule `core-no-addons`
+ * stays clean. See plan §3.
  */
 
 import {nstructjs} from '@framework/pathux'
-import {registerOpaqueCustomDataElem} from '@framework/api'
 import {CustomDataElem} from './customdata.js'
 
 /**
@@ -40,5 +39,3 @@ OpaqueCustomDataElem {
   `
   )
 }
-
-registerOpaqueCustomDataElem(OpaqueCustomDataElem)

@@ -28,6 +28,17 @@ export function onBlockRegister(cb: (cls: IDataBlockConstructor) => void) {
   onBlockRegisterCbs.push(cb)
 }
 
+/**
+ * The `MissingDataBlock` constructor, published by `missing_addon.ts` rather
+ * than imported: that module imports this one. Only `Library.loadSTRUCT` needs
+ * it, and only for a file naming a block type this build has no class for.
+ */
+let MissingDataBlockType: IDataBlockConstructor | undefined
+
+export function setMissingDataBlockType(cls: IDataBlockConstructor): void {
+  MissingDataBlockType = cls
+}
+
 let DATAREFType: number | undefined
 let DATAREFLISTType: number | undefined
 
@@ -443,7 +454,10 @@ DataRef {
     if (!block.constructor || !block.constructor.blockDefine) {
       console.warn('Invalid block in fromBlock: ', block)
     } else {
-      ret.lib_type = block.constructor.blockDefine().typeName
+      // Instance field, not the static: a MissingDataBlock standing in for an
+      // unloaded type carries the original type name, and a ref that renamed
+      // itself to the placeholder's would not survive re-enabling the addon.
+      ret.lib_type = block.lib_type || block.constructor.blockDefine().typeName
     }
 
     ret.lib_id = block.lib_id
@@ -491,7 +505,7 @@ export class BlockSet<BlockType extends DataBlock> extends Array<BlockType> {
     this,
     `
 BlockSet {
-  type   : string | this.type.blockDefine().typeName;
+  type   : string | this.savedTypeName();
   active : int | this.active !== undefined ? obj.active.lib_id : -1;
 }
   `
@@ -502,6 +516,17 @@ BlockSet {
   __active?: BlockType
   idmap: {[k: number]: BlockType}
   namemap: {[k: string]: BlockType}
+
+  /**
+   * Set when the file named a block type this build has no class for. `type` is
+   * then the MissingDataBlock stand-in, so the original name has to be kept
+   * separately or the re-save renames the whole set.
+   */
+  _origTypeName?: string
+
+  savedTypeName(): string {
+    return this._origTypeName ?? this.type.blockDefine().typeName
+  }
 
   constructor(type: IDataBlockConstructor<BlockType, {}, {}>, datalib: Library) {
     super()
@@ -1039,9 +1064,20 @@ Library {
       }
 
       if (type === undefined) {
-        console.warn('Failed to load library type', blockType)
+        if (MissingDataBlockType === undefined) {
+          console.warn('Failed to load library type', blockType)
 
-        this.libs.remove(lib)
+          this.libs.remove(lib)
+          continue
+        }
+
+        // The addon that owns this block type isn't loaded. Keep the set —
+        // dropping it here strands every MissingDataBlock the load path is
+        // about to put in it, because the save walks `this.libs`. See plan §4.1.
+        console.warn('Unknown library type', blockType, '- preserving its blocks')
+
+        lib._origTypeName = blockType
+        lib.afterLoad(this, MissingDataBlockType)
         continue
       }
 

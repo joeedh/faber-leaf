@@ -20,6 +20,7 @@ import {
   MeshTransType,
   SelMask,
   VertexScalarType,
+  registerOpaqueCustomDataElem,
   setInsetHoleOp,
   setShapesObjLoader,
 } from '@framework/api'
@@ -60,10 +61,7 @@ import {MeshOpBaseUV} from './mesh_uvops_base.js'
 import {KDrawModes} from './mesh_curvature_test.js'
 import {CDLayerPanel, ChangeActCDLayerOp, MESH_PROPS_PANELS} from './props_panels.js'
 
-// Side-effect import: registers `OpaqueCustomDataElem` with core's
-// `missing_addon` hook so files referencing unloaded customdata classes can
-// round-trip. See plan §3.
-import './missing_customdata.js'
+import {OpaqueCustomDataElem} from './missing_customdata.js'
 
 // Side-effect imports that used to sit in `scripts/entry_point.js`, where they
 // pulled the mesh subsystem into the host's own module graph: the startup-cube
@@ -128,6 +126,11 @@ function assertSelMaskAgreement(): void {
 
 export function register(api: AddonAPI<IAddon>) {
   assertSelMaskAgreement()
+
+  // Lets core round-trip files naming a customdata class no loaded addon
+  // defines. Not an `api.register` — the placeholder is deliberately kept out
+  // of the customdata menus. See plan §3.
+  registerOpaqueCustomDataElem(OpaqueCustomDataElem)
 
   // Keep these namespaces in sync with `addons/builtin/mesh/src/api.ts` so the
   // typed `@addon/mesh/api` shim resolves to the same surface at runtime.
@@ -194,6 +197,8 @@ export function register(api: AddonAPI<IAddon>) {
   }
 }
 
-export function unregister() {}
+export function unregister() {
+  registerOpaqueCustomDataElem(null)
+}
 export function handleArgv() {}
 export function validArgv() {}

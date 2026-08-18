@@ -54,7 +54,7 @@ import type {DataAPI} from '../path.ux/scripts/pathux'
 import {genDefaultFile, RootFileOp, RootLoadFileOp} from './gen_default_file'
 import {AutosaveManager} from './autosave'
 import {startStorageSync} from './storage_sync'
-import {applyMissingAddonHooks, installMissingAddonHooks, MissingDataBlock} from './missing_addon'
+import {applyMissingAddonHooks, installMissingAddonHooks, MissingDataBlock, recoverBlockHeader} from './missing_addon'
 import {runFileMigrations} from './file_migrations'
 import './app_ops.js'
 import {BinWriter} from 'nstructjs'
@@ -745,7 +745,8 @@ export class AppState {
         // MissingDataBlock placeholder so the next save round-trips the data.
         // See plan §4 and scripts/core/missing_addon.ts.
         console.warn(`unknown block type "${clsname}" — preserving as MissingDataBlock`)
-        block = MissingDataBlock.fromUnknownBlock(clsname, new Uint8Array(data2))
+        const bytes = new Uint8Array(data2)
+        block = MissingDataBlock.fromUnknownBlock(clsname, bytes, recoverBlockHeader(istruct, bytes))
       } else {
         block = istruct.readObject(data2, cls)
       }

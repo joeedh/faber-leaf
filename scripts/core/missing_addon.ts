@@ -23,7 +23,7 @@
  *      class's struct id + schema, not the placeholder's. See plan §4.
  */
 
-import {DataBlock} from './lib_api.js'
+import {DataBlock, setMissingDataBlockType} from './lib_api.js'
 import {nstructjs} from '../path.ux/scripts/pathux.js'
 import {ToolMode} from '../editors/view3d/view3d_toolmode.js'
 import {MissingNode, MissingNodeSocket} from './graph.js'
@@ -34,18 +34,89 @@ import {MissingNode, MissingNodeSocket} from './graph.js'
 let opaqueCustomDataElemCls: (new () => unknown) | null = null
 
 /**
- * Called by the mesh addon to publish its `OpaqueCustomDataElem` placeholder
- * class. The class must extend mesh's `CustomDataElem` — core does not
- * reference that base directly to keep the `core-no-addons` layer rule clean.
+ * Called from the mesh addon's `register(api)` hook to publish its
+ * `OpaqueCustomDataElem` placeholder class, and with null from `unregister()`.
+ * The class must extend mesh's `CustomDataElem` — core does not reference that
+ * base directly to keep the `core-no-addons` layer rule clean.
  */
-export function registerOpaqueCustomDataElem(cls: new () => unknown): void {
+export function registerOpaqueCustomDataElem(cls: (new () => unknown) | null): void {
   opaqueCustomDataElemCls = cls
+}
+
+/**
+ * The `DataBlock` base fields every block payload starts with, recovered from a
+ * payload whose own class is unregistered. `lib_id` is the load-bearing one:
+ * without it the placeholder is handed a fresh id and every inbound `DataRef`
+ * dangles (plan §4.1).
+ */
+export interface RecoveredBlockHeader {
+  lib_id: number
+  lib_flag: number
+  lib_users: number
+  name: string
+  lib_userData: string
+}
+
+/**
+ * Shell class whose `structName` names `DataBlock`, so `read_object` looks the
+ * *file's* `DataBlock` schema up by name and walks exactly the base-class prefix
+ * that every block payload begins with, stopping before the subclass fields it
+ * cannot interpret. Deliberately has no side effects in `loadSTRUCT` — this must
+ * not build graph state, only report what the bytes say.
+ */
+class BlockHeaderShell {
+  static structName = 'DataBlock'
+
+  loadSTRUCT(reader: (obj: BlockHeaderShell) => void): void {
+    reader(this)
+  }
+}
+
+interface FileStructManager {
+  structs: Record<string, unknown>
+  read_object: (data: DataView, cls: unknown) => unknown
+}
+
+/**
+ * Decode a block payload's `DataBlock` prefix. `istruct` must be the per-file
+ * manager, so the fields are read under the schema the file was written with
+ * rather than this build's — an older file whose `graph.Node` differed would
+ * otherwise mis-decode silently.
+ *
+ * Returns undefined when the prefix cannot be trusted: a subclass that
+ * redeclares a base field name moves it out of the prefix (`mergeScripts` keeps
+ * the child's position), and a truncated or foreign payload throws. Callers fall
+ * back to the pre-recovery behaviour rather than inventing an identity.
+ */
+export function recoverBlockHeader(istruct: unknown, bytes: Uint8Array): RecoveredBlockHeader | undefined {
+  const manager = istruct as FileStructManager
+
+  if (!manager?.structs || !('DataBlock' in manager.structs)) {
+    return undefined
+  }
+
+  let header: Partial<RecoveredBlockHeader>
+  try {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+    header = manager.read_object(view, BlockHeaderShell) as Partial<RecoveredBlockHeader>
+  } catch (error) {
+    console.warn('could not recover the block header of an unknown block', error)
+    return undefined
+  }
+
+  if (!Number.isInteger(header.lib_id) || header.lib_id! < 0 || typeof header.name !== 'string') {
+    console.warn('recovered block header failed its sanity check', header)
+    return undefined
+  }
+
+  return header as RecoveredBlockHeader
 }
 
 /**
  * Stand-in for a DataBlock whose class isn't registered (the addon that owned
  * it isn't loaded). Holds the raw on-disk bytes and the original class name so
- * appstate's writer can round-trip them on the next save.
+ * appstate's writer can round-trip them on the next save, plus the `lib_id`
+ * recovered from those bytes so inbound `DataRef`s still resolve to it.
  */
 export class MissingDataBlock extends DataBlock {
   /** Original class name (e.g. "Mesh") that the load path tried to resolve. */
@@ -78,18 +149,33 @@ MissingDataBlock {
    * Helper used by appstate.ts during load when DataBlock.getClass returns
    * undefined. Builds a placeholder, copying the bytes out of the
    * just-read block-header so the writer can re-emit them.
+   *
+   * `header` is what `recoverBlockHeader` made of those same bytes. Passing it
+   * is what keeps inbound `DataRef`s resolving; without it the block reaches
+   * `BlockSet.push` with `lib_id === -1` and is renumbered.
    */
-  static fromUnknownBlock(clsname: string, bytes: Uint8Array): MissingDataBlock {
+  static fromUnknownBlock(clsname: string, bytes: Uint8Array, header?: RecoveredBlockHeader): MissingDataBlock {
     const block = new MissingDataBlock()
     block._origClsname = clsname
     block._origBytes = new Uint8Array(bytes)
-    block.name = `Missing: ${clsname}`
+    block.name = header?.name ?? `Missing: ${clsname}`
     block.lib_type = clsname // pretend to be the original type for datalib bookkeeping
+
+    if (header !== undefined) {
+      block.lib_id = header.lib_id
+      block.lib_flag = header.lib_flag
+      block.lib_users = header.lib_users
+    }
+
     return block
   }
 }
 
 DataBlock.register(MissingDataBlock)
+
+// Library.loadSTRUCT needs the class to keep an unknown block type's BlockSet
+// alive; it cannot import this module, which imports it.
+setMissingDataBlockType(MissingDataBlock)
 
 // ----------------------------------------------------------------------------
 // MissingToolMode — placeholder for a ToolMode subclass from an unloaded addon
