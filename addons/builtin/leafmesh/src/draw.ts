@@ -12,7 +12,7 @@
  * per invalidation; a static mesh uploads on its first frame and never again.
  */
 
-import type {Drawable, IUniformsBlock, ShaderProgram, VertexAttrDesc} from '@framework/api'
+import type {Drawable, IUniformsBlock, MaterialAttrRequest, ShaderProgram, VertexAttrDesc} from '@framework/api'
 import {BufferUsage, MATERIAL_BASE_VERTEX_ATTRS} from '@framework/api'
 
 import {buildDrawGeometry, gatherDrawAttr} from './draw_buffers.js'
@@ -20,18 +20,6 @@ import type {DrawGeometry} from './draw_buffers.js'
 import {LeafMesh} from './topo.js'
 import type {Tri} from './triangulate.js'
 import {TriangulationCache} from './triangulate.js'
-
-/**
- * One attribute a compiled material asks the geometry for, at the slot its
- * generated `VsIn` declares. Structurally the subset of the host's
- * `RequestedAttrDesc` a provider actually needs — a nominal import would drag
- * the shader-node layer into the addon for three fields.
- */
-export interface RequestedDrawAttr {
-  name: string
-  slot: number
-  elemSize: number
-}
 
 /**
  * What LeafMesh always binds, whatever the material: the base vertex interface
@@ -65,7 +53,7 @@ export class LeafMeshDrawable implements Drawable {
 
   private geom?: DrawGeometry
   private tris: Tri[] = []
-  private requested: readonly RequestedDrawAttr[] = []
+  private requested: readonly MaterialAttrRequest[] = []
   private dirty = true
   private device?: GPUDevice
   private warnedWebGL = false
@@ -89,7 +77,7 @@ export class LeafMeshDrawable implements Drawable {
    * set is unchanged, so the per-frame push from the render engine does not
    * re-gather every attribute of every mesh.
    */
-  setRequestedAttrs(reqs: readonly RequestedDrawAttr[]): void {
+  setRequestedAttrs(reqs: readonly MaterialAttrRequest[]): void {
     if (this.requested.length === reqs.length) {
       let same = true
       for (let i = 0; i < reqs.length; i++) {

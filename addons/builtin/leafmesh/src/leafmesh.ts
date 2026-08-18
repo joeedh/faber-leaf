@@ -40,9 +40,11 @@ import type {
   IElementSource,
   IGeometrySource,
   IInvalidatable,
+  IMaterialAttrConsumer,
   ISpatialQueryable,
   ISymmetryAware,
   ITriangleSource,
+  MaterialAttrRequest,
   DrawQueue,
   FrameContext,
   SceneObject,
@@ -89,7 +91,7 @@ function sizedI32(out: Int32Array | undefined, n: number): Int32Array {
   return out !== undefined && out.length >= n ? out.subarray(0, n) : new Int32Array(n)
 }
 
-export class LeafMeshData extends SceneObjectData {
+export class LeafMeshData extends SceneObjectData implements IMaterialAttrConsumer {
   static STRUCT = nstructjs.inlineRegister(
     this,
     `
@@ -111,6 +113,9 @@ leafmesh.LeafMeshData {
 
   /** Draw-side vertex buffers; created on the first frame, not on load. */
   private _drawable?: LeafMeshDrawable
+
+  /** Renders authored materials, so the material compile sites must see it. */
+  usesMaterial = true
 
   symmetryAxes = 0
 
@@ -529,6 +534,16 @@ leafmesh.LeafMeshData {
       this._drawable = new LeafMeshDrawable(this.mesh, this.triCache)
     }
     return this._drawable
+  }
+
+  /**
+   * `IMaterialAttrConsumer` (geometry-contract §10.2): the host hands over what
+   * the compiled material reads, and the drawable gathers a vertex buffer per
+   * entry at the slot the shader generator assigned. A name with no layer
+   * behind it is reported by {@link LeafMeshDrawable.missingAttrs}, not thrown.
+   */
+  setRequestedAttrs(reqs: readonly MaterialAttrRequest[]): void {
+    this.drawable.setRequestedAttrs(reqs)
   }
 
   drawQ(view3d: View3D, queue: DrawQueue, frame: FrameContext, object: SceneObject): void {

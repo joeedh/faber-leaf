@@ -317,6 +317,45 @@ cube's six quads.
 hub. Fixed as its own P7 commit, so this step's diff keeps `scripts/` empty per
 criterion 12.
 
+## 4e. Step 4b as landed (2026-08-18) — the attribute-driven material
+
+Criterion 13, closed. A LeafMesh cube carrying a vertex `color` layer of pure
+red, a material whose `AttributeNode(attrName = 'color')` feeds
+`DiffuseNode.inputs.color`, rendered headless through **both** compile sites:
+
+| site | default material | attribute material |
+| --- | --- | --- |
+| `renderengine_realtime.ts` `_ensureWebgpuMaterial` | (112, 112, 112) | **(141, 0, 0)** |
+| `view3d_draw_webgpu.ts` `ensureMaterialPipeline` | (181, 181, 181) | **(222, 0, 0)** |
+
+Mean colour of the pixels that differ from an empty-scene render, ~60k pixels
+in each case. Grey is `DiffuseNode`'s own `[0.8, 0.8, 0.8, 1]` default; red is
+the layer. It cannot be a fallback: `WebGPUDrawQueueAdapter` pre-binds a shared
+**zero** buffer to every pipeline slot the geometry does not supply, so an
+attribute that never reached the shader reads `(0, 0, 0, 0)` — black, not red.
+`drawable.missingAttrs()` was empty, and the node was built through the real
+`node.add_node` ToolOp rather than by reaching for the class.
+
+The two sites differ in brightness because site B is the smoke-test path: no
+AO, no accumulation, no sharpen. That difference is the tell for G3 below.
+
+Decisions worth recording:
+
+- **`usesMaterial` was the thing keeping LeafMesh out.** It defaults to `false`
+  on `SceneObjectData`, and both compile sites open with
+  `if (!ob.data.usesMaterial) continue`. The flat render of step 4a came from
+  the solid path, which does not consult it — so the mesh was on screen the
+  whole time while never once reaching a material.
+- **The drawable binds by name, not by layer type.** `setRequestedAttrs` takes
+  the material's set, `rebuild()` gathers one buffer per entry at the slot the
+  generator assigned, and a name with no layer behind it is *reported* by
+  `missingAttrs()` rather than thrown — the material still compiles and the
+  slot reads zero.
+
+**One contract gap, G2 below** — nothing delivered the requested-attribute set
+to a provider that was not LiteMesh. Fixed as its own P8 commit; this step's
+addon diff keeps `scripts/` empty per criterion 12.
+
 ## 5. Serialization
 
 - **Authoritative columns only.** `v.co`, `e.v1/v2`, `c.v`, `c.next`, `l.c`,
@@ -406,9 +445,9 @@ consumer of that mechanism.
    list.~~ **Done 2026-08-18 — see §4b.**
 3. ~~`serialize.ts` — round-trip a primitive from P3 through `.wproj`.~~
    **Done 2026-08-18 — see §4c.**
-4. `draw.ts` — flat render first, then the attribute-driven material (§7).
-   Flat render **done 2026-08-18 — see §4d**; the attribute-driven half is the
-   second half of this step.
+4. ~~`draw.ts` — flat render first, then the attribute-driven material
+   (§7).~~ **Done 2026-08-18 — flat render in §4d, the attribute-driven
+   material in §4e.**
 5. `pick.ts` — click-select, box, circle.
 6. OBJ import (§6).
 7. The criterion-12 audit: `git diff --stat scripts/` for the whole plan must be
@@ -479,3 +518,62 @@ primitive rather than importing one.
 `ShaderStage` and `MapMode` from `scripts/webgpu/flags.js`. The hub rule in
 CLAUDE.md already covers this case — "if a symbol is missing from the hub, add
 it there" — and every addon that draws needs them, not just this one.
+
+### G2 — nothing delivered the requested-attribute set to a non-LiteMesh provider
+
+**Needed.** geometry-contract §10.2 says the vertex interface past slot 1
+follows the *material*: the generator assigns each `AttributeNode` read a
+`@location`, and the geometry is expected to bind that layer there. A provider
+therefore has to be told what the compiled material asked for. Nothing told it.
+`renderengine_realtime.ts` computed `state.requestedAttrs` and pushed it only
+inside a LiteMesh-shaped guard (`typeof litemesh.setDrawShader === 'function'`),
+and `view3d_draw_webgpu.ts` computed the set and dropped it on the floor. A
+provider that is not the sculptcore tree got a pipeline declaring slot 2 and no
+way to learn that slot existed.
+
+**Would have been special-cased as.** A second duck-typed branch in
+`encodeMeshBasePass` reading `ob.data.leafmesh === true`, or — worse — teaching
+`LeafMeshDrawable` to impersonate LiteMesh by growing a `setDrawShader` that
+ignores its argument.
+
+**Fixed in P8 as.** `scripts/core/vertex_layout.ts` now declares the shape and
+the capability:
+
+- `MaterialAttrRequest` — `{name, slot, elemSize}`, the part of a requested
+  attribute a *provider* needs. It is not a new shape: two structurally
+  identical copies already existed (`RequestedAttrDesc` in
+  `shadernodes/shader_nodes_wgsl.ts`, `MaterialVertexAttr` in
+  `shaders/wgsl_shaders.ts`). Both now extend / alias this one, so the change
+  is a net reduction in duplication.
+- `IMaterialAttrConsumer` — one method, `setRequestedAttrs(reqs)`.
+- `asMaterialAttrConsumer(data)` — feature detection. Detected rather than
+  declared on the kind descriptor, because both compile sites also serve
+  providers that predate the kind registry.
+
+Both sites push independently of `setDrawShader`: the engine's BasePass loop
+gained an `else if` beside the LiteMesh branch, and `drawRenderWebGpu` gained a
+push guarded on the material hash through a module-level `WeakMap` (and skips
+sculptcore-tree providers, which render with their own installed shader).
+
+### G3 — the second material compile site is unreachable from `View3D.draw`
+
+**Found while proving criterion 13**, which §7 requires through *both* sites.
+`drawRenderWebGpu` runs only under `SHOW_RENDER | ONLY_RENDER`, but
+`View3D.draw` hands exactly those flags to `RealtimeEngine` and returns before
+it ever calls `drawViewportWebGpu`. The two guards are mutually exclusive by
+construction, so the smoke-test path's material loop is dead code from the
+app's only entry point.
+
+**Consequence for this plan.** Site B could not be proved by rendering as it
+stands. It was proved by temporarily disabling the early return in
+`view3d.ts:1576`, rebuilding, running the same probe, and reverting — hence the
+second row of §4e's table, and hence its different brightness (site B has no
+AO/accumulation/sharpen passes). The revert is verified: `git diff` on
+`scripts/editors/view3d/view3d.ts` is empty.
+
+**Not fixed here, deliberately.** The fix is either to delete the path or to
+give it a caller, and both are decisions about the pass graph — the same
+rebuild `view3d_draw_webgpu.ts`'s own TODO defers. What P11 owes is the record:
+the two sites cannot diverge *observably* today, so a fix applied to one and
+not the other will not be caught by rendering, and they are kept in step by
+hand. Also written into [geometry-contract.md](../geometry-contract.md) §11.
