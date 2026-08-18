@@ -26,6 +26,11 @@
  *   relative to A, which is what criterion 8 asks for — and opens boot 1's
  *   output.
  *
+ * A third block covers the other direction of time: the same fixture with its
+ * header version bumped past this build's, which must load *and say so* rather
+ * than surface as corruption (§6a). The classification behind that guard is
+ * unit-tested in `tests/unit/file_version_guard.test.ts`.
+ *
  * Criteria 5, 6, 7 and 8 are asserted separately and deliberately: their failure
  * modes differ (crash on load, silent reference loss, throw on save, silent
  * mis-decode) and one combined "it round-trips" assertion would hide three of
@@ -42,6 +47,7 @@ import {execFileSync} from 'node:child_process'
 import fs from 'node:fs'
 import os from 'node:os'
 import Path from 'node:path'
+import {APP_VERSION} from '../../scripts/core/const'
 import {isolatedProfileArgs, REPO_ROOT, resolveNwjsExe} from './nwjs_boot'
 import {isDefaultBackendPass} from './split'
 
@@ -107,6 +113,18 @@ interface FullResult {
   obDataIsCurve?: boolean
   obDataLibId?: number | null
   editObFound?: boolean
+}
+
+/** One load of a file whose header claims a version this build does not know. */
+interface FutureResult {
+  ok: boolean
+  error?: string
+  stack?: string
+  warned?: boolean
+  count?: number
+  cls?: string | null
+  libId?: number | null
+  obDataLibId?: number | null
 }
 
 function boot(nwExe: string, evalExpr: string, tmpPrefix: string): unknown {
@@ -257,6 +275,49 @@ ${EVAL_PRELUDE}
       obDataIsCurve : !!(ob && c && ob.data === c),
       obDataLibId   : ob && ob.data ? ob.data.lib_id : null,
       editObFound   : !!findObject('PartialEditObject'),
+    }
+  } catch (e) {
+    return {ok: false, error: String(e), stack: String(e.stack)}
+  }
+})()`
+}
+
+/**
+ * Loads a fixture whose header version this build has never heard of, with
+ * `console.warn` captured so the guard is observable rather than inferred from
+ * the load merely not throwing.
+ */
+function futureVersionEval(fixture: string): string {
+  return `globalThis.__evalTestResult = (() => {
+  try {
+${EVAL_PRELUDE}
+    window._addons.disable('curve')
+
+    const warnings = []
+    const realWarn = console.warn
+    console.warn = function () {
+      warnings.push(Array.prototype.map.call(arguments, String).join(' '))
+      return realWarn.apply(console, arguments)
+    }
+
+    try {
+      _appstate.loadFile(readAB(${JSON.stringify(fixture)}))
+    } finally {
+      console.warn = realWarn
+    }
+
+    const set = _appstate.datalib.libmap['curve']
+    const blocks = set ? [...set] : []
+    const b = blocks[0]
+    const ob = findObject('CurveObject')
+
+    return {
+      ok         : true,
+      warned     : warnings.some((w) => w.indexOf('written by a newer version') >= 0),
+      count      : blocks.length,
+      cls        : b ? b.constructor.name : null,
+      libId      : b ? b.lib_id : null,
+      obDataLibId: ob && ob.data ? ob.data.lib_id : null,
     }
   } catch (e) {
     return {ok: false, error: String(e), stack: String(e.stack)}
@@ -419,5 +480,38 @@ ${full.stack}`)
     expect(full.numVerts).toBe(meta.numVerts)
     expect(full.numEdges).toBe(meta.numEdges)
     expect(full.obDataIsCurve).toBe(true)
+  })
+})
+
+describeMaybe('forward-version guard (P10 §6a)', () => {
+  let meta: FixtureMeta
+  let future: FutureResult
+
+  beforeAll(() => {
+    meta = JSON.parse(fs.readFileSync(FIXTURE_META, 'utf-8')) as FixtureMeta
+
+    const dir = fs.mkdtempSync(Path.join(os.tmpdir(), 'p10future-'))
+    const bumped = Path.join(dir, 'future.wproj')
+    const bytes = fs.readFileSync(FIXTURE)
+
+    // Header is 'WPRJ' + a little-endian uint16 version. Claiming the next
+    // version up is the case the guard is for; if that version ever becomes a
+    // real break, `BREAKING_FILE_VERSIONS` and this test move together.
+    bytes.writeUInt16LE(APP_VERSION + 1, 4)
+    fs.writeFileSync(bumped, bytes)
+
+    future = boot(nwExe!, futureVersionEval(bumped), 'p10fut-') as FutureResult
+    if (!future.ok) throw new Error(`future-version boot failed: ${future.error}\n${future.stack}`)
+  }, 600000)
+
+  test('a file from a newer build says so instead of failing as corruption', () => {
+    expect(future.warned).toBe(true)
+  })
+
+  test('a newer, non-breaking file still loads with its blocks intact', () => {
+    expect(future.count).toBe(1)
+    expect(future.cls).toBe('MissingDataBlock')
+    expect(future.libId).toBe(meta.curveLibId)
+    expect(future.obDataLibId).toBe(meta.curveLibId)
   })
 })

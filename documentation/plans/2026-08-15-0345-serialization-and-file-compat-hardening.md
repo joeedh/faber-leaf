@@ -467,6 +467,51 @@ Answer both halves explicitly:
 Record the decision, and the release it lands in, in P20's
 `documentation/embedding.md` as well — external embedders pin versions.
 
+### 6a. Decision (closed 2026-08-18): there is no one-way break, and the guard ships anyway
+
+**Is a one-way break acceptable?** The question turns out to be moot for the
+change that prompted it. §4.3a established that the id-scheme change is *not*
+one-way: a `.wproj` embeds its own struct schema and both `FileHelper.read` and
+`loadFile_start` build a per-file `STRUCT` from it, so a v9 file opens in a v8
+build and a v8 file opens in a v9 build. Nothing in P10 breaks reading in either
+direction, so nothing here is owed a "you must upgrade" story.
+
+That leaves the second half — **does the app say so out loud?** — which is worth
+answering on its own terms, because the *reason* §6 asks for the guard before
+the break is that a guard is useless the day you need it. Shipped in
+**APP_VERSION 9** (this plan's release), before any break exists:
+
+- `BREAKING_FILE_VERSIONS` in `scripts/core/const.ts` — empty today, and
+  expected to stay that way. Most version bumps do not belong in it, precisely
+  because the schema travels inside the file. A version goes in only when that
+  stops being true: the header layout changes, or a block type stops being
+  self-describing.
+- `isBreakingFileVersion(version, breaking?, reads?)` beside it — the
+  classification, with the list injectable so it is testable without a real
+  break to point at (`tests/unit/file_version_guard.test.ts`).
+- `AppState.checkFileVersion`, called from `loadFile_start` immediately after
+  the header's `uint16` version and before anything is decoded. A newer
+  *non*-breaking file logs and shows a notification and then loads normally; a
+  newer file across a declared break throws `FileLoadError` naming both versions
+  instead of failing somewhere downstream as a corrupt read. The notification is
+  wrapped in a `try` because the startup file loads before the screen exists.
+
+The save-side fallback §6 offers ("at minimum warn on save that the file will
+not open in older versions") is deliberately **not** implemented. It is the
+consolation prize for shipping a break without a guard, and warning on every
+save about a break that does not exist would be noise. The one real
+cross-version residue P10 does introduce — pre-v9 unknown-block bytes spliced
+into a v9 file — already warns at exactly the moment it applies, on the block
+that has it (§4.3a).
+
+What a future break owes, then: add its version to `BREAKING_FILE_VERSIONS`,
+and note that every build from v9 onward will refuse it by name. That is the
+guarantee this step buys.
+
+`documentation/embedding.md` does not exist yet (P20); when it does, it should
+carry the table in §4.3a plus the sentence that v9 is the first release with a
+forward-version guard.
+
 ## 7. Plan of record
 
 1. ~~**Sweep.** Grep for every `struct(T)` / `array(T)` / `iter(T)` declaration
@@ -492,7 +537,11 @@ Record the decision, and the release it lands in, in P20's
    (a): `stableStructId` in nstructjs (on by default), `APP_VERSION` 8 → 9, and
    the legacy-file residue recorded on the placeholder and warned about on save.
    No compatibility table is needed — the schema block already is one.
-6. Close open decision #9 and land the version guard / warning.
+6. ~~Close open decision #9 and land the version guard / warning.~~
+   **Done 2026-08-18 — see §6a.** There is no one-way break to warn about; the
+   forward-version guard (`BREAKING_FILE_VERSIONS` +
+   `AppState.checkFileVersion`) ships in v9 anyway, so a future break can be
+   refused by name rather than surfacing as corruption.
 7. Split the file migrations (§4.4).
 8. Rehome the three dying fixtures.
 

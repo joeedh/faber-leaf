@@ -48,7 +48,7 @@ import {Collection} from '../scene/collection'
 import {PropsEditor} from '../editors/properties/PropsEditor'
 import '../light/light'
 import {DefaultBrushes, DynTopoFlags, DynTopoOverrides, SculptBrush, SculptTools} from '../brush/index'
-import {APP_VERSION, CompressionFlags, STABLE_STRUCT_ID_VERSION} from './const'
+import {APP_VERSION, CompressionFlags, isBreakingFileVersion, STABLE_STRUCT_ID_VERSION} from './const'
 import type {Screen} from '../path.ux/scripts/pathux'
 import type {DataAPI} from '../path.ux/scripts/pathux'
 import {genDefaultFile, RootFileOp, RootLoadFileOp} from './gen_default_file'
@@ -640,6 +640,37 @@ export class AppState {
     window.redraw_viewport(true)
   }
 
+  /**
+   * Forward-compatibility guard, shipped in APP_VERSION 9 (plan P10 §6a).
+   *
+   * A newer file normally still opens: the schema travels inside it, so blocks
+   * this build has no class for are preserved rather than mis-decoded. Only a
+   * version in `BREAKING_FILE_VERSIONS` is actually unreadable, and refusing it
+   * by name is the whole point — the alternative is a decode failure that looks
+   * like a corrupt file.
+   */
+  checkFileVersion(version: number): void {
+    if (version <= APP_VERSION) {
+      return
+    }
+
+    const head =
+      `This file was written by a newer version of the app ` +
+      `(file format ${version}; this build reads ${APP_VERSION}).`
+
+    if (isBreakingFileVersion(version)) {
+      throw new FileLoadError(`${head} It cannot be opened here — please update.`)
+    }
+
+    console.warn(`${head} Reading it anyway; anything this build does not understand is preserved, not merged.`)
+
+    try {
+      this.ctx.warning('File is from a newer version; unrecognized parts are preserved as-is')
+    } catch {
+      // No screen yet — the startup file loads before the UI exists.
+    }
+  }
+
   loadFile_start(
     buf: ArrayBuffer | DataView,
     args: LoadFileArgs = {reset_toolstack: true, load_screen: true, load_settings: false}
@@ -672,6 +703,8 @@ export class AppState {
 
     const version = file.uint16()
     const flag = file.uint16()
+
+    this.checkFileVersion(version)
 
     if (flag & CompressionFlags.JSZIP) {
       const len = file.uint32()
