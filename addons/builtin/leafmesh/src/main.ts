@@ -9,13 +9,14 @@
  *
  * `"dependencies": []` — the first builtin with none. See P11 §4.
  *
- * This module registers the kind descriptor and nothing else; the DataBlock,
- * draw, picking, serialization and OBJ import arrive in P11 steps 2-6, and the
- * descriptor grows `factory` / `capabilities` / `vertexAttrs` with them.
+ * This module registers the kind descriptor and the data class; draw, picking,
+ * serialization and OBJ import arrive in P11 steps 3-6, and the descriptor
+ * grows `vertexAttrs` / `importExtensions` with them.
  */
 
 import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
 import * as leafmesh from './index.js'
+import {LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry} from './leafmesh.js'
 
 export const addonDefine: IAddonDefine = {
   name       : 'Leaf Mesh',
@@ -26,14 +27,18 @@ export const addonDefine: IAddonDefine = {
 
 export function register(api: AddonAPI<IAddon>) {
   // Keep in sync with addons/builtin/leafmesh/src/api.ts.
-  api.exportNamespace('leafmesh', {...leafmesh})
+  api.exportNamespace('leafmesh', {...leafmesh, LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry})
+  api.register(LeafMeshData)
 
-  // No `factory` yet: the descriptor's data class is P11 step 2. A kind with
-  // no declared capabilities claims only the required surface, which is the
-  // honest answer while there is no data class to claim them for.
+  // Declaring a capability is what makes `asElementSource` and friends return
+  // non-undefined, so this list and leafmesh.ts's AssertExtends block have to
+  // agree; they share LEAFMESH_CAPABILITIES so that they cannot drift.
   api.registerDataKind({
-    id    : 'leafmesh',
-    uiName: 'Leaf Mesh',
+    id          : 'leafmesh',
+    uiName      : 'Leaf Mesh',
+    factory     : LeafMeshData,
+    capabilities: LEAFMESH_CAPABILITIES,
+    usesMaterial: true,
   })
 }
 

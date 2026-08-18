@@ -36,7 +36,7 @@
  */
 
 import {ELEM_NONE, ElemArray, type Column} from './elem_array.js'
-import {AttrSet, Domain} from './attrs.js'
+import {AttrSet, DOMAIN_COUNT, Domain} from './attrs.js'
 
 export {ELEM_NONE}
 
@@ -333,6 +333,36 @@ export class LeafMesh {
 
   constructor() {
     this.attrs = new AttrSet([this.v.array, this.e.array, this.c.array, this.l.array, this.f.array])
+  }
+
+  /** Every domain's storage, indexed by `Domain`. */
+  get arrays(): readonly ElemArray[] {
+    return [this.v.array, this.e.array, this.c.array, this.l.array, this.f.array]
+  }
+
+  /**
+   * A deep copy: same handles, same columns, same attribute layers. Handles are
+   * preserved rather than compacted because callers hold them — an undo
+   * snapshot that renumbered everything would be useless.
+   */
+  copy(): LeafMesh {
+    const out = new LeafMesh()
+    const src = this.arrays
+    const dst = out.arrays
+
+    for (let domain = 0; domain < DOMAIN_COUNT; domain++) {
+      // Declare first: copyFrom matches columns by name, so a layer that does
+      // not exist on the destination yet would be dropped silently.
+      for (const layer of this.attrs.layers(domain)) {
+        out.attrs.add(domain, layer.name, layer.type, layer.flags, layer.column.fill)
+      }
+      dst[domain].copyFrom(src[domain])
+    }
+
+    out.topoStamp = this.topoStamp
+    out.repairLog.length = 0
+    out.repairLog.push(...this.repairLog)
+    return out
   }
 
   // ---------------------------------------------------------------- queries

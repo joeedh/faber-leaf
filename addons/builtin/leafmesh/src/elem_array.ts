@@ -241,6 +241,32 @@ export class ElemArray {
     return remap
   }
 
+  /**
+   * Overwrite this array with `src`. Columns are matched by name: one this
+   * array has and `src` does not is reset to its fill value rather than left
+   * at a stale length, and one only `src` has is dropped — declare the layer
+   * on the destination first if you want it carried across.
+   */
+  copyFrom(src: ElemArray): void {
+    this.capacity = src.capacity
+    this.used = src.used
+    this.count = src.count
+    this.freemap = src.freemap.slice()
+    this.freeList = src.freeList.slice()
+
+    for (const col of this.cols.values()) {
+      const from = src.cols.get(col.name)
+      if (from !== undefined && from.size === col.size && from.ctor === col.ctor) {
+        col.data = from.data.slice() as TypedArray
+      } else {
+        col.data = new col.ctor(this.capacity * col.size)
+        if (col.fill !== 0) {
+          col.data.fill(col.fill)
+        }
+      }
+    }
+  }
+
   *[Symbol.iterator](): Generator<number> {
     for (let i = 0; i < this.used; i++) {
       if (this.freemap[i] === 0) {

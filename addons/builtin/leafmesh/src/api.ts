@@ -6,8 +6,10 @@
  * compile-time half of that runtime namespace, and the two disagreeing is a
  * silent `undefined` at the consumer.
  *
- * It is deliberately the same list as `index.ts`: the headless core is the
- * public surface, and the addon shell adds nothing a peer should reach for.
+ * It is `index.ts` plus the host-facing data class. `index.ts` itself stays
+ * free of every `scripts/` import so the core remains unit-testable in plain
+ * jest, so the two lists are no longer identical and this is the only one that
+ * pulls in `leafmesh.ts`.
  */
 
 export {ELEM_NONE, ElemArray} from './elem_array.js'
@@ -27,3 +29,5 @@ export type {Tri} from './triangulate.js'
 
 export {makeCube, makeGrid, makePlane, makeTube, makeUVSphere} from './primitives.js'
 export type {PrimitiveResult} from './primitives.js'
+
+export {LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry} from './leafmesh.js'

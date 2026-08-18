@@ -11,6 +11,9 @@
       "@addon/curve/api": [
         "./addons/builtin/curve/src/api.ts"
       ],
+      "@addon/leafmesh/api": [
+        "./addons/builtin/leafmesh/src/api.ts"
+      ],
       "@addon/mesh/api": [
         "./addons/builtin/mesh/src/api.ts"
       ],

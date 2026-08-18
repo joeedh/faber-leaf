@@ -118,6 +118,66 @@ clean.
 zero-dependency addon to register a data kind, which is P8's `registerDataKind`
 hook and P7's `IDataKindDescriptor` doing exactly their job.
 
+## 4b. Step 2 as landed (2026-08-18)
+
+`src/leafmesh.ts` (~560 lines, under the ~900 budget) holds `LeafMeshData
+extends SceneObjectData`, and `LEAFMESH_CAPABILITIES` — the single list both
+`main.ts`'s descriptor and the file's own `AssertExtends` block read, so a
+claimed-but-unimplemented capability cannot compile. All seven optional
+capabilities are claimed: `ELEMENTS`, `INVALIDATION`, `SPATIAL`, `ATTRIBUTES`,
+`TRIANGLES`, `SYMMETRY`, `ACTIVE_ELEMENT`.
+
+Decisions worth recording:
+
+- **Selection is an attribute layer**, `.select`, one Byte column per domain,
+  created on first write. It stays out of `topo.ts` (selection is a host
+  concept, not a topological one) and gets persistence for free from §5's
+  column writer, since it is an ordinary non-`TEMP` layer.
+- **The two vocabularies are cast, not converted.** leafmesh's `Domain` /
+  `AttrType` and the host's `ElementDomain` / `AttrType` are numerically
+  identical by design, so an attribute layer round-trips as a column copy. TS
+  enums are nominal, so the agreement is not expressible as a compile-time
+  assertion; `tests/unit/leafmesh/contract_vocabulary.test.ts` pins it at
+  runtime instead. Both modules are import-safe under jest — `geometry_contract`
+  has type-only imports — so this is a plain unit test, not an integration one.
+- **`closestElements` is brute force.** The contract exposes the query and never
+  the structure, so an acceleration tree can land later without touching a
+  caller.
+- **`getPositions` on a non-vertex domain returns the element centre**, and
+  `setPositions` translates by the centre delta — the only reading of "move this
+  face" that does not also reshape it.
+- Two additions to P3 files, both addon-local: `ElemArray.copyFrom(src)`
+  (column-wise clone, matching by name) and `LeafMesh.copy()` / `get arrays()`,
+  which `LeafMeshData.copy()` needs. `copy()` preserves handles rather than
+  compacting, because callers hold them.
+
+`leafmesh.ts` is **not** unit-testable: `tests/jest.config.ts` has no
+`moduleNameMapper` entry for `@framework/*`. Its verification is therefore
+`npx tsgo --noEmit` plus the in-file `AssertExtends` block plus a headless
+NW.js probe.
+
+Verified by that probe (`--apptest-headless --eval … --dump`), on a `makeCube`
+of size 2: `hasCapability` true for all seven; 8 verts / 12 edges / 6 faces;
+bounding box `[-1,-1,-1] … [1,1,1]`; 12 triangles with 24 vertex normals;
+`listAttributes(VERT)` reporting the lazily-created `.select`; face centre
+`[0,0,-1]`; `closestElements(origin, 10, FACE)` returning all 6; active-element
+round-trip; and `copy()` yielding a real `LeafMeshData` that carries the
+selection and is independent of its source. `dataDefine()` reports kind
+`leafmesh`, select-type name `LEAFMESH`, and a registry-allocated mask of
+`65536` (`1 << 16`, per P6).
+
+`git status --porcelain scripts/` empty after `pnpm gen:paths` — the generated
+path catalogue does not enumerate addon block types, so registering a kind does
+not dirty `scripts/`. `pnpm check:layers` unchanged (all ten rules at delta 0).
+Unit suites 34/34, 328 tests. The integration package's one failure
+(`sculptcore_gpu_brush`, native, `rel = 0.0156…`) is pre-existing and was proved
+independent by an A/B run with the leafmesh entry stripped from
+`build/addons/index.json`.
+
+**No contract gap found.** P7's interfaces were implementable as written, and
+P8's `registerDataKind` took `factory` / `capabilities` / `usesMaterial` without
+extension.
+
 ## 5. Serialization
 
 - **Authoritative columns only.** `v.co`, `e.v1/v2`, `c.v`, `c.next`, `l.c`,
@@ -198,8 +258,9 @@ consumer of that mechanism.
 1. ~~`manifest.json` + `main.ts` + `api.ts`; register nothing but the kind
    descriptor. Confirm the app boots and the addon appears in the addon
    list.~~ **Done 2026-08-18 — see §4a.**
-2. `leafmesh.ts` — DataBlock + `SceneObjectData`, against P7's interfaces.
-   Compile before implementing: the type errors are the contract's to-do list.
+2. ~~`leafmesh.ts` — DataBlock + `SceneObjectData`, against P7's interfaces.
+   Compile before implementing: the type errors are the contract's to-do
+   list.~~ **Done 2026-08-18 — see §4b.**
 3. `serialize.ts` — round-trip a primitive from P3 through `.wproj`.
 4. `draw.ts` — flat render first, then the attribute-driven material (§7).
 5. `pick.ts` — click-select, box, circle.
