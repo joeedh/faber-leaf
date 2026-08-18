@@ -492,6 +492,13 @@ the slots the generator assigned. `vertexAttrs` on the kind descriptor is the
 always-present part of that — what the provider binds regardless of the
 material.
 
+The host tells it which: a provider implementing `IMaterialAttrConsumer`
+(`setRequestedAttrs(reqs)`, feature-detected by `asMaterialAttrConsumer`) is
+handed the compiled `MaterialAttrRequest[]` from *both* compile sites, whenever
+the compiled set can have changed. Feature-detected rather than declared on the
+kind descriptor, because these sites also serve providers that predate the kind
+registry.
+
 **Host call sites:** `wgsl_shaders.ts` (`buildMaterialVertexLayout` /
 `buildMaterialPipelineDescriptor`); `webgpu/batch.ts` (`getPipeline`);
 `renderengine_realtime.ts`; `view3d_draw_webgpu.ts`.
@@ -507,6 +514,15 @@ a regression: the previous fixed layout declared the same two slots and was
 equally wrong, just silently. §10 makes it visible by having both sides declare
 what they bind. The fix is for that draw path to bind requested attributes by
 name, and it belongs to the plan that replaces the BREP mesh (§12), not here.
+
+**The second material compile site is unreachable from `View3D.draw`.**
+`view3d_draw_webgpu.ts`'s `drawRenderWebGpu` runs only when `SHOW_RENDER` /
+`ONLY_RENDER` is set, but `View3D.draw` hands those flags to `RealtimeEngine`
+and returns before the path that would call it. So the two sites cannot diverge
+observably today — and equally, a fix applied to one and not the other cannot be
+caught by rendering. Both are kept in step by hand until the smoke-test path is
+either deleted or given a caller; that decision belongs to the plan that rebuilds
+the pass graph, not here.
 
 **"Just submit through the render queue" is not yet uniformly true.** At least
 one host draw path schedules a raw-GL pass through the queue

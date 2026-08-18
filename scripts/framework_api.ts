@@ -101,7 +101,12 @@ export {
   vertexShapeForAttrType,
   vertexStrideFor,
 } from './core/vertex_layout.js'
-export type {VertexAttrDesc, VertexAttrShape} from './core/vertex_layout.js'
+export type {
+  IMaterialAttrConsumer,
+  MaterialAttrRequest,
+  VertexAttrDesc,
+  VertexAttrShape,
+} from './core/vertex_layout.js'
 // Properties-editor panel contributions (§9). A leaf like the two above.
 export {ANY_DATA_KIND} from './core/props_panels.js'
 export type {IPropsPanel} from './core/props_panels.js'

@@ -27,6 +27,7 @@ import {
   LightGenWgsl,
   type IRenderLights,
 } from './shader_lib_wgsl.js'
+import type {MaterialAttrRequest} from '../core/vertex_layout.js'
 import {preprocess} from '../shaders/preprocess.js'
 
 /**
@@ -35,10 +36,13 @@ import {preprocess} from '../shaders/preprocess.js'
  * This array is the contract the renderengine hands to sculptcore: build one
  * vertex buffer per entry (by name), at the given `slot`, of `elemSize`
  * components — default-filled when the source layer is absent.
+ *
+ * `name` / `slot` / `elemSize` come from {@link MaterialAttrRequest} — the part
+ * a provider needs. `slot` is left at -1 until the graph walk finishes and
+ * `_assignAttrSlots` numbers them 2 upward; the fields below are the
+ * generator's own.
  */
-export interface RequestedAttrDesc {
-  /** Source attribute name on the mesh (e.g. `uv`, `color`). */
-  name: string
+export interface RequestedAttrDesc extends MaterialAttrRequest {
   /** `AttributeCategory` (matches sculptcore AttrUse: COLOR=2, UV=4, GENERIC=0). */
   category: number
   /** Sanitized WGSL field name in VsIn/VsOut (e.g. `attr_uv`). */
@@ -47,10 +51,6 @@ export interface RequestedAttrDesc {
   wgslType: string
   /** sculptcore `AttrType` bitflag (FLOAT2=2, FLOAT3=4, FLOAT4=8). */
   gpuType: number
-  /** Component count (2 / 3 / 4). */
-  elemSize: number
-  /** Vertex `@location`, assigned after the graph walk (2 + index). */
-  slot: number
 }
 
 /** Map an `AttributeCategory` to its WGSL/GPU element type. */

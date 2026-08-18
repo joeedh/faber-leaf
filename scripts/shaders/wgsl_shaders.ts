@@ -21,23 +21,20 @@ import {
   MATERIAL_BASE_VERTEX_ATTRS,
   VertexScalarType,
   buildVertexBufferLayout,
+  type MaterialAttrRequest,
   type VertexAttrDesc,
 } from '../core/vertex_layout.js'
 import type {PipelineDescriptor} from '../webgpu/pipeline.js'
 import {preprocess, type PreprocessOptions} from './preprocess.js'
 
 /**
- * The part of a material's requested-attribute set (`RequestedAttrDesc` in
- * `shadernodes/shader_nodes_wgsl.ts`) that the vertex layout needs. Structural
- * on purpose: the shader registry does not depend on the node graph.
+ * The part of a material's requested-attribute set the vertex layout needs.
+ * The contract owns the shape ({@link MaterialAttrRequest}); this alias is kept
+ * because the shader registry is where the name reads naturally, and because
+ * the registry must not depend on the node graph that produces the full
+ * descriptor (`RequestedAttrDesc` in `shadernodes/shader_nodes_wgsl.ts`).
  */
-export interface MaterialVertexAttr {
-  name: string
-  /** Vertex `@location` the generator assigned, always ≥ 2. */
-  slot: number
-  /** Component count (2 / 3 / 4). Requested attrs are always float. */
-  elemSize: number
-}
+export type MaterialVertexAttr = MaterialAttrRequest
 
 /**
  * Per-frame uniform layout. Stable across every shader; populated once

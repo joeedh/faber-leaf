@@ -46,6 +46,7 @@ import {
   buildMaterialVertexLayout,
   type MaterialVertexAttr,
 } from '../../shaders/wgsl_shaders.js'
+import {asMaterialAttrConsumer, type MaterialAttrRequest} from '../../core/vertex_layout.js'
 import type {Pipeline} from '../../webgpu/pipeline.js'
 import {LightGenWgsl, type IRenderLights} from '../../shadernodes/shader_lib_wgsl.js'
 import {sharedLinearSampler} from '../../shadernodes/shader_nodes_wgsl.js'
@@ -452,11 +453,15 @@ interface MaterialWebGpuState {
   program: {uniforms: IUniformsBlock; name: string; wgslKey?: undefined}
   pipeline: Pipeline
   hash: number
+  /** What this material's `AttributeNode` reads asked the geometry to bind. */
+  requestedAttrs: MaterialAttrRequest[]
   /** Seeds `sampler_<id>_tex/_smp` views per frame (image nodes). */
   setTextureUniforms?: (device: GPUDevice, uniforms: Record<string, unknown>) => void
 }
 
 const materialStates = new WeakMap<object, MaterialWebGpuState>()
+/** Last material hash whose requested-attr set was pushed to a given geometry. */
+const pushedAttrHash = new WeakMap<object, number>()
 const loggedMaterialWgsl = new Set<number>()
 
 function ensureMaterialPipeline(
@@ -541,6 +546,7 @@ function ensureMaterialPipeline(
     program,
     pipeline,
     hash,
+    requestedAttrs    : def.requestedAttrs ?? [],
     setTextureUniforms: gen ? (device, u) => gen.setTextureUniforms(device, u) : undefined,
   }
   materialStates.set(mat, state)
@@ -611,6 +617,22 @@ function drawRenderWebGpu(view3d: ViewLike): void {
 
     const state = ensureMaterialPipeline(wgpu, scene, mat, rlights)
     if (!state) continue
+
+    // Hand the geometry the attributes this material reads by name, so it
+    // binds them at the slots the pipeline above declares (geometry-contract
+    // §10.2). Re-pushed only when the compiled set can have changed.
+    // Sculptcore-tree providers are skipped: they render with their own
+    // installed shader, which this path never compiles for them.
+    const treeDrawn = typeof (data as SolidTexDataLike).setDrawShader === 'function'
+    const consumer = treeDrawn ? undefined : asMaterialAttrConsumer(data)
+    if (consumer && pushedAttrHash.get(data) !== state.hash) {
+      pushedAttrHash.set(data, state.hash)
+      try {
+        consumer.setRequestedAttrs(state.requestedAttrs)
+      } catch (err) {
+        console.error(`[webgpu] mat-${mat.lib_id} requested-attr push threw:`, err)
+      }
+    }
 
     // Image-node textures: re-seed views/samplers per frame (view identity
     // changes when an image regenerates).

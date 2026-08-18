@@ -166,3 +166,38 @@ export const MATERIAL_BASE_VERTEX_ATTRS: readonly VertexAttrDesc[] = Object.free
   Object.freeze({name: 'position', slot: 0, scalar: VertexScalarType.FLOAT32, elemSize: 3}),
   Object.freeze({name: 'normal', slot: 1, scalar: VertexScalarType.FLOAT32, elemSize: 3}),
 ])
+
+/**
+ * One attribute a compiled material asks the geometry to bind: which layer, at
+ * which `@location`, how many components wide. The shader generator's own
+ * descriptor carries more (WGSL field name, category) and extends this; a
+ * provider needs only these three to satisfy the request.
+ */
+export interface MaterialAttrRequest {
+  /** Attribute-layer name on the geometry (e.g. `uv`, `color`). */
+  name: string
+  /** Vertex `@location` the generator assigned — always 2 or above. */
+  slot: number
+  /** Component count the shader declares, 2-4. */
+  elemSize: number
+}
+
+/**
+ * Optional provider capability (geometry-contract §10.2): take the material's requested set so the
+ * next draw binds those attributes by name. Both material compile sites push it
+ * whenever the compiled set changes. A provider that renders only the base
+ * attributes does not implement it and is simply never called.
+ */
+export interface IMaterialAttrConsumer {
+  setRequestedAttrs(reqs: readonly MaterialAttrRequest[]): void
+}
+
+/**
+ * Feature-detect {@link IMaterialAttrConsumer}. Detected rather than declared
+ * on the kind descriptor, because the two compile sites also serve providers
+ * that predate the kind registry.
+ */
+export function asMaterialAttrConsumer(data: unknown): IMaterialAttrConsumer | undefined {
+  const consumer = data as Partial<IMaterialAttrConsumer> | undefined
+  return typeof consumer?.setRequestedAttrs === 'function' ? (consumer as IMaterialAttrConsumer) : undefined
+}

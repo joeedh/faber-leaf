@@ -21,6 +21,7 @@ import type {Pipeline} from '../webgpu/pipeline.js'
 import {GpuBuffer} from '../webgpu/buffer.js'
 import {GpuTexture, createSampler} from '../webgpu/texture.js'
 import {TextureUsage} from '../webgpu/flags.js'
+import {asMaterialAttrConsumer} from '../core/vertex_layout.js'
 import {
   buildMaterialPipelineDescriptor,
   buildMaterialVertexLayout,
@@ -1304,6 +1305,21 @@ export class RealtimeEngine extends RenderEngine {
           litemesh._engineAttrLayersSig = layerSig
         } catch (err) {
           console.error(`[renderengine.webgpu] LiteMesh attr push failed for mat-${mat.lib_id}:`, err)
+        }
+      } else if (matChanged || layersChanged) {
+        // Every other provider that binds material attributes by name
+        // (geometry-contract §10.2). It draws with the BasePass pipeline
+        // compiled just above, so it needs the requested set and nothing else —
+        // the WGSL push is the sculptcore-tree path's business.
+        const consumer = asMaterialAttrConsumer(ob.data)
+        if (consumer) {
+          try {
+            consumer.setRequestedAttrs(wantMaterial ? state.requestedAttrs : [])
+            litemesh._engineDrawShaderHash = effHash
+            litemesh._engineAttrLayersSig = layerSig
+          } catch (err) {
+            console.error(`[renderengine.webgpu] attr push failed for mat-${mat.lib_id}:`, err)
+          }
         }
       }
 
