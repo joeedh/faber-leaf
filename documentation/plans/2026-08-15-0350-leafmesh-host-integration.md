@@ -471,6 +471,52 @@ geometry.
 
 Two contract gaps, G4 and G5 below.
 
+## 4h. Step 7 (2026-08-18) — the criterion-12 audit
+
+Seven commits carry P11. `git diff --stat <c>^ <c> -- scripts/` is **empty for
+every one of them**:
+
+| commit | step |
+| --- | --- |
+| `67f1c6f3` | 1 — addon shell |
+| `bf378f45` | 2 — the DataBlock against P7's contract |
+| `80a3d5b8` | 3 — the `.wproj` blob |
+| `ae5b73fe` | 4a — its own `Drawable` |
+| `14bfff3a` | 4b — an `AttributeNode` material renders |
+| `3547495f` | 5 — picking |
+| `c8d03f35` | 6 — OBJ import |
+
+The stronger form of the criterion holds too: no module under
+`addons/builtin/leafmesh/src/` imports anything outside the addon except
+`@framework/api` and `@framework/pathux`. The out-of-bundle esbuild build means
+a relative escape into `scripts/` would not resolve in the first place, which is
+why §4's manifest was called the first test.
+
+Five gaps were found and closed in P7/P8 rather than worked around here — G1-G5
+below. Each is its own commit, and each is a change every provider gets, not a
+LeafMesh accommodation: the hub's usage-flag constants, the requested-attribute
+capability, the two-compile-site record, `IFileFormat` on the hub, and a host
+that actually drives the import registry.
+
+**Budget (§3), measured.** 2,200 lines budgeted, 2,437 written — +11%, and the
+distribution is more interesting than the total:
+
+| §3 row | budget | actual |
+| --- | --- | --- |
+| `leafmesh.ts` | 900 | 751 |
+| draw | 350 | 406 (`draw.ts` 209 + `draw_buffers.ts` 197) |
+| pick | 300 | 597 (`pick.ts` 272 + `pick_geom.ts` 325) |
+| `serialize.ts` | 250 | 278 |
+| `main.ts` / `api.ts` (+ `index.ts`) | 150 | 129 |
+| OBJ | 250 | 276 |
+
+The DataBlock — the row §11 predicted would overrun, because it is the one
+sized by P7's contract — came in **under** budget. The overrun is picking, at
+roughly 2x, and it is not a contract finding: §8 declined the
+spatial-acceleration capability, so `pick_geom.ts` is brute-force geometry that
+a BVH would have replaced with a call. That is a P12 question about whether
+LeafMesh needs a spatial structure, not a P7 one.
+
 ## 5. Serialization
 
 - **Authoritative columns only.** `v.co`, `e.v1/v2`, `c.v`, `c.next`, `l.c`,
@@ -570,8 +616,8 @@ consumer of that mechanism.
 5. ~~`pick.ts` — click-select, box, circle.~~ **Done 2026-08-18 — see
    §4f.**
 6. ~~OBJ import (§6).~~ **Done 2026-08-18 — see §4g.**
-7. The criterion-12 audit: `git diff --stat scripts/` for the whole plan must be
-   **empty**.
+7. ~~The criterion-12 audit: `git diff --stat scripts/` for the whole plan must
+   be **empty**.~~ **Done 2026-08-18 — see §4h.**
 
 ## 10. Tests
 
@@ -610,6 +656,15 @@ consumer of that mechanism.
   decided up front rather than after a profile.
 
 ## 12. Exit criteria
+
+**All met, 2026-08-18.** Renders (§4d/§4e), picks (§4f), round-trips (§4c),
+imports OBJ (§4g), with the BREP still present; `AttributeNode` material proved
+through both compile sites; `scripts/` untouched by every P11 commit (§4h);
+`check:layers` reports every budget delta 0; `npx tsgo --noEmit` and the unit
+suites are green. The one red on the branch is
+`tests/integration/sculptcore_gpu_brush.test.ts`, a pre-existing parity
+regression deferred at the user's instruction and unrelated to LeafMesh.
+
 
 - LeafMesh renders, picks, round-trips through `.wproj`, and imports an OBJ
   file — with the BREP still present.
