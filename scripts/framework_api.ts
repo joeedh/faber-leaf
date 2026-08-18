@@ -158,6 +158,10 @@ export {EDGE_LINKED_LISTS} from './core/const.js'
 export {registerOpaqueCustomDataElem} from './core/missing_addon.js'
 export {registerFileMigrator, unregisterFileMigrator} from './core/file_migrations.js'
 export type {IFileMigrationContext, IFileMigrator} from './core/file_migrations.js'
+// Import/export formats (§9). `core/file_formats.ts` imports nothing at all,
+// so the type can ride the hub without closing a cycle the way data_kinds would;
+// registration itself still goes through `AddonAPI.registerFileFormat`.
+export type {IFileFormat} from './core/file_formats.js'
 export {setDefaultSceneBuilder} from './core/default_file.js'
 export * as platform from './core/platform.js'
 

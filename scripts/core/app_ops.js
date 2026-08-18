@@ -3,6 +3,7 @@ import {ToolOp, BoolProperty, UndoFlags} from '../path.ux/scripts/pathux.js'
 import * as cconst from './const.js'
 import * as platform from './platform.js'
 import {exportSTLMesh} from '../util/stlformat.js'
+import {formatForFilename, listImportFormats} from './file_formats.js'
 import {genDefaultFile} from './gen_default_file.js'
 
 // AppImportOBJOp moved to scripts/mesh/import_obj_op.js so core stops
@@ -233,3 +234,58 @@ ToolOp.register(FileExportSTL)
 // AppImportOBJOp moved to scripts/mesh/import_obj_op.js (mesh-specific feature
 // that was coupling core to mesh — see plan §3 / §12). The class is still
 // exported globally via its ToolOp.register call there.
+
+export class FileImportOp extends ToolOp {
+  static tooldef() {
+    return {
+      uiname  : 'Import File',
+      toolpath: 'app.import_file',
+      inputs  : {},
+    }
+  }
+
+  exec(ctx) {
+    // The dialog is built from whatever is registered right now, so an addon
+    // contributing a format is the only thing that makes its extension
+    // reachable — core knows no format names.
+    const formats = listImportFormats()
+    if (formats.length === 0) {
+      ctx.error('No import formats are registered')
+      return
+    }
+
+    const filters = formats.map((fmt) => ({
+      name      : fmt.uiName,
+      extensions: fmt.extensions.map((ext) => (ext.startsWith('.') ? ext.slice(1) : ext)),
+    }))
+
+    let filename = ''
+
+    platform.platform
+      .showOpenDialog('Import File', {filters})
+      .then((paths) => {
+        if (paths.length === 0) {
+          return undefined
+        }
+
+        filename = paths[0].filename ?? String(paths[0])
+        return platform.platform.readFile(paths[0], 'application/x-octet-stream')
+      })
+      .then((data) => {
+        if (!data) {
+          return
+        }
+
+        const fmt = formatForFilename(filename)
+        if (fmt === undefined) {
+          ctx.error(`No importer for ${filename}`)
+          return
+        }
+
+        fmt.importFromBytes(ctx, new Uint8Array(data), filename)
+        window.redraw_viewport()
+      })
+  }
+}
+
+ToolOp.register(FileImportOp)
