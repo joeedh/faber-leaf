@@ -1,0 +1,2 @@
+# Project files are binary blobs (nstructjs/lz4); never eol-convert them.
+*.wproj binary

@@ -8,7 +8,7 @@ import {TetElementList} from './tet_element_list.js'
 import {TetVertex, TetElement, TetEdge, TetFace, TetLoop, TetCell, TetClasses, TetPlane} from './tetgen_types.js'
 import {SceneObjectData} from '../sceneobject/sceneobject_base.js'
 import {StandardTools} from '../sceneobject/stdtools.js'
-import {Node, NodeFlags} from '../core/graph.js'
+import {NodeFlags} from '../core/graph.js'
 import {DependSocket} from '../core/graphsockets.js'
 import {SelMask} from '../core/select_types.js'
 import {DataBlock} from '../core/lib_api.js'
@@ -83,8 +83,8 @@ export class TetMesh extends SceneObjectData {
   static nodedef() {
     return {
       name   : 'TetMesh',
-      inputs : Node.inherit({...super.nodedef().inputs}),
-      outputs: Node.inherit({...super.nodedef().outputs}),
+      inputs : {...super.nodedef().inputs},
+      outputs: {...super.nodedef().outputs},
       flag   : NodeFlags.SAVE_PROXY,
     }
   }

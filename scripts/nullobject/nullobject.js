@@ -5,7 +5,6 @@ import {NodeFlags} from '../core/graph.js'
 import {SelMask} from '../core/select_types.js'
 import {Shaders} from '../shaders/shaders.js'
 import {Shapes} from '../webgl/simplemesh_shapes.js'
-import {Node} from '../core/graph.js'
 import {nstructjs} from '../path.ux/scripts/pathux.js'
 
 export class NullObject extends SceneObjectData {
@@ -51,8 +50,8 @@ export class NullObject extends SceneObjectData {
     return {
       name   : 'NullObject',
       flag   : NodeFlags.SAVE_PROXY,
-      inputs : Node.inherit({...super.nodedef().inputs}),
-      outputs: Node.inherit({...super.nodedef().outputs}),
+      inputs : {...super.nodedef().inputs},
+      outputs: {...super.nodedef().outputs},
     }
   }
 
