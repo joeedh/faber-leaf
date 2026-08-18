@@ -48,7 +48,7 @@ import {Collection} from '../scene/collection'
 import {PropsEditor} from '../editors/properties/PropsEditor'
 import '../light/light'
 import {DefaultBrushes, DynTopoFlags, DynTopoOverrides, SculptBrush, SculptTools} from '../brush/index'
-import {APP_VERSION, CompressionFlags} from './const'
+import {APP_VERSION, CompressionFlags, STABLE_STRUCT_ID_VERSION} from './const'
 import type {Screen} from '../path.ux/scripts/pathux'
 import type {DataAPI} from '../path.ux/scripts/pathux'
 import {genDefaultFile, RootFileOp, RootLoadFileOp} from './gen_default_file'
@@ -345,6 +345,17 @@ export class AppState {
         // original class name + raw bytes so the file round-trips without
         // loss. See plan §4 and scripts/core/missing_addon.ts.
         if (block instanceof MissingDataBlock) {
+          // Pre-v9 bytes carry registration-order struct ids; this file's schema
+          // declares name-derived ones, so any nested abstract() inside them is
+          // unresolvable. Nothing can fix it without parsing bytes we preserved
+          // precisely so we would not have to. See plan §4.3.
+          if (block._legacyStructIds) {
+            console.warn(
+              `preserved block "${block.name}" (${block._origClsname}) came from a pre-v${STABLE_STRUCT_ID_VERSION} ` +
+                'file; its struct ids are not portable into this one'
+            )
+          }
+
           file.string(BlockTypes.DATABLOCK)
           const origBytes = block._origBytes
           const len = block._origClsname.length + origBytes.length + 4
@@ -746,7 +757,12 @@ export class AppState {
         // See plan §4 and scripts/core/missing_addon.ts.
         console.warn(`unknown block type "${clsname}" — preserving as MissingDataBlock`)
         const bytes = new Uint8Array(data2)
-        block = MissingDataBlock.fromUnknownBlock(clsname, bytes, recoverBlockHeader(istruct, bytes))
+        block = MissingDataBlock.fromUnknownBlock(
+          clsname,
+          bytes,
+          recoverBlockHeader(istruct, bytes),
+          version < STABLE_STRUCT_ID_VERSION
+        )
       } else {
         block = istruct.readObject(data2, cls)
       }

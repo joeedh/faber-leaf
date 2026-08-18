@@ -11,6 +11,12 @@
  * (mesh + sculptcore + **curve**). Regenerating it from the build under test
  * would prove nothing, so nothing here writes it.
  *
+ * `curve-addon-scene-v8.wproj` is the same scene written before struct ids were
+ * derived from struct names (plan §4.3). It is kept, and asserted on separately,
+ * because that scheme change is the one thing in the format a build cannot paper
+ * over: an old file still opens anywhere, but the unknown-block bytes inside it
+ * stop being portable the moment a partial build re-saves them.
+ *
  * Two headless boots, both under addon set B (the default set, which does *not*
  * enable curve):
  *
@@ -40,8 +46,11 @@ import {isolatedProfileArgs, REPO_ROOT, resolveNwjsExe} from './nwjs_boot'
 import {isDefaultBackendPass} from './split'
 
 const BUNDLE = Path.join(REPO_ROOT, 'build', 'entry_point.js')
-const FIXTURE = Path.join(REPO_ROOT, 'tests', 'integration', 'fixtures', 'curve-addon-scene.wproj')
-const FIXTURE_META = Path.join(REPO_ROOT, 'tests', 'integration', 'fixtures', 'curve-addon-scene.json')
+const FIXTURE_DIR = Path.join(REPO_ROOT, 'tests', 'integration', 'fixtures')
+const FIXTURE = Path.join(FIXTURE_DIR, 'curve-addon-scene.wproj')
+const FIXTURE_META = Path.join(FIXTURE_DIR, 'curve-addon-scene.json')
+const FIXTURE_V8 = Path.join(FIXTURE_DIR, 'curve-addon-scene-v8.wproj')
+const FIXTURE_V8_META = Path.join(FIXTURE_DIR, 'curve-addon-scene-v8.json')
 
 /** What the fixture's authoring build recorded about the blocks it wrote. */
 interface FixtureMeta {
@@ -257,7 +266,8 @@ ${EVAL_PRELUDE}
 
 const nwExe = resolveNwjsExe()
 const haveBundle = fs.existsSync(BUNDLE)
-const haveFixture = fs.existsSync(FIXTURE) && fs.existsSync(FIXTURE_META)
+const haveFixture =
+  fs.existsSync(FIXTURE) && fs.existsSync(FIXTURE_META) && fs.existsSync(FIXTURE_V8) && fs.existsSync(FIXTURE_V8_META)
 const canRun = !!nwExe && haveBundle && haveFixture && isDefaultBackendPass()
 
 if (!canRun && isDefaultBackendPass()) {
@@ -356,5 +366,58 @@ describeMaybe('cross-build .wproj compatibility (P10)', () => {
 
     // The unrelated edit the partial build made survives alongside it.
     expect(full.editObFound).toBe(true)
+  })
+})
+
+describeMaybe('legacy (registration-order struct id) .wproj files (P10 §4.3)', () => {
+  let meta: FixtureMeta
+  let partial: PartialResult
+  let full: FullResult
+
+  beforeAll(() => {
+    meta = JSON.parse(fs.readFileSync(FIXTURE_V8_META, 'utf-8')) as FixtureMeta
+
+    const dir = fs.mkdtempSync(Path.join(os.tmpdir(), 'p10legacy-'))
+    const resaved = Path.join(dir, 'resaved-v8.wproj')
+
+    partial = boot(nwExe!, partialBuildEval(FIXTURE_V8, resaved), 'p10lpartial-') as PartialResult
+    if (!partial.ok) throw new Error(`partial-build boot failed: ${partial.error}
+${partial.stack}`)
+
+    // Deliberately the *original* file, not the re-saved one: an old file has to
+    // keep opening. What it cannot survive is a partial build's re-save, which is
+    // why nothing here asserts on `resaved`.
+    full = boot(nwExe!, fullBuildEval(FIXTURE_V8), 'p10lfull-') as FullResult
+    if (!full.ok) throw new Error(`full-build boot failed: ${full.error}
+${full.stack}`)
+  }, 600000)
+
+  test('a pre-stable-id file still loads, with the unknown block preserved', () => {
+    const a = partial.afterLoad!
+
+    expect(a.cls).toBe('MissingDataBlock')
+    expect(a.origClsname).toBe('curve')
+    expect(a.origBytes).toBeGreaterThan(0)
+    expect(a.libId).toBe(meta.curveLibId)
+    expect(a.name).toBe(meta.curveName)
+    expect(a.obFound).toBe(true)
+    expect(a.obDataLibId).toBe(meta.curveLibId)
+  })
+
+  test('a pre-stable-id file can still be edited and saved', () => {
+    expect(partial.resavedBytes).toBeGreaterThan(0)
+    expect(partial.afterResave!.editObFound).toBe(true)
+    // Byte preservation is orthogonal to the id scheme: the bytes are opaque.
+    expect(partial.afterResave!.origHash).toBe(partial.afterLoad!.origHash)
+  })
+
+  test('the full build still reads a pre-stable-id file as live objects', () => {
+    expect(full.count).toBe(1)
+    expect(full.cls).toBe('CurveSpline')
+    expect(full.libId).toBe(meta.curveLibId)
+    expect(full.name).toBe(meta.curveName)
+    expect(full.numVerts).toBe(meta.numVerts)
+    expect(full.numEdges).toBe(meta.numEdges)
+    expect(full.obDataIsCurve).toBe(true)
   })
 })

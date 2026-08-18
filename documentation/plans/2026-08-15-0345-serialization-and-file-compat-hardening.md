@@ -281,6 +281,67 @@ anyway (its addon set is different by construction).
 Whichever is chosen: the file must record the table (or the scheme version) it
 was written under, or neither option is verifiable.
 
+### 4.3a Decision (closed 2026-08-18): option (a), with two corrections
+
+**Chosen: (a), name-derived ids.** `stableStructId(name)` in
+`vendor/nstructjs/src/struct_intern.ts` is an FNV-1a of the struct name folded
+into `[0x100000, 0x7fffffff)`, and `STRUCT.assignStructId` uses it for every
+registration. It is on by default, so a `STRUCT` has to opt *out* to get
+registration-order ids back — the failure mode is silent, so the safe scheme is
+the one you get without asking. `STRUCT.stableIdOverrides` pins a name to an id
+for the one case the scheme cannot resolve by itself (see below).
+
+Two things §4.3 got wrong, both found by reading the format rather than the
+code that writes it:
+
+1. **This is not a read break, and it needs no compatibility table.** Every
+   `.wproj` embeds its own schema (`write_scripts()`, `appstate.ts:306`), and
+   the reader parses it into a *per-file* `STRUCT` (`appstate.ts:677-682`) —
+   ids in the stream have always been resolved against the file's own table, not
+   the reader's. So an old file opens under the new scheme and a new file opens
+   under the old one, with no table and no migration. The compatibility table
+   §4.3 asked for is the schema block, and it was already there.
+
+2. **The break is narrower, and it is on the write side.** What actually depends
+   on two builds agreeing is `MissingDataBlock._origBytes`: bytes captured from
+   one file and spliced verbatim into another (`appstate.ts:345-356`). Their
+   nested `abstract(...)` ids belong to the *writing* file's table, and the
+   file they are spliced into declares the *saving* build's. Pinning ids makes
+   those two tables agree by construction — which is the whole fix, and it only
+   works for files written under the new scheme.
+
+**The residue.** A pre-v9 file whose blocks are preserved and re-saved by a
+partial build produces exactly the corruption §4.3 describes, and nothing can
+repair it without parsing the preserved bytes — option (b), rejected. So
+`MissingDataBlock._legacyStructIds` records where the bytes came from (set from
+the file version at load, persisted), and the save path warns by name. This is
+the honest scope: an old file always opens; only *round-tripping the parts an
+old build could not understand* is lost. `tests/integration/file_compat.test.ts`
+pins both halves against `curve-addon-scene-v8.wproj`.
+
+**Collisions.** With a 31-bit space, a collision needs two struct names to hash
+alike; `assignStructId` throws naming both, at registration, rather than letting
+two structs share an id. The fix is a `stableIdOverrides` entry, not a rename —
+renaming a struct breaks every file that contains it.
+
+**Format version.** `APP_VERSION` 8 → 9, and `STABLE_STRUCT_ID_VERSION = 9` in
+`scripts/core/const.ts` names what the bump means so the load path can ask.
+
+| file version | struct ids | opens in a v9 build | opens in a v8 build |
+| ------------ | ---------- | ------------------- | ------------------- |
+| ≤ 8 | registration order | yes | yes |
+| ≥ 9 | name-derived | yes | yes (schema is in the file) |
+
+The last cell is why decision #9 (§6) gets a narrower answer than it expected:
+this change is not the one-way break, so the guard it asks for is not owed by
+*this* step. Step 6 still owes it for the breaks that are one-way.
+
+**Editing warning for nstructjs.** Everything between `//$KEYWORD_CONFIG_START`
+and `//$KEYWORD_CONFIG_END` in `struct_intern.ts` is spliced into a template
+literal by `tools/rollup_configurable.config.js`, so a backtick anywhere in that
+range — comments included — breaks `build/nstructjs_configurable.js` only, while
+the other six bundles build fine. There is a comment on the marker now.
+
 ### 4.4 Ownership of the migrations
 
 The mesh addon currently owns file migrations that are not mesh-specific:
@@ -426,8 +487,11 @@ Record the decision, and the release it lands in, in P20's
    `tools/gen-file-compat-fixtures.mjs` (the one-shot generator), and
    `tests/integration/file_compat.test.ts` (criteria 5, 6, 7 and 8, asserted
    separately). All four criteria pass.
-5. Close open decision #3 and implement the chosen id scheme, with the version
-   bump and the compatibility table.
+5. ~~Close open decision #3 and implement the chosen id scheme, with the version
+   bump and the compatibility table.~~ **Done 2026-08-18 — see §4.3a.** Option
+   (a): `stableStructId` in nstructjs (on by default), `APP_VERSION` 8 → 9, and
+   the legacy-file residue recorded on the placeholder and warned about on save.
+   No compatibility table is needed — the schema block already is one.
 6. Close open decision #9 and land the version guard / warning.
 7. Split the file migrations (§4.4).
 8. Rehome the three dying fixtures.

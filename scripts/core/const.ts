@@ -2,7 +2,16 @@
 // need APP_KEY_NAME, and a dependency here would drag the pathux bundle in with it.
 
 // 8: selection masks persist as names, not ints (scripts/core/select_types.ts)
-export const APP_VERSION = 8
+// 9: struct ids are derived from struct names, not registration order
+export const APP_VERSION = 9
+
+/**
+ * First APP_VERSION whose embedded struct schema uses name-derived (stable)
+ * struct ids. Files below it carry registration-order ids, so bytes preserved
+ * out of one cannot be spliced into a file written by this build — see
+ * `MissingDataBlock._legacyStructIds`.
+ */
+export const STABLE_STRUCT_ID_VERSION = 9
 
 /** Namespace for every persistent per-app key (localStorage, IndexedDB).
  *  Renaming it strands existing profiles — `core/identity_migration.ts` carries

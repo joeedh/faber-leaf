@@ -125,6 +125,14 @@ export class MissingDataBlock extends DataBlock {
   /** Raw bytes that were intended for the original class's loadSTRUCT. */
   _origBytes: Uint8Array = new Uint8Array()
 
+  /**
+   * True when `_origBytes` came out of a file written before struct ids were
+   * derived from struct names. Nested `abstract(...)` ids inside those bytes
+   * belong to that file's registration-order id space and cannot be resolved
+   * against this one; the save path warns rather than pretending otherwise.
+   */
+  _legacyStructIds: boolean = false
+
   static blockDefine() {
     return {
       typeName   : 'MissingDataBlock',
@@ -139,8 +147,9 @@ export class MissingDataBlock extends DataBlock {
     this,
     `
 MissingDataBlock {
-  _origClsname : string;
-  _origBytes   : array(byte);
+  _origClsname     : string;
+  _origBytes       : array(byte);
+  _legacyStructIds : bool;
 }
   `
   )
@@ -153,11 +162,20 @@ MissingDataBlock {
    * `header` is what `recoverBlockHeader` made of those same bytes. Passing it
    * is what keeps inbound `DataRef`s resolving; without it the block reaches
    * `BlockSet.push` with `lib_id === -1` and is renumbered.
+   *
+   * `legacyStructIds` says the source file predates name-derived struct ids —
+   * see the field it sets.
    */
-  static fromUnknownBlock(clsname: string, bytes: Uint8Array, header?: RecoveredBlockHeader): MissingDataBlock {
+  static fromUnknownBlock(
+    clsname: string,
+    bytes: Uint8Array,
+    header?: RecoveredBlockHeader,
+    legacyStructIds = false
+  ): MissingDataBlock {
     const block = new MissingDataBlock()
     block._origClsname = clsname
     block._origBytes = new Uint8Array(bytes)
+    block._legacyStructIds = legacyStructIds
     block.name = header?.name ?? `Missing: ${clsname}`
     block.lib_type = clsname // pretend to be the original type for datalib bookkeeping
 
@@ -238,6 +256,8 @@ interface FileSchema {
 }
 interface NStructManager {
   idgen: number
+  stableIds?: boolean
+  assignStructId?: (stt: FileSchema) => number
   structs: Record<string, FileSchema>
   struct_cls: Record<string, unknown>
   struct_ids: Record<number, FileSchema>
@@ -253,9 +273,9 @@ function getManager(): NStructManager {
 /**
  * Register an unknown class's *file* schema into the global nstructjs manager so
  * the save path's `get_struct(_origClsname)` and `write_scripts()` can find it.
- * Idempotent. Mirrors what `parse_structs` does for an unknown struct: assigns a
- * fresh global id and stores the schema + a dummy class. Fixes the save-side
- * blocker for every placeholder kind (graph node/socket, toolmode, customdata).
+ * Idempotent. Mirrors what `parse_structs` does for an unknown struct: assigns
+ * the id and stores the schema + a dummy class. Fixes the save-side blocker for
+ * every placeholder kind (graph node/socket, toolmode, customdata).
  */
 function registerMissingStructGlobally(clsname: string, fileSchema: FileSchema): void {
   const manager = getManager()
@@ -263,8 +283,15 @@ function registerMissingStructGlobally(clsname: string, fileSchema: FileSchema):
     return
   }
 
-  // Fresh global id (the file's id belongs to the per-file istruct's id space).
-  fileSchema.id = manager.idgen++
+  // The file's own id belongs to the per-file istruct's id space, so it is
+  // reassigned here — by name under the stable-id scheme, which is what makes
+  // the id we write match the one the addon itself would have used.
+  fileSchema.name = clsname
+  if (manager.assignStructId) {
+    manager.assignStructId(fileSchema)
+  } else {
+    fileSchema.id = manager.idgen++
+  }
 
   const dummy = function (this: unknown) {} as unknown as {
     structName: string
