@@ -225,6 +225,7 @@ leafmesh.LeafMeshToolMode {
     tools.useIcons(true)
     tools.tool('leafmesh.extrude_region(transform=true)')
     tools.tool('leafmesh.inset_faces()')
+    tools.tool('leafmesh.subdivide()')
 
     header.flushUpdate()
   }
@@ -374,6 +375,7 @@ leafmesh.LeafMeshToolMode {
       new HotKey('V', [], 'leafmesh.split_off(transform=true)'),
       new HotKey('I', [], 'leafmesh.inset_faces()'),
       new HotKey('B', ['ctrl'], (ctx) => this._bevel(ctx as ViewContext)),
+      new HotKey('R', ['ctrl'], 'leafmesh.loop_cut()'),
     ])
   }
 

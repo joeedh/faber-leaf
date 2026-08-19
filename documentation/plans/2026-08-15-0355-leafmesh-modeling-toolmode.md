@@ -69,8 +69,8 @@ faces-with-holes are first-class:
 | inset | must handle a face with holes — inset the outer ring, not each ring blindly |
 | bevel | vertex and edge |
 | split-off | |
-| subdivide | |
-| loop-cut | |
+| subdivide | per ring; a face whose every edge is selected quad-splits |
+| loop-cut | stops at any face that is not a hole-free quad, and says where |
 
 Plus the transform integration (§6).
 
@@ -483,6 +483,57 @@ runs the toolstack's cancel, which is the base class's `undo`.
 Hotkeys: `I` insets; `Ctrl+B` bevels whatever the mode is selecting — edges when
 edge mode is on, vertices otherwise. This step opened **no** gap either; the
 addon-side diff carries no `scripts/`.
+
+### Step 6 — subdivide and loop-cut
+
+- **`subdivide.ts`** (pure, new): `subdivideEdges`, `subdivideFaces`,
+  `subdivideSelection`, `edgeRing`, `loopCut`, `loopCutEdges` — 12 tests.
+- **`modeling_ops.ts`** (framework) gained `leafmesh.subdivide` and
+  `leafmesh.loop_cut`; `_finish` now takes the domain to leave selected, so a
+  cut can leave its new vertices selected rather than nothing.
+
+**§5's two rules pull in opposite directions, and that is the design.** A
+subdivision is per ring by construction — `splitEdge` inserts the vertex into
+every face on the edge and leaves each ring's order alone — so a face with holes
+subdivides correctly with no case of its own, and the hole-ring test only has to
+confirm it. A chord is the other thing: it is only meaningful across a single
+ring, so the loop-cut walk stops dead at any face that is not a hole-free quad
+and reports it in `LoopCutResult.stopped`. Nothing is drawn through a hole, and
+the refusal is visible to the caller rather than implied. The tube pins it — a
+cut round the outer wall stops at both annular caps, names them, and the caps
+keep their holes.
+
+**Winding is derived here too.** A chord splits a ring at two of its vertices
+into the two spans between them, each walked in the ring's own direction; a quad
+split walks `mid → corner → mid` before closing on the centre. `subdivide.ts`
+reads no normal anywhere, and `validateAndRepair() === 0` in all twelve cases is
+what proves it.
+
+**A quad split is a subdivision that finished the job.** `subdivideEdges` is the
+primitive: `cuts` vertices into each selected edge, faces keeping their identity
+and simply growing. `subdivideFaces` cuts each ring edge once — once, not once
+per adjacent selected face — and then rebuilds the face as one quad per original
+corner around a new centre vertex, which is what a modelling subdivide is
+expected to do. A face with a hole is refused, because its centre would have to
+be somewhere the face is not, and comes back in `skipped` to subdivide by ring
+instead. `subdivideSelection` is the dispatch the ToolOp calls: a face whose
+every edge is selected is quad-split, every other selected edge is just cut.
+More than one cut subdivides by ring throughout, since a quad split is a single
+cut by construction.
+
+**The triangulation cache invalidates for free.** Every Euler call the two make —
+`splitEdge`, `killFace`, `makeFace`, `makeVert` — bumps `topoStamp`, which is
+what §5 asks for; no op-side invalidation call exists or is needed.
+
+**Both ops are plain, not modal.** A loop cut's interactive slide would drag `t`
+along the ring rather than in object units, which `LeafMeshDragOpBase`'s
+pixels-to-local-units mapping does not describe; `t` is an input at 0.5 and the
+slide is future work, not a silent narrowing. `leafmesh.loop_cut` cuts the ring
+through each selected edge, skipping edges an earlier ring already ran through,
+so selecting a whole loop cuts once. Hotkey `Ctrl+R`; subdivide has no default
+key (Blender has none either) and sits in the header's tool row.
+
+This step opened **no** gap; the addon-side diff carries no `scripts/`.
 
 ## 13. Contract gaps
 

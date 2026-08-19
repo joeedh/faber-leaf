@@ -20,6 +20,7 @@ import {Icons, InvalidationKind, SelMask, TranslateOp} from '@framework/api'
 import {
   BoolProperty,
   FloatProperty,
+  IntProperty,
   Mat4Property,
   Matrix4,
   PropertySlots,
@@ -43,6 +44,7 @@ import {
 } from './modeling.js'
 import type {SelectDomain} from './select_geom.js'
 import {applySelection, flushSelection, listSelected, selectAll} from './select_geom.js'
+import {loopCutEdges, subdivideSelection} from './subdivide.js'
 import {LeafMesh} from './topo.js'
 
 /** The output every one of these carries, so the macro can wire it up. */
@@ -63,6 +65,16 @@ interface ExtrudeIn extends TransformIn {
 /** What a drag writes: an inset's width, a bevel's radius. */
 interface AmountIn extends PropertySlots {
   amount: FloatProperty
+}
+
+/** How many vertices each cut edge gains. */
+interface SubdivideIn extends PropertySlots {
+  cuts: IntProperty
+}
+
+/** Where along each ring edge a loop cut lands. */
+interface LoopCutIn extends PropertySlots {
+  t: FloatProperty
 }
 
 interface InsetIn extends AmountIn {
@@ -133,14 +145,14 @@ export abstract class LeafMeshTopoOpBase<
     return this._snap === undefined ? 0 : meshSnapshotBytes(this._snap)
   }
 
-  /** Leave the result selected, flushed down to verts and edges, and drawn. */
-  _finish(data: LeafMeshData, faces: readonly number[]): void {
+  /** Leave the result selected, flushed out of `domain`, and drawn. */
+  _finish(data: LeafMeshData, elems: readonly number[], domain: SelectDomain = Domain.FACE): void {
     for (const d of [Domain.VERT, Domain.EDGE, Domain.FACE] as SelectDomain[]) {
       selectAll(data.mesh, d, false)
     }
 
-    applySelection(data.mesh, Domain.FACE, faces, 'add')
-    flushSelection(data.mesh, Domain.FACE)
+    applySelection(data.mesh, domain, elems, 'add')
+    flushSelection(data.mesh, domain)
 
     data.invalidate(InvalidationKind.ALL)
     window.redraw_viewport()
@@ -426,6 +438,64 @@ export class LeafMeshBevelEdgesOp extends LeafMeshDragOpBase<AmountIn> {
   }
 }
 
+/**
+ * Cut every selected edge in two, and quad-split any face whose every edge is
+ * selected. More than one cut subdivides by ring throughout, since a quad split
+ * is a single cut by construction.
+ */
+export class LeafMeshSubdivideOp extends LeafMeshTopoOpBase<SubdivideIn> {
+  static tooldef() {
+    return {
+      toolpath: 'leafmesh.subdivide',
+      uiname  : 'Subdivide',
+      icon    : Icons.SUBDIVIDE,
+      inputs  : {cuts: new IntProperty(1)},
+    }
+  }
+
+  exec(ctx: ToolContext): void {
+    const data = this._getData(ctx)
+    if (data === undefined) {
+      return
+    }
+
+    const out = subdivideSelection(
+      data.mesh,
+      listSelected(data.mesh, Domain.FACE),
+      listSelected(data.mesh, Domain.EDGE),
+      {cuts: this.inputs.cuts.getValue()}
+    )
+
+    this._finish(data, out.verts, Domain.VERT)
+  }
+}
+
+/**
+ * Run a cut round the edge ring through each selected edge. The ring stops at
+ * any face that is not a hole-free quad, so a cut never crosses a hole.
+ */
+export class LeafMeshLoopCutOp extends LeafMeshTopoOpBase<LoopCutIn> {
+  static tooldef() {
+    return {
+      toolpath: 'leafmesh.loop_cut',
+      uiname  : 'Loop Cut',
+      icon    : Icons.EDGECUT,
+      inputs  : {t: new FloatProperty(0.5)},
+    }
+  }
+
+  exec(ctx: ToolContext): void {
+    const data = this._getData(ctx)
+    if (data === undefined) {
+      return
+    }
+
+    const out = loopCutEdges(data.mesh, listSelected(data.mesh, Domain.EDGE), {t: this.inputs.t.getValue()})
+
+    this._finish(data, out.verts, Domain.VERT)
+  }
+}
+
 export const LEAFMESH_MODELING_OPS = [
   LeafMeshExtrudeRegionOp,
   LeafMeshExtrudeIndividualOp,
@@ -433,4 +503,6 @@ export const LEAFMESH_MODELING_OPS = [
   LeafMeshInsetOp,
   LeafMeshBevelVertsOp,
   LeafMeshBevelEdgesOp,
+  LeafMeshSubdivideOp,
+  LeafMeshLoopCutOp,
 ]

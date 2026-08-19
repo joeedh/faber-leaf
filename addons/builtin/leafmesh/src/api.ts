@@ -52,6 +52,9 @@ export type {ExtrudeOptions, InsetOptions, RegionResult} from './modeling.js'
 export {bevelEdges, bevelVerts} from './bevel.js'
 export type {BevelOptions, BevelResult} from './bevel.js'
 
+export {edgeRing, loopCut, loopCutEdges, subdivideEdges, subdivideFaces, subdivideSelection} from './subdivide.js'
+export type {EdgeRing, LoopCutOptions, LoopCutResult, SubdivideOptions, SubdivideResult} from './subdivide.js'
+
 export {
   LEAFMESH_MODELING_OPS,
   LeafMeshBevelEdgesOp,
@@ -59,6 +62,8 @@ export {
   LeafMeshExtrudeIndividualOp,
   LeafMeshExtrudeRegionOp,
   LeafMeshInsetOp,
+  LeafMeshLoopCutOp,
   LeafMeshSplitOffOp,
+  LeafMeshSubdivideOp,
   LeafMeshTopoOpBase,
 } from './modeling_ops.js'
