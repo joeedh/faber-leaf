@@ -23,18 +23,21 @@ export {
   listSelectedUVs,
   pickNearestUV,
   readUVRings,
+  restoreUVCoords,
   restoreUVFlags,
   restoreUVTransData,
   ringElements,
   selectAllUVs,
   selectLinkedUV,
   selectOneUV,
+  snapshotUVCoords,
   snapshotUVFlags,
   uvIslandOf,
   uvIslands,
 } from './uv_edit_geom.js'
 
 export type {
+  UVCoordSnapshot,
   UVDrawGeometry,
   UVFlagAction,
   UVFlagSnapshot,

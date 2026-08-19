@@ -99,6 +99,20 @@ export class LeafMeshUVSource implements IUVSource {
     return ret
   }
 
+  /**
+   * Corner positions — which on a corner domain is the corner's vertex, so the
+   * element source already answers this; only the precision differs.
+   */
+  getUVElementPositions(_layer: number, handles: ElementHandles, out?: Float32Array): Float32Array {
+    const ret = sizedF32(out, handles.length * 3)
+    const co = this.data.getPositions(ElementDomain.CORNER, handles)
+
+    for (let i = 0; i < ret.length; i++) {
+      ret[i] = co[i]
+    }
+    return ret
+  }
+
   getUVs(layer: number, handles: ElementHandles, out?: Float32Array): Float32Array {
     const ret = sizedF32(out, handles.length * 2)
     const name = this.layerName(layer)

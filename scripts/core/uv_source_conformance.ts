@@ -107,6 +107,27 @@ const CASES: [string, Case][] = [
   ],
 
   [
+    'getUVElementPositions, where offered, is three floats per handle',
+    (source, layer) => {
+      if (source.getUVElementPositions === undefined) {
+        return
+      }
+
+      const elems = elementsOf(source, layer)
+      const co = source.getUVElementPositions(layer, elems)
+      eq(co.length, elems.length * 3, 'getUVElementPositions length')
+
+      for (let i = 0; i < co.length; i++) {
+        ok(Number.isFinite(co[i]), `position component ${i} is ${co[i]}`)
+      }
+
+      const out = new Float32Array(elems.length * 3)
+      const same = source.getUVElementPositions(layer, elems, out)
+      ok(same.buffer === out.buffer, 'getUVElementPositions ignored the supplied buffer')
+    },
+  ],
+
+  [
     'getUVs is two floats per handle and honours a supplied buffer',
     (source, layer) => {
       const elems = elementsOf(source, layer)

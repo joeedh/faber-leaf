@@ -22,6 +22,12 @@ import './test/test.js'
 // here so core stops importing from editors/view3d/tools. See plan §3 / §12.
 import './editors/view3d/tools/tools.js'
 
+// `image.set_type`, restored from the archived image editor. Registered here
+// rather than beside the other op imports in data_api/api_define.ts: that hub
+// sits inside the host's import-cycle knot, and a side-effect-only ToolOp
+// registration has no reason to join it.
+import './image/image_type_ops.js'
+
 // The distribution this bundle was built for: which addons ship, which startup
 // scene opens, what the window is called. `@distribution` is aliased by
 // tools/esbuilder.js --distribution <name>; the default is faber-leaf. This is

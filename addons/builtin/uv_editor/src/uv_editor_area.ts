@@ -14,13 +14,14 @@
  * can be missing there.
  */
 
-import {Editor, Icons, ImageBlock, ImageUser, VelPan, VelPanPanOp, uvSourceFor} from '@framework/api'
+import {Editor, Icons, ImageBlock, ImageUser, SelOneToolModes, VelPan, VelPanPanOp, uvSourceFor} from '@framework/api'
 import type {BlockLoader, BlockLoaderAddUser, DataBlock, IUVSource, StructReader, ViewContext} from '@framework/api'
-import {Menu, UIBase, Vector2, eventWasTouch, haveModal, nstructjs} from '@framework/pathux'
+import {HotKey, KeyMap, Menu, UIBase, Vector2, eventWasTouch, haveModal, nstructjs} from '@framework/pathux'
 import type {DataAPI, DataStruct, IAreaDef, UIBase as UIBaseType} from '@framework/pathux'
 
-import {UV_PIN, UV_SELECT, buildUVDrawGeometry, pickNearestUV} from './uv_edit_geom.js'
+import {UV_PIN, UV_SELECT, UV_SNAP_LIMIT, buildUVDrawGeometry, pickNearestUV} from './uv_edit_geom.js'
 import type {UVDrawGeometry, UVScope} from './uv_edit_geom.js'
+import {SelectOneUVOp} from './uv_ops.js'
 
 const BACKGROUND = 'rgb(45,45,45)'
 const CHECKER_DARK = 'rgb(90,90,90)'
@@ -109,7 +110,7 @@ uveditor.UVEditor {
       uiname  : 'UV Editor',
       apiname : 'uvEditor',
       // TODO: the icon sheet has no UV cell yet; sharing the image editor's.
-      icon: Icons.IMAGE_EDITOR,
+      icon    : Icons.IMAGE_EDITOR,
     }
   }
 
@@ -154,6 +155,22 @@ uveditor.UVEditor {
     this.addEventListener('pointermove', this.onPointerMove.bind(this))
     // XXX pathux's WheelEvent typing isn't inferred for this overload
     this.addEventListener('mousewheel', this.onMouseWheel.bind(this) as EventListenerOrEventListenerObject)
+  }
+
+  /** The archived editor's hotkeys, unchanged — users have muscle memory. */
+  defineKeyMap() {
+    this.keymap = new KeyMap([
+      new HotKey('A', [], "uveditor.toggle_select_all(mode='AUTO')"),
+      new HotKey('L', [], "uveditor.pick_select_linked(mode='ADD' immediateMode=true)"),
+      new HotKey('L', ['shift'], "uveditor.pick_select_linked(mode='SUB' immediateMode=true)"),
+      new HotKey('G', [], 'uveditor.translate()'),
+      new HotKey('S', [], 'uveditor.scale()'),
+      new HotKey('R', [], 'uveditor.rotate()'),
+      new HotKey('P', [], "uveditor.set_flag(flag='PIN')"),
+      new HotKey('P', ['alt'], "uveditor.clear_flag(flag='PIN')"),
+    ])
+
+    return this.keymap
   }
 
   copy(): this {
@@ -284,7 +301,58 @@ uveditor.UVEditor {
       const op = new VelPanPanOp()
       op.inputs.velpanPath.setValue('uvEditor.velpan')
       this.ctx.api.execTool(this.ctx, op)
+    } else if (e.button === 0 || wasTouch) {
+      this.doSelect(e)
     }
+  }
+
+  /**
+   * Click-select, as the archived editor did it.
+   *
+   * The whole coincident stack under the cursor goes in together, so a corner
+   * shared by several faces selects as one point rather than whichever ring
+   * happened to be read first.
+   */
+  doSelect(e: PointerEvent): void {
+    const source = this.getSource()
+    const layer = source ? this.getLayer(source) : -1
+
+    if (!source || layer < 0 || !this.ctx) {
+      return
+    }
+
+    const local = this.getLocalMouse(e, _tmp1)
+    const uv = this.unprojectUV(local[0], local[1], _tmp2)
+
+    const limit = PICK_RADIUS / Math.max(this.velpan.scale[0] * this.getUnitSize(), 1e-6)
+    const hits = pickNearestUV(source, layer, uv[0], uv[1], {...this.getScope(), limit})
+
+    if (hits.length === 0) {
+      return
+    }
+
+    const elements: number[] = []
+    for (const hit of hits) {
+      const du = hit.u - hits[0].u
+      const dv = hit.v - hits[0].v
+
+      if (Math.sqrt(du * du + dv * dv) >= UV_SNAP_LIMIT) {
+        break
+      }
+
+      elements.push(hit.handle)
+    }
+
+    let mode = SelOneToolModes.UNIQUE
+    if (e.shiftKey) {
+      mode = hits[0].selected ? SelOneToolModes.SUB : SelOneToolModes.ADD
+    }
+
+    const op = new SelectOneUVOp()
+    op.inputs.elements.setValue(elements)
+    op.inputs.mode.setValue(mode)
+
+    this.ctx.api.execTool(this.ctx, op)
   }
 
   onPointerMove(e: PointerEvent): void {

@@ -20,6 +20,7 @@ import {
   gatherUVTransData,
   listSelectedUVs,
   pickNearestUV,
+  restoreUVCoords,
   restoreUVFlags,
   restoreUVTransData,
   ringElements,
@@ -27,6 +28,7 @@ import {
   selectAllUVs,
   selectLinkedUV,
   selectOneUV,
+  snapshotUVCoords,
   snapshotUVFlags,
   uvIslandOf,
   uvIslands,
@@ -409,6 +411,37 @@ describe('transform', () => {
     expect(restoreUVTransData(source, 0, td)).toBe(true)
 
     expect(Array.from(source.getUVs(0, td.handles))).toEqual(Array.from(td.start))
+  })
+
+  test('a coordinate snapshot restores only the handles it holds', () => {
+    const source = grid()
+    const moved = Int32Array.from([0, 1])
+    const before = Array.from(source.getUVs(0, moved))
+
+    const snap = snapshotUVCoords(source, 0, moved)
+
+    selectAllUVs(source, 0, 'add')
+    applyUVTranslate(source, 0, gatherUVTransData(source, 0), 0.5, 0.5)
+
+    const untouched = Int32Array.from([2])
+    const shifted = Array.from(source.getUVs(0, untouched))
+
+    expect(restoreUVCoords(source, 0, snap)).toBe(true)
+    expect(Array.from(source.getUVs(0, moved))).toEqual(before)
+    expect(Array.from(source.getUVs(0, untouched))).toEqual(shifted)
+  })
+
+  test('a stale coordinate snapshot is refused, not written through', () => {
+    const source = grid()
+    const handles = Int32Array.from([0, 1])
+    const snap = snapshotUVCoords(source, 0, handles)
+
+    applyUVTranslate(source, 0, gatherUVTransData(source, 0, {}), 0, 0)
+    source.setUVs(0, handles, Float32Array.from([9, 9, 9, 9]))
+    source.bumpTopoStamp()
+
+    expect(restoreUVCoords(source, 0, snap)).toBe(false)
+    expect(Array.from(source.getUVs(0, handles))).toEqual([9, 9, 9, 9])
   })
 
   test('a transform whose handles went stale is refused', () => {

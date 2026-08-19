@@ -262,6 +262,37 @@ export function restoreUVFlags(source: IUVSource, layer: number, snap: UVFlagSna
   return true
 }
 
+/** UVs of a specific handle set, for an op that has to put them back. */
+export interface UVCoordSnapshot {
+  handles: Int32Array
+  uvs: Float32Array
+  topoStamp: number
+}
+
+/**
+ * Snapshot the UVs of `handles` only. Deliberately not scope-wide: a transform
+ * undo has to be proportional to what moved, not to the layer.
+ */
+export function snapshotUVCoords(source: IUVSource, layer: number, handles: ElementHandles): UVCoordSnapshot {
+  const copy = Int32Array.from(handles as ArrayLike<number>)
+
+  return {
+    handles  : copy,
+    uvs      : source.getUVs(layer, copy, new Float32Array(copy.length * 2)),
+    topoStamp: source.topoStamp,
+  }
+}
+
+/** Put one back, refusing a stale one for {@link restoreUVFlags}'s reason. */
+export function restoreUVCoords(source: IUVSource, layer: number, snap: UVCoordSnapshot): boolean {
+  if (snap.topoStamp !== source.topoStamp) {
+    return false
+  }
+
+  source.setUVs(layer, snap.handles, snap.uvs)
+  return true
+}
+
 export type UVFlagAction = 'set' | 'clear' | 'toggle'
 
 export function applyUVFlag(

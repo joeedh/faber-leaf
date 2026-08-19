@@ -190,6 +190,28 @@ export class LiteMeshUVSource implements IUVSource {
     return ret
   }
 
+  /**
+   * Owner-vertex positions, object-local. Two engine calls, not one per element:
+   * corners to their verts, then the verts' coordinates.
+   */
+  getUVElementPositions(_layer: number, handles: ElementHandles, out?: Float32Array): Float32Array {
+    const ret = sizedF32(out, handles.length * 3)
+    const verts = this.data._intVecOut()
+    this.mesh.uvCornerVerts(this.intVecIn(handles).vec as never, verts.vec as never)
+
+    const dst = this.data._floatVecOut()
+    ;(this.data.mesh as unknown as {gatherVertCos(i: never, o: never): void}).gatherVertCos(
+      verts.vec as never,
+      dst.vec as never
+    )
+
+    const src = dst.read()
+    for (let i = 0; i < ret.length; i++) {
+      ret[i] = src[i]
+    }
+    return ret
+  }
+
   getUVs(layer: number, handles: ElementHandles, out?: Float32Array): Float32Array {
     const ret = sizedF32(out, handles.length * 2)
     const col = this.columnOf(layer)

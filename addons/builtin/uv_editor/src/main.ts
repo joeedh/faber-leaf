@@ -11,13 +11,14 @@
  *
  * Registration is thin on purpose: the behaviour is `index.ts`, which imports
  * no host value and is unit-tested against the in-memory double. The area is
- * the shell around it; the `uveditor.*` ToolOps attach here as they land.
+ * the shell around it, and the `uveditor.*` ToolOps are the same shape.
  */
 
 import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
 
 import * as uvEditor from './index.js'
 import {UVEditor} from './uv_editor_area.js'
+import {UV_OPS} from './uv_ops.js'
 
 export const addonDefine: IAddonDefine = {
   name       : 'UV Editor',
@@ -31,6 +32,7 @@ export function register(api: AddonAPI<IAddon>) {
   api.exportNamespace('uv_editor', {...uvEditor})
 
   api.register(UVEditor)
+  api.registerAll(...UV_OPS)
 }
 
 export function unregister() {}

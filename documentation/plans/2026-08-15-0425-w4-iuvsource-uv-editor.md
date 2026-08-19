@@ -1,9 +1,9 @@
 # P18 — W4a: `IUVSource` + the mesh-agnostic UV editor
 
-**Status:** in progress — §5 steps 1–3 closed (all three implementors landed
+**Status:** in progress — §5 steps 1–4 closed (all three implementors landed
 and run through one conformance suite; the editor's host-free core, its addon,
-and its Editor component are in). Step 4 — the `uveditor.*` ToolOps, which is
-where selection lands — is next.
+its Editor component, and every tool path the archive registered are in).
+Step 5 — `ImageBus` in place of `window.redraw_uveditors` — is next.
 
 **Date:** 2026-08-15 (citations re-verified 2026-08-19)
 
@@ -224,7 +224,7 @@ implementation will otherwise break:
    - [x] **The addon**, external and default-on in both distributions. Out of
      bundle for a stronger reason than leafmesh's: a physical build boundary is
      a better guarantee of criterion 11 than a lint rule, and the built
-     `build/addons/uv_editor/src/main.js` has exactly three inputs, all its own.
+     `build/addons/uv_editor/src/main.js` has five inputs, all its own.
    - [x] **The Editor component** — `uv_editor_area.ts`: the area, Canvas-2D
      draw (checker, backdrop image, edges, points), `VelPan` pan/zoom, and
      mouse-move highlight, reaching geometry only through `uvSourceFor`. Kept
@@ -252,6 +252,32 @@ implementation will otherwise break:
    `saveLastValue()` state keyed on these paths; a rename is gratuitous churn.
    `image.set_type` (`SetImageTypeOp`) is on that list and is not UV — restore
    it too rather than losing it silently.
+   - [x] **All ten `uveditor.*` ops**, in `addons/builtin/uv_editor/src/uv_ops.ts`
+     over the step-3 core. Paths, hotkeys and `saveLastValue()` inputs are the
+     archive's byte for byte; only input *names* that spelled a BREP concept
+     changed (`meshPath` → `dataPath`, `loopEid(s)` → `element(s)`), because
+     nothing persists those, and the old vertex/edge/face `selectMask` is gone
+     because a UV element has one domain. Undo is a snapshot rather than a
+     memfile: scope-wide flags for the selection ops, and the coordinates of
+     exactly the handles a transform moved. A modal drag re-`exec`s from the
+     gathered start each move, so it accumulates no drift and lands as one undo
+     step, and the gathered arrays are dropped at `execPost` so they never ride
+     the undo stack.
+   - [x] **The editor invokes them** — `uv_editor_area.ts` gained the archived
+     keymap verbatim (A / L / shift-L / G / S / R / P / alt-P) and click-select,
+     which sends the whole coincident stack under the cursor through
+     `uveditor.select_one` so a welded corner selects as one point. The ops and
+     the area never import each other: the op layer reaches the editor through
+     a structural `IUVEditorView`.
+   - [x] **`image.set_type`** — `scripts/image/image_type_ops.ts`, the archive's
+     `ImageBlockOp` + its one subclass collapsed into a single class. Registered
+     from `entry_point.js` rather than from `data_api/api_define.ts`: that hub
+     is inside the host's cycle knot, and routing a side-effect-only ToolOp
+     registration through it costs three cycles for nothing.
+   - [x] **The paths are proven registered, not assumed** —
+     `tests/integration/uv_editor_ops.test.ts` boots the app headlessly and
+     resolves all eleven through `CTX.api.getToolDef`, which is the only honest
+     check when the ops ship in an external addon.
 5. Subscribe the editor to `ImageBus`; convert `image_ops.js:119`; delete
    `window.redraw_uveditors` and its `declare global`.
 6. Give `selectedFacesOnly` a real home. `mesh_uvops_base.ts` and its hardcoded

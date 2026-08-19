@@ -281,6 +281,15 @@ export interface IUVSource {
    * coupling this contract exists to prevent.
    */
   getUVFaceRings(layer: number, faces: ElementHandles): {offsets: Int32Array; values: Int32Array}
+
+  /**
+   * Optional: the 3D position of each UV element's owner, `3n` components for
+   * `n` handles. Only a projection needs it — `uveditor.project_uvs` multiplies
+   * these by a camera matrix — so a source with no positions behind it (a
+   * generated layout, a test double) simply omits it and the tool feature-
+   * detects, the same way it does for the solver.
+   */
+  getUVElementPositions?(layer: number, handles: ElementHandles, out?: Float32Array): Float32Array
 }
 
 // ---------------------------------------------------------------------------
