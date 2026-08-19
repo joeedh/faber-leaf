@@ -1,0 +1,11 @@
+{
+  "id": "uv_editor",
+  "name": "UV Editor",
+  "version": "1.0.0",
+  "author": "joeedh",
+  "entry": "src/main.ts",
+  "dependencies": [],
+  "description": "Edits UV layouts for any geometry type that registers an IUVSource: draw, pick, select, pin and transform.",
+  "buildMode": "prebuilt",
+  "defaultEnabled": true
+}

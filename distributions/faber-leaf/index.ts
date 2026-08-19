@@ -14,11 +14,12 @@ export default defineDistribution({
   id   : 'faber-leaf',
   title: 'FaberLeaf',
 
-  // litemesh is in-bundle; leafmesh ships as its own build under
-  // build/addons/ and is still default-off here (its manifest says so).
+  // litemesh is in-bundle; leafmesh and uv_editor ship as their own builds
+  // under build/addons/. leafmesh is still default-off here and uv_editor
+  // default-on — each addon's manifest says which, and neither is overridden.
   // Order is not load-bearing — the resolver sorts, and the startup scene is
   // chosen by name below.
-  addons: [bundled(litemeshManifest, litemesh), external('leafmesh')],
+  addons: [bundled(litemeshManifest, litemesh), external('leafmesh'), external('uv_editor')],
 
   defaultScene: 'litemesh-sphere',
 })

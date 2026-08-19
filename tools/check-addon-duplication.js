@@ -33,7 +33,7 @@ import fs from 'fs'
  *
  * @type {string[]}
  */
-export const EXTERNAL_IDS = ['leafmesh']
+export const EXTERNAL_IDS = ['leafmesh', 'uv_editor']
 
 /**
  * Builtin addons that ship compiled INTO the main bundle, for whichever

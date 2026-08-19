@@ -14,7 +14,8 @@ export default defineDistribution({
 
   // No litemesh, so nothing here reaches sculptcore. leafmesh ships default-off
   // in the full product; here it is the only geometry type, so it is on.
-  addons: [external('leafmesh', {enabled: true})],
+  // uv_editor names no geometry type, so it is the same addon in both.
+  addons: [external('leafmesh', {enabled: true}), external('uv_editor')],
 
   defaultScene: 'leafmesh-cube',
 })

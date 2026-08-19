@@ -1,7 +1,8 @@
 # P18 — W4a: `IUVSource` + the mesh-agnostic UV editor
 
 **Status:** in progress — §5 steps 1 and 2 closed (all three implementors
-landed and run through one conformance suite); step 3 next.
+landed and run through one conformance suite); step 3 under way (the editor's
+behaviour landed as a host-free core; its Editor component is next).
 
 **Date:** 2026-08-15 (citations re-verified 2026-08-19)
 
@@ -207,6 +208,24 @@ implementation will otherwise break:
 3. Reimplement the editor as an addon (`addons/builtin/uv_editor/`), consuming
    `IUVSource` only. Draw, pick (`findnearestUV`'s replacement, reading through
    bulk handles), select, pin, transform.
+   - [x] **The behaviour**, as one host-free module:
+     `addons/builtin/uv_editor/src/uv_edit_geom.ts`. Draw geometry, picking,
+     flags with snapshot/restore, selection, islands (union-find over face rings
+     and UV fans — two elements are linked when a ring holds both or they are
+     coincident on one owner, which is exactly what a seam is the absence of),
+     and the proportional-edit transform gather plus translate/scale/rotate.
+     Its only host import is `import type`, which the jest transform erases, so
+     the whole editor runs under plain jest against the double while still
+     typechecking against the real contract —
+     `tests/unit/uv_editor/uv_edit_geom.test.ts`, 35 tests, no geometry engine
+     in the process. Every rule that could otherwise hide in a UI callback lives
+     there for that reason.
+   - [x] **The addon**, external and default-on in both distributions. Out of
+     bundle for a stronger reason than leafmesh's: a physical build boundary is
+     a better guarantee of criterion 11 than a lint rule, and the built
+     `build/addons/uv_editor/src/main.js` has exactly three inputs, all its own.
+   - [ ] **The Editor component** — draw, pan/zoom, mouse pick, wired to the
+     core. Next commit.
 4. Re-register the tool paths from `archive/uv-editor/TODO.md` under `uveditor.*`,
    with the same names, taking a datapath. Users have keymaps and
    `saveLastValue()` state keyed on these paths; a rename is gratuitous churn.
