@@ -309,9 +309,15 @@ how to add a flag, and persistence semantics.
 
 ## Cross-layer follow-ups
 
-`TODO.md` (repo root) tracks non-addon consumers of addon files and
-cross-addon `scripts/...` path imports that survive the addon-API
-migration. Add to it when you discover another one.
+Layer violations are machine-checked, not listed in prose: `pnpm check:layers`
+cruises `scripts` + `addons` with `.dependency-cruiser.cjs` and fails on any
+`error`-severity rule or any count over its `tools/layer-baseline.json` budget.
+A host file importing addon source, or an addon importing a peer through a
+`scripts/...` path instead of `@addon/<id>/api`, is caught there. Lower a
+budget when you remove edges; never raise one to make the gate pass.
+
+(The old free-text `TODO.md` this section used to point at was deleted in
+`6af17e06`; the gate replaced it.)
 
 ## Submodules
 

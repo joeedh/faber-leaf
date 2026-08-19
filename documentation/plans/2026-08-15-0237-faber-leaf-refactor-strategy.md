@@ -1919,9 +1919,9 @@ ungrounded input just argues a wrong plan more convincingly.
 | 1. Built-in geometry type | **Resolved** — LeafMesh (P3, P11) | — |
 | 2. Modeling without sculptcore | **Resolved — yes**; LeafMesh's modeling toolmode is it (P12, landed 2026-08-18) | — |
 | 3. File compatibility (pin ids vs. rewrite `_origBytes`) | **Resolved** — pin ids (`stableStructId` in nstructjs, `APP_VERSION` 8→9); P10 §4.3a, landed 2026-08-18 | — |
-| 4. Curves / tets / hair / subsurf | P13 | at the delete |
+| 4. Curves / tets / hair / subsurf | **Resolved — archive, do not port**; P13 §2/§2.1, moved intact under `archive/` 2026-08-18 | — |
 | 5. Texture painting | **Resolved** — deleted in P5, port plan deferred (landed 2026-08-16) | — |
-| 6. UV unwrapping | decided in P13 (rescue), executed in P19 | rescue before the delete |
+| 6. UV unwrapping | **Resolved — rescue**; the 4,701-line stack moved to `archive/` in P13's rescue commit before the delete. The *port* is still P19's | — |
 | 7. Rename's storage keys | **Resolved** — migrate (P2, landed 2026-08-15) | — |
 | 8. Does `faber-leaf-core` model on day one? | **Resolved — yes**, at P12 §4's scope (landed 2026-08-18) | — |
 | 9. One-way format break | **Resolved — there is no one-way break**; the forward-version guard ships in v9 anyway (P10 §6a, landed 2026-08-18). Embedder-facing wording still P20 | — |
@@ -1930,6 +1930,16 @@ ungrounded input just argues a wrong plan more convincingly.
 Decisions 3, 8 and 9 are the ones that change the *shape* of the plan rather than
 its content. All three must be answered before phase 9 is scheduled, and all
 three now are.
+
+**4 and 6 are the same answer applied to different code.** Both were settled by
+P13's rescue commit rather than by its delete: everything worth keeping — the
+unwrapping stack, the tet generator, curves, hair, subsurf — moves intact under
+`archive/`, excluded from the build, `tsconfig`, `check:layers` and eslint, with
+a README per tree naming what it depended on and which plan would port it. What
+is left for the delete is only the code nothing proposed to keep. The
+user-visible consequence is recorded in P13 §2.1: a file holding curve, tet,
+hair or subsurf data opens through P10's unknown-addon path as
+preserved-but-inert blocks, round-trips byte-identically, and is not editable.
 
 **2 and 8 are one answer read twice.** 2 asks whether modeling without
 sculptcore is possible; 8 asks whether the core distribution ships it. P12
