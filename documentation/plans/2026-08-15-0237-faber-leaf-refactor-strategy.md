@@ -1320,7 +1320,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P10 | [Serialization + file-compat hardening](./2026-08-15-0345-serialization-and-file-compat-hardening.md) | W1 §5 (promoted) | 7 | P8 | **landed** |
 | P11 | [LeafMesh host integration](./2026-08-15-0350-leafmesh-host-integration.md) | risk mitigation | 8 | P3, P8 | **landed** |
 | P12 | [LeafMesh modeling toolmode](./2026-08-15-0355-leafmesh-modeling-toolmode.md) | open decisions #2, #8 | 8 | P11 | **landed** |
-| P13 | [W1e — delete the TS BREP](./2026-08-15-0400-w1-delete-ts-brep.md) | W1 §4 | 9 | P5, P9, P10, P12 | **written** |
+| P13 | [W1e — delete the TS BREP](./2026-08-15-0400-w1-delete-ts-brep.md) | W1 §4 | 9 | P5, P9, P10, P12 | **landed** |
 | P14 | [Addon manager — optional dependencies](./2026-08-15-0405-addon-manager-optional-dependencies.md) | W3 §0 | 10 | P9 | **written** |
 | P15 | [W3a — LiteMesh becomes an optional addon](./2026-08-15-0410-w3-litemesh-optional-addon.md) | W3 §1 | 10 | P13, P14 | **written** |
 | P16 | [W3b — sculptcore build decoupling](./2026-08-15-0415-w3-sculptcore-build-decoupling.md) | W3 §2–4 | 10 | P15 | **written** |
@@ -1738,7 +1738,7 @@ ungrounded input just argues a wrong plan more convincingly.
 > against shapes P3 and P7 already settled; P13 is a delete whose whole
 > difficulty is the completeness of its checklist.
 
-- [ ] **P11 — [LeafMesh host integration](./2026-08-15-0350-leafmesh-host-integration.md)**
+- [x] **P11 — [LeafMesh host integration](./2026-08-15-0350-leafmesh-host-integration.md)** — landed 2026-08-18 (`67f1c6f3`..`3bd9f4d0`)
   - Design steps 4–7 of §12: `leafmesh.ts` (DataBlock + `SceneObjectData`),
     `draw.ts`, `pick.ts`, `serialize.ts`, `main.ts`/`api.ts`, plus the
     `manifest.json` with zero dependencies.
@@ -1769,7 +1769,7 @@ ungrounded input just argues a wrong plan more convincingly.
   - Exit: a cube is modelled into a hole-bearing shape in a sculptcore-free
     build.
 
-- [ ] **P13 — [W1e: delete the TS BREP](./2026-08-15-0400-w1-delete-ts-brep.md)**
+- [x] **P13 — [W1e: delete the TS BREP](./2026-08-15-0400-w1-delete-ts-brep.md)** — landed 2026-08-19 (`2994594d`..`def6d270`)
   - Enumerate the feature-regression list from §6 **before** deleting, and
     decide per feature: drop / port / preserve in `archive/`.
   - **Rescue before delete**: `unwrapping.ts`, `unwrapping_solve.ts`,

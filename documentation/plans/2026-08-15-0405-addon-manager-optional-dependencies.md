@@ -1,6 +1,6 @@
 # P14 — addon manager: optional dependencies — `[xhigh]`
 
-**Status:** plan — not started.
+**Status:** in progress — step 1 landed 2026-08-19.
 
 **Date:** 2026-08-15
 
@@ -46,6 +46,9 @@ semantics here, or P15 and P16 will each invent their own and the third-party
 story will be whatever falls out.
 
 ## 3. Current state
+
+> Written 2026-08-15, before P10–P13 landed. §10.1 re-verifies every
+> citation below and corrects three of the claims — §3.3 is stale outright.
 
 ### 3.1 `"optional": true` is silently dropped
 
@@ -213,3 +216,116 @@ permanent test fixtures — the latter is preferable, and they are cheap.
   it.
 - `addons/builtin/*` is a pnpm workspace glob and a clean install is green.
 - `documentation/addons.md` documents the semantics normatively.
+
+---
+
+## 10. Execution log
+
+### 10.1 The citations, re-verified against the tree (step 1)
+
+The §3 citations are a 2026-08-15 snapshot taken before P10–P13 landed. Walked
+one at a time:
+
+| Citation | Verdict |
+| --- | --- |
+| `AddonManifest` at `manifest.ts:9-47` | line range **exact**; the interface is named **`IAddonManifest`** |
+| `validateManifest` at `:123-135` | those lines are the *return literal*; the validator spans `:67-136`. The claim — nothing reads `optional` — holds |
+| `install.ts:113` | points into the `buildMode === 'source'` branch, which has nothing to do with `optional`. See below |
+| `manifest.ts:163-165` (throw on unknown dep) | **exact** |
+| `addon.ts:430-439` (builtins cannot be disabled) | line range **exact** — it is the dependency loop in `enable()`. The surrounding claim is **stale**; see below |
+| `addon_api_plugin.js:54-58` | **exact**. The consequence drawn from it is half right; see below |
+| `pnpm-workspace.yaml` lists `addons/*` | **exact**. `addons/code_editor` is the only package it currently matches |
+
+Three of them need their *claims* corrected, not just their line numbers.
+
+**§3.1 / `install.ts`.** The installer never reads `optional`, which is what
+§3.1 says — but there is nothing for it to read at install time. `optional` is a
+*resolve-time* property; `install.ts` already routes its manifest through
+`validateManifest`, so the field starts flowing the moment the schema declares
+it. The installer needs no change, and the citation is dropped rather than
+fixed.
+
+**§3.3 — "builtins cannot be disabled" is stale.** There is no
+`addon_register.ts` in the tree; it was replaced by the unified pipeline
+(`builtin_registry.ts` → `registerBuiltin` → `pendingSources` →
+`_materializePending` → `enable`), and a builtin now flows through *exactly* the
+same lifecycle as a third-party addon. `disable('sculptcore')` already works.
+What is genuinely missing is different and narrower: **no boot-time override
+exists**. Settings' `_loadAddons()` pass 1 re-enables anything with a persisted
+enabled flag, and nothing anywhere can say "this id does not load at all,
+whatever the manifest and the prefs say". That is the hole force-disable fills.
+
+**§3.4 — the build-time failure is only half the story.** The plugin hard-fails
+the build when `addons/builtin/<id>/src/api.ts` is missing from disk. But when
+the file *is* on disk and the addon is merely absent at **runtime**, the
+generated stub resolves `globalThis._addons.getAddonAPI(id)` to `undefined`,
+falls back to `{}` and emits `export const X = undefined` for every symbol —
+silent, not loud. Both halves are wrong in opposite directions: absent-on-disk
+is too loud (at the wrong time), absent-at-runtime is too quiet.
+
+Two items §4 asks for already exist:
+
+- **`api.has(id)`** is at `addon_base.ts:317`, and its doc comment already
+  states the degrade-rather-than-crash rationale. P14 does not add it; P14 makes
+  its answer *mean* something.
+- **A CLI-arg reader** is at `scripts/core/app_argv.ts` (`getArg`, `getArgList`,
+  NW.js `nw.App.argv`, empty in the browser). The force-disable flag reads
+  through it rather than parsing argv again.
+
+### 10.2 The semantics, decided (step 1)
+
+§2's point is that "optional" is four questions with four owners. These are the
+answers this phase implements; everything downstream inherits them.
+
+**D1 — force-disable means the addon is never loaded.** Not "loaded but off":
+no record, no module import, absent from `idmap`. This is the strongest form and
+it is the only one that makes `api.has(id)` correct *by construction* — with a
+record present, `has()` would have to start distinguishing loaded-from-enabled
+and every caller would have to care. It is also the state a distribution that
+omits the addon is actually in, which is what P15 and P16 need to test against.
+The manager keeps the id and a reason so the UI can say what happened.
+
+**D2 — only a missing *required* dependency becomes a partition entry.** A
+cycle and a duplicate id stay throws: they are programming errors, not
+configuration states, and no amount of runtime tolerance makes a cyclic graph
+loadable. A missing dependency, by contrast, is exactly what a shipped
+distribution looks like from the inside.
+
+**D3 — `optionalDependencies` order, they never satisfy.** They take part in the
+topological sort (present → loaded first) and in `api.deps` wiring, and they are
+ignored by satisfiability *and* by `disable()`'s dependent check — an optional
+dependent must never block its optional dependency from being turned off, or
+"optional" means nothing at the only moment it is tested.
+
+**D4 — load order becomes deterministic by id.** The existing sort is DFS in
+input order, which is reproducible only if the *input* is; `storage.list()`
+ordering is a filesystem detail. Roots are now visited in id order, so the
+enable order is a function of the manifest set alone. P17 depends on that.
+
+**D5 — unknown manifest fields are rejected.** Silently dropping `optional` is
+the root defect of §3.1, and the only way it cannot recur is for an unrecognised
+key to be an error naming the key.
+
+**D6 — the build-time stub throws on use, per symbol.** When `api.ts` is on disk
+and the addon is not loaded at runtime, each export becomes a sentinel that
+throws on call / construct / property access, naming the addon and the symbol —
+instead of today's silent `undefined`. An addon **absent from disk** keeps the
+hard build error: there is nothing to type-check a consumer against, and
+inventing export names for a module that does not exist would trade a loud build
+failure for a silent runtime one. The distribution-driven variant (source
+present, deliberately excluded from the bundle) is P17's, and it lands on this
+same sentinel path.
+
+A CJS-`Proxy` stub was tried first, since it would have made *any* named import
+resolve for an addon absent from disk. It does not work: esbuild's `__toESM`
+interop snapshots the module's own property names at import time, so the proxy's
+`get` trap is never reached from the consumer and every symbol reads back
+`undefined` — the silent failure again, one layer down. Verified against
+esbuild directly before the design was settled.
+
+**D7 — no types-only tsconfig stub is needed.** `tools/gen-tsconfig-paths.mjs`
+already derives every `@addon/<id>/api` alias from the on-disk tree, so a
+consumer type-checks whenever the source is in the repo — which, per D6, is the
+only case where compiling against it is meaningful. §5 step 5's "types-only
+stub" is therefore not implemented, and the reason is recorded here rather than
+left as an unexplained omission.
