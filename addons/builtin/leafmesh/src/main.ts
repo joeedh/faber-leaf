@@ -18,6 +18,7 @@ import {LEAFMESH_VERTEX_ATTRS} from './draw.js'
 import {runLeafMeshHeadlessDemo} from './headless_demo.js'
 import * as leafmesh from './index.js'
 import {LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry} from './leafmesh.js'
+import {buildLeafMeshDefaultScene} from './leafmesh_default_scene.js'
 import {LEAFMESH_MODELING_OPS} from './modeling_ops.js'
 import {LEAFMESH_OBJ_FORMAT} from './obj.js'
 import {LEAFMESH_SELECT_OPS} from './select_ops.js'
@@ -67,6 +68,9 @@ export function register(api: AddonAPI<IAddon>) {
   // Implementor #2 of `ITransDataType` (P12 §6) — grab/rotate/scale, snapping
   // and proportional edit, with `transform_ops.ts` naming no geometry type.
   api.registerTransType(LeafMeshTransType)
+
+  // The startup file `faber-leaf-core` selects (P17 §3).
+  api.registerDefaultSceneBuilder('leafmesh-cube', buildLeafMeshDefaultScene, 'leafmesh')
 }
 
 export function unregister() {}

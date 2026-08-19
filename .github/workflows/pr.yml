@@ -187,10 +187,14 @@ jobs:
         run: pnpm test
 
   # Success criterion 0a: the host builds, typechecks and *runs* without the
-  # engine. Every step here is deliberately cheap — no Emscripten, no CMake, no
-  # WASM cache — because the value is in the configuration, not the depth.
+  # engine. What it builds is the `faber-leaf-core` distribution — a real
+  # product whose manifest omits litemesh — on a tree with the submodule
+  # deinited, so the lane proves the same thing twice over: the distribution
+  # does not reach for the engine, and the engine is not there to reach for.
+  # Every step is deliberately cheap — no Emscripten, no CMake, no WASM cache —
+  # because the value is in the configuration, not the depth.
   no-sculptcore:
-    name: no-sculptcore (engine absent)
+    name: no-sculptcore (faber-leaf-core, engine absent)
     runs-on: ubuntu-latest
     steps:
       # actions/checkout cannot init a subset of submodules, and path.ux, mathl
@@ -228,21 +232,23 @@ jobs:
       - name: Install JS dependencies
         run: pnpm install --frozen-lockfile
 
-      # Both gates read the availability predicate in tools/builtin_addons.js:
-      # gen:paths drops the unavailable addon's tsconfig alias (pointing it at
-      # scripts/addon/unavailable_builtin.ts instead), and esbuild drops its
-      # entry, assets and externals. A host file that imported addon source
-      # directly would fail here, which is the point.
+      # Typecheck covers every distribution's source at once (tsconfig includes
+      # distributions/**), and reads the availability predicate in
+      # tools/builtin_addons.js: gen:paths points the unavailable addon's alias
+      # at scripts/addon/unavailable_builtin.ts. A host file that imported addon
+      # source directly would fail here, which is the point.
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Bundle app (esbuild)
-        run: pnpm build
+      # faber-leaf-core imports no @builtin/litemesh, so esbuild never resolves
+      # the engine and no sculptcore build assets are copied.
+      - name: Bundle app (esbuild, faber-leaf-core)
+        run: pnpm build:core
 
       # Static gates all pass on a tree that boots to a blank error screen, so
-      # the lane ends by booting the real app and modelling something in it.
-      # The script refuses to run when litemesh turns out to be available —
-      # that guard is what stops this job reporting green for the sculptcore-
-      # present configuration if any step above silently kept the engine.
+      # the lane ends by booting the real app and modelling something in it. The
+      # smoke asserts the booted distribution *is* faber-leaf-core and that it
+      # defines zero feature flags — flags are addon-owned, so a build that
+      # silently kept litemesh would report eleven and fail here.
       - name: Smoke test (boot, model, save, load)
-        run: pnpm smoke:no-sculptcore
+        run: pnpm smoke:core

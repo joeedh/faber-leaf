@@ -1,7 +1,7 @@
 // Side-effect: assigns globalThis._framework so externalized addon bundles
 // (which see `@framework/api` as a stub looking up globalThis._framework.api)
-// resolve to the main bundle's namespace. Must run before the builtin
-// registry below, whose entries are imported at module scope.
+// resolve to the main bundle's namespace. Must run before the distribution
+// below, whose in-bundle addons are imported at module scope.
 import './_framework_runtime.js'
 
 import './typescript_entry.js'
@@ -22,9 +22,11 @@ import './test/test.js'
 // here so core stops importing from editors/view3d/tools. See plan §3 / §12.
 import './editors/view3d/tools/tools.js'
 
-// The single in-bundle builtin registry: registers each in-bundle builtin as an
-// addon source; the unified startAddons() pipeline materializes + enables them.
-import '../addons/builtin/builtin_registry.js'
+// The distribution this bundle was built for: which addons ship, which startup
+// scene opens, what the window is called. `@distribution` is aliased by
+// tools/esbuilder.js --distribution <name>; the default is faber-leaf. This is
+// the only place the app names a product.
+import distribution from '@distribution'
 
 import addon, {startAddons} from './addon/addon.js'
 
@@ -68,10 +70,14 @@ export async function init() {
 
   appstate.preinit()
 
-  console.log('Loading addons')
+  // Declares the distribution's in-bundle addons as sources and installs its
+  // allow-list, startup scene and title. Must precede startAddons().
+  addon.loadDistribution(distribution)
+
+  console.log(`Loading addons for distribution "${distribution.id}"`)
   // Await the unified pipeline so every addon's toolmodes/editors/datablocks
-  // are registered + enabled before we build the UI (appstate.init). Builtin
-  // sources were registered synchronously by the builtin_registry import above.
+  // are registered + enabled before we build the UI (appstate.init). The
+  // distribution's in-bundle sources were registered synchronously just above.
   // It also awaits each addon's boot task, so any engine an addon needs (e.g.
   // sculptcore's WASM) is warm before appstate.init reads the startup file.
   await startAddons(true)

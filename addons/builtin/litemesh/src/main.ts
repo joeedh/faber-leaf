@@ -11,9 +11,10 @@
  * *binding* is the `@sculptcore/api` workspace package, not an addon, so a split
  * would have bought only "LiteMesh with no sculpt mode" — see P15 §4.1.
  *
- * Still in-bundle (registered by `addons/builtin/builtin_registry.ts`), so its
- * modules still reach `scripts/` by relative path. P16 pushes it out-of-bundle,
- * which is what forces those onto `@framework/api`.
+ * Still in-bundle wherever a distribution imports it (`bundled(...)` in
+ * distributions/<id>/index.ts), so its modules still reach `scripts/` by
+ * relative path. Pushing it out-of-bundle is what forces those onto
+ * `@framework/api`.
  */
 
 import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
@@ -67,9 +68,9 @@ export function register(api: AddonAPI<IAddon>) {
   api.registerAll(...LITEMESH_OPS, ...STROKE_BASE_OPS, SculptPaintOp, SculptCorePaintMode, BoxModelToolMode)
   api.registerTransType(LiteMeshTransType)
 
-  // The startup file: a LiteMesh sphere, opened in sculpt mode. One slot, so
-  // disabling the addon hands it back to whoever held it before.
-  api.registerDefaultSceneBuilder(buildLiteMeshDefaultScene, 'sculptcore')
+  // The startup file `faber-leaf` selects: a LiteMesh sphere in sculpt mode.
+  // Named, so the distribution picks it rather than load order deciding.
+  api.registerDefaultSceneBuilder('litemesh-sphere', buildLiteMeshDefaultScene, 'sculptcore')
 
   for (const [name, builder] of Object.entries({...LITEMESH_TEST_SCENES, ...LITEMESH_EXAMPLE_SCENES})) {
     api.registerTestScene(name, builder)

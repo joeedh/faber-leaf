@@ -4,8 +4,8 @@
  * via `tools/framework_api_plugin.js`) can look up real values at runtime
  * instead of inlining the framework source.
  *
- * Must run before `addons/builtin/builtin_registry.ts` is imported from
- * `scripts/entry_point.js`. The main bundle keeps importing
+ * Must run before `scripts/entry_point.js` imports `@distribution` (whose
+ * in-bundle addons are ordinary static imports). The main bundle keeps importing
  * `scripts/framework_api.ts` directly through its real path; addons go
  * through the global.
  */

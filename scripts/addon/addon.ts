@@ -2,6 +2,7 @@ import {AddonAPI, IAddon} from './addon_base'
 import * as util from '../util/util'
 import {DisabledAddon, IAddonManifest, resolveManifests, validateManifest} from './manifest'
 import {isForceDisabled} from './force_disable'
+import {distributionEnabled, isInDistribution, setActiveDistribution, type Distribution} from './distribution'
 import {runBootTasks} from '../core/boot_tasks'
 import type {AddonStorage} from './storage'
 import {Menu} from '../path.ux/scripts/widgets/ui_menu'
@@ -42,7 +43,7 @@ interface AddonSource {
 export interface UnloadedAddon {
   id: string
   name?: string
-  reason: DisabledAddon['reason'] | 'force-disabled' | 'not-in-build'
+  reason: DisabledAddon['reason'] | 'force-disabled' | 'not-in-build' | 'not-in-distribution'
   message: string
 }
 
@@ -150,10 +151,13 @@ export class AddonManager {
    */
   storage: AddonStorage | undefined
 
+  /** The product this build is, once loadDistribution() has run. */
+  distribution: Distribution | undefined
+
   /**
    * Sources awaiting record creation in start(). Keyed by manifest id. Builtin
-   * sources are added synchronously at import time (by the builtin registry
-   * module); external sources are added by start()'s collectors.
+   * sources are added by loadDistribution(); external sources are added by
+   * start()'s collectors.
    */
   private pendingSources: Map<string, AddonSource>
   private started: boolean
@@ -214,7 +218,7 @@ export class AddonManager {
     if (this.pendingSources.has(m.id) || this.idmap.has(m.id)) {
       return
     }
-    if (this._skipForceDisabled(m)) {
+    if (this._skipExcluded(m, true)) {
       return
     }
     // The build resolved this builtin's entry to scripts/addon/unavailable_builtin
@@ -275,11 +279,15 @@ export class AddonManager {
       if (this.pendingSources.has(m.id) || this.idmap.has(m.id)) {
         continue // builtin / already-loaded wins
       }
-      if (this._skipForceDisabled(m)) {
+
+      // Only the shipped builtins are the distribution's to withhold. A test
+      // fixture is in this index because the build was asked for fixtures, and
+      // that is a harness decision, not a shipping one.
+      const builtin = !!(raw as {builtin?: boolean}).builtin
+      if (this._skipExcluded(m, builtin)) {
         continue
       }
 
-      const builtin = !!(raw as {builtin?: boolean}).builtin
       const entryJs = m.entry.replace(/\.ts$/, '.js')
       const rel = `${baseUrl.replace(/\/$/, '')}/${m.id}/${entryJs}`
       // Anchor to the document base so import() agrees with fetch() (a raw
@@ -330,7 +338,7 @@ export class AddonManager {
         console.warn(`installed addon "${m.id}" collides with an already-loaded id; skipping`)
         continue
       }
-      if (this._skipForceDisabled(m)) {
+      if (this._skipExcluded(m, false)) {
         continue
       }
       const entryJs = m.entry.replace(/\.ts$/, '.js')
@@ -445,6 +453,28 @@ export class AddonManager {
   }
 
   /**
+   * Apply a distribution: its addon list becomes the first-party allow-list, its
+   * in-bundle entries are declared as builtin sources, and the title takes
+   * effect. The startup scene follows from the active distribution itself —
+   * core's default_file reads the name back. Must run before start(); the order
+   * of `dist.addons` is deliberately not load-bearing.
+   */
+  loadDistribution(dist: Distribution): void {
+    this.distribution = dist
+    setActiveDistribution(dist)
+
+    for (const entry of dist.addons) {
+      if (entry.manifest && entry.module) {
+        this.registerBuiltin(entry.manifest, entry.module as IAddon)
+      }
+    }
+
+    if (typeof document !== 'undefined') {
+      document.title = dist.title
+    }
+  }
+
+  /**
    * The single unified load pipeline. Collects builtin (already pending) +
    * index.json + storage sources, materializes them into records in dependency
    * order, then — when `autoEnable` — enables every record by default (deps
@@ -466,7 +496,13 @@ export class AddonManager {
       // disabled until the user turns them on); their deps are still pulled in
       // by any default-enabled dependent.
       for (const rec of this.addons.slice()) {
-        if (rec.manifest && !rec.enabled && rec.manifest.defaultEnabled !== false) {
+        if (!rec.manifest || rec.enabled) {
+          continue
+        }
+        // The distribution's `enabled` wins over the manifest's default: an
+        // addon that ships off in one product can ship on in another.
+        const want = distributionEnabled(rec.manifest.id) ?? rec.manifest.defaultEnabled !== false
+        if (want) {
           this.enable(rec.manifest.id)
         }
       }
@@ -493,19 +529,32 @@ export class AddonManager {
   }
 
   /**
-   * Records a force-disabled addon as unloaded and reports whether the caller
-   * should skip it. Force-disable withholds the source entirely — no module
-   * import, no record — so `isEnabled()` is false by construction.
+   * Records an addon this build withholds and reports whether the caller should
+   * skip it. Both exclusions withhold the source entirely — no module import, no
+   * record — so `isEnabled()` is false by construction. `firstParty` is false
+   * for user-installed addons and for test fixtures, which a distribution's
+   * allow-list does not touch: neither one is a shipping decision.
    */
-  private _skipForceDisabled(m: IAddonManifest): boolean {
-    if (!isForceDisabled(m.id)) return false
-    this.unloaded.set(m.id, {
-      id     : m.id,
-      name   : m.name,
-      reason : 'force-disabled',
-      message: `addon "${m.id}" is force-disabled for this session`,
-    })
-    return true
+  private _skipExcluded(m: IAddonManifest, firstParty: boolean): boolean {
+    if (isForceDisabled(m.id)) {
+      this.unloaded.set(m.id, {
+        id     : m.id,
+        name   : m.name,
+        reason : 'force-disabled',
+        message: `addon "${m.id}" is force-disabled for this session`,
+      })
+      return true
+    }
+    if (firstParty && !isInDistribution(m.id)) {
+      this.unloaded.set(m.id, {
+        id     : m.id,
+        name   : m.name,
+        reason : 'not-in-distribution',
+        message: `addon "${m.id}" is not part of this distribution`,
+      })
+      return true
+    }
+    return false
   }
 
   /**

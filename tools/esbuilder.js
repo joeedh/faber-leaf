@@ -5,6 +5,7 @@ import {fileURLToPath} from 'url'
 
 import {addonApiPlugin} from './addon_api_plugin.js'
 import {builtinEntryAliases, collectBuildAssets, describeUnavailable} from './builtin_addons.js'
+import {distributionEntry, inBundleBuiltinIds, listDistributions, resolveDistributionName} from './distributions.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const REPO_ROOT = Path.resolve(Path.dirname(__filename), '..')
@@ -15,11 +16,18 @@ const MAIN_META_PATH = Path.join(REPO_ROOT, 'build', 'meta-main.json')
 // See documentation/releaseBuild.md.
 const RELEASE = process.argv.includes('--release')
 
+// Which product this bundle is. `@distribution` is aliased to its manifest, and
+// the manifest's in-bundle addon set decides which build assets get copied.
+const DISTRIBUTION = resolveDistributionName()
+const DISTRIBUTION_ENTRY = distributionEntry(DISTRIBUTION)
+const IN_BUNDLE_IDS = inBundleBuiltinIds(DISTRIBUTION)
+console.log(`esbuilder: distribution "${DISTRIBUTION}" (in-bundle: ${[...IN_BUNDLE_IDS].join(', ') || 'none'})`)
+
 // Entry points and externals contributed by the builtin addons that are in this
-// build (manifest `buildAssets`). An addon whose optional workspace dependency
-// did not install is not in this build, so it contributes nothing and its
-// artifacts stop being a missing-file error.
-const ADDON_ASSETS = collectBuildAssets()
+// build (manifest `buildAssets`) *and* that this distribution ships. An addon
+// whose optional workspace dependency did not install is not in this build, so
+// it contributes nothing and its artifacts stop being a missing-file error.
+const ADDON_ASSETS = collectBuildAssets(undefined, IN_BUNDLE_IDS)
 for (const line of describeUnavailable()) {
   console.log(`esbuilder: ${line}`)
 }
@@ -51,6 +59,9 @@ let options = {
   ],
   alias: {
     '@framework/api': Path.join(REPO_ROOT, 'scripts', 'framework_api.ts'),
+    // entry_point.js names the product it was built for by this alias and
+    // nothing else; tsconfig.paths.json points it at the default for typecheck.
+    '@distribution' : DISTRIBUTION_ENTRY,
     // Mirrors the `@builtin/<id>` paths in tsconfig.paths.json — an addon that
     // is not in this build resolves to the stub, so its subtree never enters
     // the bundle and registerBuiltin records it as not-in-build.
@@ -117,6 +128,7 @@ async function buildAddons(opts = {}) {
   if (opts.watch) args.push('--watch')
   if (opts.includeFixtures) args.push('--include-fixtures')
   if (opts.release) args.push('--release')
+  args.push('--distribution', DISTRIBUTION)
   const {spawn} = await import('child_process')
   return new Promise((resolve, reject) => {
     const proc = spawn('node', args, {stdio: 'inherit'})
@@ -127,7 +139,8 @@ async function buildAddons(opts = {}) {
 
 const handlers = {
   async help() {
-    console.log('\nUsage: esbuilder --watch,-w --release --help\n')
+    console.log('\nUsage: esbuilder --watch,-w --release --distribution <name> --help\n')
+    console.log(`  distributions: ${listDistributions().join(', ')}\n`)
   },
   async build() {
     const result = await esbuild.build(options)

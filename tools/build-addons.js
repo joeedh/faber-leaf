@@ -151,9 +151,9 @@ function buildOptionsFor(entries) {
 }
 
 async function build() {
-  // In-bundle builtins ship in the main bundle and are registered via
-  // builtin_registry.ts — they must NOT be separately compiled here (that would
-  // produce a dead, duplicated bundle). Only external addons get built.
+  // In-bundle builtins ship inside the main bundle, imported by whichever
+  // distribution lists them — they must NOT be separately compiled here (that
+  // would produce a dead, duplicated bundle). Only external addons get built.
   const builtins = discoverManifests(BUILTIN_DIR, 'builtin').filter((m) => !IN_BUNDLE_BUILTIN_IDS.has(m.id))
   const fixtures = INCLUDE_FIXTURES ? discoverManifests(FIXTURE_DIR, 'fixture') : []
   const all = [...builtins, ...fixtures]

@@ -68,13 +68,7 @@ import * as sceneobject from '../sceneobject/index'
 import {ViewContext} from '../core/context'
 import type {ToolContext} from '../core/context'
 import {registerDataKind, unregisterDataKind, type IDataKindDescriptor} from '../core/data_kinds'
-import {
-  getDefaultSceneBuilder,
-  getDefaultToolMode,
-  setDefaultSceneBuilder,
-  setDefaultToolMode,
-  type DefaultSceneBuilder,
-} from '../core/default_file'
+import {registerDefaultScene, unregisterDefaultScene, type DefaultSceneBuilder} from '../core/default_file'
 import {registerTestScene, unregisterTestScene, type TestSceneBuilder} from '../core/test_scenes'
 import {registerBootTask, unregisterBootTask, type BootTask} from '../core/boot_tasks'
 import {FeatureFlagManager, FeatureFlags, defineFeatureFlagMember, type FeatureFlag} from '../core/feature-flag'
@@ -356,24 +350,14 @@ export class AddonAPI<T> {
   }
 
   /**
-   * Supply the contents of the default scene, so a distribution's startup file
-   * is not hardcoded in core. There is one slot; registering replaces whatever
-   * held it, and unloading restores the previous occupant. `toolMode` is the
-   * mode the new file opens in — it belongs to the scene, so it travels with it.
+   * Contribute a named startup scene, so a distribution's default file is not
+   * hardcoded in core. The distribution picks one by name, which is what keeps
+   * the choice independent of addon load order. `toolMode` is the mode the new
+   * file opens in — it belongs to the scene, so it travels with it.
    */
-  registerDefaultSceneBuilder(fn: DefaultSceneBuilder, toolMode?: string): void {
-    const prev = getDefaultSceneBuilder()
-    const prevMode = getDefaultToolMode()
-    setDefaultSceneBuilder(fn)
-    if (toolMode !== undefined) {
-      setDefaultToolMode(toolMode)
-    }
-    this._undoRegistrations.push(() => {
-      if (getDefaultSceneBuilder() === fn) {
-        setDefaultSceneBuilder(prev)
-        setDefaultToolMode(prevMode)
-      }
-    })
+  registerDefaultSceneBuilder(name: string, fn: DefaultSceneBuilder, toolMode?: string): void {
+    registerDefaultScene(name, fn, toolMode)
+    this._undoRegistrations.push(() => unregisterDefaultScene(name, fn))
   }
 
   /**

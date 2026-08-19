@@ -32,7 +32,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(__dirname, '..')
 
 const CONFIG = '.dependency-cruiser.cjs'
-const CRUISE_ROOTS = ['scripts', 'addons']
+// distributions/ is a root so the graph is complete from the composition
+// root down: a distribution manifest that grew product logic would show up
+// here as an edge, rather than sitting outside every rule's reach.
+const CRUISE_ROOTS = ['scripts', 'addons', 'distributions']
 const BASELINE = path.join(__dirname, 'layer-baseline.json')
 
 function parseArgv(argv) {

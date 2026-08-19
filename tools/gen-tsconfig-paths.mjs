@@ -27,15 +27,23 @@ import {dirname, join, resolve} from 'node:path'
 import {fileURLToPath} from 'node:url'
 
 import {discoverBuiltins} from './builtin_addons.js'
+import {DEFAULT_DISTRIBUTION} from './distributions.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(__dirname, '..')
 const OUT = join(repoRoot, 'tsconfig.paths.json')
 
-/** Aliases that are not derived from the addon tree. */
+/**
+ * Aliases that are not derived from the addon tree. `@distribution` is what
+ * scripts/entry_point.js imports its product through; esbuild aliases it per
+ * `--distribution <name>`, and the program pins it to the default so a
+ * typecheck sees one concrete distribution. Every distribution's source is in
+ * the program regardless — tsconfig.json includes `distributions/**`.
+ */
 const STATIC_PATHS = {
   '@framework/api'   : ['./scripts/framework_api.ts'],
   '@framework/pathux': ['./scripts/path.ux/scripts/pathux.ts'],
+  '@distribution'    : [`./distributions/${DEFAULT_DISTRIBUTION}/index.ts`],
 }
 
 /** What the program never looks at, whichever addons are in the build. */
@@ -53,10 +61,10 @@ const STATIC_EXCLUDE = [
 const UNAVAILABLE_STUB = './scripts/addon/unavailable_builtin.ts'
 
 /**
- * `@builtin/<id>` — an in-bundle builtin's entry module, as
- * addons/builtin/builtin_registry.ts imports it. It points at the stub when the
- * addon is not in this build, so the registry still compiles while the addon's
- * own sources — which import an engine that is not here — leave the program.
+ * `@builtin/<id>` — an in-bundle builtin's entry module, as a distribution
+ * manifest imports it. It points at the stub when the addon is not in this
+ * build, so the manifest still compiles while the addon's own sources — which
+ * import an engine that is not here — leave the program.
  */
 function discoverBuiltinEntries(builtins) {
   const paths = {}

@@ -61,7 +61,7 @@ describeOnce('leafmesh as a real per-addon bundle', () => {
   test('the in-bundle registration sites are gone', () => {
     // The per-addon addon_register.ts side-effect files were deleted by the
     // unified-registrator refactor (registration now lives in each addon's
-    // main.ts register() hook, wired through builtin_registry.ts).
+    // main.ts register() hook, reached through the distribution manifest).
     expect(fs.existsSync(OLD_ADDON_REGISTER_TS)).toBe(false)
     // The view3d tools index never names the leafmesh toolmode: an
     // out-of-bundle addon is not importable from the host bundle, and success

@@ -11,14 +11,17 @@ TypeScript module that:
 - Imports framework primitives through the `@framework/api` alias
 - Imports another addon's public surface through `@addon/<id>/api`
 
-Builtin addons today: `leafmesh` and `sculptcore`. `leafmesh` is the home of
-the `LeafMesh` DataBlock, its attribute layers, and its picking / selection /
-modeling ops; `sculptcore` owns the sculpt toolmode, the brushes, and the
-`litemesh.add_*` entries in the Add menu.
+Builtin addons today: `leafmesh` and `litemesh`. `leafmesh` is the home of the
+`LeafMesh` DataBlock, its attribute layers, and its picking / selection /
+modeling ops; `litemesh` owns the sculptcore-backed mesh, the sculpt toolmode,
+the brushes, and the `litemesh.add_*` entries in the Add menu.
 
 Every class an addon owns is registered from its `register(api)` hook, through
 `api.register` / `api.registerAll` — there is no generated class list to keep
 in sync.
+
+Which of them a given build actually ships is a
+[distribution](#distributions), not a property of the addon.
 
 ## Anatomy
 
@@ -34,9 +37,9 @@ addons/builtin/<id>/
 
 Two ways an addon ships:
 
-- **In-bundle (builtin).** Statically imported by
-  `addons/builtin/builtin_registry.ts`, which calls
-  `addonManager.registerBuiltin(manifest, module)` at module load.
+- **In-bundle (builtin).** Statically imported by a distribution manifest
+  (`distributions/<id>/index.ts`), which hands it to
+  `addonManager.registerBuiltin(manifest, module)` at boot.
 - **Out-of-bundle (per-addon esbuild output).** Built by
   `tools/build-addons.js` into `build/addons/<id>/main.js` and dynamically
   imported by `AddonManager` from `build/addons/index.json`.
@@ -188,18 +191,18 @@ two. And `exclude` only filters the *initial* file set, so it is the
 `@builtin/<id>` alias, not the exclusion, that actually keeps an absent addon's
 source out of the program.
 
-The `@builtin/<id>` indirection is why `addons/builtin/builtin_registry.ts`
-imports the entry through an alias and the manifest relatively: the entry is
-conditional, the metadata never is.
+The `@builtin/<id>` indirection is why a distribution imports the entry through
+an alias and the manifest relatively: the entry is conditional, the metadata
+never is.
 
 Nothing a developer does day to day exercises any of this, so CI does: the
 `no-sculptcore` job in `.github/workflows/pr.yml` deinits the sculptcore
-submodule, then typechecks, builds, and runs `pnpm smoke:no-sculptcore`
-(`tools/no-sculptcore-smoke.mjs`) — which boots the real app headlessly and
+submodule, then typechecks, builds the `faber-leaf-core` distribution
+(`pnpm build:core`) and runs `pnpm smoke:core`
+(`tools/distribution-smoke.mjs`) — which boots the real app headlessly and
 models, saves and reloads a mesh with the engine absent. The static gates alone
 pass on a tree that boots to a blank error screen, which is why the runtime half
-exists. The script exits 2 rather than reporting green if the addon it expects
-to be missing turns out to be present.
+exists.
 
 ## The `register(api)` hook
 
@@ -250,28 +253,78 @@ class Foo {
 class is first instantiated, which may happen before any addon's
 `register(api)` runs. It's idempotent — leave it where it is.
 
-## In-bundle registration
+## Distributions
 
-`addons/builtin/builtin_registry.ts` is the single place an in-bundle addon is
-named. It has no logic — one import pair and one call per addon:
+A **distribution** is the product this bundle is: which addons ship, which
+startup scene opens, what the window is called. It is a manifest, not a fork —
+`distributions/<id>/index.ts`, and nothing in it may hold product logic. Both of
+today's are ~20 lines:
 
 ```ts
-import * as myAddon from '@builtin/my_addon'
-import myManifest from './my_addon/manifest.json'
+import {bundled, defineDistribution, external} from '../../scripts/addon/distribution'
+import * as litemesh from '@builtin/litemesh'
+import litemeshManifest from '../../addons/builtin/litemesh/manifest.json'
 
-addonManager.registerBuiltin(myManifest, myAddon as IAddon)
+export default defineDistribution({
+  id   : 'faber-leaf',
+  title: 'FaberLeaf',
+  addons: [bundled(litemeshManifest, litemesh), external('leafmesh')],
+  defaultScene: 'litemesh-sphere',
+})
 ```
 
-The entry comes in through the `@builtin/<id>` alias and the manifest
-relatively, because the entry is conditional and the metadata is not — see
-[Not in this build](#not-in-this-build).
+`bundled(manifest, module)` is the in-bundle form: the entry comes in through
+the `@builtin/<id>` alias and the manifest relatively, because the entry is
+conditional and the metadata is not — see
+[Not in this build](#not-in-this-build). `external(id)` names an addon that is
+already discoverable from `build/addons/index.json`; both take an optional
+`{enabled}` that overrides the manifest's `defaultEnabled`, so an addon that
+ships off in one product can ship on in another.
+
+`scripts/entry_point.js` imports exactly one of these, through `@distribution`,
+and calls `addonManager.loadDistribution(dist)` before `startAddons()`. That is
+the only place the app names a product.
+
+**The addon list is an allow-list for shipped first-party addons only.** A
+builtin — in-bundle, or an `index.json` entry carrying `builtin: true` — that the
+distribution omits is never loaded — no module import, no record, the same state
+[Force-disable](#force-disable) produces, so `api.has(id)` stays correct by
+construction (reason `not-in-distribution`).
+
+Two kinds of addon are *not* filtered, because neither one is a shipping
+decision:
+
+- **Third-party addons the user installed from storage.** Installing one was a
+  user decision.
+- **Test fixtures** (`tests/fixtures/addons/*`). They appear in `index.json`
+  only when the build was asked for them (`tools/build-addons.js
+  --include-fixtures`), which is a harness concern. `index.json` records the
+  difference as `builtin` / `kind`, so the manager reads it rather than
+  inferring it from where the entry came from.
+
+Both exemptions are still force-disablable — that combination is what
+`tests/integration/addon_optional_probe.test.ts` drives.
+
+**The startup scene is selected by name.** Addons contribute named scenes with
+`api.registerDefaultSceneBuilder(name, fn, toolMode?)` and the distribution picks
+one, which is what keeps the startup file independent of addon load order. With
+nothing selected and exactly one scene registered, that one is used — so unit
+tests and single-geometry builds need no manifest.
+
+Building a non-default distribution is `node tools/esbuilder.js --distribution
+<name>` (`pnpm build:core` for `faber-leaf-core`). `tools/distributions.mjs`
+reads two facts out of the entry file's *source* before esbuild runs: what
+`@distribution` resolves to, and which `@builtin/<id>` specifiers it imports.
+That second set decides which addons contribute build assets (litemesh's WASM) —
+it is the same specifier esbuild resolves, not a guess about intent.
 
 `registerBuiltin` only records a *source*: it validates the manifest, honours
-force-disable and the not-in-build sentinel, and hands the rest to `start()`.
-Nothing is registered or enabled here, so an in-bundle addon has no earlier
-lifecycle than an out-of-bundle one — it is just already imported. (Registering
-after `start()` has run, as tests and HMR do, materializes and enables it
-immediately so it still behaves like a boot-time builtin.)
+force-disable, the distribution allow-list and the not-in-build sentinel, and
+hands the rest to `start()`. Nothing is registered or enabled here, so an
+in-bundle addon has no earlier lifecycle than an out-of-bundle one — it is just
+already imported. (Registering after `start()` has run, as tests and HMR do,
+materializes and enables it immediately so it still behaves like a boot-time
+builtin.)
 
 The runtime surface peer addons see through `@addon/<id>/api` comes from the
 addon's own `src/api.ts`; `register(api)` is where classes actually register.
@@ -346,9 +399,10 @@ compile against, the namespace is what they get.
    [Not in this build](#not-in-this-build)
 5. Implementation modules use `@framework/api` and `@addon/<id>/api` only
    (no `../../../../scripts/...`)
-6. In-bundle only: a static import in `addons/builtin/builtin_registry.ts`
-   through `@builtin/<id>`, and the manifest's `buildAssets` for any extra
-   entry point the bundle has to emit. Out-of-bundle addons need neither —
-   `tools/build-addons.js` discovers them from the manifest alone.
+6. Add it to whichever distributions ship it (`distributions/<id>/index.ts`):
+   `external('<id>')`, or — in-bundle only — `bundled(manifest, module)` with a
+   static `@builtin/<id>` import, plus the manifest's `buildAssets` for any
+   extra entry point the bundle has to emit. See
+   [Distributions](#distributions).
 7. `pnpm gen:paths` (picks up `@addon/<id>/api` and `@builtin/<id>`), then
    `pnpm build` and `npx tsgo --noEmit` should both stay green

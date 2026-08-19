@@ -76,18 +76,25 @@ export function discoverBuiltins() {
 }
 
 /**
- * The main bundle's contribution from every available builtin: esbuild entry
- * points (repo-root-relative `in` paths, verbatim from `manifest.buildAssets`)
- * and `external` patterns. An unavailable addon contributes nothing, which is
- * how a missing artifact stops being a build error.
+ * The main bundle's contribution from every available builtin the distribution
+ * actually ships: esbuild entry points (repo-root-relative `in` paths, verbatim
+ * from `manifest.buildAssets`) and `external` patterns. An unavailable addon
+ * contributes nothing, which is how a missing artifact stops being a build
+ * error; an addon this distribution omits contributes nothing either, which is
+ * how `faber-leaf-core` avoids copying sculptcore's WASM on a tree that has it.
+ *
+ * `inBundleIds` is tools/distributions.mjs's set; undefined means "no filter".
  */
-export function collectBuildAssets(builtins = discoverBuiltins()) {
+export function collectBuildAssets(builtins = discoverBuiltins(), inBundleIds = undefined) {
   const entryPoints = []
   const external = []
 
   for (const b of builtins) {
     const assets = b.manifest.buildAssets
     if (!b.available || !assets) {
+      continue
+    }
+    if (inBundleIds && !inBundleIds.has(b.id)) {
       continue
     }
     for (const ep of assets.entryPoints ?? []) {

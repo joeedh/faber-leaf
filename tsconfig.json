@@ -30,6 +30,7 @@
   "include": [
     "scripts/**/*.ts",
     "addons/**/*.ts",
+    "distributions/**/*.ts",
     "tools/**/*.mjs",
   ],
 }

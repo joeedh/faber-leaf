@@ -36,12 +36,13 @@ import fs from 'fs'
 export const EXTERNAL_IDS = ['leafmesh']
 
 /**
- * Builtin addons compiled INTO the main bundle (registered via
- * addons/builtin/builtin_registry.ts). build-addons.js skips these — they ship
- * in the main bundle and must not be separately compiled (the user's "builtins
- * wouldn't have to be compiled" rule). To extract one, remove it here, remove
- * its registerBuiltin() call from builtin_registry.ts, and add it to
- * EXTERNAL_IDS above.
+ * Builtin addons that ship compiled INTO the main bundle, for whichever
+ * distribution includes them (`bundled(...)` in distributions/<id>/index.ts).
+ * build-addons.js skips these — they must never also be compiled separately
+ * (the user's "builtins wouldn't have to be compiled" rule). This is a property
+ * of the addon, not of a distribution: a distribution that omits the addon
+ * simply does not import it. To extract one, remove it here, drop its
+ * `bundled(...)` entry from every distribution, and add it to EXTERNAL_IDS.
  *
  * @type {Set<string>}
  */

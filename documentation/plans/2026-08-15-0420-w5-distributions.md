@@ -1,6 +1,11 @@
 # P17 — W5a: distributions + cycle cleanup
 
-**Status:** plan — not started.
+**Status:** step 0 verified, step 1 landed; step 2 not started.
+
+**Citations note:** the file:line references below were a 2026-08-15 snapshot
+taken before any of this work landed. Where step 1 found one stale, the text is
+corrected in place and marked **(corrected 2026-08-19)** — the plan is kept
+honest rather than left as a record of what the tree used to look like.
 
 **Date:** 2026-08-15
 
@@ -42,64 +47,117 @@ LeafMesh is the natural target — zero dependencies, same as `tetmesh` had. A
 purpose-built fixture addon is also fine and is arguably better, since it will
 not drift as LeafMesh grows.
 
+**Verified (2026-08-19):** P13 did re-point it. `tetmesh_real_build.test.ts` is
+gone and `tests/integration/leafmesh_real_build.test.ts` covers the same ground,
+including the `index.json` entry (`buildMode: "prebuilt"`, `dependencies: []`).
+The pipeline was never uncovered, so this was not a commit.
+
 ## 3. Step 1 — the distribution manifest
 
-`scripts/entry_point.js` today is a hand-ordered list of side-effect imports
-with comments explaining TDZ hazards ("Must come AFTER the mesh default_scene
-import so this builder wins"). That is not embeddable and it is barely
-maintainable.
+**(corrected 2026-08-19)** `scripts/entry_point.js` was described here as a
+hand-ordered list of side-effect imports with TDZ comments ("Must come AFTER the
+mesh default_scene import so this builder wins"). By the time this step ran, W1
+had already collapsed that to a single side-effect import of
+`addons/builtin/builtin_registry.ts` — the *ordering* hazard was gone, but the
+hardcoded product was not, which is what this step actually removed.
 
 ```ts
-// distributions/faber-leaf/index.ts
+// distributions/faber-leaf/index.ts — as landed
+import {bundled, defineDistribution, external} from '../../scripts/addon/distribution'
+import * as litemesh from '@builtin/litemesh'
+import litemeshManifest from '../../addons/builtin/litemesh/manifest.json'
+
 export default defineDistribution({
-  addons: [litemesh, sculpt, boxmodel, uv_editor, node_editor, leafmesh],
+  id   : 'faber-leaf',
+  title: 'FaberLeaf',
+  addons: [bundled(litemeshManifest, litemesh), external('leafmesh')],
   defaultScene: 'litemesh-sphere',
-  branding: {title: 'Faber Leaf'},
 })
 ```
 
 ```ts
-// distributions/faber-leaf-core/index.ts
+// distributions/faber-leaf-core/index.ts — as landed
+import {defineDistribution, external} from '../../scripts/addon/distribution'
+
 export default defineDistribution({
-  addons: [leafmesh, leafmesh_modeling, uv_editor, node_editor],
+  id   : 'faber-leaf-core',
+  title: 'FaberLeaf Core',
+  addons: [external('leafmesh', {enabled: true})],
   defaultScene: 'leafmesh-cube',
-  branding: {title: 'Faber Leaf Core'},
 })
 ```
 
-- `entry_point` becomes generic: load the distribution, register its addons
-  through the P14 resolver, build the default scene through P7's
-  `registerDefaultSceneBuilder`.
+- `entry_point` becomes generic: one `import distribution from '@distribution'`,
+  then `addon.loadDistribution(distribution)` before `startAddons(true)`.
+  `addons/builtin/builtin_registry.ts` is deleted.
 - `tools/esbuilder.js` takes `--distribution <name>`; the default is
-  `faber-leaf`.
+  `faber-leaf`. `tools/distributions.mjs` reads the two facts the build needs
+  out of the entry file's *source* — what `@distribution` resolves to, and which
+  `@builtin/<id>` specifiers it imports — rather than evaluating it.
 - **A distribution is a manifest + entry file, not a fork.** Nothing in
   `distributions/*/` may contain product logic. If something needs to differ
   beyond addon set / default scene / branding, that is a missing addon
   boundary — fix it there. Enforce with a size budget: a distribution file over
-  ~50 lines is a smell.
+  ~50 lines is a smell. (Landed at 24 and 20 lines.)
 - Build assets follow the addon set (P16 step 3), so `faber-leaf-core` does not
   try to copy the WASM artifacts.
+- **The addon list is an allow-list for shipped first-party addons only.** A
+  builtin — in-bundle, or a `build/addons/index.json` entry carrying
+  `builtin: true` — that the distribution omits is never loaded — no module
+  import, no record — the same state `force_disable.ts` produces, so
+  `api.has(id)` is correct by construction (reason `not-in-distribution`).
+  Two kinds of addon are *not* filtered, because neither is a shipping
+  decision: third-party addons the user installed from storage (installing one
+  was a user decision), and the `tests/fixtures/addons/*` fixtures, which are in
+  the index only when the build was asked for them (`--include-fixtures`) and
+  are a harness concern. `index.json` already records the difference as
+  `builtin` / `kind`, so the manager reads it rather than inferring it. Both
+  exemptions remain force-disablable, which is what
+  `addon_optional_probe.test.ts` drives.
+- **Named default scenes replaced the one-slot last-wins hook.** P7's
+  `registerDefaultSceneBuilder` took a builder and the last registration won,
+  which *was itself* the load-order dependency step 2 exists to remove. It now
+  takes `(name, fn, toolMode?)` and the distribution selects by name. Fallback:
+  with nothing selected and exactly one scene registered, that one is used, so
+  unit tests and single-geometry builds keep working.
 
 `faber-leaf` is what ships and what developers run. `faber-leaf-core` exists to
-serve embedders **and** to keep the boundary from rotting — re-point P16's
-`--no-sculptcore` CI lane at it, so the lane builds a real product rather than a
-crippled full build.
+serve embedders **and** to keep the boundary from rotting — P16's
+`--no-sculptcore` CI lane is re-pointed at it (`pnpm build:core` →
+`pnpm smoke:core`), so the lane builds a real product rather than a crippled
+full build.
 
 ### 3.1 What `faber-leaf-core` contains
 
-Frozen here, from P12's decision #8: LeafMesh plus the modeling toolmode at
-P12 §4's scope, the UV editor (P18), and the node/material editor. No
-sculptcore, no LiteMesh, no sculpting.
+**(corrected 2026-08-19)** This section named `sculpt`, `boxmodel`, `uv_editor`,
+`node_editor` and `leafmesh_modeling` as addons. None of those exist as addons
+in the tree: the modeling toolmode ships *inside* `leafmesh`, the sculpt
+toolmode and box-modeling mode ship inside `litemesh`, and the UV / node editors
+are host editors, not addons. The plan's rule still holds — reconcile against
+what P12 actually shipped, not against its plan — so the honest lists are:
 
-If P12's scope was cut, this list shrinks with it — reconcile against P12's
-final §4 rather than against its plan.
+| | `faber-leaf` | `faber-leaf-core` |
+| --- | --- | --- |
+| `litemesh` | in-bundle, default-on | absent |
+| `leafmesh` | external, manifest default (off) | external, forced **on** |
+| startup scene | `litemesh-sphere` (sculpt mode) | `leafmesh-cube` (leafmesh mode) |
+| feature flags | 11 (all `sculptcore.*`, litemesh-owned) | 0 |
+
+No sculptcore, no LiteMesh, no sculpting in core — which is the frozen decision
+#8 requirement. The UV editor arrives with P18 and is a host editor either way.
+
+`faber-leaf-core` needed a startup scene of its own, so `leafmesh` gained
+`addons/builtin/leafmesh/src/leafmesh_default_scene.ts` (cube + default material
++ light) registered as `leafmesh-cube`.
 
 ## 4. Step 2 — the load-order fragility
 
 `framework_api.ts` carries comments about export ordering to dodge TDZ ("MUST be
-re-exported BEFORE context.ts"); `builtin_registry.ts` has import-order comments
-too. Those are circular-dependency smells, and today they are survivable only
-because the load order is hardcoded.
+re-exported BEFORE context.ts" — `scripts/framework_api.ts:112,115`). That is a
+circular-dependency smell, and it is survivable only because the load order is
+hardcoded. **(corrected 2026-08-19)** The plan also cited import-order comments
+in `builtin_registry.ts`; that file is deleted by step 1, so `framework_api.ts`
+is the whole of it.
 
 A distribution manifest makes load order **data**. P14's resolver sorts
 deterministically, but a distribution can legitimately list addons in any order
@@ -121,7 +179,15 @@ non-deterministic crash.
 
 - **Criterion 10**: both distributions build from one tree, boot, and pass a
   smoke test. No file exists in one distribution's source that does not exist in
-  the other's — the only difference is the manifest.
+  the other's — the only difference is the manifest. **Met (2026-08-19)**:
+  `tools/distribution-smoke.mjs` (table-driven, one row per distribution) boots
+  the built bundle and asserts the distribution id, window title, enabled and
+  absent addon ids, feature-flag count, the startup file's object set, and a
+  `.wproj` save/load round-trip. `faber-leaf` → 17.5 MB bundle, 11 flags,
+  `[LiteMesh, Light]`; `faber-leaf-core` → 14.1 MB bundle, 0 flags,
+  `[LeafMeshData, Light]` plus the leafmesh modelling demo. 14.1 MB is the same
+  size P16 measured for the sculptcore-deinited build, which is the evidence
+  that `faber-leaf-core` on a full tree equals the engine-absent build.
 - **Packaging**: the re-pointed external-addon build test passes, including the
   `index.json` dependency entry.
 - **Shuffle test** (§4): distribution addon order does not affect resulting
