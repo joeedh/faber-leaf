@@ -33,6 +33,10 @@ export default defineConfig([
     './test-results/**',
     './tools/.tmp/**',
     './scripts/extern/**',
+    // Rescued BREP code, kept to be ported rather than maintained (P13 §3).
+    // It does not compile against the current host and never will; linting
+    // it would be a permanent backlog for a tree nobody edits.
+    './archive/**',
   ]),
   {
     files          : ['**/*.{js,mjs,cjs,ts,mts,cts}'],

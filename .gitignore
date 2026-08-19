@@ -1,5 +1,7 @@
 /keys/
-archive
+# The loose screenshot dump at archive/'s top level. The subdirectories are
+# tracked: P13 moves the rescued BREP code there and P19 reads it back.
+archive/*.png
 .sculptcore
 scripts/config/config_local.js
 electron/arguments.txt

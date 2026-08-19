@@ -14,6 +14,10 @@ scripts/mathl/
 vendor/
 emsdk/
 
+# Rescued-but-dead code. It is kept to be read and ported, not to be
+# maintained; formatting it would churn a tree nobody edits.
+archive/
+
 # Vendored third-party sources, generated output, scratch.
 scripts/extern/
 scripts/data_api/generated/

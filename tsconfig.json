@@ -37,6 +37,6 @@
     "build",
     "dist",
     "types",
-    "**/pending-port/**",
+    "archive",
   ],
 }
