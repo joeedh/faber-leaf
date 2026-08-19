@@ -371,6 +371,57 @@ be one invalidation per vertex per frame.
 
 This step needed **G7** below; the addon-side diff carries no `scripts/`.
 
+### Step 4 — extrude and split-off
+
+The same split a third time, and this time the hub needed nothing new.
+
+- **`modeling.ts`** (pure): `extrudeFaceRegion`, `extrudeFacesIndividual`,
+  `splitOffFaces`, `regionBoundaryEdges`, `meshSnapshotBytes` — 14 tests.
+- **`modeling_ops.ts`** (framework): `leafmesh.extrude_region`,
+  `leafmesh.extrude_individual`, `leafmesh.split_off` on a shared
+  `LeafMeshTopoOpBase`, registered through `main.ts`'s one `registerAll`.
+
+**All three tools are the same rewrite**: snapshot the region, duplicate the
+vertices that have to come apart, rebuild the faces on the copies, and — for an
+extrude — raise a wall along the rim. Only two things differ: *which* vertices
+are duplicated (an extrude duplicates the rim's, a split-off duplicates every
+vertex the region shares with a face outside it) and whether walls go up.
+
+**The rim is an edge property, not a vertex one**: an edge with exactly one
+adjacent *region* face. Classifying vertices instead would make a lone flat quad
+extrude into nothing; the edge rule extrudes it into an open box, raises one
+wall rather than three between two selected neighbours, and correctly no-ops a
+closed region — all four are tests.
+
+**Wall winding follows the region face's own traversal.** For the directed edge
+`a → b` as the region face walks it, the wall ring is `[a, b, b', a']`, whose
+Newell normal points out of the solid. That is right for a hole ring as well as
+an outer one, because a hole ring is already wound the other way — §5's case,
+pinned by the tube test that checks the eight inner walls face inward and the
+eight outer ones outward while the cap keeps its hole.
+
+Two things the rewrite has to get right and does: every attribute row is
+snapshotted **before** the first `killFace`, because a freed row's storage is
+handed straight back out to the faces being rebuilt; and a region-interior edge
+whose endpoints were both duplicated is left with zero faces, so every region
+edge is collected up front and the survivors killed.
+
+**Undo is a whole-mesh `copy()`.** A topology op rewrites handles across four
+domains at once, so no smaller snapshot is honest — `calcUndoMem` reports
+`meshSnapshotBytes`, which counts every column of every domain plus the
+freemaps. `undo` restores a *fresh* copy each time, so undo → redo → undo works.
+
+`transform=1` chains a `TranslateOp` behind the geom op in one `ToolMacro`
+(`E`, `Alt+E`, `V`), with the op's `normalSpace` output driving the translate's
+constraint space — the same shape as `litemesh_modeling_ops.ts`'s
+`makeTransformMacro`. Split-off drags freely instead: a detached piece goes
+anywhere. Both extrudes also carry a plain `offset` input, which is what makes
+§8's scripted headless sequences expressible without a pointer.
+
+`ToolMacro`, `Mat4Property` and `Matrix4` all already reach the addon through
+`@framework/pathux` and `@framework/api`, so this step opened **no** gap: the
+addon-side diff carries no `scripts/`.
+
 ## 13. Contract gaps
 
 Numbering continues from the P11 plan (G1-G5 are recorded there).

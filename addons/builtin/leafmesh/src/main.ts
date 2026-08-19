@@ -17,6 +17,7 @@ import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
 import {LEAFMESH_VERTEX_ATTRS} from './draw.js'
 import * as leafmesh from './index.js'
 import {LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry} from './leafmesh.js'
+import {LEAFMESH_MODELING_OPS} from './modeling_ops.js'
 import {LEAFMESH_OBJ_FORMAT} from './obj.js'
 import {LEAFMESH_SELECT_OPS} from './select_ops.js'
 import {LeafMeshToolMode} from './toolmode.js'
@@ -52,9 +53,9 @@ export function register(api: AddonAPI<IAddon>) {
   // reads. Both point at the same parser (P11 §6).
   api.registerFileFormat(LEAFMESH_OBJ_FORMAT)
 
-  // The modeling toolmode and its selection ops (P12 step 1). One `register`
-  // dispatch each — no module-scope `ToolMode.register` side effect.
-  api.registerAll(LeafMeshToolMode, ...LEAFMESH_SELECT_OPS)
+  // The modeling toolmode, its selection ops (P12 step 1) and its topology ops
+  // (step 4). One `register` dispatch each — no module-scope side effect.
+  api.registerAll(LeafMeshToolMode, ...LEAFMESH_SELECT_OPS, ...LEAFMESH_MODELING_OPS)
 
   // Implementor #2 of `ITransDataType` (P12 §6) — grab/rotate/scale, snapping
   // and proportional edit, with `transform_ops.ts` naming no geometry type.

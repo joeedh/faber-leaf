@@ -93,14 +93,14 @@ leafmesh.LeafMeshToolMode {
 
   static toolModeDefine() {
     return {
-      name       : 'leafmesh',
-      uiname     : 'Leaf Model',
+      name        : 'leafmesh',
+      uiname      : 'Leaf Model',
       // Shared with the BREP editor until P13 removes it, at which point this
       // is the only mesh-editing mode wearing it.
-      icon       : Icons.MESHTOOL,
-      flag       : 0,
-      description: 'Model a LeafMesh (select / extrude / inset / loop cut)',
-      selectMode : SelMask.OBJECT,
+      icon        : Icons.MESHTOOL,
+      flag        : 0,
+      description : 'Model a LeafMesh (select / extrude / inset / loop cut)',
+      selectMode  : SelMask.OBJECT,
       transWidgets: [],
     }
   }
@@ -355,8 +355,8 @@ leafmesh.LeafMeshToolMode {
   }
 
   defineKeyMap(): void {
-    // G / R / S arrive with the transform bridge (P12 step 3); until then the
-    // mode is selection-only by design.
+    // G and S are View3D's own hotkeys, and reach LeafMesh through the
+    // transform bridge (P12 step 3); the mode does not rebind them.
     this.keymap = new KeyMap([
       new HotKey('A', [], 'leafmesh.select_all(mode=AUTO)'),
       new HotKey('A', ['alt'], 'leafmesh.select_all(mode=NONE)'),
@@ -364,6 +364,9 @@ leafmesh.LeafMeshToolMode {
       new HotKey('C', [], 'leafmesh.select_circle()'),
       new HotKey('L', [], 'leafmesh.select_linked()'),
       new HotKey('G', ['shift'], (ctx) => this._popupSelectSimilar(ctx as ViewContext)),
+      new HotKey('E', [], 'leafmesh.extrude_region(transform=true)'),
+      new HotKey('E', ['alt'], 'leafmesh.extrude_individual(transform=true)'),
+      new HotKey('V', [], 'leafmesh.split_off(transform=true)'),
     ])
   }
 

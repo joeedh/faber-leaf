@@ -30,7 +30,14 @@ export {LEAFMESH_BLOB_VERSION, deserializeLeafMesh, serializeLeafMesh} from './s
 export {buildDrawGeometry, drawAttrNames, gatherDrawAttr, recalcVertexNormals, resolveDrawAttr} from './draw_buffers.js'
 export type {DrawGeometry} from './draw_buffers.js'
 
-export {DEPTH_TIEBREAK_PX, elementPoint, nearestByDomain, pickScreenCircle, pickScreenRect, rayCastMesh} from './pick_geom.js'
+export {
+  DEPTH_TIEBREAK_PX,
+  elementPoint,
+  nearestByDomain,
+  pickScreenCircle,
+  pickScreenRect,
+  rayCastMesh,
+} from './pick_geom.js'
 export type {LeafMeshPickElem, PickCandidate, PickDomainName, Point3, Projector, RayHit} from './pick_geom.js'
 
 export {OBJ_MAX_WARNINGS, OBJ_UV_LAYER, readOBJ} from './obj_read.js'
@@ -68,20 +75,16 @@ export {
   overlayCacheKey,
   overlayVertexNormals,
 } from './overlay_geom.js'
-export type {
-  DomainMarks,
-  OverlayBatch,
-  OverlayGeometry,
-  OverlayRequest,
-  OverlayTheme,
-  Rgba,
-} from './overlay_geom.js'
+export type {DomainMarks, OverlayBatch, OverlayGeometry, OverlayRequest, OverlayTheme, Rgba} from './overlay_geom.js'
+
+export {aabbOf, centroidOf, gatherMovableVerts, propagationDistances, snapshotBytes} from './transform_geom.js'
+export type {MovableVerts, NearVertQuery} from './transform_geom.js'
 
 export {
-  aabbOf,
-  centroidOf,
-  gatherMovableVerts,
-  propagationDistances,
-  snapshotBytes,
-} from './transform_geom.js'
-export type {MovableVerts, NearVertQuery} from './transform_geom.js'
+  extrudeFaceRegion,
+  extrudeFacesIndividual,
+  meshSnapshotBytes,
+  regionBoundaryEdges,
+  splitOffFaces,
+} from './modeling.js'
+export type {ExtrudeOptions, RegionResult} from './modeling.js'

@@ -37,3 +37,20 @@ export {LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry} from './leafmesh.
 export {LEAFMESH_VERTEX_ATTRS, LeafMeshDrawable} from './draw.js'
 
 export {LeafMeshTransElem, LeafMeshTransList, LeafMeshTransType} from './transtype.js'
+
+export {
+  extrudeFaceRegion,
+  extrudeFacesIndividual,
+  meshSnapshotBytes,
+  regionBoundaryEdges,
+  splitOffFaces,
+} from './modeling.js'
+export type {ExtrudeOptions, RegionResult} from './modeling.js'
+
+export {
+  LEAFMESH_MODELING_OPS,
+  LeafMeshExtrudeIndividualOp,
+  LeafMeshExtrudeRegionOp,
+  LeafMeshSplitOffOp,
+  LeafMeshTopoOpBase,
+} from './modeling_ops.js'
