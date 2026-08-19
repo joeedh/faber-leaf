@@ -18,7 +18,7 @@ import {SceneObject, ObjectFlags} from '../../../../scripts/sceneobject/sceneobj
 import {getWasmImmediate} from '@sculptcore/api/api'
 import {LiteMesh, AttrDomain} from './litemesh'
 import {makeDefaultMaterial} from '../../../../scripts/core/material'
-import {FeatureFlags} from '../../../../scripts/core/feature-flag'
+import {FeatureFlags} from '@framework/api'
 import {Icons} from '../../../../scripts/editors/icon_enum.js'
 import {SculptPaintOp} from './sculptcore_ops'
 

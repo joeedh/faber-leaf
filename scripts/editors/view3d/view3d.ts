@@ -55,7 +55,6 @@ import {OptionalIfNot} from '../../util/optionalIf'
 import type {ViewContext} from '../../core/context'
 import {BusMessage} from '../../core/bus'
 import type {StructReader} from '../../path.ux/scripts/util/nstructjs'
-import * as sculptcore_demo from '../../sculptcore_demo'
 import {isWebGPU} from '../../core/renderer_flag'
 import {
   drawDrawLinesWebGpu,
@@ -1214,10 +1213,6 @@ View3D {
     this.gl = getWebGL()!
     if (this.gl === undefined) {
       throw new Error('no webgl')
-    }
-
-    if (!isWebGPU()) {
-      sculptcore_demo.initSculptcoreDemo(getWebGL())
     }
 
     this.canvas = this.gl.canvas as CanvasWithExtra

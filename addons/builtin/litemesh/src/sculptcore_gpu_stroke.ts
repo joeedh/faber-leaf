@@ -13,10 +13,10 @@
 import {GpuBrushData, GpuBrushInfo, IWasmInterface, SculptHandle} from '@sculptcore/api/api'
 import {SculptBrushes} from '@sculptcore/api/sculptcore/brush/SculptBrushes'
 
-import {GpuBrushStroke, GpuBrushStats, ScatterTables} from '../../../../scripts/webgpu/brush_compute'
+import {GpuBrushStroke, GpuBrushStats, ScatterTables} from './brush_compute'
 import {BufferUsage, MapMode} from '../../../../scripts/webgpu/flags'
 import {getActiveWebGpuContext} from '../../../../scripts/render/queue_factory'
-import {FeatureFlags} from '../../../../scripts/core/feature-flag'
+import {FeatureFlags} from '@framework/api'
 
 import type {LiteMesh} from './litemesh'
 

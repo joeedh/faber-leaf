@@ -332,17 +332,6 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `settings.autosaveToProjectDir` | prop | BoolProperty | Autosave Next To Project |  |
 | `settings.brushSet` | prop | EnumProperty | Brush Set | enum {0, 1, HIGH_RES, MEDIUM_RES, DEFAULT} |
 | `settings.featureFlags` | struct |  |  |  |
-| `settings.featureFlags.sculptcore_auto_defrag` | prop | BoolProperty | sculptcore.auto_defrag |  |
-| `settings.featureFlags.sculptcore_backface_cull` | prop | BoolProperty | Backface Culling |  |
-| `settings.featureFlags.sculptcore_cpp_stroke_driver` | prop | BoolProperty | C++ Stroke Driver |  |
-| `settings.featureFlags.sculptcore_gpu_brush` | prop | BoolProperty | GPU Brushes |  |
-| `settings.featureFlags.sculptcore_gpu_brush_grab` | prop | BoolProperty | GPU Grab Brush |  |
-| `settings.featureFlags.sculptcore_gpu_brush_verify` | prop | BoolProperty | GPU Brush Shadow-Verify |  |
-| `settings.featureFlags.sculptcore_multires` | prop | BoolProperty | Multires Subsurf |  |
-| `settings.featureFlags.sculptcore_quad_remesher` | prop | BoolProperty | sculptcore.quad_remesher |  |
-| `settings.featureFlags.sculptcore_sculpt_layers` | prop | BoolProperty | Sculpt Layers |  |
-| `settings.featureFlags.sculptcore_select_flush_prefer_op_domain` | prop | BoolProperty | sculptcore.select_flush_prefer_op_domain |  |
-| `settings.featureFlags.sculptcore_vdm_sculpt` | prop | BoolProperty | VDM Sculpting |  |
 | `settings.limitUndoMem` | prop | BoolProperty | Limit Undo Memory |  |
 | `settings.undoMemLimit` | prop | IntProperty | Mem Limit |  |
 

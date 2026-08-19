@@ -26,10 +26,16 @@ import {GPUType} from '@sculptcore/api/sculptcore/gpu/GPUType'
 import {GPUCmdType} from '@sculptcore/api/sculptcore/gpu/GPUCmdType'
 import {IWasmInterface} from '@sculptcore/api/api'
 
-import {VertexScalarType, buildVertexBufferLayout, type VertexAttrDesc} from '../core/vertex_layout.js'
-
-import {GpuBuffer, GpuBufferUsage} from './buffer.js'
-import {Pipeline, PipelineCache, type PipelineDescriptor} from './pipeline.js'
+import {
+  VertexScalarType,
+  buildVertexBufferLayout,
+  GpuBuffer,
+  Pipeline,
+  PipelineCache,
+  type VertexAttrDesc,
+  type GpuBufferUsage,
+  type PipelineDescriptor,
+} from '@framework/api'
 
 interface BoundLike {
   ptr: number

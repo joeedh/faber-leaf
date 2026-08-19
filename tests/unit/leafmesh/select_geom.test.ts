@@ -53,9 +53,7 @@ function bowtie(): {mesh: LeafMesh; a: number; b: number; pivot: number} {
   const mesh = new LeafMesh()
   const pivot = mesh.makeVert([0, 0, 0])
 
-  const a = mesh.makeFace([
-    [mesh.makeVert([-1, -1, 0]), mesh.makeVert([-1, 1, 0]), mesh.makeVert([0, 1, 0]), pivot],
-  ])
+  const a = mesh.makeFace([[mesh.makeVert([-1, -1, 0]), mesh.makeVert([-1, 1, 0]), mesh.makeVert([0, 1, 0]), pivot]])
   const b = mesh.makeFace([[pivot, mesh.makeVert([1, 0, 0]), mesh.makeVert([1, -1, 0]), mesh.makeVert([0, -1, 0])]])
 
   return {mesh, a, b, pivot}

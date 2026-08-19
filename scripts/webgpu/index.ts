@@ -31,9 +31,6 @@ export type {WebGPUFrameContext} from './queue_adapter.js'
 export {WebGpuRenderContext, FULLSCREEN_QUAD_LAYOUT} from './render_context.js'
 export type {WebGpuRenderContextOptions} from './render_context.js'
 
-export {WebGPUBatchExecutor} from './batch.js'
-export type {WebGPUBatchExecutorOptions} from './batch.js'
-
 export {WebGpuRenderGraph} from './render_graph.js'
 export type {GraphNodeRef, DispatchHooks} from './render_graph.js'
 

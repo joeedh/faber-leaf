@@ -1,7 +1,7 @@
 // Side-effect: assigns globalThis._framework so externalized addon bundles
 // (which see `@framework/api` as a stub looking up globalThis._framework.api)
-// resolve to the main bundle's namespace. Must run before any addon's
-// addon_register side effects below.
+// resolve to the main bundle's namespace. Must run before the builtin
+// registry below, whose entries are imported at module scope.
 import './_framework_runtime.js'
 
 import './typescript_entry.js'
@@ -28,23 +28,12 @@ import '../addons/builtin/builtin_registry.js'
 
 import addon, {startAddons} from './addon/addon.js'
 
-import {getAppArgv, getArg} from './core/app_argv.js'
+import {getAppArgv} from './core/app_argv.js'
 import {runTestHarness} from './core/test_harness.js'
 
 import config from './config/config.js'
 import {setupPathux} from './setup_pathux.js'
 import {nstructjs} from './path.ux/pathux.js'
-import * as sculptcore from '@sculptcore/api/api'
-
-// Backend selection (Workstream C seam) must be set BEFORE the initial
-// loadWasm() — it runs at module load, before handleNodeArguments(). The test
-// harness's later --backend handling is too late for this first load.
-const _backend = getArg('backend')
-if (_backend) {
-  globalThis.__SCULPTCORE_BACKEND = _backend
-}
-
-await sculptcore.loadWasm()
 
 export function handleNodeArguments() {
   // getAppArgv reads the NW.js user args (nw.App.argv); see
@@ -68,8 +57,6 @@ export async function init() {
 
   await setupPathux()
 
-  await sculptcore.getWasm()
-
   //give addons 500 ms to load
   let timeout = config.addonLoadWaitTime
   if (timeout === undefined) {
@@ -85,6 +72,8 @@ export async function init() {
   // Await the unified pipeline so every addon's toolmodes/editors/datablocks
   // are registered + enabled before we build the UI (appstate.init). Builtin
   // sources were registered synchronously by the builtin_registry import above.
+  // It also awaits each addon's boot task, so any engine an addon needs (e.g.
+  // sculptcore's WASM) is warm before appstate.init reads the startup file.
   await startAddons(true)
 
   window.setTimeout(() => {

@@ -371,4 +371,3 @@ BoxModelToolMode {
     this.boxModelSelMode = normalizeSelMask(this.boxModelSelMode, SelMask.VERTEX)
   }
 }
-

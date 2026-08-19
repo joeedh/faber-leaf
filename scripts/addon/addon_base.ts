@@ -76,6 +76,8 @@ import {
   type DefaultSceneBuilder,
 } from '../core/default_file'
 import {registerTestScene, unregisterTestScene, type TestSceneBuilder} from '../core/test_scenes'
+import {registerBootTask, unregisterBootTask, type BootTask} from '../core/boot_tasks'
+import {FeatureFlagManager, FeatureFlags, defineFeatureFlagMember, type FeatureFlag} from '../core/feature-flag'
 import {registerFileMigrator, unregisterFileMigrator, type IFileMigrator} from '../core/file_migrations'
 import {registerFileFormat, unregisterFileFormat, type IFileFormat} from '../core/file_formats'
 import {registerUVSource, unregisterUVSource, type IUVSourceProvider} from '../core/uv_sources'
@@ -383,6 +385,37 @@ export class AddonAPI<T> {
     this._undoRegistrations.push(() => unregisterTestScene(name, builder))
   }
 
+  /**
+   * Hold the boot open until this addon's async warm-up finishes. `start()`
+   * awaits every registered task after the enable pass, so nothing reads a
+   * file or builds the UI before it lands. Rejections are reported, not fatal.
+   */
+  registerBootTask(fn: BootTask, label: string): void {
+    registerBootTask(fn, label)
+    this._undoRegistrations.push(() => unregisterBootTask(fn))
+  }
+
+  /**
+   * Feature flags owned by this addon. `getDataAPI()` is one-shot and has
+   * already run by the time an addon registers, so each flag also declares its
+   * own data-API member against the live API — that member is what the settings
+   * UI binds to. Stored values are keyed by flag name and outlive the addon, so
+   * turning it off and on again does not reset the user's toggles.
+   */
+  registerFeatureFlags(flags: readonly Readonly<FeatureFlag>[]): void {
+    FeatureFlags.registerFlags(flags)
+    this._undoRegistrations.push(() => FeatureFlags.unregisterFlags(flags.map((f) => f.key)))
+
+    this._whenAppstateReady(() => {
+      const st = _appstate.api.mapStruct(FeatureFlagManager, true)
+      for (const flag of flags) {
+        if (FeatureFlags.markDefined(flag.key)) {
+          defineFeatureFlagMember(st, flag)
+        }
+      }
+    })
+  }
+
   /** Register a per-version file migration owned by this addon's data. */
   registerFileMigrator(m: IFileMigrator<Library>): void {
     registerFileMigrator(m)
@@ -535,26 +568,29 @@ export class AddonAPI<T> {
    * its classes itself; retries until `_appstate` exists, and runs at most once.
    */
   private _defineDataAPIWhenReady(cls: DefineAPIClass): void {
-    const define = () => {
+    this._whenAppstateReady(() => {
       if (isDataAPIDefined(cls)) {
         return
       }
       markDataAPIDefined(cls)
       cls.defineAPI(_appstate.api)
-    }
+    })
+  }
 
+  /** Runs `fn` once `_appstate` exists — now if it already does, else polling. */
+  private _whenAppstateReady(fn: () => void): void {
     if (window._appstate) {
-      define()
-    } else {
-      const cb = () => {
-        if (!window._appstate) {
-          window.setTimeout(cb, 5)
-          return
-        }
-        define()
-      }
-      window.setTimeout(cb)
+      fn()
+      return
     }
+    const cb = () => {
+      if (!window._appstate) {
+        window.setTimeout(cb, 5)
+        return
+      }
+      fn()
+    }
+    window.setTimeout(cb)
   }
 
   /**

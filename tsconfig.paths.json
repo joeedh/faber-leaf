@@ -13,7 +13,23 @@
       ],
       "@addon/litemesh/api": [
         "./addons/builtin/litemesh/src/api.ts"
+      ],
+      "@builtin/leafmesh": [
+        "./addons/builtin/leafmesh/src/main.ts"
+      ],
+      "@builtin/litemesh": [
+        "./addons/builtin/litemesh/src/main.ts"
       ]
     }
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "**/node_modules",
+    "scripts/path.ux",
+    "scripts/mathl",
+    "build",
+    "dist",
+    "types",
+    "archive"
+  ]
 }

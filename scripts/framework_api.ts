@@ -101,12 +101,7 @@ export {
   vertexShapeForAttrType,
   vertexStrideFor,
 } from './core/vertex_layout.js'
-export type {
-  IMaterialAttrConsumer,
-  MaterialAttrRequest,
-  VertexAttrDesc,
-  VertexAttrShape,
-} from './core/vertex_layout.js'
+export type {IMaterialAttrConsumer, MaterialAttrRequest, VertexAttrDesc, VertexAttrShape} from './core/vertex_layout.js'
 // Properties-editor panel contributions (§9). A leaf like the two above.
 export {ANY_DATA_KIND} from './core/props_panels.js'
 export type {IPropsPanel} from './core/props_panels.js'
@@ -149,6 +144,18 @@ export type {IFileMigrationContext, IFileMigrator} from './core/file_migrations.
 // registration itself still goes through `AddonAPI.registerFileFormat`.
 export type {IFileFormat} from './core/file_formats.js'
 export {setDefaultSceneBuilder} from './core/default_file.js'
+// The app's own CLI flags: an addon that takes one (sculptcore's --backend)
+// has to read it from the same place the host does.
+export {getAppArgv, getArg, getArgList, hasArg} from './core/app_argv.js'
+// Feature flags: the host defines none, addons register their own through
+// `AddonAPI.registerFeatureFlags`, and read them back through `FeatureFlags`.
+export {
+  FeatureFlags,
+  FeatureFlagManager,
+  defineFeatureFlagMember,
+  featureFlagApiName,
+  type FeatureFlag,
+} from './core/feature-flag.js'
 export * as platform from './core/platform.js'
 
 // webgl/*
@@ -160,15 +167,20 @@ export * as webgl from './webgl/webgl.js'
 export {Shapes} from './webgl/simplemesh_shapes.js'
 
 // webgpu/* — a provider that brings its own Drawable creates its own vertex
-// buffers, so it needs the usage flags the DOM lib declares as types only.
+// buffers, so it needs the usage flags the DOM lib declares as types only,
+// plus the buffer wrapper and pipeline cache its batch executor draws through.
 export {BufferUsage, MapMode, ShaderStage, TextureUsage} from './webgpu/flags.js'
+export {GpuBuffer} from './webgpu/buffer.js'
+export type {GpuBufferUsage} from './webgpu/buffer.js'
+export {Pipeline, PipelineCache} from './webgpu/pipeline.js'
+export type {PipelineDescriptor} from './webgpu/pipeline.js'
 
 // render/* — backend-agnostic DrawQueue dispatch
 export {WebGLDrawQueueAdapter} from './render/queue.js'
 export type {DrawQueue, FrameContext, Submission, Drawable} from './render/queue.js'
 
 // shaders/*
-export {Shaders, BasicLineShader, MeshIDShader} from './shaders/shaders.js'
+export {Shaders, BasicLineShader, MeshIDShader, loadShader} from './shaders/shaders.js'
 
 // editors/*
 export {ToolMode} from './editors/view3d/view3d_toolmode.js'

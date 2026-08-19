@@ -30,10 +30,14 @@ const WPROJ = Path.join(FIXTURE_DIR, 'curve-addon-scene.wproj')
 const META = Path.join(FIXTURE_DIR, 'curve-addon-scene.json')
 
 function resolveNwjsExe() {
-  const exe = execFileSync('node', ['-e', "require('nw').findpath().then(p=>process.stdout.write(p),()=>process.exit(1))"], {
-    cwd     : REPO_ROOT,
-    encoding: 'utf-8',
-  }).trim()
+  const exe = execFileSync(
+    'node',
+    ['-e', "require('nw').findpath().then(p=>process.stdout.write(p),()=>process.exit(1))"],
+    {
+      cwd     : REPO_ROOT,
+      encoding: 'utf-8',
+    }
+  ).trim()
   if (!exe || !fs.existsSync(exe)) throw new Error('could not resolve the NW.js executable')
   return exe
 }

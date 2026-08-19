@@ -20,7 +20,7 @@
 import {brushWgsl} from '@sculptcore/api/sculptcore/brush/brushWgsl'
 import {GpuBrushData, GpuBrushInfo, IWasmInterface, SculptHandle} from '@sculptcore/api/api'
 
-import {BufferUsage, MapMode, ShaderStage, TextureUsage} from './flags'
+import {BufferUsage, MapMode, ShaderStage, TextureUsage} from '@framework/api'
 
 /** std430 array<vec3<f32>> element stride (xyz + pad). */
 const VEC3_STRIDE = 16

@@ -33,13 +33,13 @@ export interface OverlayTheme {
 }
 
 export const DEFAULT_OVERLAY_THEME: OverlayTheme = {
-  vert: [0.0, 0.0, 0.0, 1.0],
+  vert      : [0.0, 0.0, 0.0, 1.0],
   vertSelect: [1.0, 0.55, 0.1, 1.0],
-  edge: [0.1, 0.1, 0.1, 0.6],
+  edge      : [0.1, 0.1, 0.1, 0.6],
   edgeSelect: [1.0, 0.65, 0.25, 1.0],
-  face: [1.0, 0.6, 0.15, 0.28],
-  active: [1.0, 1.0, 1.0, 1.0],
-  highlight: [0.4, 0.9, 1.0, 1.0],
+  face      : [1.0, 0.6, 0.15, 0.28],
+  active    : [1.0, 1.0, 1.0, 1.0],
+  highlight : [0.4, 0.9, 1.0, 1.0],
 }
 
 /** One element per domain, or `ELEM_NONE`. */
@@ -144,7 +144,7 @@ class BatchBuilder {
 
   finish(): OverlayBatch {
     return {
-      co: Float32Array.from(this.co),
+      co   : Float32Array.from(this.co),
       color: Float32Array.from(this.color),
       count: this.co.length / 3,
     }

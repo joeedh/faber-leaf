@@ -4,8 +4,11 @@
   "version": "1.0.0",
   "description": "Workspace package for the litemesh builtin addon. It exists so the addon owns its dependency on the sculptcore engine binding instead of the host carrying it (P16 W3b).",
   "dependencies": {
-    "@litestl/typescript-runtime": "workspace:*",
-    "@sculptcore/api": "workspace:*",
     "nstructjs": "workspace:*"
+  },
+  "//optionalDependencies": "Both live inside the sculptcore submodule. optional is the only workspace: field pnpm tolerates when the package is absent (dependencies and devDependencies both hard-fail ERR_PNPM_WORKSPACE_PKG_NOT_FOUND); it still links normally when it is present. See W3b step 1.",
+  "optionalDependencies": {
+    "@litestl/typescript-runtime": "workspace:*",
+    "@sculptcore/api": "workspace:*"
   }
 }

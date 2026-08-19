@@ -169,7 +169,11 @@ f 1/1 2/2 3/3
     for (const c of mesh.loopCorners(mesh.f.l[0])) {
       got.push([uv[c * 2], uv[c * 2 + 1]])
     }
-    expect(got).toEqual([[0, 0], [1, 0], [1, 1]])
+    expect(got).toEqual([
+      [0, 0],
+      [1, 0],
+      [1, 1],
+    ])
   })
 
   test('a face mixing uv-bearing and bare references keeps the ones it has', () => {

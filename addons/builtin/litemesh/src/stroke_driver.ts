@@ -14,7 +14,15 @@
 import {PaintSample} from './stroke_base.js'
 import {Bezier} from '../../../../scripts/util/bezier.js'
 import {Matrix4, Vector2, Vector3, Vector4} from '../../../../scripts/path.ux/scripts/pathux.js'
-import {arcLengthWalk, crToBezier, Cubic, evalCubic, lerpV, subCubic, Vec} from '../../../../scripts/util/stroke_math.js'
+import {
+  arcLengthWalk,
+  crToBezier,
+  Cubic,
+  evalCubic,
+  lerpV,
+  subCubic,
+  Vec,
+} from '../../../../scripts/util/stroke_math.js'
 import {AnchoredLiveMode, StrokeMethod} from '../../../../scripts/brush/brush_base.js'
 export {AnchoredLiveMode, StrokeMethod} from '../../../../scripts/brush/brush_base.js'
 

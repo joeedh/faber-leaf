@@ -1323,7 +1323,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P13 | [W1e — delete the TS BREP](./2026-08-15-0400-w1-delete-ts-brep.md) | W1 §4 | 9 | P5, P9, P10, P12 | **landed** |
 | P14 | [Addon manager — optional dependencies](./2026-08-15-0405-addon-manager-optional-dependencies.md) | W3 §0 | 10 | P9 | **landed** |
 | P15 | [W3a — LiteMesh becomes an optional addon](./2026-08-15-0410-w3-litemesh-optional-addon.md) | W3 §1 | 10 | P13, P14 | **landed** |
-| P16 | [W3b — sculptcore build decoupling](./2026-08-15-0415-w3-sculptcore-build-decoupling.md) | W3 §2–4 | 10 | P15 | **written** |
+| P16 | [W3b — sculptcore build decoupling](./2026-08-15-0415-w3-sculptcore-build-decoupling.md) | W3 §2–4 | 10 | P15 | **landed** |
 | P17 | [W5a — distributions + cycle cleanup](./2026-08-15-0420-w5-distributions.md) | W5 §1–2 | 11 | P16 | **written** |
 | P18 | [W4a — `IUVSource` + UV editor rewrite](./2026-08-15-0425-w4-iuvsource-uv-editor.md) | W4 | 12 | P8, P11 | **written** |
 | P19 | [W4b — port the unwrapping solvers](./2026-08-15-0430-w4-unwrapping-port.md) | W4 | 12 | P18, P13 (rescue) | **written** |

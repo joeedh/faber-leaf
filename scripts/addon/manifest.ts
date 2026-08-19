@@ -57,6 +57,18 @@ export interface IAddonManifest {
    * absent entry does not disable this addon — it loads degraded and asks
    * `api.has(id)`. */
   optionalDependencies?: string[]
+
+  /** What this addon contributes to the *main* bundle: esbuild entry points to
+   * emit alongside it (repo-root-relative `in`, unhashed `out` stem) and
+   * `external` patterns its code needs. Read by tools/esbuilder.js, never at
+   * runtime. An addon that is not in this build contributes nothing, which is
+   * how an absent engine's artifacts stop being a missing-file error (P16). */
+  buildAssets?: IAddonBuildAssets
+}
+
+export interface IAddonBuildAssets {
+  entryPoints?: {in: string; out: string}[]
+  external?: string[]
 }
 
 /**
@@ -78,6 +90,7 @@ const KNOWN_FIELDS = new Set([
   'defaultEnabled',
   'optional',
   'optionalDependencies',
+  'buildAssets',
 ])
 
 export class ManifestValidationError extends Error {
@@ -92,6 +105,34 @@ export class ManifestValidationError extends Error {
 
 const ID_RE = /^[a-z][a-z0-9_-]*$/
 const VERSION_RE = /^\d+\.\d+\.\d+$/
+
+function validateBuildAssets(raw: unknown, manifestPath?: string): void {
+  const fail = (msg: string) => {
+    throw new ManifestValidationError(`"buildAssets" ${msg}`, manifestPath)
+  }
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    fail('must be an object')
+    return
+  }
+  const {entryPoints, external} = raw as Record<string, unknown>
+
+  if (entryPoints !== undefined) {
+    if (!Array.isArray(entryPoints)) {
+      fail('entryPoints must be an array')
+      return
+    }
+    for (const ep of entryPoints) {
+      const e = ep as Record<string, unknown> | null
+      if (typeof e !== 'object' || e === null || typeof e.in !== 'string' || typeof e.out !== 'string') {
+        fail('entryPoints entries must be {in: string, out: string}')
+      }
+    }
+  }
+
+  if (external !== undefined && (!Array.isArray(external) || external.some((e) => typeof e !== 'string'))) {
+    fail('external must be an array of strings')
+  }
+}
 
 /**
  * Parses + validates a manifest object. Returns the typed manifest on success;
@@ -142,17 +183,16 @@ export function validateManifest(raw: unknown, manifestPath?: string): IAddonMan
     }
     for (const d of v as string[]) {
       if (!ID_RE.test(d)) {
-        throw new ManifestValidationError(
-          `${field} id ${JSON.stringify(d)} does not match ${ID_RE}`,
-          manifestPath
-        )
+        throw new ManifestValidationError(`${field} id ${JSON.stringify(d)} does not match ${ID_RE}`, manifestPath)
       }
     }
   }
 
-  const bothLists = new Set(((m.dependencies as string[] | undefined) ?? []).filter((d) =>
-    ((m.optionalDependencies as string[] | undefined) ?? []).includes(d)
-  ))
+  const bothLists = new Set(
+    ((m.dependencies as string[] | undefined) ?? []).filter((d) =>
+      ((m.optionalDependencies as string[] | undefined) ?? []).includes(d)
+    )
+  )
   if (bothLists.size > 0) {
     throw new ManifestValidationError(
       `${[...bothLists].map((d) => JSON.stringify(d)).join(', ')} listed as both a required and an optional dependency`,
@@ -173,6 +213,10 @@ export function validateManifest(raw: unknown, manifestPath?: string): IAddonMan
     )
   }
 
+  if (m.buildAssets !== undefined) {
+    validateBuildAssets(m.buildAssets, manifestPath)
+  }
+
   for (const field of ['defaultEnabled', 'optional'] as const) {
     if (m[field] !== undefined && typeof m[field] !== 'boolean') {
       throw new ManifestValidationError(`"${field}" must be a boolean`, manifestPath)
@@ -180,19 +224,20 @@ export function validateManifest(raw: unknown, manifestPath?: string): IAddonMan
   }
 
   return {
-    id            : m.id as string,
-    name          : m.name as string,
-    version       : m.version as string,
-    author        : typeof m.author === 'string' ? m.author : undefined,
-    entry         : m.entry as string,
-    dependencies  : (m.dependencies as string[] | undefined) ?? [],
-    permissions   : m.permissions as string[] | undefined,
-    description   : typeof m.description === 'string' ? m.description : undefined,
-    icon          : (m.icon as string | number | undefined) ?? undefined,
+    id                  : m.id as string,
+    name                : m.name as string,
+    version             : m.version as string,
+    author              : typeof m.author === 'string' ? m.author : undefined,
+    entry               : m.entry as string,
+    dependencies        : (m.dependencies as string[] | undefined) ?? [],
+    permissions         : m.permissions as string[] | undefined,
+    description         : typeof m.description === 'string' ? m.description : undefined,
+    icon                : (m.icon as string | number | undefined) ?? undefined,
     buildMode           : (m.buildMode as 'prebuilt' | 'source' | undefined) ?? 'prebuilt',
     defaultEnabled      : (m.defaultEnabled as boolean | undefined) ?? true,
     optional            : (m.optional as boolean | undefined) ?? false,
     optionalDependencies: (m.optionalDependencies as string[] | undefined) ?? [],
+    buildAssets         : m.buildAssets as IAddonBuildAssets | undefined,
   }
 }
 

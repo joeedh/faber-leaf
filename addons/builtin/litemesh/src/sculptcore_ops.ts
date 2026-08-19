@@ -27,7 +27,7 @@ import {
 import {PaintSample, SymAxisMap} from './stroke_base.js'
 import type {View3D} from '../../../../scripts/editors/view3d/view3d'
 import {view3dProject, view3dUnproject} from '../../../../scripts/editors/view3d/view3d_base'
-import {FeatureFlags} from '../../../../scripts/core/feature-flag'
+import {FeatureFlags} from '@framework/api'
 import {GpuStrokeController} from './sculptcore_gpu_stroke'
 
 /** Vert page-spread ratio above which the opt-in stroke-end auto-defrag

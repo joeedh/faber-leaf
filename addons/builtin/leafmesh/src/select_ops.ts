@@ -136,7 +136,7 @@ export class SelectAllLeafMeshOp extends LeafMeshSelectOpBase<{mode: EnumPropert
       toolpath: 'leafmesh.select_all',
       uiname  : 'Select All',
       icon    : Icons.TOGGLE_SEL_ALL,
-      inputs  : {
+      inputs: {
         mode: new EnumProperty(2, {ALL: 0, NONE: 1, AUTO: 2}),
       },
     }
@@ -185,7 +185,7 @@ export class SelectBoxLeafMeshOp extends LeafMeshSelectOpBase<{
       uiname  : 'Box Select',
       icon    : Icons.SELECT_BOX,
       is_modal: true,
-      inputs  : {
+      inputs: {
         mode: new EnumProperty(SelToolModes.ADD, SelToolModes).private(),
         x1  : new FloatProperty(0).private(),
         y1  : new FloatProperty(0).private(),
@@ -308,7 +308,7 @@ export class SelectCircleLeafMeshOp extends LeafMeshSelectOpBase<{
       uiname  : 'Circle Select',
       icon    : Icons.CIRCLE_SEL,
       is_modal: true,
-      inputs  : {
+      inputs: {
         radius: new FloatProperty(25).setRange(1, 500).noUnits().saveLastValue(),
         mode  : new EnumProperty(SelToolModes.ADD, SelToolModes).private(),
       },
@@ -447,7 +447,7 @@ export class SelectNearestLeafMeshOp extends LeafMeshSelectOpBase<{
       uiname  : 'Select',
       icon    : Icons.CURSOR_ARROW,
       is_modal: true,
-      inputs  : {
+      inputs: {
         toggle: new BoolProperty(false).private(),
         x     : new FloatProperty(0).private(),
         y     : new FloatProperty(0).private(),
@@ -532,7 +532,7 @@ export class SelectLinkedLeafMeshOp extends LeafMeshSelectOpBase<{deselect: Bool
     return {
       toolpath: 'leafmesh.select_linked',
       uiname  : 'Select Linked',
-      inputs  : {
+      inputs: {
         deselect: new BoolProperty(false),
       },
     }
@@ -579,7 +579,7 @@ export class SelectSimilarLeafMeshOp extends LeafMeshSelectOpBase<{
     return {
       toolpath: 'leafmesh.select_similar',
       uiname  : 'Select Similar',
-      inputs  : {
+      inputs: {
         criterion: new EnumProperty(0, SIMILAR_CRITERIA),
         threshold: new FloatProperty(0.01).setRange(0, 1).noUnits().saveLastValue(),
       },
@@ -593,11 +593,7 @@ export class SelectSimilarLeafMeshOp extends LeafMeshSelectOpBase<{
     }
 
     const criterion = SIMILAR_NAMES[Number(this.inputs.criterion.getValue())]
-    const domain = criterion.startsWith('FACE')
-      ? Domain.FACE
-      : criterion.startsWith('EDGE')
-        ? Domain.EDGE
-        : Domain.VERT
+    const domain = criterion.startsWith('FACE') ? Domain.FACE : criterion.startsWith('EDGE') ? Domain.EDGE : Domain.VERT
 
     const active = data.getActiveElement(toElementDomain(domain))
     const seed = active ?? listSelected(data.mesh, domain)[0] ?? ELEM_NONE

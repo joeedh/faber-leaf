@@ -4,6 +4,7 @@ import Path from 'path'
 import {fileURLToPath} from 'url'
 
 import {addonApiPlugin} from './addon_api_plugin.js'
+import {builtinEntryAliases, collectBuildAssets, describeUnavailable} from './builtin_addons.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const REPO_ROOT = Path.resolve(Path.dirname(__filename), '..')
@@ -13,6 +14,15 @@ const MAIN_META_PATH = Path.join(REPO_ROOT, 'build', 'meta-main.json')
 // maps anywhere — this bundle plus, via buildAddons(), the addon bundles.
 // See documentation/releaseBuild.md.
 const RELEASE = process.argv.includes('--release')
+
+// Entry points and externals contributed by the builtin addons that are in this
+// build (manifest `buildAssets`). An addon whose optional workspace dependency
+// did not install is not in this build, so it contributes nothing and its
+// artifacts stop being a missing-file error.
+const ADDON_ASSETS = collectBuildAssets()
+for (const line of describeUnavailable()) {
+  console.log(`esbuilder: ${line}`)
+}
 
 /* Sourcemap mode. --release wins (none emitted at all); otherwise
  * ESBUILD_SOURCEMAP (inline | external | linked | both | none), defaulting to
@@ -34,19 +44,17 @@ let options = {
     // Autosave compression worker (plan §5.4). Stable, unhashed name so the
     // host can spawn `build/autosave_worker.js` as a sibling module worker.
     {in: './scripts/core/autosave_worker.ts', out: 'autosave_worker'},
-    {in: './sculptcore/typescript/build/sculptcore-browser.wasm', out: 'sculptcore-browser'},
-    // Emit the Emscripten glue at a stable, unhashed path. Its pthread pool
-    // spawns workers via `new Worker(new URL('sculptcore-browser.js',
-    // import.meta.url))` (see PThread.allocateUnusedWorker in the generated
-    // glue); if esbuild content-hashes the chunk, that bare filename 404s and
-    // every pool worker dies on startup. Pinning the name to
-    // `build/sculptcore-browser.js` makes the self-reference resolve. The
-    // dynamic `import('../build/sculptcore-browser.js')` in wasm.ts dedupes
-    // onto this same output.
-    {in: './sculptcore/typescript/build/sculptcore-browser.js', out: 'sculptcore-browser'},
+    // Addon-contributed entries (manifest `buildAssets`). Each `out` is an
+    // unhashed stem, because an engine artifact that names its own siblings at
+    // runtime cannot survive content hashing — documentation/addons.md.
+    ...ADDON_ASSETS.entryPoints,
   ],
   alias: {
     '@framework/api': Path.join(REPO_ROOT, 'scripts', 'framework_api.ts'),
+    // Mirrors the `@builtin/<id>` paths in tsconfig.paths.json — an addon that
+    // is not in this build resolves to the stub, so its subtree never enters
+    // the bundle and registerBuiltin records it as not-in-build.
+    ...builtinEntryAliases(),
   },
   outdir     : './build',
   bundle     : true,
@@ -64,7 +72,7 @@ let options = {
     'path',
     'os',
     'marked',
-    '*/build/sculptcore.js',
+    ...ADDON_ASSETS.external,
     // path.ux retains its electron platform (additive); its static
     // require("electron") must stay external even though the app uses NW.js.
     'electron',

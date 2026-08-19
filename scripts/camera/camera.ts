@@ -335,10 +335,7 @@ CameraData {
   dataLink(getblock: BlockLoader, getblock_addUser: BlockLoaderAddUser) {
     super.dataLink(getblock, getblock_addUser)
 
-    this.curvespline = getblock_addUser<CameraPathCurve>(
-      this.curvespline as unknown as number,
-      this
-    )
+    this.curvespline = getblock_addUser<CameraPathCurve>(this.curvespline as unknown as number, this)
   }
 }
 

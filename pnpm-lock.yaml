@@ -95,15 +95,16 @@ importers:
 
   addons/builtin/litemesh:
     dependencies:
+      nstructjs:
+        specifier: workspace:*
+        version: link:../../../vendor/nstructjs
+    optionalDependencies:
       '@litestl/typescript-runtime':
         specifier: workspace:*
         version: link:../../../sculptcore/source/litestl/binding/typescriptRuntime
       '@sculptcore/api':
         specifier: workspace:*
         version: link:../../../sculptcore/typescript
-      nstructjs:
-        specifier: workspace:*
-        version: link:../../../vendor/nstructjs
 
   addons/code_editor:
     dependencies:
@@ -120,15 +121,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.2.1(jiti@2.6.1))
-      '@litestl/typescript-runtime':
-        specifier: workspace:*
-        version: link:../sculptcore/source/litestl/binding/typescriptRuntime
       '@pathtx/prettier':
         specifier: 3.3.0-dev
         version: 3.3.0-dev
-      '@sculptcore/api':
-        specifier: workspace:*
-        version: link:../sculptcore/typescript
       '@swc/jest':
         specifier: ^0.2.39
         version: 0.2.39(@swc/core@1.15.33)

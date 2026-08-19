@@ -8,7 +8,7 @@ import {SculptBrushes} from '@sculptcore/api/sculptcore/brush/SculptBrushes'
 import {SculptTools, BrushFlags, StrokeMethod, isPlaneFamilyTool} from '../../../../scripts/brush/brush_base'
 import {PaintSample} from './stroke_base.js'
 import {FalloffKind} from '@sculptcore/api/sculptcore/gpu/FalloffKind'
-import {FeatureFlags} from '../../../../scripts/core/feature-flag'
+import {FeatureFlags} from '@framework/api'
 
 /** Mirror of C++ enum DeviceType (prop_dynamics.h). */
 const DeviceType = {

@@ -152,15 +152,7 @@ describe('legacy struct-name migration', () => {
   /** Every addon whose structs used to sit in core's table. The ones P13
    * deleted or archived stay on the list: the table must not regrow them
    * either. */
-  const ADDON_PREFIXES = [
-    'mesh.',
-    'mesh_edit.',
-    'curve.',
-    'tetmesh.',
-    'subsurf.',
-    'sculptcore.',
-    'leafmesh.',
-  ]
+  const ADDON_PREFIXES = ['mesh.', 'mesh_edit.', 'curve.', 'tetmesh.', 'subsurf.', 'sculptcore.', 'leafmesh.']
 
   test('the host table holds no addon-owned target', () => {
     const owned = Object.entries(getLegacyStructNameMap()).filter(([, to]) =>

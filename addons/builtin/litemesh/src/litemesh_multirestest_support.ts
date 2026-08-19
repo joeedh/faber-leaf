@@ -17,7 +17,7 @@
 
 import {BrushFlags, SculptTools} from '../../../../scripts/brush/brush_base'
 import {DefaultBrushes, type SculptBrush} from '../../../../scripts/brush/index'
-import {FeatureFlags} from '../../../../scripts/core/feature-flag'
+import {FeatureFlags} from '@framework/api'
 import {nstructjs} from '../../../../scripts/path.ux/scripts/pathux'
 import {runSculptcoreStroke, SculptPaintOp} from './sculptcore_ops'
 import {LiteMesh} from './litemesh'

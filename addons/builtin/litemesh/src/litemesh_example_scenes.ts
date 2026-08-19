@@ -16,7 +16,7 @@ import type {TestSceneArgs, TestSceneBuilder} from '../../../../scripts/core/tes
 import {SceneObject} from '../../../../scripts/sceneobject/index'
 import {Light} from '../../../../scripts/light/light.js'
 import {makeDefaultMaterial} from '../../../../scripts/core/material'
-import {FeatureFlags} from '../../../../scripts/core/feature-flag'
+import {FeatureFlags} from '@framework/api'
 import {ImageBlock} from '../../../../scripts/image/image'
 import {DiffuseNode, ImageNode} from '../../../../scripts/shadernodes/shader_nodes'
 import {getWasmImmediate} from '@sculptcore/api/api'
@@ -84,7 +84,6 @@ function buildMultiresSphere(_ctx: ToolContext, lib: Library, scene: Scene, args
   sob.graphUpdate()
   lm.graphUpdate()
 }
-
 
 /**
  * UV-mapped cube carrying a UVGRID test image: a real cube with a per-face box

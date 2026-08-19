@@ -24,25 +24,30 @@ in sync.
 
 ```
 addons/builtin/<id>/
-├── manifest.json         # id, version, entry, dependencies
+├── manifest.json    # id, version, entry, dependencies
+├── package.json     # only if the addon has dependencies of its own
 └── src/
-    ├── main.ts           # external entry point (per-addon esbuild output)
-    ├── addon_register.ts # internal entry — registerInternalAddon(...)
-    ├── api.ts            # public surface re-exported to peer addons via @addon/<id>/api
-    └── *.ts              # implementation
+    ├── main.ts      # the entry: addonDefine + register/unregister/handleArgv/validArgv
+    ├── api.ts       # public surface re-exported to peer addons via @addon/<id>/api
+    └── *.ts         # implementation
 ```
 
 Two ways an addon ships:
 
-- **Internal (in-bundle).** Imported eagerly from `scripts/entry_point.js`.
-  Calls `addonManager.registerInternalAddon({manifest, exports, register})`
-  at module load.
-- **External (per-addon esbuild output).** Loaded by `AddonManager` from
-  `build/addons/<id>/main.js`. Calls the `register(api)` export at addon-
-  init time.
+- **In-bundle (builtin).** Statically imported by
+  `addons/builtin/builtin_registry.ts`, which calls
+  `addonManager.registerBuiltin(manifest, module)` at module load.
+- **Out-of-bundle (per-addon esbuild output).** Built by
+  `tools/build-addons.js` into `build/addons/<id>/main.js` and dynamically
+  imported by `AddonManager` from `build/addons/index.json`.
 
-Both paths converge on the same `register(api)` hook, so the registration
-code is identical regardless of ship mode.
+Neither *enables* anything: both are **sources**, and both flow through the
+same `start()` → resolve → topo-sort → `enable()` lifecycle, calling the same
+`register(api)` hook. Ship mode is a build fact, not a behavioural one — which
+is what makes moving an addon between the two a build change only.
+
+In-bundle is a concession, not a tier: an addon is in-bundle exactly as long as
+its source is too entangled with `scripts/` to compile separately.
 
 ## Manifest schema
 
@@ -63,6 +68,7 @@ happens.
 | `optional` | no | may a build ship without this addon (default `false`) |
 | `defaultEnabled` | no | `false` ships the addon loaded but disabled (default `true`) |
 | `buildMode` | no | `'prebuilt'` (default) or `'source'` |
+| `buildAssets` | no | extra esbuild entry points / externals this addon contributes to the main bundle (in-bundle builtins only) — see [Not in this build](#not-in-this-build) |
 | `author`, `description`, `icon`, `permissions` | no | metadata; `permissions` is reserved |
 
 An id may not appear in both `dependencies` and `optionalDependencies`.
@@ -138,6 +144,63 @@ Three sources, unioned and read once per session
 `setForceDisabledIds(ids)` overrides the detected set for tests and for a host
 that decides its own distribution; `undefined` restores detection.
 
+## Not in this build
+
+An in-bundle builtin can depend on something that is not always installed — a
+git submodule, a native binding. The rule, one predicate in
+`tools/builtin_addons.js`:
+
+> **A builtin addon whose optional workspace dependency is absent is not part of
+> this build.**
+
+Not "loaded but broken", not "stubbed": absent, the same state
+[force-disable](#force-disable) produces, reached from the install rather than
+from a flag. The addon declares the dependency in its **own** `package.json`,
+never the host's:
+
+```json
+{
+  "name": "@faber-leaf/addon-litemesh",
+  "optionalDependencies": { "@sculptcore/api": "workspace:*" }
+}
+```
+
+`optionalDependencies` is not a stylistic choice — it is the only `workspace:`
+field pnpm tolerates when the target package is absent. `dependencies` and
+`devDependencies` both hard-fail the whole install with
+`ERR_PNPM_WORKSPACE_PKG_NOT_FOUND`; measured on pnpm 10.30.3. It still links
+normally when the package is there, so the present-engine build is unchanged.
+
+`discoverBuiltins()` resolves every such entry under the addon's
+`node_modules/` or the repo root's. One predicate, four consumers, so the three
+representations of "this build" cannot drift apart:
+
+| Consumer | Available | Not available |
+| --- | --- | --- |
+| `tools/gen-tsconfig-paths.mjs` | `@builtin/<id>` → the addon's `entry` | → `scripts/addon/unavailable_builtin.ts`, and `addons/builtin/<id>` joins the generated `exclude` |
+| `tools/esbuilder.js` alias | same | same (so the subtree never enters the bundle) |
+| `tools/esbuilder.js` assets | the manifest's `buildAssets` are added | contributes nothing — its artifacts stop being a missing-file error |
+| `AddonManager.registerBuiltin` | registers the real module | sees `unavailableBuiltin`, records `unloaded` with reason `not-in-build` |
+
+`exclude` is *generated* rather than written in `tsconfig.json` because a child
+config's `exclude` replaces its base's outright — it cannot be split between the
+two. And `exclude` only filters the *initial* file set, so it is the
+`@builtin/<id>` alias, not the exclusion, that actually keeps an absent addon's
+source out of the program.
+
+The `@builtin/<id>` indirection is why `addons/builtin/builtin_registry.ts`
+imports the entry through an alias and the manifest relatively: the entry is
+conditional, the metadata never is.
+
+Nothing a developer does day to day exercises any of this, so CI does: the
+`no-sculptcore` job in `.github/workflows/pr.yml` deinits the sculptcore
+submodule, then typechecks, builds, and runs `pnpm smoke:no-sculptcore`
+(`tools/no-sculptcore-smoke.mjs`) — which boots the real app headlessly and
+models, saves and reloads a mesh with the engine absent. The static gates alone
+pass on a tree that boots to a blank error screen, which is why the runtime half
+exists. The script exits 2 rather than reporting green if the addon it expects
+to be missing turns out to be present.
+
 ## The `register(api)` hook
 
 ```ts
@@ -187,41 +250,31 @@ class Foo {
 class is first instantiated, which may happen before any addon's
 `register(api)` runs. It's idempotent — leave it where it is.
 
-## Internal-addon registration
+## In-bundle registration
 
-The `addon_register.ts` file (loaded at module-import time from
-`scripts/entry_point.js`) wires the addon into `AddonManager`:
+`addons/builtin/builtin_registry.ts` is the single place an in-bundle addon is
+named. It has no logic — one import pair and one call per addon:
 
 ```ts
-import {addonManager} from '@framework/api'
-import {MyToolMode, MyMesh} from './stuff.js'
+import * as myAddon from '@builtin/my_addon'
+import myManifest from './my_addon/manifest.json'
 
-if (!addonManager.idmap.has('my_addon')) {
-  addonManager.registerInternalAddon({
-    manifest: {
-      id          : 'my_addon',
-      name        : 'My Addon',
-      version     : '1.0.0',
-      entry       : 'internal',
-      dependencies: ['mesh'],
-      buildMode   : 'prebuilt',
-      author      : 'you',
-      description : '…',
-    },
-    exports: {
-      // Mirrors src/api.ts — what peer addons see via @addon/my_addon/api.
-      my_addon: {MyToolMode, MyMesh},
-    },
-    register(api) {
-      api.registerAll(MyToolMode, MyMesh)
-    },
-  })
-}
+addonManager.registerBuiltin(myManifest, myAddon as IAddon)
 ```
 
-`exports` declares the runtime surface for `@addon/<id>/api`. `register(api)`
-runs after the record is wired in and is the place to do the actual class
-registration.
+The entry comes in through the `@builtin/<id>` alias and the manifest
+relatively, because the entry is conditional and the metadata is not — see
+[Not in this build](#not-in-this-build).
+
+`registerBuiltin` only records a *source*: it validates the manifest, honours
+force-disable and the not-in-build sentinel, and hands the rest to `start()`.
+Nothing is registered or enabled here, so an in-bundle addon has no earlier
+lifecycle than an out-of-bundle one — it is just already imported. (Registering
+after `start()` has run, as tests and HMR do, materializes and enables it
+immediately so it still behaves like a boot-time builtin.)
+
+The runtime surface peer addons see through `@addon/<id>/api` comes from the
+addon's own `src/api.ts`; `register(api)` is where classes actually register.
 
 ## `@framework/api` — single framework-import surface
 
@@ -234,21 +287,19 @@ import type {ViewContext, IAddon, AddonAPI} from '@framework/api'
 ```
 
 - The alias resolves to `scripts/framework_api.ts`, configured in both
-  `tools/esbuilder.js` and `tools/build-addons.js` and listed in
-  `tsconfig.json` `paths`.
+  `tools/esbuilder.js` and `tools/build-addons.js` and emitted into the
+  generated `tsconfig.paths.json` (`pnpm gen:paths`) that `tsconfig.json`
+  extends.
 - pathux is re-exported wholesale (`export * from './path.ux/scripts/pathux.js'`),
   so the full `nstructjs` / `ToolOp` / property classes / KeyMap / HotKey /
   DataAPI / UIBase surface is available without extra wiring.
 - If you need a framework symbol that isn't re-exported yet, **add it to
   `scripts/framework_api.ts`** — do not write `../../../../scripts/foo.js`.
 
-The lone exceptions in the tree are documented in
-`documentation/archive/TODO.md` and represent known cross-layer references that
-need a deeper restructure — today the announcement shim in
-`sculptcore/src/api.ts`, for classes that haven't yet physically moved out of
-`scripts/editors/view3d/tools/`. (The mesh → `pbvh_sculpt` `instanceof` check
-that used to be listed here went away with that addon in P5; mesh now tests
-`instanceof PaintToolModeBase` off `@framework/api`.)
+Cross-layer edges are machine-checked rather than listed in prose: `pnpm
+check:layers` fails on any `error`-severity rule and on any count over its
+`tools/layer-baseline.json` budget. A host file importing addon source, or an
+addon reaching a peer through a `scripts/...` path, is caught there.
 
 ## `@addon/<id>/api` — peer-addon import surface
 
@@ -278,19 +329,26 @@ exports lazily (via the getters in `scripts/addon/addon_base.ts`'s
 at module top level. Inside an addon's own bundle the ordering is guaranteed by
 the manifest `dependencies`, so eager imports are fine there.
 
-The `api.ts` shim must list every value an addon publishes to peers, and
-the corresponding `addon_register.ts`'s `exports.<id>` object must mirror
-that list at runtime.
+The `api.ts` shim must list every value an addon publishes to peers, and the
+namespace the addon passes to `api.exportNamespace('<id>', {...})` from inside
+`register()` must mirror that list at runtime — the shim is what consumers
+compile against, the namespace is what they get.
 
 ## Adding a new builtin addon — checklist
 
 1. `addons/builtin/<id>/manifest.json` — id, version, entry, dependencies
 2. `addons/builtin/<id>/src/main.ts` — `addonDefine` + `register(api)` /
    `unregister()` / `handleArgv()` / `validArgv()`
-3. `addons/builtin/<id>/src/addon_register.ts` if shipping internal —
-   `addonManager.registerInternalAddon(...)` with a `register(api)` callback
-4. `addons/builtin/<id>/src/api.ts` — re-export the addon's public surface
+3. `addons/builtin/<id>/src/api.ts` — re-export the addon's public surface
+4. `addons/builtin/<id>/package.json` if the addon has npm/workspace
+   dependencies of its own — the host's `scripts/package.json` must not carry
+   them. A dependency that may be absent goes in `optionalDependencies`; see
+   [Not in this build](#not-in-this-build)
 5. Implementation modules use `@framework/api` and `@addon/<id>/api` only
    (no `../../../../scripts/...`)
-6. Add the manifest id to `scripts/entry_point.js` if it ships internal
-7. `pnpm build` and `npx tsgo --noEmit` should both stay green
+6. In-bundle only: a static import in `addons/builtin/builtin_registry.ts`
+   through `@builtin/<id>`, and the manifest's `buildAssets` for any extra
+   entry point the bundle has to emit. Out-of-bundle addons need neither —
+   `tools/build-addons.js` discovers them from the manifest alone.
+7. `pnpm gen:paths` (picks up `@addon/<id>/api` and `@builtin/<id>`), then
+   `pnpm build` and `npx tsgo --noEmit` should both stay green

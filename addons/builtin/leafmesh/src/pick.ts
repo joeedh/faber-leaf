@@ -233,14 +233,7 @@ export function castScreenCircle(
 
   return packResult(
     object,
-    pickScreenCircle(
-      target.mesh,
-      localProjector(view3d, object),
-      wantedDomains(selectMask),
-      mpos[0],
-      mpos[1],
-      radius
-    )
+    pickScreenCircle(target.mesh, localProjector(view3d, object), wantedDomains(selectMask), mpos[0], mpos[1], radius)
   )
 }
 

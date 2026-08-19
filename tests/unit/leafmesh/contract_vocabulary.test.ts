@@ -20,7 +20,7 @@ describe('leafmesh / host vocabulary agreement', () => {
   })
 
   test('every host domain is a leafmesh domain', () => {
-    const hostValues = Object.values(ElementDomain).filter(v => typeof v === 'number') as number[]
+    const hostValues = Object.values(ElementDomain).filter((v) => typeof v === 'number') as number[]
 
     expect(hostValues.length).toBe(DOMAIN_COUNT)
     for (const v of hostValues) {
@@ -29,7 +29,7 @@ describe('leafmesh / host vocabulary agreement', () => {
   })
 
   test('AttrType matches the host AttrType', () => {
-    const names = Object.keys(HostAttrType).filter(k => isNaN(Number(k)))
+    const names = Object.keys(HostAttrType).filter((k) => isNaN(Number(k)))
 
     expect(names.length).toBeGreaterThan(0)
     for (const name of names) {

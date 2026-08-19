@@ -17,7 +17,7 @@ import {
   IconButton,
   Button,
 } from '../../../../scripts/path.ux/pathux'
-import {FeatureFlags} from '../../../../scripts/core/feature-flag'
+import {FeatureFlags} from '@framework/api'
 import {ToolMode, type IToolModeDefine} from '../../../../scripts/editors/view3d/view3d_toolmode'
 import {PaintToolModeBase} from './stroke_base.js'
 import {Icons} from '../../../../scripts/editors/icon_enum.js'

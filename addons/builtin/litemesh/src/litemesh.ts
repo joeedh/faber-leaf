@@ -1,4 +1,13 @@
-import {Container, DataAPI, DataStruct, Matrix4, nstructjs, Vector2, Vector3, Vector4} from '../../../../scripts/path.ux/pathux'
+import {
+  Container,
+  DataAPI,
+  DataStruct,
+  Matrix4,
+  nstructjs,
+  Vector2,
+  Vector3,
+  Vector4,
+} from '../../../../scripts/path.ux/pathux'
 import type {ListBoxChangeEvent} from '../../../../scripts/path.ux/pathux'
 import type {ScreenPickResult} from '../../../../scripts/editors/view3d/findnearest'
 import {FindNearestRet} from '../../../../scripts/editors/view3d/findnearest'
@@ -23,7 +32,8 @@ import {getWasmImmediate, IWasmInterface} from '@sculptcore/api/api'
 import type {RequestedAttrBridge} from '@sculptcore/api/api'
 import type {RequestedAttrDesc} from '../../../../scripts/shadernodes/shader_nodes_wgsl'
 import {LightGenWgsl, type IRenderLights} from '../../../../scripts/shadernodes/shader_lib_wgsl'
-import {IUniformsBlock, WebGLBatchExecutor} from '../../../../scripts/webgl/index'
+import type {IUniformsBlock} from '@framework/api'
+import {WebGLBatchExecutor} from './gl_batch'
 import type {View3D} from '../../../../scripts/editors/all'
 import {SceneObject, ObjectFlags} from '../../../../scripts/sceneobject/index'
 import {DrawModes, DrawFlags} from '../../../../scripts/sceneobject/drawmode'
@@ -37,11 +47,15 @@ import {GeometryCapability, InvalidationKind} from '../../../../scripts/core/geo
 import type {IDataKindDescriptor} from '../../../../scripts/core/data_kinds'
 import {MATERIAL_BASE_VERTEX_ATTRS} from '../../../../scripts/core/vertex_layout'
 import type {IGeometrySource} from '../../../../scripts/sceneobject/sceneobject_base'
-import {getSerializeCacheMode, getDeferredBlobCollector, getDeferredBlobResolver} from '../../../../scripts/core/serialize_cache'
-import {FeatureFlags} from '../../../../scripts/core/feature-flag'
+import {
+  getSerializeCacheMode,
+  getDeferredBlobCollector,
+  getDeferredBlobResolver,
+} from '../../../../scripts/core/serialize_cache'
+import {FeatureFlags} from '@framework/api'
 import {makeBlobPlaceholder, readBlobPlaceholder} from '../../../../scripts/core/autosave_format'
 import {getActiveWebGpuContext} from '../../../../scripts/render/queue_factory'
-import {WebGPUBatchExecutor, type CommandBindGroup} from '../../../../scripts/webgpu/batch'
+import {WebGPUBatchExecutor, type CommandBindGroup} from './gpu_batch'
 import {UniformBindings} from '../../../../scripts/webgpu/uniform_bindings'
 import {GpuTexture} from '../../../../scripts/webgpu/texture'
 import {BufferUsage, TextureUsage} from '../../../../scripts/webgpu/flags'

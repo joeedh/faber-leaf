@@ -24,19 +24,12 @@
   // addon can go unnoticed (success criterion 0c). Sibling workspaces
   // (sculptcore/, tests/, scripts/path.ux, scripts/mathl) have their own
   // programs and are checked by their own `turbo typecheck` tasks.
+  // `exclude` is inherited from tsconfig.paths.json, which generates it: an
+  // addon that is not in this build has to drop out of the program, and a child
+  // config's `exclude` replaces its base's rather than adding to it.
   "include": [
     "scripts/**/*.ts",
     "addons/**/*.ts",
     "tools/**/*.mjs",
-  ],
-  "exclude": [
-    "node_modules",
-    "**/node_modules",
-    "scripts/path.ux",
-    "scripts/mathl",
-    "build",
-    "dist",
-    "types",
-    "archive",
   ],
 }

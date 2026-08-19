@@ -38,7 +38,7 @@ function shape(mesh: LeafMesh) {
   for (const f of mesh.f) {
     const rings = []
     for (const l of mesh.faceLoops(f)) {
-      rings.push(mesh.loopVerts(l).map(v => [...mesh.v.co.subarray(v * 3, v * 3 + 3)]))
+      rings.push(mesh.loopVerts(l).map((v) => [...mesh.v.co.subarray(v * 3, v * 3 + 3)]))
     }
     faces.push(rings)
   }
@@ -117,7 +117,7 @@ describe('leafmesh serialization', () => {
     const out = deserializeLeafMesh(serializeLeafMesh(src))
 
     expect(out.attrs.has(Domain.VERT, 'stroke_orig')).toBe(false)
-    expect(out.attrs.layers(Domain.VERT).map(l => l.name)).toEqual(['.select'])
+    expect(out.attrs.layers(Domain.VERT).map((l) => l.name)).toEqual(['.select'])
 
     const outUv = out.attrs.get(Domain.CORNER, 'uv')!
     const outMat = out.attrs.get(Domain.FACE, 'material_index')!

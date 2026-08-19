@@ -12,7 +12,7 @@
  * microtask chain, no screen-tick).
  */
 
-import {FeatureFlags} from '../../../../scripts/core/feature-flag'
+import {FeatureFlags} from '@framework/api'
 import {getActiveWebGpuContext} from '../../../../scripts/render/queue_factory'
 import {ensureGpuBrushDebug} from './sculptcore_gpu_stroke'
 import {LiteMesh} from './litemesh'

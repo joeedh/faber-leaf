@@ -2,6 +2,7 @@ import {AddonAPI, IAddon} from './addon_base'
 import * as util from '../util/util'
 import {DisabledAddon, IAddonManifest, resolveManifests, validateManifest} from './manifest'
 import {isForceDisabled} from './force_disable'
+import {runBootTasks} from '../core/boot_tasks'
 import type {AddonStorage} from './storage'
 import {Menu} from '../path.ux/scripts/widgets/ui_menu'
 
@@ -41,7 +42,7 @@ interface AddonSource {
 export interface UnloadedAddon {
   id: string
   name?: string
-  reason: DisabledAddon['reason'] | 'force-disabled'
+  reason: DisabledAddon['reason'] | 'force-disabled' | 'not-in-build'
   message: string
 }
 
@@ -198,9 +199,9 @@ export class AddonManager {
    * the addon flows through the same enable() lifecycle as external ones during
    * start(). Idempotent: a second call for the same id is ignored.
    *
-   * Builtins are the duplication-unavoidable subsystems (mesh, subsurf, …) that
-   * still ship in the main bundle; this lets them load through the unified path
-   * without a separate compile.
+   * A builtin is an addon whose source is too entangled with the host to build
+   * separately yet; this lets it load through the unified path without its own
+   * compile. `litemesh` is the only one left.
    */
   registerBuiltin(rawManifest: unknown, module: IAddon): void {
     let m: IAddonManifest
@@ -214,6 +215,15 @@ export class AddonManager {
       return
     }
     if (this._skipForceDisabled(m)) {
+      return
+    }
+    // The build resolved this builtin's entry to scripts/addon/unavailable_builtin
+    // because an optional workspace dependency of its package did not install —
+    // its real source is in neither the program nor the bundle. Record it so the
+    // UI can say so, and never enable the shell.
+    if ((module as {unavailableBuiltin?: boolean}).unavailableBuiltin) {
+      const message = `addon "${m.id}" is not part of this build (an optional dependency did not install)`
+      this.unloaded.set(m.id, {id: m.id, name: m.name, reason: 'not-in-build', message})
       return
     }
     const source: AddonSource = {manifest: m, loadModule: () => module, builtin: true}
@@ -461,6 +471,10 @@ export class AddonManager {
         }
       }
     }
+
+    // An enabled addon may need async warm-up (sculptcore's WASM/native load is
+    // the reason this exists) before anything reads a file or builds the UI.
+    await runBootTasks()
   }
 
   /** Returns the AddonAPI for a loaded addon, keyed by manifest id. */

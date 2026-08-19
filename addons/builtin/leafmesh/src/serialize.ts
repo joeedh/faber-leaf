@@ -35,7 +35,7 @@ export const LEAFMESH_BLOB_VERSION = 1
 const CTORS = [Float32Array, Float64Array, Int32Array, Int16Array, Uint8Array] as const
 
 function ctorTag(data: TypedArray): number {
-  const i = CTORS.findIndex(c => data instanceof c)
+  const i = CTORS.findIndex((c) => data instanceof c)
   if (i < 0) {
     throw new Error('leafmesh: unserializable column type')
   }

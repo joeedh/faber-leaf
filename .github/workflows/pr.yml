@@ -1,15 +1,17 @@
 name: PR checks
 
-# The merge gate. Runs the full sculptcore-present configuration — the default
-# configuration, and the one every Faber Leaf plan's exit criteria are written
-# against. A `--no-sculptcore` lane is deliberately absent; it cannot pass yet
-# (P16 owns it), and gating on a cheaper configuration would quietly revoke
-# success criterion 0a.
+# The merge gate. The sculptcore-present configuration is the default one, and
+# the one every Faber Leaf plan's exit criteria are written against; the
+# sculptcore-*absent* one is what the refactor is for, so both are gated.
 #
-# Two jobs, split by what they need rather than by speed, running in parallel:
-#   checks — static gates; needs only the source tree, so it starts immediately.
-#   test   — needs sculptcore WASM + the esbuild bundle, both cached by
-#            submodule SHA, so a TS-only PR skips the Emscripten toolchain.
+# Three jobs, split by what they need rather than by speed, running in parallel:
+#   checks        — static gates; needs only the source tree, so it starts
+#                   immediately.
+#   test          — needs sculptcore WASM + the esbuild bundle, both cached by
+#                   submodule SHA, so a TS-only PR skips the Emscripten toolchain.
+#   no-sculptcore — the same tree with the engine submodule deinited. Cheap (no
+#                   C++ toolchain at all) and the only thing standing between
+#                   the host and a fresh hard dependency on the engine.
 #
 # ESLint is not among the gates: the repo's pre-existing violation backlog has
 # not been triaged, and type-aware linting this tree costs tens of minutes.
@@ -183,3 +185,64 @@ jobs:
       # excluded by construction; they belong on a nightly `pnpm test:slow`.
       - name: Test
         run: pnpm test
+
+  # Success criterion 0a: the host builds, typechecks and *runs* without the
+  # engine. Every step here is deliberately cheap — no Emscripten, no CMake, no
+  # WASM cache — because the value is in the configuration, not the depth.
+  no-sculptcore:
+    name: no-sculptcore (engine absent)
+    runs-on: ubuntu-latest
+    steps:
+      # actions/checkout cannot init a subset of submodules, and path.ux, mathl
+      # and nstructjs are not optional — the app will not boot without them. So
+      # take everything, then drop the one submodule this lane is about.
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Deinit the sculptcore submodule
+        run: |
+          git submodule deinit -f sculptcore
+          if [ -n "$(ls -A sculptcore 2>/dev/null)" ]; then
+            echo "sculptcore/ is not empty after deinit — the lane would test the wrong tree:"
+            ls -A sculptcore
+            exit 1
+          fi
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # Must come after the deinit. pnpm discovers workspace packages from the
+      # filesystem, so the six sculptcore importers in the lockfile are simply
+      # skipped when their directories are gone — the frozen check still passes
+      # (verified locally: 9 projects resolved against a 15-importer lockfile).
+      # litemesh's `@sculptcore/api` is an optionalDependency for exactly this
+      # reason; see W3b step 1.
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Both gates read the availability predicate in tools/builtin_addons.js:
+      # gen:paths drops the unavailable addon's tsconfig alias (pointing it at
+      # scripts/addon/unavailable_builtin.ts instead), and esbuild drops its
+      # entry, assets and externals. A host file that imported addon source
+      # directly would fail here, which is the point.
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Bundle app (esbuild)
+        run: pnpm build
+
+      # Static gates all pass on a tree that boots to a blank error screen, so
+      # the lane ends by booting the real app and modelling something in it.
+      # The script refuses to run when litemesh turns out to be available —
+      # that guard is what stops this job reporting green for the sculptcore-
+      # present configuration if any step above silently kept the engine.
+      - name: Smoke test (boot, model, save, load)
+        run: pnpm smoke:no-sculptcore

@@ -39,7 +39,7 @@ import {TranslateOp} from '../../../../scripts/editors/view3d/transform/transfor
 import {LiteMesh, IMeshLogSelect} from './litemesh'
 import {LiteMeshOp} from './litemesh_ops'
 import {Icons} from '../../../../scripts/editors/icon_enum.js'
-import {FeatureFlags} from '../../../../scripts/core/feature-flag'
+import {FeatureFlags} from '@framework/api'
 
 /** Map a SelMask bitmask (VERTEX=1/EDGE=2/FACE=4) to the C++ domain codes
  * (0/1/2). Defaults to vertex when nothing is set. */

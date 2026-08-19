@@ -198,17 +198,6 @@ export type GeneratedDataPath =
   | "settings.autosaveToProjectDir"
   | "settings.brushSet"
   | "settings.featureFlags"
-  | "settings.featureFlags.sculptcore_auto_defrag"
-  | "settings.featureFlags.sculptcore_backface_cull"
-  | "settings.featureFlags.sculptcore_cpp_stroke_driver"
-  | "settings.featureFlags.sculptcore_gpu_brush"
-  | "settings.featureFlags.sculptcore_gpu_brush_grab"
-  | "settings.featureFlags.sculptcore_gpu_brush_verify"
-  | "settings.featureFlags.sculptcore_multires"
-  | "settings.featureFlags.sculptcore_quad_remesher"
-  | "settings.featureFlags.sculptcore_sculpt_layers"
-  | "settings.featureFlags.sculptcore_select_flush_prefer_op_domain"
-  | "settings.featureFlags.sculptcore_vdm_sculpt"
   | "settings.limitUndoMem"
   | "settings.undoMemLimit"
   | "settings_editor"
@@ -603,17 +592,6 @@ declare module "@framework/pathux" {
     "settings.autosaveToProjectDir": true;
     "settings.brushSet": true;
     "settings.featureFlags": true;
-    "settings.featureFlags.sculptcore_auto_defrag": true;
-    "settings.featureFlags.sculptcore_backface_cull": true;
-    "settings.featureFlags.sculptcore_cpp_stroke_driver": true;
-    "settings.featureFlags.sculptcore_gpu_brush": true;
-    "settings.featureFlags.sculptcore_gpu_brush_grab": true;
-    "settings.featureFlags.sculptcore_gpu_brush_verify": true;
-    "settings.featureFlags.sculptcore_multires": true;
-    "settings.featureFlags.sculptcore_quad_remesher": true;
-    "settings.featureFlags.sculptcore_sculpt_layers": true;
-    "settings.featureFlags.sculptcore_select_flush_prefer_op_domain": true;
-    "settings.featureFlags.sculptcore_vdm_sculpt": true;
     "settings.limitUndoMem": true;
     "settings.undoMemLimit": true;
     "settings_editor": true;

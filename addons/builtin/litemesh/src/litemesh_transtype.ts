@@ -17,7 +17,12 @@
  * comes from the *modeling op* holding its step open across the modal (§3d).
  */
 import {Vector3, Matrix4} from '../../../../scripts/path.ux/scripts/pathux'
-import {ITransDataType, TransDataType, TransDataElem, TransDataList} from '../../../../scripts/editors/view3d/transform/transform_base'
+import {
+  ITransDataType,
+  TransDataType,
+  TransDataElem,
+  TransDataList,
+} from '../../../../scripts/editors/view3d/transform/transform_base'
 import {SelMask} from '../../../../scripts/core/select_types'
 import {LiteMesh} from './litemesh'
 import type {ToolContext} from '../../../../scripts/core/context'

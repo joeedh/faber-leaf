@@ -25,7 +25,7 @@ import {
   StrokeSpaceMode,
 } from './stroke_driver.js'
 import {NativeStrokeDriver} from './stroke_driver_native.js'
-import {FeatureFlags} from '../../../../scripts/core/feature-flag'
+import {FeatureFlags} from '@framework/api'
 import {getWasmImmediate} from '@sculptcore/api/api'
 
 import {

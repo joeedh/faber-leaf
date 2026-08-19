@@ -4,8 +4,7 @@ import {GPUType} from '@sculptcore/api/sculptcore/gpu/GPUType'
 import {GPUBufferType} from '@sculptcore/api/sculptcore/gpu/GPUBufferType'
 import {GPUCmdType} from '@sculptcore/api/sculptcore/gpu/GPUCmdType'
 import {IWasmInterface} from '@sculptcore/api/api'
-import {IUniformsBlock, ShaderProgram} from './webgl'
-import {loadShader} from '../shaders/shaders'
+import {loadShader, type IUniformsBlock, type ShaderProgram} from '@framework/api'
 
 interface BoundLike {
   ptr: number

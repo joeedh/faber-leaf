@@ -17,7 +17,10 @@
  */
 
 import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
+import {getArg} from '@framework/api'
+import {loadWasm} from '@sculptcore/api/api'
 import {BoxModelToolMode} from './boxmodel.js'
+import {LITEMESH_FEATURE_FLAGS} from './feature_flags.js'
 import * as litemesh from './index.js'
 import {LITEMESH_DATA_KIND, LiteMesh} from './litemesh.js'
 import {buildLiteMeshDefaultScene} from './litemesh_default_scene.js'
@@ -37,6 +40,25 @@ export const addonDefine: IAddonDefine = {
 }
 
 export function register(api: AddonAPI<IAddon>) {
+  // Before anything that reads one: a flag with no definition reads false, so
+  // a late registration would silently take the default path for one boot.
+  api.registerFeatureFlags(LITEMESH_FEATURE_FLAGS)
+
+  // `--backend native|wasm` must be read before the first loadWasm(); the test
+  // harness's own --backend handling runs far too late for it.
+  const backend = getArg('backend')
+  if (backend) {
+    ;(globalThis as {__SCULPTCORE_BACKEND?: string}).__SCULPTCORE_BACKEND = backend
+  }
+
+  // Nothing may deserialize a LiteMesh before the engine is up, so hold the
+  // boot open until it is. Kicking it off here rather than at module load keeps
+  // a force-disabled litemesh from paying for a load it will never use.
+  const engineReady = loadWasm()
+  api.registerBootTask(async () => {
+    await engineReady
+  }, 'litemesh: sculptcore engine')
+
   // Keep in sync with addons/builtin/litemesh/src/api.ts.
   api.exportNamespace('litemesh', {...litemesh, BoxModelToolMode, PaintToolModeBase, SculptCorePaintMode})
 

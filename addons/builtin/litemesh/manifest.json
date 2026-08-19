@@ -7,5 +7,12 @@
   "dependencies": [],
   "optional": true,
   "description": "Sculptcore-backed triangle mesh: the sculpt and box-modeling toolmodes, dyntopo, sculpt layers, multires and VDM.",
-  "buildMode": "prebuilt"
+  "buildMode": "prebuilt",
+  "buildAssets": {
+    "entryPoints": [
+      {"in": "sculptcore/typescript/build/sculptcore-browser.wasm", "out": "sculptcore-browser"},
+      {"in": "sculptcore/typescript/build/sculptcore-browser.js", "out": "sculptcore-browser"}
+    ],
+    "external": ["*/build/sculptcore.js"]
+  }
 }

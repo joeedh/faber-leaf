@@ -1,26 +1,34 @@
 # Feature Flags
 
-**Source:** `scripts/core/feature-flag.ts`
+**Source:** `scripts/core/feature-flag.ts` (the manager),
+`addons/builtin/litemesh/src/feature_flags.ts` (an example flag set).
 
 Feature flags are boolean knobs that control opt-in or experimental features.
 They are persisted per-user through the app storage backend
 (`scripts/core/app_storage.ts`) and exposed to the Data API so they can be
 wired into UI panels with the standard binding system.
 
+**Flags belong to addons, not to the host.** A flag describes a feature, and
+features live in addons, so the host defines none: an addon registers its own
+from its `register(api)` hook and a build without that addon neither lists the
+flag in Settings nor knows the key exists. See
+[addons.md](addons.md) for what "not in this build" means.
+
 ## Using a flag
 
 Import the singleton and call `get`:
 
 ```ts
-import {FeatureFlags} from '../core/feature-flag'
+import {FeatureFlags} from '@framework/api' // '../core/feature-flag' from host code
 
 if (FeatureFlags.get('sculptcore.quad_remesher')) {
   // ...
 }
 ```
 
-`get` returns the stored override if one exists, otherwise the flag's default
-value defined in the `featureFlags` array.
+`get` returns the stored override if one exists, otherwise the registered
+default — and `false` if no addon in this build registered the key at all, so a
+gate on an absent addon's flag reads closed rather than throwing.
 
 To gate a whole feature's UI, cover every surface:
 
@@ -57,26 +65,47 @@ messageBus.on(FeatureFlagManager, 'FLAG_SET', ({key, value}) => {
 
 ## Adding a flag
 
-Append an entry to the `featureFlags` `as const` array at the bottom of
-`feature-flag.ts`:
+Flags go in the owning addon, in one `as const satisfies readonly FeatureFlag[]`
+array — `addons/builtin/<id>/src/feature_flags.ts` by convention:
 
 ```ts
-const featureFlags = [
-  // ...existing entries...
+import type {FeatureFlag} from '@framework/api'
+
+export const MY_FEATURE_FLAGS = [
   {
     key        : 'my_feature.thing',
     description: 'Human-readable description shown in UI',
     type       : 'bool',
     value      : false,   // default value
   },
-] as const
+] as const satisfies readonly FeatureFlag[]
+
+type MyFeatureFlagKey = (typeof MY_FEATURE_FLAGS)[number]['key']
+
+declare global {
+  interface FeatureFlagRegistry extends Record<MyFeatureFlagKey, boolean> {}
+}
 ```
 
 `uiName` is optional; if omitted the key is used as the display label.
 
-The `FeatureFlagKeys` union type is derived automatically from the array, so
-`FeatureFlags.get('my_feature.thing')` will typecheck immediately after adding
-the entry — no other registration is needed.
+Register the array first thing in `register(api)`, before anything that might
+read a flag — an unregistered key reads `false`, so a late registration
+silently takes the default path for one boot:
+
+```ts
+api.registerFeatureFlags(MY_FEATURE_FLAGS)
+```
+
+`registerFeatureFlags` undoes itself when the addon is disabled (the
+definitions drop; stored *values* stay, so re-enabling restores the user's
+toggles).
+
+`FeatureFlagKeys` is `keyof FeatureFlagRegistry`, which every addon merges its
+own keys into by declaration merging — that is what keeps
+`FeatureFlags.get('my_feature.thing')` typo-checked without the host ever
+naming a key. A build where all such augmentations are absent degrades the type
+to `string`: looser, but never wrong.
 
 ## Data API / UI binding
 
@@ -91,8 +120,16 @@ member names cannot, so each property's apiname is the mangled
 settings.featureFlags.sculptcore_quad_remesher
 ```
 
-This is set up automatically for every entry in `featureFlags` — after adding
-a flag, run `pnpm gen:paths` to add its path to the generated catalog.
+`getDataAPI()` is one-shot and runs *before* addons start, so by the time an
+addon registers, the struct is already built. `AddonAPI.registerFeatureFlags`
+therefore declares each flag's member against the live `_appstate.api` as well —
+`defineFeatureFlagMember` is the shared helper, and `FeatureFlags.markDefined`
+keeps the two routes from declaring the same key twice.
+
+That also means these paths are **not** in the generated catalog
+(`pnpm gen:paths`), which only walks what `getDataAPI()` builds — the same way
+none of an addon's other paths are. They resolve at runtime; the e2e test below
+is what guards them.
 
 The Settings editor (`scripts/editors/settings/SettingsEditor.ts`) lists every
 flag as a checkbox in its **Feature Flags** tab, built from

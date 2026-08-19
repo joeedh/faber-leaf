@@ -21,6 +21,7 @@
     "check:lint": "node tools/check-lint.mjs",
     "gen:paths": "node tools/gen-datapaths.mjs && node tools/gen-tsconfig-paths.mjs",
     "typecheck": "pnpm gen:paths && turbo typecheck",
+    "smoke:no-sculptcore": "node tools/no-sculptcore-smoke.mjs",
     "test": "node tools/run-tests.mjs",
     "test:slow": "pnpm --filter @faber-leaf/tests-integration test:slow",
     "watch-typecheck": "npx tsgo --watch",

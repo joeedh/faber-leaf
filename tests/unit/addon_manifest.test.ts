@@ -102,9 +102,9 @@ describe('validateManifest', () => {
   })
 
   test('rejects a non-boolean optional', () => {
-    expect(() =>
-      validateManifest({id: 'a', name: 'A', version: '1.0.0', entry: 'm.ts', optional: 'yes'})
-    ).toThrow(/optional/)
+    expect(() => validateManifest({id: 'a', name: 'A', version: '1.0.0', entry: 'm.ts', optional: 'yes'})).toThrow(
+      /optional/
+    )
   })
 
   test('rejects an id listed as both required and optional', () => {
@@ -206,10 +206,7 @@ describe('resolveManifests', () => {
   })
 
   test('a present optional dependency still orders first', () => {
-    const {loaded} = resolveManifests([
-      manifest({id: 'a', optionalDependencies: ['mesh']}),
-      manifest({id: 'mesh'}),
-    ])
+    const {loaded} = resolveManifests([manifest({id: 'a', optionalDependencies: ['mesh']}), manifest({id: 'mesh'})])
     expect(ids(loaded)).toEqual(['mesh', 'a'])
   })
 

@@ -17,7 +17,7 @@
 
 import {BrushFlags, DynTopoFlagsSC, SculptTools} from '../../../../scripts/brush/brush_base'
 import {DefaultBrushes} from '../../../../scripts/brush/index'
-import {FeatureFlags} from '../../../../scripts/core/feature-flag'
+import {FeatureFlags} from '@framework/api'
 import {SculptBrushes} from '@sculptcore/api/sculptcore/brush/SculptBrushes'
 import {runSculptcoreStroke, SculptPaintOp} from './sculptcore_ops'
 import {LiteMesh} from './litemesh'

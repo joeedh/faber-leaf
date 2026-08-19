@@ -5,9 +5,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@litestl/typescript-runtime": "workspace:*",
     "@pathtx/prettier": "3.3.0-dev",
-    "@sculptcore/api": "workspace:*",
     "@swc/jest": "^0.2.39",
     "@types/react": "^19.1.5",
     "@typescript-eslint/eslint-plugin": "^6.19.1",

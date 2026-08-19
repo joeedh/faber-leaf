@@ -177,7 +177,6 @@ function buildLiteMeshAttrTest(_ctx: ToolContext, lib: Library, scene: Scene, ar
   lm.graphUpdate()
 }
 
-
 /**
  * Builds a single all-quad UV-sphere LiteMesh (plus a light) — the
  * remesh-friendly primitive for the quad-remesh parity / round-trip test

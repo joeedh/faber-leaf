@@ -12,7 +12,7 @@
  */
 
 import {Vector2} from '../../../../scripts/path.ux/scripts/pathux.js'
-import {FeatureFlags} from '../../../../scripts/core/feature-flag'
+import {FeatureFlags} from '@framework/api'
 import {LiteMesh, type IMeshLogSelect} from './litemesh'
 import type {ViewContext} from '../../../../scripts/core/context'
 import type {View3D} from '../../../../scripts/editors/view3d/view3d'

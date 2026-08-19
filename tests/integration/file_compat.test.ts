@@ -405,7 +405,8 @@ describeMaybe('legacy (registration-order struct id) .wproj files (P10 §4.3)', 
     const resaved = Path.join(dir, 'resaved-v8.wproj')
 
     partial = boot(nwExe!, partialBuildEval(FIXTURE_V8, resaved), 'p10lpartial-') as PartialResult
-    if (!partial.ok) throw new Error(`partial-build boot failed: ${partial.error}
+    if (!partial.ok)
+      throw new Error(`partial-build boot failed: ${partial.error}
 ${partial.stack}`)
   }, 600000)
 

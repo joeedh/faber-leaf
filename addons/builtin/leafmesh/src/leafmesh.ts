@@ -143,7 +143,7 @@ leafmesh.LeafMeshData {
 
   static dataDefine(): IDataDefine {
     return {
-      name: 'LeafMesh',
+      name          : 'LeafMesh',
       // Allocated by registerSelectType('LEAFMESH') on first registration; the
       // `?? 0` is what makes that first call legal (P6).
       selectMask    : SelMask.LEAFMESH ?? 0,
@@ -464,9 +464,10 @@ leafmesh.LeafMeshData {
     const n = handles.length * size
 
     const ctor = data.constructor as {new (length: number): typeof data}
-    const ret = out !== undefined && out.constructor === data.constructor && out.byteLength >= n * data.BYTES_PER_ELEMENT
-      ? (out as typeof data)
-      : new ctor(n)
+    const ret =
+      out !== undefined && out.constructor === data.constructor && out.byteLength >= n * data.BYTES_PER_ELEMENT
+        ? (out as typeof data)
+        : new ctor(n)
 
     for (let i = 0; i < handles.length; i++) {
       const s = handles[i] * size

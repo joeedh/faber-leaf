@@ -19,6 +19,41 @@ export interface FeatureFlag {
   value: boolean
 }
 
+declare global {
+  /**
+   * Flag keys, contributed by declaration merging. The host defines no flags —
+   * a flag describes a feature, and features live in addons — so an addon adds
+   * its keys with `declare global { interface FeatureFlagRegistry { … } }` and
+   * `FeatureFlags.get/set` stay typo-checked without the host naming anything.
+   * A build whose augmentations are all absent degrades to `string`, which is
+   * looser but never wrong.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  interface FeatureFlagRegistry {}
+}
+
+/** The registered keys, or `string` when nothing has augmented the registry. */
+export type FeatureFlagKeys = keyof FeatureFlagRegistry extends never ? string : keyof FeatureFlagRegistry
+
+/**
+ * Declares `flag` on a `FeatureFlagManager` struct. Used by `defineAPI` and, for
+ * a flag registered after `getDataAPI()` already ran, by the addon API.
+ */
+export function defineFeatureFlagMember(st: DataStruct, flag: Readonly<FeatureFlag>): void {
+  const key = flag.key as FeatureFlagKeys
+  /* customGetSet means the member path is never dereferenced, but path.ux
+   * still parses it — so it must be the dot-free mangled name too. */
+  const apiname = featureFlagApiName(flag.key)
+  st.bool(apiname, apiname, flag.uiName ?? flag.key, flag.description).customGetSet<FeatureFlagManager>(
+    function () {
+      return this.dataref.get(key)
+    },
+    function (value: boolean) {
+      this.dataref.set(key, value)
+    }
+  )
+}
+
 type StoredFeatureFlag = Omit<FeatureFlag, 'value'> & {
   /** undefined means use default value */
   value?: FeatureFlag['value']
@@ -34,47 +69,80 @@ export class FeatureFlagManager implements IBusEmitter<typeof FeatureFlagManager
     } as const
   }
 
+  /** Stored overrides, including flags no addon in this build defines. */
   flags: StoredFeatureFlag[] = []
+  /** Definitions of the flags this build actually has, by key. */
+  private defs = new Map<string, Readonly<FeatureFlag>>()
+  private defined = new Set<string>()
   private LSKEY = FEATURE_FLAGS_KEY
 
   constructor() {
     this.load()
     messageBus.addEmitter(this, FeatureFlagManager)
+  }
 
-    for (const flag of featureFlags) {
+  /**
+   * Adds flag definitions. Storage is keyed by flag name and never pruned, so a
+   * value written by a build that had the flag survives a build that does not
+   * and comes back when the addon does.
+   */
+  registerFlags(flags: readonly Readonly<FeatureFlag>[]): void {
+    for (const flag of flags) {
+      this.defs.set(flag.key, flag)
       if (!this.has(flag.key)) {
-        this.flags.push({
-          ...flag,
-          value: undefined,
-          mtime: Date.now(),
-        })
+        this.flags.push({...flag, value: undefined, mtime: Date.now()})
       }
     }
+  }
+
+  /** Drops definitions (their stored values stay). Mirrors `registerFlags`. */
+  unregisterFlags(keys: readonly string[]): void {
+    for (const key of keys) {
+      this.defs.delete(key)
+    }
+  }
+
+  /** True once `key`'s data-API member has been declared; set by the caller. */
+  markDefined(key: string): boolean {
+    if (this.defined.has(key)) {
+      return false
+    }
+    this.defined.add(key)
+    return true
   }
 
   onTrigger(type: BusTriggers<typeof FeatureFlagManager>, data: any) {
     //
   }
 
-  has(key: FeatureFlagKeys) {
+  /** Whether a value is stored for `key` — `string`, not a registered key,
+   * because storage outlives the addon that defined the flag. */
+  has(key: string): boolean {
     return this.flags.find((f) => f.key === key) !== undefined
   }
 
-  get(key: FeatureFlagKeys) {
-    return this.flags.find((f) => f.key === key)!.value ?? featureFlags.find((flag) => flag.key === key)!.value
+  /** Reading a flag no addon in this build defines yields `false`, not a throw. */
+  get(key: FeatureFlagKeys): boolean {
+    return this.flags.find((f) => f.key === key)?.value ?? this.defs.get(key)?.value ?? false
   }
 
-  getDef(key: FeatureFlagKeys): FeatureFlag {
-    return featureFlags.find((f) => f.key === key)!
-  }
-
-  /** The canonical flag definitions (defaults), not the stored overrides. */
+  /** The definitions this build has (defaults), not the stored overrides. */
   get definitions(): readonly Readonly<FeatureFlag>[] {
-    return typecheckFeatureFlags
+    return [...this.defs.values()]
+  }
+
+  private stored(key: string): StoredFeatureFlag {
+    let flag = this.flags.find((f) => f.key === key)
+    if (!flag) {
+      const def = this.defs.get(key)
+      flag = {key, description: def?.description ?? '', type: 'bool', value: undefined, mtime: Date.now()}
+      this.flags.push(flag)
+    }
+    return flag
   }
 
   set(key: FeatureFlagKeys, value: boolean) {
-    const flag = this.flags.find((f) => f.key === key)!
+    const flag = this.stored(key)
     if (flag.value !== value) {
       flag.value = value
       flag.mtime = Date.now()
@@ -83,15 +151,14 @@ export class FeatureFlagManager implements IBusEmitter<typeof FeatureFlagManager
     }
   }
 
-  reset(key: keyof typeof featureFlags) {
-    const flag = this.flags.find((f) => f.key === key)!
+  reset(key: FeatureFlagKeys) {
+    const flag = this.stored(key)
     if (flag.value !== undefined) {
       flag.value = undefined
       flag.mtime = Date.now()
       this.save()
       // Resets change the effective value too — same rebuild signal as set().
-      const k = key as FeatureFlagKeys
-      messageBus.emit(this, FeatureFlagManager, 'FLAG_SET', {key: k, value: this.get(k)})
+      messageBus.emit(this, FeatureFlagManager, 'FLAG_SET', {key, value: this.get(key)})
     }
   }
 
@@ -134,32 +201,25 @@ export class FeatureFlagManager implements IBusEmitter<typeof FeatureFlagManager
    * flag getters each frame, so refreshing `flags` is enough for the UI. */
   reloadFromDisk() {
     this.load()
-    for (const flag of featureFlags) {
+    for (const flag of this.definitions) {
       if (!this.has(flag.key)) {
         this.flags.push({...flag, value: undefined, mtime: Date.now()})
       }
     }
   }
 
+  /**
+   * Declares whatever is registered when the data API is built. Addons register
+   * after that (`getDataAPI()` is one-shot), so those flags declare themselves
+   * against the live API instead — see `AddonAPI.registerFeatureFlags`.
+   */
   static defineAPI(api: DataAPI, st?: DataStruct): DataStruct {
     st = st ?? api.mapStruct(FeatureFlagManager, true)
 
-    const createKey = (flag: Readonly<FeatureFlag>) => {
-      const key = flag.key as FeatureFlagKeys
-      /* customGetSet means the member path is never dereferenced, but path.ux
-       * still parses it — so it must be the dot-free mangled name too. */
-      const apiname = featureFlagApiName(flag.key)
-      st!.bool(apiname, apiname, flag.uiName ?? flag.key, flag.description).customGetSet<FeatureFlagManager>(
-        function () {
-          return this.dataref.get(key)
-        },
-        function (value: boolean) {
-          this.dataref.set(key, value)
-        }
-      )
-    }
-    for (const flag of typecheckFeatureFlags) {
-      createKey(flag)
+    for (const flag of FeatureFlags.definitions) {
+      if (FeatureFlags.markDefined(flag.key)) {
+        defineFeatureFlagMember(st, flag)
+      }
     }
 
     return st
@@ -169,89 +229,6 @@ export class FeatureFlagManager implements IBusEmitter<typeof FeatureFlagManager
     this.merge()
   }
 }
-
-// each entry must satisfy FeatureFlag
-const featureFlags = [
-  {
-    key        : 'sculptcore.quad_remesher',
-    description: 'Enable quad remesher',
-    type       : 'bool',
-    value      : true,
-  },
-  {
-    key        : 'sculptcore.auto_defrag',
-    description: 'Auto-compact mesh DRAM layout at stroke end when fragmented (dyntopo)',
-    type       : 'bool',
-    value      : true,
-  },
-  {
-    key        : 'sculptcore.select_flush_prefer_op_domain',
-    description: "Prefer an op's own selected domain over a derived one; when off, merge instead",
-    type       : 'bool',
-    value      : true,
-  },
-  {
-    key        : 'sculptcore.gpu_brush',
-    uiName     : 'GPU Brushes',
-    description: 'Run eligible global brushes (kelvinlet) on the GPU when dyntopo is off',
-    type       : 'bool',
-    value      : true,
-  },
-  {
-    key        : 'sculptcore.gpu_brush_grab',
-    uiName     : 'GPU Grab Brush',
-    description: 'Also run the grab brush on the GPU (off until soak; needs GPU Brushes on)',
-    type       : 'bool',
-    value      : false,
-  },
-  {
-    key        : 'sculptcore.gpu_brush_verify',
-    uiName     : 'GPU Brush Shadow-Verify',
-    description: 'Run GPU-eligible dabs on both paths and diff them (CPU stays authoritative)',
-    type       : 'bool',
-    value      : false,
-  },
-  {
-    key        : 'sculptcore.cpp_stroke_driver',
-    uiName     : 'C++ Stroke Driver',
-    description: 'Sample sculpt strokes with the sculptcore C++ sampler instead of the TS one',
-    type       : 'bool',
-    value      : true,
-  },
-  {
-    key        : 'sculptcore.backface_cull',
-    uiName     : 'Backface Culling',
-    description: 'Cull back-facing triangles when drawing the sculpt surface (needs consistent winding)',
-    type       : 'bool',
-    value      : false,
-  },
-  {
-    key        : 'sculptcore.sculpt_layers',
-    uiName     : 'Sculpt Layers',
-    description: 'Sculpt-layer stack: the LiteMesh layer panel + edit-target sculpting (experimental)',
-    type       : 'bool',
-    value      : false,
-  },
-  {
-    key        : 'sculptcore.multires',
-    uiName     : 'Multires Subsurf',
-    description: 'Multiresolution subdivision sculpting: the LiteMesh multires panel + level ops (experimental)',
-    type       : 'bool',
-    value      : false,
-  },
-  {
-    key        : 'sculptcore.vdm_sculpt',
-    uiName     : 'VDM Sculpting',
-    description: 'Vector-displacement sculpting: the LiteMesh VDM panel + Draw-brush texel splatting (experimental)',
-    type       : 'bool',
-    value      : false,
-  },
-] as const
-
-/** exists to typecheck featureFlags above. */
-const typecheckFeatureFlags = featureFlags as readonly Readonly<FeatureFlag>[]
-
-type FeatureFlagKeys = (typeof featureFlags)[number]['key']
 
 registerDataAPI(FeatureFlagManager)
 
