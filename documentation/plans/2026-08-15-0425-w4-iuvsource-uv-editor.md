@@ -1,14 +1,17 @@
 # P18 — W4a: `IUVSource` + the mesh-agnostic UV editor
 
-**Status:** plan — not started.
+**Status:** in progress — §5 step 1 closed, step 2 under way (LeafMesh and the
+test double landed; LiteMesh open).
 
-**Date:** 2026-08-15
+**Date:** 2026-08-15 (citations re-verified 2026-08-19)
 
 **Strategy:** [Faber Leaf refactor strategy](./2026-08-15-0237-faber-leaf-refactor-strategy.md)
 §4 W4, §5 phase 12, §9.3 P18.
-**Reference:** `scripts/editors/image/pending-port/TODO.md` — the slim-down
-author's own port checklist. Read it in full before starting; it is more
-accurate than this plan about what the old editor did.
+**Reference:** `archive/uv-editor/TODO.md` — the slim-down author's own port
+checklist. Read it in full before starting; it is more accurate than this plan
+about what the old editor did. Two of its statements have since gone stale: the
+directory moved out of `scripts/editors/image/pending-port/` (P13, `8d4ee0c4`),
+and `ImageBus` no longer has the live importer it names — see §2.
 
 **Workstream / phase:** W4 / phase 12.
 
@@ -30,14 +33,15 @@ them is named in the editor.
 ## 2. Current state
 
 The image editor was slimmed to "load `ImageBlock`s and pan/zoom" and the entire
-UV half was moved, unwired, to `scripts/editors/image/pending-port/`:
+UV half was moved, unwired, to what is now `archive/uv-editor/` (P13 moved it
+there from `scripts/editors/image/pending-port/`; see `archive/README.md`):
 
 | File | Lines | What it held |
 | --- | --- | --- |
-| `pending-port/ImageEditor.ts` | 1,791 | the old editor **plus** the `UVEditor` UIBase component, `findnearestUV`, `DrawLine`, `ImageBlockOp` / `SetImageTypeOp`, the UV sidebar, and `window.redraw_uveditors` |
-| `pending-port/uv_selectops.js` | 335 | `uveditor.toggle_select_all`, `pick_select_linked`, `select_one` |
-| `pending-port/uv_transformops.js` | 550 | `uveditor.translate` / `scale` / `rotate`, modal, reading the mouse off `ctx.editors.imageEditor.uvEditor` |
-| `pending-port/uv_ops.js` | 331 | `uveditor.project_uvs`, `set_flag` / `clear_flag` / `toggle_flag` (`UVFlags.PIN`) |
+| `uv-editor/ImageEditor.ts` | 1,791 | the old editor **plus** the `UVEditor` UIBase component, `findnearestUV`, `DrawLine`, `ImageBlockOp` / `SetImageTypeOp`, the UV sidebar, and `window.redraw_uveditors` |
+| `uv-editor/uv_selectops.js` | 335 | `uveditor.toggle_select_all`, `pick_select_linked`, `select_one` |
+| `uv-editor/uv_transformops.js` | 550 | `uveditor.translate` / `scale` / `rotate`, modal, reading the mouse off `ctx.editors.imageEditor.uvEditor` |
+| `uv-editor/uv_ops.js` | 331 | `uveditor.project_uvs`, `set_flag` / `clear_flag` / `toggle_flag` (`UVFlags.PIN`) |
 | | **3,007** | |
 
 Live remnants:
@@ -47,21 +51,26 @@ Live remnants:
   `scripts/image/image_ops.js:119` and (in `pending-port`) from four UV op
   sites.
 - `scripts/editors/image/ImageBus.ts` — 9 lines, triggers `resetDrawLines`,
-  `flagRedraw`, `addDrawLine`. Deliberately left in place; still imported by
-  `addons/builtin/mesh/src/unwrapping.ts` to push seam draw-lines, and
-  re-exported from `@framework/api`. **The minimal editor does not subscribe**,
-  so those triggers are live no-ops today.
-- `addons/builtin/mesh/src/mesh_uvops_base.ts` — 171 lines. `:37-43` and
-  `:135-138`: because the editor's per-editor preference is gone, the op
-  **hardcodes `selectedFacesOnly = true`** whenever the caller does not pass it,
-  with a comment saying so. `:55-70` and `mesh_uvops.ts:536` read it.
-- The tool paths listed in `pending-port/TODO.md` are unregistered and throw
-  "unknown tool" if invoked.
+  `flagRedraw`, `addDrawLine`. Deliberately left in place and re-exported from
+  `@framework/api` — which, since P13 archived the unwrapping stack, is now its
+  **only** reference anywhere in `scripts/`, `addons/` or `distributions/`.
+  Nothing subscribes and nothing triggers: it is dead, not merely unheard, so
+  §7's "verify each trigger still fires" is answered — none of them do, and the
+  new editor's subscription has to be paired with a new caller.
+- `addons/builtin/mesh/src/mesh_uvops_base.ts` — **deleted with the rest of
+  `addons/builtin/mesh/` in P13**. Its hardcoded `selectedFacesOnly = true` went
+  with it, so step 6 is no longer a rewrite of an existing file: it is deciding
+  where the flag lives now. This plan puts it on the source
+  (`IUVSource.listUVFaces(layer, selectedOnly)`), which is what §4.1 already
+  asked for. The ops that read it are archived alongside it, under
+  `archive/unwrapping/`.
+- The tool paths listed in `archive/uv-editor/TODO.md` are unregistered and
+  throw "unknown tool" if invoked.
 
 Data-path change to carry through the port: the old editor nested everything
 under a `uvEditor` sub-component (`imageEditor.uvEditor.imageUser.image`); the
 new one owns the `ImageUser` directly (`imageEditor.imageUser.image`).
-`pending-port/TODO.md` lists the consumers that were updated — those are exactly
+`archive/uv-editor/TODO.md` lists the consumers that were updated — those are exactly
 the sites a naive port would break again.
 
 ## 3. Do not port the old code back
@@ -73,12 +82,18 @@ of this workstream.
 Use it as a **specification**: it is the record of what UV editing in this app
 actually did, including the pieces nobody would think to re-specify (pinning,
 `select_linked`, draw-lines, projection). Read it, list the behaviours, then
-implement them against the interface. `pending-port/` is deleted at the end of
-this plan.
+implement them against the interface. `archive/uv-editor/` is deleted at the end
+of this plan, along with its row in `archive/README.md`.
 
 ## 4. `IUVSource`
 
-From strategy §4 W4:
+**Already declared.** P7 wrote `IUVSource` into
+`scripts/core/geometry_contract.ts` ahead of any implementor, and
+`documentation/geometry-contract.md` §11 reserves the right to revise it for
+*this* plan alone. §5 step 1 is therefore closed on arrival, and what follows is
+the record of the revision this plan made rather than a design still to do.
+
+The strategy's original sketch, kept for comparison:
 
 ```ts
 interface IUVSource {
@@ -92,6 +107,26 @@ interface IUVSource {
   unwrap?(opts: UnwrapOptions): void
 }
 ```
+
+P7's declaration was already stricter than that sketch — bulk everywhere,
+opaque handles, `out` buffers, CSR fans. This plan added three things it was
+missing, each because an implementor or the editor could not be written without
+it:
+
+- **`readonly topoStamp`** — handle validity is the source's to report. Without
+  it a source with no geometry behind it (the in-memory double) could not say
+  when its handles go stale, and the editor would have had to find an
+  `IElementSource` to ask, which is exactly the coupling the resolver avoids.
+- **`listUVFaces(layer, selectedOnly?)`** — the answer to §4.1's
+  `selectedFacesOnly` question, expressed as a filter on the source.
+- **`getUVFaceRings(layer, faces)`** — a face's UV elements in winding order,
+  CSR-shaped. Without it the editor would rebuild rings out of the geometry to
+  draw or pick anything, which is the BREP-shaped coupling this workstream
+  exists to remove.
+
+One convention the conformance suite forced into writing: an `out` buffer may
+come back as a *view*, so callers compare buffers, never object identity. That
+is now stated on `IElementSource`'s `out` note, which the whole contract shares.
 
 Four constraints, from §4 W4, restated because each one is a rule the
 implementation will otherwise break:
@@ -109,45 +144,69 @@ implementation will otherwise break:
    and its `declare global` block. P20 audits what remains — do not leave this
    one for it.
 
-### 4.1 Open questions to settle while writing the interface
+### 4.1 Open questions — settled
 
-- **What is a UV element?** The signatures index by `Int32Array`, so the
-  addressing domain has to be named. LeafMesh's Corner domain and LiteMesh's
-  loop domain both work; say which, and say what `readUVs`' `out` layout is
-  (tightly packed `[u, v]` per index).
-- **`selectedFacesOnly`.** Restore it as a real binding on the editor, since
-  the hardcoded `true` at `mesh_uvops_base.ts:37-43` is an acknowledged
-  placeholder. It is a *filter on the source*, not editor state — express it in
-  the op's inputs and resolve it against the source's face selection.
-- **Layer identity.** `UVLayerDesc` needs a stable name, since files persist a
-  layer choice. Index alone is not stable across attribute-layer edits.
+- **What is a UV element?** Whatever domain the source stores UVs on, reported
+  as `IUVSource.uvDomain`, with `getUVOwners` mapping an element back to the
+  geometry element that carries it. On LeafMesh that domain is `CORNER` and the
+  map is the *identity*; on the in-memory double the owners are grid vertices
+  and it is many-to-one. Both are conformant, which is the check that the
+  interface did not quietly assume one mesh's storage. `getUVs` packs `[u, v]`
+  per handle.
+- **`selectedFacesOnly`.** A filter on the source:
+  `listUVFaces(layer, selectedOnly)`. The op passes the flag through; no editor
+  state and no hardcoded default survive.
+- **Layer identity.** `listUVLayers()` returns names in layer order and an index
+  into that array is a `layer`. The *name* is what a file persists; the index is
+  valid only for as long as the layer set is unchanged.
+- **Where the flags live** (not in the original list, but a source has to answer
+  it): on LeafMesh, in a sibling `Byte` corner layer named `.uvflags:<uv name>`,
+  persistent so §6's `.wproj` round-trip holds, and internal so it can never
+  itself be mistaken for a UV map.
 
 ## 5. Plan
 
-1. Declare `IUVSource` + `UVLayerDesc` + `UnwrapOptions` in the host, and
-   register implementations through the P7 `AddonAPI` (same pattern as
-   `ITransDataType`). Nothing else in this step.
+1. ~~Declare `IUVSource` in the host and register implementations through the
+   P7 `AddonAPI`.~~ **Done by P7**: the interface is in
+   `scripts/core/geometry_contract.ts`, the registry is
+   `scripts/core/uv_sources.ts` (a resolver keyed by data-kind id, not a
+   capability narrow, because a provider may hand back an adapter over a cached
+   unwrap), and the hook is `AddonAPI.registerUVSource`. Revised here per §4.
 2. **Implement it three times, in the same PR** — this is the point of the
    plan. LiteMesh, LeafMesh, and an in-memory test double (a fixed grid of UVs
    with no geometry behind it). The double is what makes the editor testable
    headlessly and is the honest check that the interface is not
    LiteMesh-in-disguise. If any implementor needs an interface change, the
    interface is wrong — change it, do not special-case.
+   - [x] **LeafMesh** — `addons/builtin/leafmesh/src/uv_source.ts` over a pure
+     `uv_geom.ts`, registered from the addon's `register(api)` hook. UVs are
+     corner-domain, so `getUVOwners` is the identity.
+   - [x] **The double** — `tests/lib/uv_grid_source.ts`, a W×H grid of quads
+     with vertex owners and no geometry object. `tests/lib/uv_source_conformance.ts`
+     is the shared suite every implementor is run through.
+   - [ ] **LiteMesh** — needs new *bulk* bound methods on sculptcore's `Mesh`
+     (face corner rings, corner→vert, and gather/scatter of a float attribute)
+     because attribute values are paged behind `AttrData<T>` and reachable from
+     TS only one element at a time. That is a C++ change plus a rebuild, hence a
+     second commit; the interface was shaped against those constraints from the
+     start (strictly bulk, CSR, no per-element accessor) so that writing
+     LeafMesh first could not bias it.
 3. Reimplement the editor as an addon (`addons/builtin/uv_editor/`), consuming
    `IUVSource` only. Draw, pick (`findnearestUV`'s replacement, reading through
    bulk handles), select, pin, transform.
-4. Re-register the tool paths from `pending-port/TODO.md` under `uveditor.*`,
+4. Re-register the tool paths from `archive/uv-editor/TODO.md` under `uveditor.*`,
    with the same names, taking a datapath. Users have keymaps and
    `saveLastValue()` state keyed on these paths; a rename is gratuitous churn.
    `image.set_type` (`SetImageTypeOp`) is on that list and is not UV — restore
    it too rather than losing it silently.
 5. Subscribe the editor to `ImageBus`; convert `image_ops.js:119`; delete
    `window.redraw_uveditors` and its `declare global`.
-6. Rewrite `mesh_uvops_base.ts`'s successor against the interface, restoring
-   `selectedFacesOnly` as a real binding, and drop the hardcoded default.
-7. Delete `scripts/editors/image/pending-port/` in the final commit, once every
-   behaviour in its TODO table is either implemented or explicitly recorded as
-   dropped.
+6. Give `selectedFacesOnly` a real home. `mesh_uvops_base.ts` and its hardcoded
+   default are already gone (P13), so this is: pass the flag through the op's
+   inputs into `listUVFaces`, and make §6's false-differs-from-true test real.
+7. Delete `archive/uv-editor/` and its `archive/README.md` row in the final
+   commit, once every behaviour in its TODO table is either implemented or
+   explicitly recorded as dropped.
 
 `unwrap` and `pinUVs` are optional on the interface. `unwrap` is only
 implementable once P19 lands the solver; declare it here, leave it unimplemented,
@@ -163,7 +222,11 @@ design left in it.
 - The test double drives the whole editor headlessly: select, transform, write,
   read back. This suite must pass in a `--no-sculptcore` build, which means it
   cannot touch LiteMesh.
-- Every tool path in `pending-port/TODO.md` is registered and invocable.
+- Every tool path in `archive/uv-editor/TODO.md` is registered and invocable.
+- Every implementor passes `tests/lib/uv_source_conformance.ts`. A case there
+  may only use the contract: one that has to know which source it is driving
+  means the contract is under-specified, and the fix belongs in
+  `geometry_contract.ts`.
 - Round-trip: unwrap-free UV edits on a `.wproj` save and reload with selection
   and pin state intact.
 - `selectedFacesOnly` false actually differs from true — the current hardcoded
@@ -183,18 +246,19 @@ design left in it.
 - **`selectedFacesOnly` restoration changes behaviour** for anyone relying on
   the hardcoded `true`. It is a placeholder with a comment saying it is a
   placeholder; restoring it is the fix. Note it in the release notes.
-- **`ImageBus` has no subscribers today**, so its triggers have been silently
-  dropped for however long. Verify each of the three actually does something
-  once subscribed rather than assuming they still fire.
+- **`ImageBus` has neither subscribers nor callers today** — P13 archived the
+  unwrapping stack that pushed seam draw-lines, so all three triggers are dead
+  code, not merely unheard. Subscribing is half the work; each trigger needs a
+  new caller or an explicit note that it is dropped.
 
 ## 8. Exit criteria
 
 - Criterion 11: `IUVSource` exists, is implemented by LiteMesh, LeafMesh and a
   test double, and the UV editor addon names no concrete geometry type.
 - The headless test-double suite passes in a `--no-sculptcore` build.
-- Every `uveditor.*` tool path from `pending-port/TODO.md` is registered again,
-  under its original name, taking a datapath.
+- Every `uveditor.*` tool path from `archive/uv-editor/TODO.md` is registered
+  again, under its original name, taking a datapath.
 - `window.redraw_uveditors` is gone; the editor subscribes to `ImageBus`.
-- `selectedFacesOnly` is a real binding again and
-  `mesh_uvops_base.ts`'s hardcoded default is gone.
-- `scripts/editors/image/pending-port/` is deleted.
+- `selectedFacesOnly` reaches the source as an argument, with no default
+  hardcoded anywhere.
+- `archive/uv-editor/` and its `archive/README.md` row are deleted.

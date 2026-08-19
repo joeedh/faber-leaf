@@ -74,6 +74,7 @@ export {
   ElementDomain,
   GeometryCapability,
   InvalidationKind,
+  UVFlags,
   hasCapability,
 } from './core/geometry_contract.js'
 export type {
@@ -91,6 +92,7 @@ export type {
   ISpatialQueryable,
   ISymmetryAware,
   ITriangleSource,
+  IUVSource,
 } from './core/geometry_contract.js'
 // The vertex-layout half of the same contract (§10).
 export {
@@ -139,6 +141,10 @@ export type {IFileMigrationContext, IFileMigrator} from './core/file_migrations.
 // so the type can ride the hub without closing a cycle the way data_kinds would;
 // registration itself still goes through `AddonAPI.registerFileFormat`.
 export type {IFileFormat} from './core/file_formats.js'
+// The UV-source registry's provider shape (§11). `core/uv_sources.ts` imports
+// only the contract, so the type rides the hub; registration still goes through
+// `AddonAPI.registerUVSource`.
+export type {IUVSourceProvider} from './core/uv_sources.js'
 export {setDefaultSceneBuilder} from './core/default_file.js'
 // The app's own CLI flags: an addon that takes one (sculptcore's --backend)
 // has to read it from the same place the host does.

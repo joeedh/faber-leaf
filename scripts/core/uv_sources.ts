@@ -1,9 +1,9 @@
 /**
  * Registry of UV sources, keyed by data kind.
  *
- * `IUVSource` (`core/geometry_contract.ts`) is declared but has no implementor
- * yet — see `documentation/geometry-contract.md` §11. This registry exists now
- * so the UV editor has exactly one way to reach a source when P18 lands.
+ * `IUVSource` lives in `core/geometry_contract.ts`; this is the only way to
+ * reach an implementation of it, so the UV editor's gate and its call path
+ * cannot disagree.
  *
  * It is a resolver rather than a capability narrow (the shape used by every
  * other optional capability in `core/data_kinds.ts`) because a UV source need

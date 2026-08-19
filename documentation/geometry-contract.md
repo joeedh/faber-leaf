@@ -531,25 +531,39 @@ it, but a host developer wiring up a new draw path can, and the failure is a
 runtime throw rather than a compile error. Fixing the call site belongs to the
 plans that touch those paths, not to this contract.
 
-**`IUVSource` is declared but not implemented.** Its constraints are fixed by
-the same boundary reasoning as §4 — opaque handles, bulk arrays in and out, no
-per-element round trips — and it is deliberately written down before it has an
-implementor, so that the providers being built against this contract know what
-they will owe. The plan that implements it is allowed to revise it, and is the
-only one that is.
+**`IUVSource` is not yet implemented by LiteMesh.** The interface itself is no
+longer a gap: P18 revised it against real implementors and it is reached through
+`scripts/core/uv_sources.ts`, a resolver keyed by data-kind id rather than a
+capability narrow — a source need not be the geometry object, so a provider may
+hand back an adapter over a cached unwrap. What is missing is the LiteMesh side,
+which needs bulk attribute reads across the sculptcore seam: values are paged
+behind `AttrData<T>` and reachable from TS only one element at a time, so the
+adapter waits on new bound methods on the engine's `Mesh`.
 
 ## 12. Who implements this today
 
 Kept deliberately short, and deliberately last: this section is the only place
 in the document where concrete type names belong.
 
-- **The BREP mesh** implements the full surface including every optional
-  capability. It is scheduled for deletion; it is implementor #2 only until
-  its replacement lands.
 - **LiteMesh** implements the required groups plus elements, spatial queries and
   attributes. Of the old nine-name invalidation vocabulary it implemented three,
   as empty stubs — which is the clearest evidence available that the vocabulary
   was not a contract anyone could satisfy.
+- **LeafMesh** implements the required groups plus elements, attributes,
+  triangles and symmetry, and is the first implementor of `ITransDataType`'s
+  peer `IUVSource`. (The BREP mesh was implementor #2 of everything until P13
+  deleted it.)
+
+`IUVSource` is counted separately, because it is registered rather than narrowed
+to and so its implementors need not appear above:
+
+- **LeafMesh**, through `addons/builtin/leafmesh/src/uv_source.ts` — UVs on the
+  corner domain, so a UV element handle *is* a corner handle.
+- **An in-memory grid**, `tests/lib/uv_grid_source.ts` — no geometry object at
+  all, and owners that are many-to-one. It exists so the interface cannot
+  quietly become one mesh's storage; both it and LeafMesh are run through the
+  same `tests/lib/uv_source_conformance.ts`.
+- **LiteMesh** — pending, see §11.
 
 **The contract must never be down to one implementor.** A contract with one
 implementor has not been tested, it has been described.

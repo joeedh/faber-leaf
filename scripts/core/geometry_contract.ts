@@ -128,7 +128,8 @@ export interface IDeclaredAttribute {
  *
  * `out` parameters let a caller reuse scratch buffers across a stroke. A
  * provider must honour a correctly-sized `out` and is free to allocate when one
- * is absent or too small.
+ * is absent or too small. What comes back may be a *view* onto `out` rather
+ * than `out` itself, so compare buffers, never object identity.
  */
 export interface IElementSource {
   /**
@@ -200,7 +201,7 @@ export interface IActiveElementSource {
 }
 
 // ---------------------------------------------------------------------------
-// UV editing (§7 of the plan; declared before it has an implementor)
+// UV editing (§11)
 // ---------------------------------------------------------------------------
 
 /** Per-UV-element state. Bit flags so a whole layer round-trips as one column. */
@@ -210,17 +211,23 @@ export enum UVFlags {
 }
 
 /**
- * The UV-editing surface. Deliberately written down before anything implements
- * it, so that the providers being built against this contract know what they
- * will owe; the plan that implements it is the only one allowed to revise it.
+ * The UV-editing surface, reached through the `core/uv_sources.ts` resolver
+ * rather than a capability narrow — a source need not be the geometry object.
  *
  * A *UV element* is one (geometry element, layer) pair — a corner on a mesh
  * that stores UVs per corner, a vertex on one that stores them per vertex — and
  * its handle obeys the same rules as {@link ElementHandle}: opaque, and valid
- * only until {@link IElementSource.topoStamp} changes. Every accessor is bulk,
- * for the reason given in this file's header.
+ * only until {@link IUVSource.topoStamp} changes. Every accessor is bulk, for
+ * the reason given in this file's header.
  */
 export interface IUVSource {
+  /**
+   * Handle-validity stamp, carrying {@link IElementSource.topoStamp}'s meaning
+   * and, where a source is both, its value. Declared here as well so that a
+   * source with no geometry behind it is still a complete one.
+   */
+  readonly topoStamp: number
+
   /** Layer names in layer order; an index into this array is a `layer`. */
   listUVLayers(): readonly string[]
 
@@ -258,6 +265,22 @@ export interface IUVSource {
    * indexes `values`. A per-handle call would be a round trip per element.
    */
   getUVFans(layer: number, handles: ElementHandles): {offsets: Int32Array; values: Int32Array}
+
+  /**
+   * Faces carrying UV data in `layer`. `selectedOnly` restricts them to the
+   * source's selected faces, which is the entire meaning of the editor's
+   * `selectedFacesOnly` — the filter belongs to the source, not to editor state.
+   */
+  listUVFaces(layer: number, selectedOnly?: boolean): Int32Array
+
+  /**
+   * Each face's UV elements in winding order, CSR-style like
+   * {@link IUVSource.getUVFans}: `offsets` has `faces.length + 1` entries and
+   * indexes `values`. It is what the editor draws and picks against; without it
+   * a caller would rebuild rings out of the geometry, which is the BREP-shaped
+   * coupling this contract exists to prevent.
+   */
+  getUVFaceRings(layer: number, faces: ElementHandles): {offsets: Int32Array; values: Int32Array}
 }
 
 // ---------------------------------------------------------------------------

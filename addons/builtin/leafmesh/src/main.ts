@@ -10,7 +10,7 @@
  * `"dependencies": []` — the first builtin with none. See P11 §4.
  *
  * This module registers the kind descriptor, the data class, the OBJ importer,
- * and the modeling toolmode with its selection ops (P12).
+ * the modeling toolmode with its selection ops (P12), and the UV source (P18).
  */
 
 import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
@@ -24,6 +24,7 @@ import {LEAFMESH_OBJ_FORMAT} from './obj.js'
 import {LEAFMESH_SELECT_OPS} from './select_ops.js'
 import {LeafMeshToolMode} from './toolmode.js'
 import {LeafMeshTransType} from './transtype.js'
+import {LEAFMESH_UV_PROVIDER} from './uv_source.js'
 
 export const addonDefine: IAddonDefine = {
   name       : 'Leaf Mesh',
@@ -68,6 +69,10 @@ export function register(api: AddonAPI<IAddon>) {
   // Implementor #2 of `ITransDataType` (P12 §6) — grab/rotate/scale, snapping
   // and proportional edit, with `transform_ops.ts` naming no geometry type.
   api.registerTransType(LeafMeshTransType)
+
+  // Implementor #1 of `IUVSource` (P18 §5 step 2). Registered, not narrowed:
+  // the source is an adapter, so it cannot be found by a capability query.
+  api.registerUVSource(LEAFMESH_UV_PROVIDER)
 
   // The startup file `faber-leaf-core` selects (P17 §3).
   api.registerDefaultSceneBuilder('leafmesh-cube', buildLeafMeshDefaultScene, 'leafmesh')
