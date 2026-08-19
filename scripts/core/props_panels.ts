@@ -1,9 +1,9 @@
 /**
  * Registry of properties-editor panels, keyed by data kind.
  *
- * `PropsEditor` used to build the object-data tab by branching on concrete type
- * (`data instanceof ProceduralMesh`, `data.lib_type === 'mesh'`), which is the
- * pattern the host geometry contract exists to remove: a new geometry type
+ * `PropsEditor` used to build the object-data tab by branching on concrete
+ * type and on `lib_type` strings, which is the pattern the host geometry
+ * contract exists to remove: a new geometry type
  * could not contribute UI without editing `scripts/`. A panel is contributed
  * through `AddonAPI.registerPropsPanel` instead, and disappears with its addon.
  *

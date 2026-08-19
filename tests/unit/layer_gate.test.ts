@@ -14,8 +14,8 @@ interface Violation {
   to: string
 }
 
-const RULE_NAMES = ['core-no-mesh', 'core-no-addons', 'no-circular']
-const SEVERITIES = {'core-no-mesh': 'error', 'core-no-addons': 'error', 'no-circular': 'warn'}
+const RULE_NAMES = ['core-no-litemesh', 'core-no-addons', 'no-circular']
+const SEVERITIES = {'core-no-litemesh': 'error', 'core-no-addons': 'error', 'no-circular': 'warn'}
 
 function cruiseResult(violations: Violation[]) {
   return {summary: {violations}}
@@ -30,7 +30,7 @@ describe('tally', () => {
     const rules = tally(cruiseResult([]), RULE_NAMES, SEVERITIES)
 
     expect([...rules.keys()]).toEqual(RULE_NAMES)
-    expect(rules.get('core-no-mesh')).toMatchObject({count: 0, severity: 'error'})
+    expect(rules.get('core-no-litemesh')).toMatchObject({count: 0, severity: 'error'})
     expect(rules.get('no-circular')).toMatchObject({count: 0, severity: 'warn'})
   })
 
@@ -56,7 +56,7 @@ describe('tally', () => {
 })
 
 describe('evaluate', () => {
-  const baseline = {total: 10, rules: {'core-no-mesh': 0, 'core-no-addons': 0, 'no-circular': 5}}
+  const baseline = {total: 10, rules: {'core-no-litemesh': 0, 'core-no-addons': 0, 'no-circular': 5}}
 
   test('passes when nothing fires and every count is within budget', () => {
     const rules = tally(cruiseResult([]), RULE_NAMES, SEVERITIES)
@@ -74,7 +74,7 @@ describe('evaluate', () => {
     const failures = evaluate(rules, {baseline, warnCount: 0})
 
     expect(failures).toHaveLength(1)
-    expect(failures[0]).toMatch(/^core-no-mesh: 1 violation\(s\) at severity error$/)
+    expect(failures[0]).toMatch(/^core-no-addons: 1 violation\(s\) at severity error$/)
   })
 
   test('an error-severity rule fails even when its budget would allow it', () => {

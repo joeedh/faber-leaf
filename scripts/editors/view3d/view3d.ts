@@ -861,7 +861,6 @@ View3D {
     strip.prop("scene.toolmode[tanspace_tester]");
     */
 
-    //header.tool("mesh.subdivide_smooth()", PackFlags.USE_ICONS);
     //strip.tool("view3d.view_selected()", PackFlags.USE_ICONS);
     //strip.tool("view3d.center_at_mouse()", PackFlags.USE_ICONS);
 
@@ -888,7 +887,6 @@ View3D {
     //strip.prop("scene.toolmode[pan]");
     //strip.prop("scene.toolmode[object]");
 
-    //header.prop("mesh.flag[SUBSURF]", PackFlags.USE_ICONS);
     //strip.tool("light.new(position='cursor')", PackFlags.USE_ICONS);
 
     //header.iconbutton(Icons.VIEW_SELECTED, "Recenter View (fixes orbit/rotate problems)", () => {

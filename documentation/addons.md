@@ -11,15 +11,14 @@ TypeScript module that:
 - Imports framework primitives through the `@framework/api` alias
 - Imports another addon's public surface through `@addon/<id>/api`
 
-Builtin addons today: `mesh`, `mesh_edit`, `curve`, `subsurf`, `tetmesh`,
-`sculptcore`. `mesh` is unique in that it's also the home of
-the `Mesh` DataBlock, customdata layers, and the BVH — i.e. the framework
-literally cannot render a model without it.
+Builtin addons today: `leafmesh` and `sculptcore`. `leafmesh` is the home of
+the `LeafMesh` DataBlock, its attribute layers, and its picking / selection /
+modeling ops; `sculptcore` owns the sculpt toolmode, the brushes, and the
+`litemesh.add_*` entries in the Add menu.
 
-The mesh addon has 100+ registerable classes, collected into the
-auto-generated `addons/builtin/mesh/src/register_classes.ts`. When you add a
-new class that needs registering, either append it manually to that list or
-rerun `node tools/migrate-mesh-registers.js` to regenerate it.
+Every class an addon owns is registered from its `register(api)` hook, through
+`api.register` / `api.registerAll` — there is no generated class list to keep
+in sync.
 
 ## Anatomy
 

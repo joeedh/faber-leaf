@@ -21,7 +21,6 @@ import {Icons} from '../editors/icon_enum.js'
 import {PropModes} from '../editors/view3d/transform/transform_base.js'
 import {Collection} from './collection'
 import {SceneObjectData} from '../sceneobject/sceneobject_base'
-import {SceneBVH} from '../sceneobject/scenebvh.js'
 import {toolModeStruct, updateToolModeAPI} from './scene_utils'
 
 export enum EnvLightFlags {
@@ -371,7 +370,6 @@ propIslandOnly : bool;
   // data lib
   collection: Collection = undefined as unknown as Collection
 
-  sbvh: SceneBVH
   //magnet transform settings
   propRadius = 1.0
   propMode = 0
@@ -419,8 +417,6 @@ propIslandOnly : bool;
 
   constructor(objects: Iterable<SceneObject> = []) {
     super()
-
-    this.sbvh = new SceneBVH(this)
 
     //XXX hack!
     this.widgets = new WidgetManager(window._appstate.ctx as ViewContext)

@@ -4466,6 +4466,10 @@ registerDataKind({
   id          : 'litemesh',
   uiName      : 'Lite Mesh',
   usesMaterial: true,
+  // TODO: no TRIANGLES, so STL export silently skips a LiteMesh -- which is
+  // the mesh users would most want to export. It threw outright before P13
+  // re-pointed the exporter at ITriangleSource; implementing extractTriangles
+  // over the sculptcore tessellation is the fix.
   capabilities: [GeometryCapability.INVALIDATION],
   // The always-present set. Everything a material asks for beyond this is
   // built per-material by `setRequestedAttrs`, at the slot the generator

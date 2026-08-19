@@ -101,9 +101,6 @@ view3d.ObjectEditor {
     strip.prop('scene.tool.transformWidget[translate]')
     strip.prop('scene.tool.transformWidget[scale]')
     strip.prop('scene.tool.transformWidget[rotate]')
-
-    //strip = row.strip();
-    //strip.tool("mesh.toggle_select_all()");
   }
 
   on_mousedown(e: PointerEvent, x: number, y: number, was_touch?: boolean): boolean | void {

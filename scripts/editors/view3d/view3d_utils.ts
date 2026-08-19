@@ -15,15 +15,6 @@ import type {View3D} from './view3d'
 
 export type BoundingBox = [IVectorOrHigher<3, Vector3>, IVectorOrHigher<3, Vector3>]
 
-/** The part of a BREP mesh `calcUpdateHash` reads. Erased with the BREP at P13. */
-interface BrepElementCounts {
-  verts: {length: number}
-  edges: {length: number}
-  faces: {length: number}
-  loops: {length: number}
-  _ltris?: {length: number}
-}
-
 const thehash = new util.HashDigest()
 
 const proj_temps = util.cachering.fromConstructor(Vector4, 128)
@@ -73,20 +64,6 @@ export function calcUpdateHash(view3d: View3D, do_objects = true) {
 
       //console.log("UPDATEGEN:", ob.updateGen, ob.data.updateGen);
 
-      if (ob.data?.lib_type === 'mesh') {
-        // Structural, not `as Mesh`: the draw-cache key only needs element
-        // counts, and the host must not import the BREP addon (it leaves at P13).
-        const mesh = ob.data as unknown as BrepElementCounts
-
-        thehash.add(mesh.verts.length)
-        thehash.add(mesh.faces.length)
-        thehash.add(mesh.edges.length)
-        thehash.add(mesh.loops.length)
-
-        if (mesh._ltris) {
-          thehash.add(mesh._ltris.length)
-        }
-      }
       if (ob.data.updateGen !== undefined) {
         thehash.add(ob.data.updateGen)
       }

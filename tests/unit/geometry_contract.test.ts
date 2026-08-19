@@ -163,15 +163,11 @@ describe('no concrete-type branching in the host', () => {
   ]
 
   /**
-   * The kind-string compares that survive P7. Each is a host code path that
-   * still assumes "mesh" specifically; P8 onward removes them. Shrink this list,
-   * never grow it — a new entry means the host learned a type name.
+   * Empty since P13: the last three kind-string compares were context.ts's, and
+   * they went with the BREP. Shrink this list, never grow it — a new entry means
+   * the host learned a type name.
    */
-  const ALLOWED = new Set([
-    'scripts/core/context.ts:226: kind-string compare',
-    'scripts/core/context.ts:323: kind-string compare',
-    'scripts/core/context.ts:372: kind-string compare',
-  ])
+  const ALLOWED = new Set<string>([])
 
   /**
    * Blank out `/* … *\/` bodies, keeping the line count so reported line numbers

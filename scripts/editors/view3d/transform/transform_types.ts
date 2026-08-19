@@ -63,8 +63,6 @@ export const ObjectTransType: ITransDataType<
     propradius: number,
     toolop: TransformOp
   ): TransDataList<SceneObject, ObjectTransform> | undefined {
-    const ignore_meshes = selectmode & (SelMask.VERTEX | SelMask.EDGE | SelMask.FACE)
-
     if (!(selectmode & SelMask.OBJECT)) {
       return undefined
     }
@@ -88,8 +86,10 @@ export const ObjectTransType: ITransDataType<
     }
 
     for (const ob of ctx.selectedObjects) {
-      let ok = get_transform_parent(ob) === ob
-      ok = ok && (!ignore_meshes || ob.data?.lib_type !== 'mesh')
+      // TODO: in an element mode this used to skip the object being edited, but
+      // only for the BREP -- LiteMesh box modeling was never covered. If that
+      // double-transform shows up, gate on a capability, not on a lib_type.
+      const ok = get_transform_parent(ob) === ob
 
       if (!ok) {
         continue

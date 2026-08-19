@@ -10,9 +10,9 @@
  * source dir appears in BOTH the addon bundle's inputs and the main bundle's
  * inputs, that's a violation.
  *
- * In-bundle builtins (mesh, subsurf, curve, mesh_edit, sculptcore) are
- * intentionally compiled into the main bundle and are NOT in `EXTERNAL_IDS`,
- * so the guard never fires on them.
+ * In-bundle builtins (today just `sculptcore`) are intentionally compiled
+ * into the main bundle and are NOT in `EXTERNAL_IDS`, so the guard never fires
+ * on them.
  *
  * Usage (from build-addons.js, after both builds have run):
  *   import {checkAddonDuplication, EXTERNAL_IDS} from './check-addon-duplication.js'

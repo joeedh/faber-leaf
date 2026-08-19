@@ -259,15 +259,14 @@ same goes for tessellation, draw buffers, and UV caches.
 
 ### 5.1 What each provider derives
 
-`Mesh` (`addons/builtin/mesh/src/mesh.ts`) maps onto its `RecalcFlags`:
+`LeafMesh` (`addons/builtin/leafmesh/src/leafmesh.ts`) maps onto its caches:
 
-| The caller said | `Mesh` rebuilds |
+| The caller said | `LeafMesh` rebuilds |
 | --- | --- |
-| `ALL` (in full) | `regenAll()`, then the rows below still run |
-| `TOPOLOGY` | `regenTessellation()` |
-| `TOPOLOGY \| POSITIONS` | `regenBVH()` |
-| `TOPOLOGY \| POSITIONS \| ATTRIBUTES \| MATERIALS` | `regenRender()` |
-| `SELECTION` | `regenElementsDraw()`, `regenUVEditor()` |
+| `TOPOLOGY \| POSITIONS` | `triCache.invalidate()` |
+| `TOPOLOGY` | `mesh.topoStamp++` |
+| `TOPOLOGY \| POSITIONS \| ATTRIBUTES` | `_drawable.invalidate()` |
+| anything at all | `updateGen++`, then `graphUpdate()` |
 
 `LiteMesh` (`scripts/lite-mesh/litemesh.ts`) derives almost everything lazily
 inside the engine, so the same table has exactly one live row — `TOPOLOGY |

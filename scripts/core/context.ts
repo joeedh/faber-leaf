@@ -3,7 +3,8 @@ import '../path.ux/scripts/util/struct.js'
 import {NodeViewer} from '../editors/node/NodeViewer.js'
 import {Editor, editorAccessor, getContextArea, IEditorConstructor} from '../editors/editor_base'
 import {ResourceBrowser} from '../editors/resbrowser/resbrowser.js'
-import {SceneObjectData} from '../sceneobject/sceneobject_base.js'
+import {dataHasCapability} from './data_kinds.js'
+import {GeometryCapability} from './geometry_contract.js'
 import {Light} from '../light/light.js'
 import type {Scene} from '../scene/scene'
 import {BlockSet, DataBlock, DataRef, Library} from './lib_api'
@@ -296,7 +297,7 @@ export class ToolContext extends ContextExtraAPI {
     return this.scene.objects.selected.editable
   }
 
-  /* unlike selectedMeshObjects, this returns all light objects
+  /* unlike selectedTriangleSourceObjects, this returns all light objects
    * even if they share .data Light instances*/
   get selectedLightObjects() {
     const this2 = this
@@ -314,18 +315,18 @@ export class ToolContext extends ContextExtraAPI {
     })()
   }
 
-  /**returns selected mesh objects,
-   ignoring objects that use the same mesh
-   instance (only one will get yielded in that case)
+  /**
+   * Selected objects whose geometry can be read as triangles, ignoring objects
+   * that share one data block (only one of those is yielded).
    */
-  get selectedMeshObjects(): Iterable<SceneObject> {
+  get selectedTriangleSourceObjects(): Iterable<SceneObject> {
     const this2 = this
     return (function* () {
       const visit = new Set<unknown>()
 
       for (const ob of this2.selectedObjects) {
         let bad = ob.data === undefined
-        bad = bad || SceneObjectData.dataKindOf(ob.data) !== 'mesh'
+        bad = bad || !dataHasCapability(ob.data, GeometryCapability.TRIANGLES)
         bad = bad || visit.has(ob.data)
 
         if (bad) {

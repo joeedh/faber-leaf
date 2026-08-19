@@ -46,10 +46,10 @@
     "moved to the new brep-consumers-no-addons rule), core-no-addons-typeonly",
     "12 -> 7, core-no-addons-transitive 1152 -> 800, no-circular 631 -> 586.",
     "",
-    "P13 (W1) deleted the BREP: addons/builtin/{mesh,mesh_edit},",
-    "builtin_data_api.ts, the four dev-addon harnesses, scripts/tet,",
-    "scripts/hair and transform_inset.ts, with curves/tets/hair/subsurf and the",
-    "unwrapping stack rescued into archive/ first. That removed every remaining",
+    "P13 (W1) deleted the TS BREP: its two addons, builtin_data_api.ts, the",
+    "four dev-addon harnesses, scripts/tet, scripts/hair and",
+    "transform_inset.ts, with curves/tets/hair/subsurf and the unwrapping stack",
+    "rescued into archive/ first. That removed every remaining",
     "host->addon edge at once: brep-consumers-no-addons 13 -> 0 (rule deleted),",
     "core-no-addons-typeonly 7 -> 0, core-no-addons-transitive 800 -> 0,",
     "no-circular 586 -> 461, modules 546 -> 361.",
@@ -61,7 +61,13 @@
     "set no longer exists), and the tet|hair alternatives inside the HOST regex.",
     "",
     "Every layer rule is now `severity: error` and reads 0. The only `warn`",
-    "left is no-circular (461), owned by P17. Success criterion #1 is closed."
+    "left is no-circular (461), owned by P17. Success criterion #1 is closed.",
+    "",
+    "P13 step 9 (criterion-2 residue) deleted the last host code keyed on the",
+    "BREP: SceneBVH (dead -- every method early-returned without the addon it",
+    "looked up), calcUpdateHash's element-count block, transform_types'",
+    "always-true object-skip clause, and the STL exporter's loopTris walk, which",
+    "now reads ITriangleSource. no-circular 461 -> 459."
   ],
   "measured": "2026-08-19",
   "config": ".dependency-cruiser.cjs",
@@ -69,7 +75,7 @@
     "scripts",
     "addons"
   ],
-  "total": 461,
+  "total": 459,
   "rules": {
     "core-no-view3d-tools": 0,
     "core-no-addons": 0,
@@ -77,6 +83,6 @@
     "core-no-addons-transitive": 0,
     "core-no-litemesh": 0,
     "core-no-sculptcore": 0,
-    "no-circular": 461
+    "no-circular": 459
   }
 }

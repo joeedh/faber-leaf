@@ -91,28 +91,32 @@ code** — Light, NullObject, Camera, and StrandSet all rely on this. They only
 need a correct `selectMask` in `dataDefine()` (this is why `Light` now declares
 `SelMask.LIGHT` instead of `0`).
 
-## Mesh (BMesh) picking — the BVH path
+## LeafMesh picking — the brute-force path
 
-The `Mesh` class (`addons/builtin/mesh/src/mesh.ts`) overrides all four methods
-with BVH-backed element picking:
+`LeafMeshData` (`addons/builtin/leafmesh/src/leafmesh.ts`) overrides all four
+methods and delegates each to `pick.ts`. That file does unprojection and result
+packing only; the geometry itself is in `pick_geom.ts`, which imports nothing
+from `scripts/` and is unit-tested directly:
 
-- **`castViewRay`** transforms the screen ray into object-local space and calls
-  `this.getLastBVH().castRay(...)`.
-- **`castScreenCircle`** builds a **view cone** (near→far through the cursor,
-  object-local) by unprojecting through `imat = (objMatrix · camera.rendermat)⁻¹`,
-  then queries `bvh.facesInCone` / `bvh.vertsInCone`. A per-element screen-distance
-  test (vertex/edge-line/face-centroid) refines the radius check.
-- **`castScreenRect`** builds a **frustum** from the rect's 4 corners
-  (unprojected at the near + far planes = 8 object-local points), queries
-  `bvh.facesInFrustum` / `bvh.vertsInFrustum` as the broad phase, then refines
-  with a 2D screen-rect containment test so the selection exactly matches the
-  drawn rectangle.
-- **`findNearest`** runs a small `castScreenCircle` and reduces it to the nearest
-  `FindNearestRet` per element type (vertex/edge/face), plus an object-level hit
-  when `selectMask & SelMask.OBJECT`.
+- **`castViewRay`** unprojects the cursor to an object-local ray and calls
+  `rayCastMesh`, which walks the triangulation cache.
+- **`castScreenCircle`** projects each element's representative point straight
+  from object-local to screen (`localProjector` — no world-space round trip)
+  and keeps what lands inside the radius.
+- **`castScreenRect`** runs the same containment test against the rect, ordered
+  by distance from its centre.
+- **`findNearest`** reduces that same circle query to the nearest hit per
+  requested domain — so click-select and brush-select agree by construction —
+  plus an object-level hit when `selectMask & SelMask.OBJECT`.
 
-The element switch in `findNearest` is gated on `SelMask.GEOM`, so object-mode
-picking returns only the OBJECT-level hit (not stray face hits).
+All four early-out unless `selectMask` addresses this object, and the domains
+queried are derived from the mask, so object-mode picking returns only the
+OBJECT-level hit (not stray face hits).
+
+The queries are brute force deliberately: LeafMesh declines the spatial
+capability rather than faking one, and the contract exposes queries and never
+structures — so an acceleration tree can be added later without a caller
+noticing.
 
 ### Frustum primitives
 
@@ -122,26 +126,31 @@ Box select needed real frustum intersection, which didn't exist before:
 |---|---|
 | `scripts/util/frustum.ts` | `point_in_frustum`, `aabb_frustum_isect` (p-vertex test), `tri_frustum_isect` (conservative SAT over the 6 planes). Dependency-free so it unit-tests in isolation. |
 | `scripts/util/isect.ts` | re-exports the above (and is the home of the existing cone tests `aabb_cone_isect` / `tri_cone_isect`). |
-| `addons/builtin/mesh/src/bvh.ts` | `facesInFrustum` / `vertsInFrustum` (node-level + BVH-level), gated by `aabb_frustum_isect`, mirroring the existing `facesInCone` / `vertsInCone`. |
 
 A frustum is an array of `Vector4` plane equations `[nx,ny,nz,d]` with **inward**
-normals; a point is inside when `dot(n,p)+d >= 0` for every plane. `Mesh`'s
-`_buildScreenRectFrustum` fits a plane to each of the 6 faces and flips each
-normal so the 8-corner centroid is on its positive side — so plane winding/order
-never has to be reasoned about.
+normals; a point is inside when `dot(n,p)+d >= 0` for every plane. A plane is
+fitted to each of the 6 faces of the unprojected corner box and each normal
+flipped so the 8-corner centroid is on its positive side, so plane
+winding/order never has to be reasoned about.
+
+No pick path calls these TS helpers today: LiteMesh builds its planes in C++
+(`buildScreenRectPlanes`, below) and LeafMesh tests screen-space containment
+instead. They stay as the reference the C++ side is checked against, and they
+unit-test in isolation (`tests/unit/isect_frustum.test.ts`).
 
 ## Selection operators
 
 | Op | File | Calls |
 |---|---|---|
-| `CircleSelectOp` (brush) | `addons/builtin/mesh/src/select_ops.js` | `mesh.castScreenCircle(...)` |
-| `BoxSelectOp` (mesh box) | `addons/builtin/mesh/src/select_ops.js` | `mesh.castScreenRect(...)` |
+| `SelectCircleLeafMeshOp` (brush) | `addons/builtin/leafmesh/src/select_ops.ts` | `data.castScreenCircle(...)` |
+| `SelectBoxLeafMeshOp` (element box) | `addons/builtin/leafmesh/src/select_ops.ts` | `data.castScreenRect(...)` |
+| `SelectNearestLeafMeshOp` (element click) | `addons/builtin/leafmesh/src/select_ops.ts` | `data.findNearest(...)` |
 | `ObjectBoxSelectOp` (object box) | `scripts/sceneobject/selectops.js` | `ob.data.castScreenRect(...)` for every visible object |
 | `ObjectSelectOneOp` (click) | `scripts/sceneobject/selectops.js` | via `FindNearest` |
 
-Mesh ops register through the addon pipeline
-(`addons/builtin/mesh/src/register_classes.ts`). The object box-select tool is
-reachable via `StandardTools.BoxSelect` → `object.select_box`.
+Element ops register from their addon's `register(api)` hook
+(`api.registerAll(..., ...LEAFMESH_SELECT_OPS, ...)`). The object box-select
+tool is reachable via `StandardTools.BoxSelect` → `object.select_box`.
 
 Both box ops are modal: `on_mousedown` records the drag start, `on_mousemove`
 redraws the rubber-band rectangle, `on_mouseup` samples once and ends.

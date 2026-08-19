@@ -143,9 +143,9 @@ export class AddonAPI<T> {
 
   readonly sceneobject = sceneobject
 
-  // P13 deleted the `mesh` / `mesh_edit` addons, and with them the lazy
-  // `api.mesh` / `api.bvh` / `api.subsurf` / `api.toolmode.MeshToolBase`
-  // getters. A peer addon reaches another through `@addon/<id>/api`.
+  // P13 deleted the TS BREP addons, and with them the lazy `api.mesh` /
+  // `api.bvh` / `api.subsurf` / `api.toolmode.MeshToolBase` getters. A peer
+  // addon reaches another through `@addon/<id>/api`.
 
   readonly KeyMap = KeyMap
   readonly HotKey = HotKey
@@ -286,7 +286,7 @@ export class AddonAPI<T> {
   /**
    * Contribute entries to a named application menu. Call from `register(api)`:
    *
-   *   api.menuEntries('add', ['mesh.make_cube()', 'mesh.make_sphere()'])
+   *   api.menuEntries('add', ['litemesh.add_cube()', 'litemesh.add_plane()'])
    *
    * Each entry is a toolpath string evaluated by the menu builder. Entries are
    * removed automatically when the addon is disabled (via `unregisterAll()`), so

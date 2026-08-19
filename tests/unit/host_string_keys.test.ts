@@ -172,10 +172,10 @@ describe('legacy struct-name migration', () => {
   })
 
   test('a contribution merges in and leaves with its owner', () => {
-    registerLegacyStructNames('mesh', {CotanVert: 'mesh.CotanVert'})
-    expect(getLegacyStructNameMap().CotanVert).toBe('mesh.CotanVert')
+    registerLegacyStructNames('demo', {CotanVert: 'demo.CotanVert'})
+    expect(getLegacyStructNameMap().CotanVert).toBe('demo.CotanVert')
 
-    unregisterLegacyStructNames('mesh')
+    unregisterLegacyStructNames('demo')
     expect(getLegacyStructNameMap().CotanVert).toBeUndefined()
   })
 
@@ -197,13 +197,13 @@ describe('an unbound hotkey is a no-op, not a crash', () => {
       },
     }
 
-    expect(() => new HotKey('W', [], 'mesh.vertex_smooth()').exec(ctx as never)).not.toThrow()
+    expect(() => new HotKey('W', [], 'demo.vertex_smooth()').exec(ctx as never)).not.toThrow()
 
     // Two turns: one for execTool's rejection, one for the .catch handler.
     await Promise.resolve()
     await Promise.resolve()
 
     expect(warn).toHaveBeenCalled()
-    expect(String(warn.mock.calls[0][0])).toContain('mesh.vertex_smooth()')
+    expect(String(warn.mock.calls[0][0])).toContain('demo.vertex_smooth()')
   })
 })

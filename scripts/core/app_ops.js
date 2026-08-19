@@ -202,7 +202,7 @@ export class FileExportSTL extends ToolOp {
   }
 
   exec(ctx) {
-    let list = new Set(ctx.selectedMeshObjects).map((f) => f.data)
+    let list = new Set(ctx.selectedTriangleSourceObjects).map((f) => f.data)
     if (list.size === 0) {
       return
     }

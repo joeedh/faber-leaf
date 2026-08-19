@@ -36,7 +36,7 @@ describe('validateManifest', () => {
   })
 
   test('rejects bad id', () => {
-    for (const bad of ['', 'Foo', '1mesh', 'mesh.edit', 'mesh/edit']) {
+    for (const bad of ['', 'Foo', '1demo', 'demo.edit', 'demo/edit']) {
       expect(() => validateManifest({id: bad, name: 'x', version: '1.0.0', entry: 'm.ts'})).toThrow(
         ManifestValidationError
       )
