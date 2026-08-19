@@ -7,7 +7,7 @@ import {nstructjs, type DataAPI, type DataStruct, type Container, type IAreaDef}
 import type {Material} from '../../core/material'
 import type {ViewContext} from '../../core/context'
 import type {StructReader} from '../../path.ux/scripts/util/nstructjs'
-import {SceneObjectData} from '@framework/api'
+import {SceneObjectData} from '../../sceneobject/sceneobject_base.js'
 
 /**
  * NodeEditor specialized for editing the active object's material shader graph.

@@ -19,7 +19,7 @@ import {Menu} from '../../path.ux/scripts/widgets/ui_menu.js'
 const menuSize = 27
 
 import * as platform from '../../core/platform.js'
-import {addonManager} from '@framework/api'
+import addonManager from '../../addon/addon.js'
 
 export class ToolHistoryConsole extends ColumnFrame {
   constructor() {

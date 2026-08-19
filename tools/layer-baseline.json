@@ -82,7 +82,15 @@
     "in proceduralTex.ts / addon_base.ts dropped. no-circular 400 -> 399.",
     "The entry-walk ratchet lives separately in tools/cycle-baseline.json;",
     "this count is dependency-cruiser sweeping every root, so path.ux",
-    "dominates it and the two numbers do not track each other."
+    "dominates it and the two numbers do not track each other.",
+    "",
+    "P18 (W4a) took scripts/framework_api.ts out of every cycle it was in. The",
+    "hub is the addon-facing barrel, so it imports most of the host; two host",
+    "files imported it back (MainMenu.js for addonManager, MaterialEditor.ts for",
+    "SceneObjectData), and those two edges alone closed 23 cycles through it.",
+    "Both now import the real module directly. That also absorbed the three",
+    "edges the UV editor's own hub exports add (editor_base, velpan, image):",
+    "no-circular 399 -> 373."
   ],
   "measured": "2026-08-19",
   "config": ".dependency-cruiser.cjs",
@@ -91,7 +99,7 @@
     "addons",
     "distributions"
   ],
-  "total": 399,
+  "total": 373,
   "rules": {
     "core-no-view3d-tools": 0,
     "core-no-addons": 0,
@@ -99,6 +107,7 @@
     "core-no-addons-transitive": 0,
     "core-no-litemesh": 0,
     "core-no-sculptcore": 0,
-    "no-circular": 399
+    "host-no-framework-api": 0,
+    "no-circular": 373
   }
 }

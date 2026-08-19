@@ -50,6 +50,7 @@ import {
   MaterialChooser,
   MaterialPanel,
   NewDataBlockOp,
+  defineEditorAPI,
   getContextArea,
   IEditorConstructor,
 } from '../editors/editor_base'
@@ -524,6 +525,12 @@ export class AddonAPI<T> {
       Editor.register(cls as unknown as IEditorConstructor)
       this.classes.editorClasses.push(cls)
       addToOther = false
+
+      // An editor's own struct and its `editors.<name>` context path are wired
+      // by the one-shot `getDataAPI` build, which has already run by now; an
+      // addon-owned editor attaches itself so its `prop()` bindings resolve.
+      const editorCls = cls as unknown as IEditorConstructor
+      this._whenAppstateReady(() => defineEditorAPI(_appstate.api, editorCls))
     }
 
     if (subclassOf(cls, SceneObjectData)) {

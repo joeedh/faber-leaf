@@ -10,13 +10,14 @@
  * — the editor is useful the moment any source exists.
  *
  * Registration is thin on purpose: the behaviour is `index.ts`, which imports
- * no host value and is unit-tested against the in-memory double. The editor
- * component and the `uveditor.*` ToolOps attach here as they land.
+ * no host value and is unit-tested against the in-memory double. The area is
+ * the shell around it; the `uveditor.*` ToolOps attach here as they land.
  */
 
 import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
 
 import * as uvEditor from './index.js'
+import {UVEditor} from './uv_editor_area.js'
 
 export const addonDefine: IAddonDefine = {
   name       : 'UV Editor',
@@ -28,6 +29,8 @@ export const addonDefine: IAddonDefine = {
 export function register(api: AddonAPI<IAddon>) {
   // Keep in sync with addons/builtin/uv_editor/src/api.ts.
   api.exportNamespace('uv_editor', {...uvEditor})
+
+  api.register(UVEditor)
 }
 
 export function unregister() {}

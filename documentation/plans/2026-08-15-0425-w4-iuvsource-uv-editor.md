@@ -1,8 +1,9 @@
 # P18 — W4a: `IUVSource` + the mesh-agnostic UV editor
 
-**Status:** in progress — §5 steps 1 and 2 closed (all three implementors
-landed and run through one conformance suite); step 3 under way (the editor's
-behaviour landed as a host-free core; its Editor component is next).
+**Status:** in progress — §5 steps 1–3 closed (all three implementors landed
+and run through one conformance suite; the editor's host-free core, its addon,
+and its Editor component are in). Step 4 — the `uveditor.*` ToolOps, which is
+where selection lands — is next.
 
 **Date:** 2026-08-15 (citations re-verified 2026-08-19)
 
@@ -224,8 +225,28 @@ implementation will otherwise break:
      bundle for a stronger reason than leafmesh's: a physical build boundary is
      a better guarantee of criterion 11 than a lint rule, and the built
      `build/addons/uv_editor/src/main.js` has exactly three inputs, all its own.
-   - [ ] **The Editor component** — draw, pan/zoom, mouse pick, wired to the
-     core. Next commit.
+   - [x] **The Editor component** — `uv_editor_area.ts`: the area, Canvas-2D
+     draw (checker, backdrop image, edges, points), `VelPan` pan/zoom, and
+     mouse-move highlight, reaching geometry only through `uvSourceFor`. Kept
+     out of `index.ts` because it imports host *values* and so cannot run under
+     jest; the rules it needs are all in the core it calls. Selection is
+     deliberately not here — it is written once, in its undoable `uveditor.*`
+     form, in step 4.
+   - [x] **Editors registered by an addon get a data API.** `getDataAPI()` is
+     one-shot and runs before addons start, so `buildEditorsAPI` had already
+     swept `areaclasses` by the time an addon registered an editor: no struct,
+     no `editors.<name>` context path, so every `prop()` binding and
+     `VelPanPanOp`'s datapath would have failed. `defineEditorAPI(api, cls)` is
+     now factored out of `buildEditorsAPI` and is idempotent, and
+     `AddonAPI.register` calls it for an `Editor` subclass. `DataBlock` and
+     `SceneObjectData` already had this path; editors were the gap.
+   - [x] **The host stopped importing its own barrel.** Adding the editor's
+     three hub exports (`editor_base`, `velpan`, `image`) pushed `no-circular`
+     over budget, which surfaced the real defect: `MainMenu.js` and
+     `MaterialEditor.ts` imported `@framework/api`, and those two edges closed
+     23 cycles through a module that re-exports most of `scripts/`. Both now
+     import the defining module, and a new error-severity
+     `host-no-framework-api` rule keeps them there. `no-circular` 399 → 373.
 4. Re-register the tool paths from `archive/uv-editor/TODO.md` under `uveditor.*`,
    with the same names, taking a datapath. Users have keymaps and
    `saveLastValue()` state keyed on these paths; a rename is gratuitous churn.

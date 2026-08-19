@@ -145,6 +145,9 @@ export type {IFileFormat} from './core/file_formats.js'
 // only the contract, so the type rides the hub; registration still goes through
 // `AddonAPI.registerUVSource`.
 export type {IUVSourceProvider} from './core/uv_sources.js'
+// The lookup half of that registry, for an editor that has a data block and
+// wants its UVs. One resolver, so an editor's gate and its call path agree.
+export {listUVSources, uvSourceFor} from './core/uv_sources.js'
 // The contract's own conformance checker (§11), jest-free on purpose: a
 // provider lives in an addon, and an addon is only reachable from inside the
 // running app, where jest is not. Its test-support module calls this.
@@ -226,6 +229,17 @@ export type {ITransDataType, TransformDefine} from './editors/view3d/transform/t
 export {RotateWidget, ScaleWidget, TranslateWidget} from './editors/view3d/widgets/widget_tools.js'
 export {Icons} from './editors/icon_enum.js'
 export {ImageBus} from './editors/image/ImageBus.js'
+// The image data block and the pointer-with-a-user that an editor holds one
+// through, so an addon-owned editor can show a texture behind what it edits.
+export {ImageBlock, ImageTypes, ImageUser} from './image/image.js'
+// An addon that contributes a whole editor area needs the base class, its
+// sidebar, and the data-block browser its header puts in a row. `api.editor.*`
+// carries the same values, but only inside `register(api)` — a class body
+// needs them at module scope.
+export {DataBlockBrowser, Editor, EditorSideBar, makeDataBlockBrowser} from './editors/editor_base.js'
+// Pan/zoom for a 2D editor, and the modal op that drives it. The op takes a
+// data path, so an addon-owned editor pans without the host knowing it exists.
+export {VelPan, VelPanFlags, VelPanPanOp} from './editors/velpan.js'
 export type {BoundingBox} from './editors/view3d/view3d_utils.js'
 export type {View3D} from './editors/view3d/view3d.js'
 export type {ImageEditor} from './editors/all.js'

@@ -566,31 +566,49 @@ export class EditorAccessor {
 
 export const editorAccessor = new EditorAccessor()
 
-export function rebuildEditorAccessor() {
+/** Characters an area name may carry that a data-API path may not. */
+const NAME_RE = /[\- \t]/g
+
+/** The ToolContext struct, kept so an editor registered later can still attach. */
+let _editorCtxStruct: DataStruct | undefined = undefined
+const _definedEditors = new Set<IEditorConstructor<any>>()
+
+/**
+ * Attach one editor class to the data API: its own struct, the `editors.<name>`
+ * path on the context, and the accessor property that path reads through.
+ *
+ * `getDataAPI` is one-shot and runs before addons start, so an addon that owns
+ * an editor calls this itself (via `AddonAPI.register`) rather than being swept
+ * up by `buildEditorsAPI`. Idempotent: a class already attached is a no-op, so
+ * a disable/enable cycle doesn't redefine anything.
+ */
+export function defineEditorAPI(api: DataAPI, cls: IEditorConstructor<any>): void {
+  if (_definedEditors.has(cls)) {
+    return
+  }
+  _definedEditors.add(cls)
+
+  // Incremental and guarded, so this is cheap per class.
   editorAccessor.update()
+  cls.defineAPI(api)
+
+  const def = cls.define()
+  const name = (def.apiname ?? def.areaname).replace(NAME_RE, '_')
+  const uiname = def.uiname ?? ToolProperty.makeUIName(def.areaname)
+
+  api.mapStruct(EditorAccessor, true).struct(name, name, uiname, api.mapStruct(cls))
+  _editorCtxStruct?.struct('editors.' + name, name, uiname, api.mapStruct(cls))
 }
 
 export function buildEditorsAPI(api: DataAPI, ctxStruct: DataStruct) {
+  _editorCtxStruct = ctxStruct
+
   Editor.defineAPI(api)
-
-  editorAccessor.update()
-
-  const st = api.mapStruct(EditorAccessor, true)
 
   const editorclasses = areaclasses as unknown as {[k: string]: IEditorConstructor<any>}
 
-  //let st = api.mapStruct(
   for (const k in editorclasses) {
-    const cls = editorclasses[k]
-
-    cls.defineAPI(api)
-
-    let name = cls.define().apiname ?? cls.define().areaname
-    name = name.replace(/[\- \t]/g, '_')
-    const uiname = cls.define().uiname ?? ToolProperty.makeUIName(cls.define().areaname)
-
-    ctxStruct.struct('editors.' + name, name, uiname, api.mapStruct(cls))
-    st.struct(name, name, uiname, api.mapStruct(cls))
+    defineEditorAPI(api, editorclasses[k])
   }
 }
 

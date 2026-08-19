@@ -101,6 +101,17 @@ module.exports = {
       to      : {path: ['^sculptcore/', '^node_modules/@sculptcore/']},
     },
     {
+      name    : 'host-no-framework-api',
+      severity: 'error',
+      comment:
+        'The host must not import its own addon-facing barrel. framework_api.ts re-exports most ' +
+        'of scripts/, so every host file that imports it back closes a cycle through the hub — ' +
+        'P18 removed the last two (MainMenu, MaterialEditor) and took 23 cycles with them. ' +
+        'Import the defining module directly; `@framework/api` is for addons.',
+      from    : {path: HOST},
+      to      : {path: '^scripts/framework_api\.ts$'},
+    },
+    {
       name    : 'no-circular',
       severity: 'warn',
       comment:
