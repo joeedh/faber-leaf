@@ -69,6 +69,7 @@ import {ViewContext} from '../core/context'
 import type {ToolContext} from '../core/context'
 import {registerDataKind, unregisterDataKind, type IDataKindDescriptor} from '../core/data_kinds'
 import {getDefaultSceneBuilder, setDefaultSceneBuilder, type DefaultSceneBuilder} from '../core/default_file'
+import {registerTestScene, unregisterTestScene, type TestSceneBuilder} from '../core/test_scenes'
 import {registerFileMigrator, unregisterFileMigrator, type IFileMigrator} from '../core/file_migrations'
 import {registerFileFormat, unregisterFileFormat, type IFileFormat} from '../core/file_formats'
 import {registerUVSource, unregisterUVSource, type IUVSourceProvider} from '../core/uv_sources'
@@ -359,6 +360,15 @@ export class AddonAPI<T> {
         setDefaultSceneBuilder(prev)
       }
     })
+  }
+
+  /**
+   * Contribute a named `--gen-scene` builder. Deterministic test scenes are
+   * built out of a geometry type, so they belong to whichever addon owns it.
+   */
+  registerTestScene(name: string, builder: TestSceneBuilder): void {
+    registerTestScene(name, builder)
+    this._undoRegistrations.push(() => unregisterTestScene(name, builder))
   }
 
   /** Register a per-version file migration owned by this addon's data. */

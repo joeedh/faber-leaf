@@ -7,10 +7,9 @@
  * Workstream F) can build a deterministic scene to render, save, or dump.
  *
  * Builders register *downward* into this core registry from wherever their
- * dependencies live — e.g. the LiteMesh builder is registered from
- * `scripts/lite-mesh/litemesh_test_scene.ts`, because core must not import
- * lite-mesh / sculptcore. This is the same inversion `default_file.ts` uses for
- * the mesh subsystem's startup cube.
+ * dependencies live, because core must not import a geometry type. An addon
+ * contributes through `api.registerTestScene`, which unregisters on disable;
+ * `registerTestScene` here is the raw hook, for core's own builders.
  */
 
 import type {ToolContext} from './context'
@@ -29,6 +28,15 @@ const _scenes = new Map<string, TestSceneBuilder>()
 
 export function registerTestScene(name: string, builder: TestSceneBuilder): void {
   _scenes.set(name, builder)
+}
+
+/** Drop a named builder. Removes only `builder` itself, so a later registration
+ * of the same name by someone else survives an earlier owner's teardown. */
+export function unregisterTestScene(name: string, builder?: TestSceneBuilder): void {
+  if (builder && _scenes.get(name) !== builder) {
+    return
+  }
+  _scenes.delete(name)
 }
 
 export function getTestScene(name: string): TestSceneBuilder | undefined {
