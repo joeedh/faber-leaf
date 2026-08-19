@@ -126,8 +126,16 @@ Requirements:
 
 Modeling ops are ToolOps and must be undoable. LeafMesh's indices are stable
 under tombstoned deletion (P3), so undo can hold raw `int32` handles — but only
-as long as nothing calls `compact()` mid-session. Assert that: `compact()` has
-exactly two callers (serialize, GPU upload) and neither runs inside a ToolOp.
+as long as nothing calls `compact()` mid-session.
+
+**Asserted, and the answer is stronger than this section predicted: `compact()`
+has *no* production caller at all.** Not two. `serialize.ts` builds its own
+old-index → new-index table rather than compacting the mesh being saved
+(`serialize.ts:12`), and the GPU upload path in `draw_buffers.ts` walks the live
+elements without compacting. The only caller in the tree is
+`tests/unit/leafmesh/elem_array.test.ts`. So a stored handle cannot be
+invalidated by anything a ToolOp does, and undo holding raw `int32` is safe by
+construction rather than by convention. Re-check this if a caller ever appears.
 
 `calcUndoMem` (P7's undo capability) needs a real implementation — the column
 byte count — or large-mesh undo silently mis-budgets.
@@ -328,6 +336,41 @@ unreleased, so dropping the STRUCT field is free.
 `git diff --stat scripts/` for this commit is empty (criterion 12); no new
 contract gap was needed.
 
+### Step 3 — `ITransDataType`
+
+The same pure/framework split again.
+
+- **`transform_geom.ts`** (pure): `gatherMovableVerts`, `propagationDistances`,
+  `centroidOf`, `aabbOf`, `snapshotBytes`. Which vertices move, how far each
+  unselected one follows, and what a snapshot costs — 11 tests.
+- **`transtype.ts`** (framework): `LeafMeshTransType`, plus the `TransDataElem` /
+  `TransDataList` subclasses. Registered from `register(api)` through
+  `api.registerTransType`, so it can be unregistered when the addon unloads —
+  which `litemesh_transtype.ts:204`'s module-scope `TransDataType.register`
+  cannot.
+
+`transform_ops.ts` names no geometry type: `TransDataType.defaultTypeNames()`
+already collects every registered name, so registering is the whole of the
+wiring.
+
+**Proportional edit runs on `closestElements`, and the pure module takes the
+query as a parameter** (`NearVertQuery`) rather than importing it. That is what
+keeps `transform_geom.ts` free of `scripts/` while still making the real path
+the contract's own query — production passes `data.closestElements`, the tests
+pass a brute-force stand-in and one that deliberately ignores the radius, which
+is how the hard radius cut is pinned. P11's `closestElements` is itself brute
+force; §6 permits that, and speeding it up stays a LeafMesh-internal change.
+
+**`calcUndoMem` reports the real figure** (§7): an `int32` handle plus three
+`float64` per vertex, counted over every element in the list — the
+proportional-edit ones included, since undo has to put those back too.
+
+`applyTransform` writes straight into `mesh.v.co` and `update` issues one
+`invalidate(POSITIONS, VERT, handles)` per step. Per-vertex `setPositions` would
+be one invalidation per vertex per frame.
+
+This step needed **G7** below; the addon-side diff carries no `scripts/`.
+
 ## 13. Contract gaps
 
 Numbering continues from the P11 plan (G1-G5 are recorded there).
@@ -348,3 +391,21 @@ which carries `scripts/framework_api.ts` and nothing else.
 `TransDataElem` / `TransDataList` are still missing, but they are step 3's
 problem, not step 1's; and the property classes turned out to be reachable
 already through `@framework/pathux`, so they needed no hub change at all.
+
+### G7 — the transform-data interface was not on the hub
+
+`AddonAPI.registerTransType` has existed since P7, but the type it takes had
+not: `ITransDataType`, `TransformDefine` (what every implementor returns from
+`transformDefine()`), and `TransDataElem` / `TransDataList` (the two classes it
+must subclass) were reachable only by relative path into
+`scripts/editors/view3d/transform/`. A geometry addon could be *registered* but
+not *written* — P7's defect, not LeafMesh's. Fixed in
+`10fe2fb7 refactor(P7): re-export the transform-data interface from the hub`,
+which carries `scripts/framework_api.ts` and `transform_ops.ts` and nothing
+else.
+
+The re-export is routed through `transform_ops.js` rather than
+`transform_base.js`, for the same reason the hub's `MeshTransType` line already
+is: the hub depends on `transform_ops.js` either way, whereas a direct edge on
+`transform_base.js` puts `framework_api.ts` into one more import cycle and
+`check:layers` refuses the +1.

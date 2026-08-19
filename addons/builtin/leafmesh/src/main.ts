@@ -20,6 +20,7 @@ import {LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry} from './leafmesh.
 import {LEAFMESH_OBJ_FORMAT} from './obj.js'
 import {LEAFMESH_SELECT_OPS} from './select_ops.js'
 import {LeafMeshToolMode} from './toolmode.js'
+import {LeafMeshTransType} from './transtype.js'
 
 export const addonDefine: IAddonDefine = {
   name       : 'Leaf Mesh',
@@ -54,6 +55,10 @@ export function register(api: AddonAPI<IAddon>) {
   // The modeling toolmode and its selection ops (P12 step 1). One `register`
   // dispatch each — no module-scope `ToolMode.register` side effect.
   api.registerAll(LeafMeshToolMode, ...LEAFMESH_SELECT_OPS)
+
+  // Implementor #2 of `ITransDataType` (P12 §6) — grab/rotate/scale, snapping
+  // and proportional edit, with `transform_ops.ts` naming no geometry type.
+  api.registerTransType(LeafMeshTransType)
 }
 
 export function unregister() {}

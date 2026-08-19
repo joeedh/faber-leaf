@@ -76,3 +76,12 @@ export type {
   OverlayTheme,
   Rgba,
 } from './overlay_geom.js'
+
+export {
+  aabbOf,
+  centroidOf,
+  gatherMovableVerts,
+  propagationDistances,
+  snapshotBytes,
+} from './transform_geom.js'
+export type {MovableVerts, NearVertQuery} from './transform_geom.js'
