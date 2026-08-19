@@ -1325,7 +1325,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P15 | [W3a — LiteMesh becomes an optional addon](./2026-08-15-0410-w3-litemesh-optional-addon.md) | W3 §1 | 10 | P13, P14 | **landed** |
 | P16 | [W3b — sculptcore build decoupling](./2026-08-15-0415-w3-sculptcore-build-decoupling.md) | W3 §2–4 | 10 | P15 | **landed** |
 | P17 | [W5a — distributions + cycle cleanup](./2026-08-15-0420-w5-distributions.md) | W5 §1–2 | 11 | P16 | **landed** |
-| P18 | [W4a — `IUVSource` + UV editor rewrite](./2026-08-15-0425-w4-iuvsource-uv-editor.md) | W4 | 12 | P8, P11 | **written** |
+| P18 | [W4a — `IUVSource` + UV editor rewrite](./2026-08-15-0425-w4-iuvsource-uv-editor.md) | W4 | 12 | P8, P11 | **landed** |
 | P19 | [W4b — port the unwrapping solvers](./2026-08-15-0430-w4-unwrapping-port.md) | W4 | 12 | P18, P13 (rescue) | **written** |
 | P20 | [W5b — de-globalize + embedding contract](./2026-08-15-0435-w5-deglobalize-embedding-api.md) | W5 §3–4 | 13 | P17, P18 | **written** |
 
@@ -1880,22 +1880,28 @@ ungrounded input just argues a wrong plan more convincingly.
   - Exit: success criterion #10 **met**; packaging test green; cycle ratchet and
     shuffle test landed.
 
-- [ ] **P18 — [W4a: `IUVSource` + UV editor rewrite](./2026-08-15-0425-w4-iuvsource-uv-editor.md)**
-  - Define `IUVSource` per §4 W4 — opaque handles, bulk arrays-in/arrays-out,
+- [x] **P18 — [W4a: `IUVSource` + UV editor rewrite](./2026-08-15-0425-w4-iuvsource-uv-editor.md)**
+  - [x] Define `IUVSource` per §4 W4 — opaque handles, bulk arrays-in/arrays-out,
     no per-element round-trips across the WASM boundary. Declared in P7,
     implemented here.
-  - Reimplement the editor as a `uv_editor` addon against the interface. **Do
+  - [x] Reimplement the editor as a `uv_editor` addon against the interface. **Do
     not port `pending-port/`** (3,007 lines of code against BREP element types;
-    3,104 with the checklist); use it as a spec, not as source.
-  - UV ToolOps take a datapath to the source object; `window.redraw_uveditors`
+    3,104 with the checklist); use it as a spec, not as source. Held: the archive
+    was read as a spec, its checklist is dispositioned row by row in the plan's
+    §5 step 7, and the directory was deleted in the same commit.
+  - [x] UV ToolOps take a datapath to the source object; `window.redraw_uveditors`
     becomes an `ImageBus` signal; restore `selectedFacesOnly` as a real editor
-    preference.
-  - Two implementors land together: LiteMesh (`uv_source.ts`) and LeafMesh
+    preference — an op *input* rather than editor state, since the filter is the
+    source's (`listUVFaces(layer, selectedOnly)`), and its default is `false`.
+  - [x] Two implementors land together: LiteMesh (`uv_source.ts`) and LeafMesh
     (design §12 step 7) — plus an in-memory test double that doubles as the
-    sculptcore-free unit fixture.
-  - Needs P8's sever, **not** P13's delete — this is deliberately off the
+    sculptcore-free unit fixture. All three run through one conformance suite,
+    and the double's own suite is executed with the submodule deinited in the
+    `no-sculptcore` lane, with a static import-graph guard beside it.
+  - [x] Needs P8's sever, **not** P13's delete — this is deliberately off the
     critical path.
-  - Exit: success criterion #11.
+  - Exit: success criterion #11 **met**; a UV selection round-trips through a
+    `.wproj`. `unwrap` is declared and unimplemented, which is P19's whole job.
 
 - [ ] **P19 — [W4b: port the unwrapping solvers](./2026-08-15-0430-w4-unwrapping-port.md)**
   - Port `unwrapping.ts`, `unwrapping_solve.ts`, `mesh_paramizer.ts` (~4,700

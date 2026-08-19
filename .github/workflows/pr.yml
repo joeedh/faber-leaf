@@ -253,6 +253,14 @@ jobs:
       - name: Bundle app (esbuild, faber-leaf-core)
         run: pnpm build:core
 
+      # P18 §6: the UV editor's headless suite is the one jest suite that has to
+      # survive here. It drives the editor against a test double, so an import of
+      # the engine — or of anything needing a bundler alias jest cannot resolve —
+      # fails in this lane and nowhere else. Its sibling suite walks the same
+      # module graph statically, which is what makes the failure legible.
+      - name: UV editor double suite (jest)
+        run: pnpm --filter @faber-leaf/tests test uv_editor
+
       # Static gates all pass on a tree that boots to a blank error screen, so
       # the lane ends by booting the real app and modelling something in it. The
       # smoke asserts the booted distribution *is* faber-leaf-core and that it

@@ -1,12 +1,15 @@
 # P18 — W4a: `IUVSource` + the mesh-agnostic UV editor
 
-**Status:** in progress — §5 is closed. All three implementors landed and run
-through one conformance suite; the editor's host-free core, its addon, its
+**Status:** done — §5 and §6 are both closed. All three implementors landed and
+run through one conformance suite; the editor's host-free core, its addon, its
 Editor component, every tool path the archive registered, the redraw bus that
 replaced the `window.redraw_uveditors` global, and `selectedFacesOnly` as a
-proven op input are in, and `archive/uv-editor/` is gone. What is left is §6's
-last two tests: the `--no-sculptcore` run of the double suite, and the `.wproj`
-round-trip.
+proven op input are in, and `archive/uv-editor/` is gone. The double suite runs
+in the `no-sculptcore` lane with a static guard on its import graph, and a UV
+selection now survives a `.wproj` save and reload under test. What is left is
+P19's, not this phase's: the solver behind `unwrap`, the seam overlay that
+re-earns `ImageBus`'s two draw-line triggers, and an icon-sheet cell of the
+editor's own (`uv_editor_area.ts` shares the image editor's, under a TODO).
 
 **Date:** 2026-08-15 (citations re-verified 2026-08-19)
 
@@ -364,7 +367,12 @@ design left in it.
   nothing.
 - The test double drives the whole editor headlessly: select, transform, write,
   read back. This suite must pass in a `--no-sculptcore` build, which means it
-  cannot touch LiteMesh.
+  cannot touch LiteMesh. Landed: `tests/unit/uv_editor/uv_edit_geom.test.ts` is
+  that suite, and `uv_editor_engine_free.test.ts` beside it walks its *runtime*
+  import graph — type imports followed but not counted — and fails on the first
+  value import reaching the engine, a geometry addon, or a bundler alias jest
+  cannot resolve. The `no-sculptcore` CI lane then runs both with the submodule
+  deinited, so the claim is executed and not merely argued.
 - Every tool path the archived `TODO.md` listed is registered and invocable.
   The list outlived the file: it is in `uv_editor_ops.test.ts` and in §5 step 7.
 - Every implementor passes `tests/lib/uv_source_conformance.ts`. A case there
@@ -372,7 +380,14 @@ design left in it.
   means the contract is under-specified, and the fix belongs in
   `geometry_contract.ts`.
 - Round-trip: unwrap-free UV edits on a `.wproj` save and reload with selection
-  and pin state intact.
+  and pin state intact. Landed: `tests/integration/uv_editor_roundtrip.test.ts`
+  boots `litemesh-attrtest subdiv=2`, selects through the shipping op, then
+  writes a deliberately *mixed* flag column — some elements selected, some
+  pinned, some neither, so a saved column of ones cannot pass by accident — and
+  nudges the UVs by binary fractions before saving and reloading. Elements are
+  compared by ring position rather than by handle, which the contract only
+  promises until `topoStamp` changes; the owner-vertex positions travel in the
+  snapshot so a reordered ring fails as itself instead of as a flag mismatch.
 - `selectedFacesOnly` false actually differs from true — the current hardcoded
   path makes that untestable, so it is a real regression test. Landed in step 6
   at both levels: `uv_edit_geom.test.ts` for a partial scope against the double,
@@ -405,10 +420,14 @@ design left in it.
 
 - Criterion 11: `IUVSource` exists, is implemented by LiteMesh, LeafMesh and a
   test double, and the UV editor addon names no concrete geometry type.
-- The headless test-double suite passes in a `--no-sculptcore` build.
+- The headless test-double suite passes in a `--no-sculptcore` build — the
+  lane's *UV editor double suite* step, plus the static graph guard beside it.
 - Every `uveditor.*` tool path from the archived `TODO.md` (§5 step 7) is
   registered again, under its original name, taking a datapath.
 - `window.redraw_uveditors` is gone; the editor subscribes to `ImageBus`.
 - `selectedFacesOnly` reaches the source as an argument, with no default
   hardcoded anywhere.
 - `archive/uv-editor/` and its `archive/README.md` row are deleted.
+- A UV selection survives a `.wproj` round trip — `uv_editor_roundtrip.test.ts`,
+  against the `.uvflags:<layer>` sidecar the engine declares persistent for
+  exactly this reason.
