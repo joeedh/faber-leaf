@@ -3,13 +3,10 @@
  *
  * This is the "clean" image editor that supports a single responsibility:
  * loading images into `ImageBlock`s and displaying the active image with
- * pan/zoom. All of the legacy UV-editing machinery (the `UVEditor`
+ * pan/zoom. The legacy UV-editing machinery it used to carry (the `UVEditor`
  * component, find-nearest UV picking, the UV select/transform/flag ToolOps,
- * and the UV tools sidebar) lived in the old editor and now sits, unwired,
- * under `./pending-port/`. A new UV-editing abstraction layer will be
- * designed in a future plan and will replace it.
- *
- * See ./pending-port/TODO.md for the port checklist.
+ * and the UV tools sidebar) was archived by P13 and rebuilt by P18 as the
+ * `uv_editor` addon, over the mesh-agnostic `IUVSource` contract.
  */
 import {DataBlockBrowser, Editor, EditorSideBar, HotKey, VelPan} from '../editor_base'
 import {Icons} from '../icon_enum.js'
@@ -26,6 +23,9 @@ import {isWebGPU} from '../../core/renderer_flag.js'
 import {getWebGL} from '../view3d/view3d.js'
 import {getActiveWebGpuViewport, primeWebGpuViewport, ensureCanvasDepth} from '../view3d/view3d_draw_webgpu.js'
 import {createSampler} from '../../webgpu/texture.js'
+import bus from '../../core/bus.js'
+import type {BusTriggers} from '../../core/bus.js'
+import {ImageBus} from './ImageBus.js'
 
 function clampInt(v: number, lo: number, hi: number): number {
   return v < lo ? lo : v > hi ? hi : v
@@ -98,6 +98,32 @@ image.ImageEditor {
 
   flagRedraw() {
     window.redraw_viewport(false)
+  }
+
+  onTrigger(type: BusTriggers<typeof ImageBus>): void {
+    // A screen torn down whole (a file load) never fires on_area_inactive, so
+    // an emitter that outlived its DOM deregisters itself on first contact.
+    if (this.isDead()) {
+      bus.removeEmitter(this, ImageBus)
+      return
+    }
+
+    if (type === 'flagRedraw') {
+      this.flagRedraw()
+    }
+  }
+
+  on_area_active(): void {
+    super.on_area_active()
+    bus.addEmitter(this, ImageBus)
+  }
+
+  on_area_inactive(): void {
+    super.on_area_inactive()
+
+    if (bus.hasEmitter(this, ImageBus)) {
+      bus.removeEmitter(this, ImageBus)
+    }
   }
 
   static define() {
@@ -528,25 +554,3 @@ image.ImageEditor {
 }
 
 Editor.register(ImageEditor)
-
-declare global {
-  interface Window {
-    redraw_uveditors(): void
-  }
-}
-
-/* Back-compat global still called by mesh UV ops and image_ops.js.
-   Redraws any open image editors. */
-window.redraw_uveditors = function () {
-  if (!_appstate?.screen) {
-    return
-  }
-
-  for (const sarea of _appstate.screen.sareas) {
-    const editor = sarea.area
-
-    if (editor instanceof ImageEditor) {
-      editor.flagRedraw()
-    }
-  }
-}

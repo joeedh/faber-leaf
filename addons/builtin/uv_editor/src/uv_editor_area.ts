@@ -14,8 +14,27 @@
  * can be missing there.
  */
 
-import {Editor, Icons, ImageBlock, ImageUser, SelOneToolModes, VelPan, VelPanPanOp, uvSourceFor} from '@framework/api'
-import type {BlockLoader, BlockLoaderAddUser, DataBlock, IUVSource, StructReader, ViewContext} from '@framework/api'
+import {
+  Editor,
+  Icons,
+  ImageBlock,
+  ImageBus,
+  ImageUser,
+  SelOneToolModes,
+  VelPan,
+  VelPanPanOp,
+  bus,
+  uvSourceFor,
+} from '@framework/api'
+import type {
+  BlockLoader,
+  BlockLoaderAddUser,
+  BusTriggers,
+  DataBlock,
+  IUVSource,
+  StructReader,
+  ViewContext,
+} from '@framework/api'
 import {HotKey, KeyMap, Menu, UIBase, Vector2, eventWasTouch, haveModal, nstructjs} from '@framework/pathux'
 import type {DataAPI, DataStruct, IAreaDef, UIBase as UIBaseType} from '@framework/pathux'
 
@@ -386,6 +405,37 @@ uveditor.UVEditor {
 
   flagRedraw(): void {
     this.doOnce(this.draw)
+  }
+
+  /**
+   * `ImageBus` reaches whichever editors are on screen: an area registers as an
+   * emitter while it is the visible one, so a trigger fans out to exactly the
+   * editors a user can see, without anyone holding a list of them.
+   */
+  onTrigger(type: BusTriggers<typeof ImageBus>): void {
+    // A screen torn down whole (a file load) never fires on_area_inactive, so
+    // an emitter that outlived its DOM deregisters itself on first contact.
+    if (this.isDead()) {
+      bus.removeEmitter(this, ImageBus)
+      return
+    }
+
+    if (type === 'flagRedraw') {
+      this.flagRedraw()
+    }
+  }
+
+  on_area_active(): void {
+    super.on_area_active()
+    bus.addEmitter(this, ImageBus)
+  }
+
+  on_area_inactive(): void {
+    super.on_area_inactive()
+
+    if (bus.hasEmitter(this, ImageBus)) {
+      bus.removeEmitter(this, ImageBus)
+    }
   }
 
   /** Drops the cached rings. Selection and position changes don't need it. */

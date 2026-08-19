@@ -13,6 +13,8 @@ import {DataRefProperty, DataRefListProperty} from '../core/lib_api.js'
 import {ImageBlock, ImageTypes} from './image.js'
 import * as platform from '../core/platform.js'
 import * as cconst from '../core/const.js'
+import bus from '../core/bus.js'
+import {ImageBus} from '../editors/image/ImageBus.js'
 
 export class ImageOp extends ToolOp {
   static tooldef() {
@@ -25,7 +27,7 @@ export class ImageOp extends ToolOp {
   }
 
   getImage(ctx) {
-    let iuser = ctx.api.getValue(this.inputs.dataPath.getValue())
+    let iuser = ctx.api.getValue(ctx, this.inputs.dataPath.getValue())
 
     if (!iuser) {
       console.warn('Failed to look up image at path', this.inputs.dataPath.getValue())
@@ -116,7 +118,7 @@ export class LoadImageOp extends ImageOp {
     }
 
     this.outputs.image.setValue(image)
-    window.redraw_uveditors()
+    bus.sendTrigger(ImageBus, 'flagRedraw')
   }
 }
 

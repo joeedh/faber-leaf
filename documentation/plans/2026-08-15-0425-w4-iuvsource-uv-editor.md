@@ -1,9 +1,10 @@
 # P18 — W4a: `IUVSource` + the mesh-agnostic UV editor
 
-**Status:** in progress — §5 steps 1–4 closed (all three implementors landed
+**Status:** in progress — §5 steps 1–5 closed (all three implementors landed
 and run through one conformance suite; the editor's host-free core, its addon,
-its Editor component, and every tool path the archive registered are in).
-Step 5 — `ImageBus` in place of `window.redraw_uveditors` — is next.
+its Editor component, every tool path the archive registered, and the redraw
+bus that replaced the `window.redraw_uveditors` global are in). Step 6 —
+`selectedFacesOnly` through the op inputs — is next.
 
 **Date:** 2026-08-15 (citations re-verified 2026-08-19)
 
@@ -53,7 +54,7 @@ Live remnants:
   `scripts/image/image_ops.js:119` and (in `pending-port`) from four UV op
   sites.
 - `scripts/editors/image/ImageBus.ts` — 9 lines, triggers `resetDrawLines`,
-  `flagRedraw`, `addDrawLine`. Deliberately left in place and re-exported from
+  `flagRedraw`, `addDrawLine` (step 5 kept only `flagRedraw`). Deliberately left in place and re-exported from
   `@framework/api` — which, since P13 archived the unwrapping stack, is now its
   **only** reference anywhere in `scripts/`, `addons/` or `distributions/`.
   Nothing subscribes and nothing triggers: it is dead, not merely unheard, so
@@ -279,7 +280,26 @@ implementation will otherwise break:
      resolves all eleven through `CTX.api.getToolDef`, which is the only honest
      check when the ops ship in an external addon.
 5. Subscribe the editor to `ImageBus`; convert `image_ops.js:119`; delete
-   `window.redraw_uveditors` and its `declare global`.
+   `window.redraw_uveditors` and its `declare global`. **Done.**
+   - [x] **Both editors register as `ImageBus` emitters** while they are the
+     visible area (`on_area_active` / `on_area_inactive`, as the archive did),
+     so a trigger reaches exactly the editors a user can see and nobody holds a
+     list of editor types. `onTrigger` deregisters an emitter that outlived its
+     DOM: a screen torn down whole — a file load — never fires
+     `on_area_inactive`.
+   - [x] **`image.open` sends the trigger** — `bus.sendTrigger(ImageBus,
+     'flagRedraw')` at `scripts/image/image_ops.js:121`, the global's only
+     caller. `ImageOp.getImage`'s one-argument `ctx.api.getValue(path)` was
+     wrong in the same file and is fixed with it.
+   - [x] **`resetDrawLines` / `addDrawLine` are recorded as dropped**, not kept
+     as an unserved surface: `ImageBus` now declares only `flagRedraw`, with a
+     comment saying the other two return with the overlay P19 ports. A trigger
+     no emitter handles is silently swallowed, so declaring one is worse than
+     not having it.
+   - [x] `tests/unit/image_bus.test.ts` pins the trigger's spelling — the one
+     string the sender and both editors must agree on — and the registration
+     lifecycle, including that a second `on_area_active` does not
+     double-deliver.
 6. Give `selectedFacesOnly` a real home. `mesh_uvops_base.ts` and its hardcoded
    default are already gone (P13), so this is: pass the flag through the op's
    inputs into `listUVFaces`, and make §6's false-differs-from-true test real.
@@ -325,10 +345,11 @@ design left in it.
 - **`selectedFacesOnly` restoration changes behaviour** for anyone relying on
   the hardcoded `true`. It is a placeholder with a comment saying it is a
   placeholder; restoring it is the fix. Note it in the release notes.
-- **`ImageBus` has neither subscribers nor callers today** — P13 archived the
-  unwrapping stack that pushed seam draw-lines, so all three triggers are dead
-  code, not merely unheard. Subscribing is half the work; each trigger needs a
-  new caller or an explicit note that it is dropped.
+- **`ImageBus` had neither subscribers nor callers** — P13 archived the
+  unwrapping stack that pushed seam draw-lines, so all three triggers were dead
+  code, not merely unheard. Settled in step 5: `flagRedraw` got a caller and two
+  handlers, and the two draw-line triggers were deleted rather than left
+  declared. P19 re-adds them with the overlay that needs them.
 
 ## 8. Exit criteria
 
