@@ -733,9 +733,11 @@ export class LeafMesh {
 
   /**
    * Merge the two faces sharing `e` into one, dropping the shared edge. Both
-   * faces' holes carry over. Returns `ELEM_NONE` unless `e` has exactly two
-   * corners, they belong to different faces' outer rings, and those rings
-   * traverse the edge in opposite directions.
+   * faces' holes carry over, and the shared edge may lie on one face's hole
+   * ring — that merges the hole with the other face's outer ring, which is how
+   * a face beside a hole is dissolved into it. Returns `ELEM_NONE` unless `e`
+   * has exactly two corners, on two different faces, at most one of them on a
+   * hole ring, traversing the edge in opposite directions.
    */
   joinFaces(f1: number, f2: number, e: number): number {
     if (f1 === f2 || !this.f.has(f1) || !this.f.has(f2) || !this.e.has(e)) {
@@ -754,9 +756,9 @@ export class LeafMesh {
     let c2 = ELEM_NONE
     for (const c of corners) {
       const l = this.c.l[c]
-      if (this.l.f[l] === f1 && this.f.l[f1] === l) {
+      if (this.l.f[l] === f1) {
         c1 = c
-      } else if (this.l.f[l] === f2 && this.f.l[f2] === l) {
+      } else if (this.l.f[l] === f2) {
         c2 = c
       }
     }
@@ -768,40 +770,60 @@ export class LeafMesh {
       return ELEM_NONE
     }
 
-    const outer: number[] = []
+    // A hole ring merges with the other face's outer ring, and that face's
+    // outer ring then leads. Two hole rings would leave the result with none.
+    const hole1 = this.c.l[c1] !== this.f.l[f1]
+    const hole2 = this.c.l[c2] !== this.f.l[f2]
+    if (hole1 && hole2) {
+      return ELEM_NONE
+    }
+    const lead = hole1 ? f1 : hole2 ? f2 : ELEM_NONE
+
+    const merged: number[] = []
     const sources: number[] = []
     const walk = (from: number, until: number): void => {
       let c = from
       for (let i = 0; i < WALK_LIMIT && c !== until; i++) {
-        outer.push(this.c.v[c])
+        merged.push(this.c.v[c])
         sources.push(c)
         c = this.c.next[c]
       }
     }
     // b … a from f1, then f2's ring minus the duplicated a and b.
     walk(this.c.next[c1], c1)
-    outer.push(this.c.v[c1])
+    merged.push(this.c.v[c1])
     sources.push(c1)
     walk(this.c.next[this.c.next[c2]], c2)
 
     // Two faces sharing more than one edge would merge into a ring that
     // repeats a vertex. Bail before killing anything.
-    if (!this.ringIsUsable(outer)) {
+    if (!this.ringIsUsable(merged)) {
       return ELEM_NONE
     }
 
-    const rings: number[][] = [outer]
-    const ringSources: number[][] = [sources]
+    const rings: number[][] = []
+    const ringSources: number[][] = []
+    const taken = new Set<number>([this.c.l[c1], this.c.l[c2]])
+    const takeLoop = (l: number): void => {
+      const cs: number[] = []
+      for (const c of this.loopCorners(l)) {
+        cs.push(c)
+      }
+      rings.push(cs.map((c) => this.c.v[c]))
+      ringSources.push(cs)
+      taken.add(l)
+    }
+
+    if (lead !== ELEM_NONE) {
+      takeLoop(this.f.l[lead])
+    }
+    rings.push(merged)
+    ringSources.push(sources)
     for (const f of [f1, f2]) {
-      let l = this.l.next[this.f.l[f]]
-      while (l !== ELEM_NONE) {
-        const cs: number[] = []
-        for (const c of this.loopCorners(l)) {
-          cs.push(c)
+      for (const l of this.faceLoops(f)) {
+        if (!taken.has(l)) {
+          takeLoop(l)
         }
-        rings.push(cs.map((c) => this.c.v[c]))
-        ringSources.push(cs)
-        l = this.l.next[l]
       }
     }
 

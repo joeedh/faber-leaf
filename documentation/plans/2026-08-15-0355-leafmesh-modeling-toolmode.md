@@ -535,6 +535,51 @@ key (Blender has none either) and sits in the header's tool row.
 
 This step opened **no** gap; the addon-side diff carries no `scripts/`.
 
+### Step 7 — the hole cases named, the Euler count, and a round trip
+
+`tests/unit/leafmesh/holes.test.ts` (ten cases) states §5's list one test at a
+time, and `topo.ts`'s `joinFaces` grew the ring merge §5 asks it for.
+
+**§5 lists four bullets and step 12 asks for five cases, because the first
+bullet is one rule over two ops.** The five: extrude a holed cap, inset a holed
+cap, dissolve a face beside a hole, cut a loop across a hole, subdivide a hole
+ring. Four of them were already true of the code — `modeling.test.ts` and
+`subdivide.test.ts` cover some of the same ground — but a rule scattered across
+three files by side effect is not an audited rule, and this file is where §5 can
+be read against the tests one line at a time.
+
+**`joinFaces` now merges a hole ring into the other face's outer ring.** It used
+to require both corners on their faces' outer rings, which refused the one case
+§5 names. The generalisation is small because the walk never cared: an edge is
+traversed in opposite directions by its two faces whichever rings they sit on,
+so the merge is unchanged and only the bookkeeping moves — when either side's
+corner is on a hole, the *other* face's outer ring leads the new face and the
+merged ring becomes its hole. Two hole rings are refused, because the result
+would have no outer ring at all; two faces sharing more than one edge were
+already refused, which is what a face exactly filling its own hole is.
+
+**Face deletion is a capability here, not a tool.** §4's list has no delete or
+dissolve op and §4 says additions are separate plans, so §5's case lands as
+`joinFaces` plus its tests. The tube is the honest fixture: joining the annular
+cap to an inner wall quad dissolves the quad into the hole, and the hole ring
+comes back with ten vertices — eight plus four, less the two the dropped edge
+held in common.
+
+**The Euler–Poincaré count is the property test.** `V − E + F − H = 2(S − G)`,
+`H` counting inner rings: the cube's term is 2 and the tube's, being genus one,
+is 0, and every op in §4 except split-off leaves it alone. Only the closed
+fixtures are held to it — an open surface's boundary is not in the formula, and
+split-off is the one op that opens one, so it is named and left out rather than
+quietly skipped.
+
+**The round trip models, saves, loads, and goes on modelling.** A cube extruded,
+subdivided and loop-cut, through `serialize.ts` and back, comes out with the
+same counts, the same term, the same vertex column and no repairs — and then
+takes an inset that matches the same inset on the mesh it came from. Serialising
+is not a snapshot of a finished mesh; it is a pause in the middle of one.
+
+This step opened **no** gap; the diff carries no `scripts/`.
+
 ## 13. Contract gaps
 
 Numbering continues from the P11 plan (G1-G5 are recorded there).
