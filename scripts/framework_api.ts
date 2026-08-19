@@ -186,11 +186,22 @@ export {Shaders, BasicLineShader, MeshIDShader} from './shaders/shaders.js'
 
 // editors/*
 export {ToolMode} from './editors/view3d/view3d_toolmode.js'
+// Every addon-owned toolmode has to return one of these from
+// `toolModeDefine()`, so the shape rides the hub with the class.
+export type {IToolModeDefine} from './editors/view3d/view3d_toolmode.js'
 // The stroke-toolmode base every sculpt/paint toolmode derives from. Addons
 // that need to ask "is a paint toolmode active?" test against this rather than
 // a concrete toolmode class.
 export {PaintToolModeBase} from './editors/view3d/tools/stroke_base.js'
-export {SelMask, SelOneToolModes, SelToolModes} from './core/select_types.js'
+export {
+  SelMask,
+  SelOneToolModes,
+  SelToolModes,
+  // A persisted mask arrives as either names or an integer; every toolmode
+  // that stores one needs both halves of that conversion.
+  normalizeSelMask,
+  selMaskToNames,
+} from './core/select_types.js'
 export {FindNearest, FindNearestRet, castViewRay, CastModes} from './editors/view3d/findnearest.js'
 export type {ScreenPickResult} from './editors/view3d/findnearest.js'
 // MeshTransType rides transform_ops.js rather than transform_types.js: the hub
