@@ -256,8 +256,8 @@ thing *every* addon-owned toolmode needs — which is the test P11 §2 applies.
   above. Box and circle are modal and call `exec` themselves on commit, because
   the toolstack does not (`modalEnd` never calls `exec`) — which is also what
   makes redo work, since redo is `undoPre` + `exec`.
-- **`toolmode.ts`**: `LeafMeshToolMode` — sel-mode chips, the four overlay
-  toggles step 2 will read, `selectRadius`, click-select, hover highlight, and
+- **`toolmode.ts`**: `LeafMeshToolMode` — sel-mode chips, the overlay
+  toggles step 2 reads, `selectRadius`, click-select, hover highlight, and
   the A / alt-A / B / C / L / shift-G keymap. Registered from `register(api)`
   via `api.registerAll(...)`, never at module scope.
 
@@ -273,6 +273,60 @@ transform bridge; the mode is selection-only until then.
 
 `git diff --stat scripts/` for this commit is empty (criterion 12), with the one
 hub gap it needed landed separately as G6 below.
+
+### Step 2 — selection overlay
+
+- **`overlay_geom.ts`** (pure): `buildSelectionOverlay(mesh, req, cache?)`
+  returns three position+colour batches — points, lines, tris — and decides the
+  whole of what the viewport shows. Colours are resolved on the CPU
+  (highlight ▸ active ▸ selected ▸ base) against a replaceable `OverlayTheme`,
+  so the tinting is unit-testable rather than something to squint at. Selected
+  faces are filled through the shared `TriangulationCache`, which means the
+  hole rule §5 states is inherited rather than re-implemented. 14 unit tests in
+  `tests/unit/leafmesh/overlay_geom.test.ts`.
+- **`overlay.ts`** (framework-facing): three `SimpleMesh` batches, each with
+  `primflag` set to exactly `POINTS` / `LINES` / `TRIS` so
+  `WebGPUDrawQueueAdapter` picks the line topology and the point-sprite remap,
+  drawn with `Shaders.MeshEditShader`. Cached per `LeafMeshData` in a
+  `WeakMap`, rebuilt only when `overlayCacheKey` changes — `updateGen` covers
+  topology, positions and selection, and the rest of the key covers the things
+  `invalidate` does *not* bump (the sel-mode, the toggles, active/highlight).
+- **The overlay draws from `on_drawend`, not from `drawQ`.** That hook runs
+  inside the open pass in both the solid path and the render-mode overlay pass,
+  whereas `drawQ` is skipped for renderables under `SHOW_RENDER`; and a
+  modeling overlay should only exist while the mode is active.
+  `SimpleMesh.draw` self-routes through `createDrawQueue` when a WebGPU pass is
+  open, so no queue or frame plumbing crosses the addon boundary.
+
+**Two shader facts the overlay had to be built around**, both consequences of
+the WGSL port rather than of LeafMesh:
+
+- *No polygon offset.* The GLSL `MeshEditShader` had one; the WGSL port
+  dropped it, and there is no per-submission depth bias. So the overlay is
+  lifted off the surface **geometrically** — along an accumulated face normal,
+  by `OVERLAY_LIFT` × the bounding diagonal, with face fills lifted half as far
+  as the wires over them. Doing it in the pure module keeps it camera-free and
+  testable.
+- *Unset vertex ids are `-1`.* `MeshEditShader` tints any vertex whose id
+  matches `active_id` / `highlight_id` / `last_id`, and `SimpleIsland` fills an
+  unwritten ID layer with `-1` — so `-1` is exactly the wrong "off" sentinel.
+  The uniforms are set to `-2` instead, which switches the shader's own tinting
+  off and leaves the baked per-vertex colours alone.
+
+**The `xray` toggle was removed rather than shipped dead.** Every WGSL pipeline
+gets `DEFAULT_DEPTH_STATE` from `buildPipelineDescriptor`, and there is no
+depth-off path through the queue adapter — LiteMesh's own x-ray works only
+because it bypasses the queue via `WebGPUBatchExecutor`, which is
+sculptcore-only. Honouring the toggle would mean a `depthTest` field on
+`Submission` plus a depth-variant pipeline cache in
+`scripts/webgpu/queue_adapter.ts`, *and* a hub re-export of `createDrawQueue`
+(because `SimpleMesh.draw` builds its own `Submission` internally) — a real P8
+change, worth making when a second consumer needs it and not before. A toggle
+that silently does nothing is worse than no toggle, and the branch is
+unreleased, so dropping the STRUCT field is free.
+
+`git diff --stat scripts/` for this commit is empty (criterion 12); no new
+contract gap was needed.
 
 ## 13. Contract gaps
 

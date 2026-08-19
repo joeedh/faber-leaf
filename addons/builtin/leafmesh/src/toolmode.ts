@@ -15,7 +15,10 @@ import {HotKey, KeyMap, Vector2, createMenu, nstructjs, startMenu} from '@framew
 
 import {Domain} from './attrs.js'
 import {LeafMeshData} from './leafmesh.js'
+import {drawLeafMeshOverlay, releaseLeafMeshOverlay} from './overlay.js'
+import type {DomainMarks, OverlayRequest} from './overlay_geom.js'
 import {SelectNearestLeafMeshOp, selMaskToDomains} from './select_ops.js'
+import type {SelectDomain} from './select_geom.js'
 
 /** `Domain` and the contract's `ElementDomain` agree numerically; say so once. */
 function hostDomain(domain: Domain): ElementDomain {
@@ -63,7 +66,6 @@ leafmesh.LeafMeshToolMode {
     drawSelectionOverlay : bool;
     drawWireframe        : bool;
     drawPoints           : bool;
-    xray                 : bool;
     selectRadius         : float;
 }
     `
@@ -82,7 +84,6 @@ leafmesh.LeafMeshToolMode {
   drawSelectionOverlay = true
   drawWireframe = true
   drawPoints = true
-  xray = false
   /** Circle/brush-select radius, screen px. */
   selectRadius = 25
 
@@ -128,7 +129,6 @@ leafmesh.LeafMeshToolMode {
     st.bool('drawPoints', 'drawPoints', 'Vertex Points')
       .icon(Icons.VERTEX_POINTS)
       .description('Draw every vertex as a billboard point')
-    st.bool('xray', 'xray', 'X-Ray').icon(Icons.XRAY).description('Draw the overlays through the mesh')
     st.float('selectRadius', 'selectRadius', 'Select Radius').noUnits().range(1, 500).step(1.0)
 
     return st
@@ -213,7 +213,6 @@ leafmesh.LeafMeshToolMode {
     strip.prop(`scene.tools.${name}.drawSelectionOverlay`)
     strip.prop(`scene.tools.${name}.drawWireframe`)
     strip.prop(`scene.tools.${name}.drawPoints`)
-    strip.prop(`scene.tools.${name}.xray`)
 
     const row = addHeaderRow()
     strip = row.strip()
@@ -223,6 +222,48 @@ leafmesh.LeafMeshToolMode {
     strip.tool('leafmesh.select_circle()')
 
     header.flushUpdate()
+  }
+
+  /**
+   * The selection overlay (P12 step 2). `on_drawend` runs inside the open
+   * WebGPU pass in both the solid and the render-mode path, and `SimpleMesh`
+   * self-routes through the draw queue — so this needs no frame plumbing.
+   */
+  on_drawend(view3d: View3D): void {
+    const object = this.ctx?.object
+    const data = this._data()
+    if (!view3d || object === undefined || data === undefined) {
+      return
+    }
+
+    const req = this._overlayRequest(data)
+    if (!req.drawSelection && !req.drawWireframe && !req.drawPoints) {
+      return
+    }
+
+    drawLeafMeshOverlay(view3d, object, data, req)
+  }
+
+  private _overlayRequest(data: LeafMeshData): OverlayRequest {
+    const marks = (get: (d: Domain) => number | undefined): DomainMarks => {
+      const out: {-readonly [K in SelectDomain]?: number} = {}
+      for (const d of [Domain.VERT, Domain.EDGE, Domain.FACE] as SelectDomain[]) {
+        const h = get(d)
+        if (h !== undefined) {
+          out[d] = h
+        }
+      }
+      return out
+    }
+
+    return {
+      domains      : selMaskToDomains(this.leafMeshSelMode),
+      drawSelection: this.drawSelectionOverlay,
+      drawWireframe: this.drawWireframe,
+      drawPoints   : this.drawPoints,
+      active       : marks((d) => data.getActiveElement(hostDomain(d))),
+      highlight    : marks((d) => data.getHighlightElement(hostDomain(d))),
+    }
   }
 
   /** The active object's LeafMesh, or undefined when the mode is not on one. */
@@ -308,6 +349,7 @@ leafmesh.LeafMeshToolMode {
     const data = this._data()
     if (data !== undefined) {
       LeafMeshToolMode.clearHighlight(data)
+      releaseLeafMeshOverlay(data)
     }
     super.onInactive()
   }

@@ -59,3 +59,20 @@ export {
   vertFaces,
 } from './select_geom.js'
 export type {SelectAction, SelectDomain, SelectionSnapshot, SimilarCriterion} from './select_geom.js'
+
+export {
+  DEFAULT_OVERLAY_THEME,
+  OVERLAY_LIFT,
+  buildSelectionOverlay,
+  meshDiagonal,
+  overlayCacheKey,
+  overlayVertexNormals,
+} from './overlay_geom.js'
+export type {
+  DomainMarks,
+  OverlayBatch,
+  OverlayGeometry,
+  OverlayRequest,
+  OverlayTheme,
+  Rgba,
+} from './overlay_geom.js'
