@@ -1,6 +1,6 @@
 # P14 — addon manager: optional dependencies — `[xhigh]`
 
-**Status:** in progress — step 1 landed 2026-08-19.
+**Status:** landed 2026-08-19.
 
 **Date:** 2026-08-15
 
@@ -329,3 +329,77 @@ consumer type-checks whenever the source is in the repo — which, per D6, is th
 only case where compiling against it is meaningful. §5 step 5's "types-only
 stub" is therefore not implemented, and the reason is recorded here rather than
 left as an unexplained omission.
+
+### 10.3 Steps 2–7 (landed 2026-08-19)
+
+**Step 2 — the resolver.** `sortManifestsByDeps` is gone; `resolveManifests`
+returns `{loaded, disabled}` (`DisabledAddon = {id, reason, dependency,
+message}`). Cycles, self-cycles and duplicate ids still throw with their
+existing messages (D2). Roots are visited in id order and `optionalDependencies`
+are visited sorted, so the order is a function of the manifest set alone (D4).
+`AddonManager._materializePending` drops each disabled id from `pendingSources`
+and records it in the new `unloaded: Map<string, UnloadedAddon>` — so a broken
+manifest costs exactly one addon.
+
+**Step 3 — nothing to do.** §10.1 already established that §3.3 was stale: a
+builtin flows through the same `registerBuiltin → pendingSources →
+_materializePending → enable` pipeline as an installed addon, and
+`disable('sculptcore')` worked before this phase. The hole was the boot-time
+override, which is step 4.
+
+**Step 4 — force-disable** (`scripts/addon/force_disable.ts`): query param,
+`localStorage`, and `--disable-addon` unioned once per session. The guard sits
+in all three source-collection paths (`registerBuiltin`, `collectIndexSources`,
+`collectInstalledSources`) and in `enable()`, so a force-disabled addon is never
+imported and can never be turned on by a persisted pref (D1).
+
+**`api.has()` was redefined**, not added: `addon_base.ts` answered
+"is a record present", which a *disabled* addon also satisfies. It now answers
+`window._addons.isEnabled(id)` — loaded *and* enabled. Safe to change outright:
+grep found no pre-existing call sites.
+
+**Step 5 — the stub.** Each export is `export const X = __pick("X")`, and
+`__pick` falls back to a `__missing(name)` sentinel: a `Proxy` over a function
+that throws on call, construct or property access, naming the addon, the symbol
+and `api.has("<id>")`, and distinguishing "addon not loaded" from "addon does
+not export this" (D6). Two things it must not do — throw at import, and cost
+bundle size: the first pass inlined a `hasOwnProperty` ternary per export and
+pushed the fixture bundle from 15 KB to 31 KB, hence the hoisted `__pick`. (An
+`__missing(__name)` parameter also collides with esbuild's own `__name` helper
+and gets renamed to `__name2`; it is `__sym`.) Per D7 no types-only tsconfig
+stub was added.
+
+**Step 6 — `addons/builtin/*`** is now a workspace glob. It matches no package
+today (no builtin has a `package.json`), which is the point: P16's optional
+`@sculptcore/api` dependency has somewhere to live without a workspace edit.
+`pnpm i` from the existing lockfile reports all 14 projects up to date — no new
+packages, no name collision.
+
+**Step 7 — the probes.** `tests/fixtures/addons/optional_probe{,_dep,_broken}`,
+kept as permanent fixtures per §6. `tests/integration/addon_optional_probe.test.ts`
+runs three headless NW.js boots and reports the manager state back through
+`--eval` → `globalThis.__evalTestResult` → the `--dump` JSON. §6's five cases:
+
+| Case | Where |
+| --- | --- |
+| both present → both load, in dependency order | boot 1 |
+| dependency force-disabled → probe loads degraded, `api.has()` false | boot 2 |
+| probe force-disabled → app boots, nothing else notices | boot 3 |
+| required dependency absent → disabled with a reason, no throw | boot 1 (`optional_probe_broken`) |
+| a cycle → still throws | `tests/unit/addon_manifest.test.ts` |
+
+7/7 green, ~50 s for the three boots — under `slow.mjs`'s bar, so it stays in
+the default run.
+
+**§7's remaining items.** The addon UI lists `unloaded` entries with their
+reason under *Not loaded* (`SettingsEditor.buildAddonsSettings`). "Boot with the
+mesh addon force-disabled" is moot — P13 deleted that addon; the equivalent
+proof is boot 3. The stub-throws-only-when-reached case is
+`tests/integration/addon_api_resolver.test.ts`, which re-imports the built entry
+with no host installed and asserts each symbol throws on use rather than reading
+back `undefined`.
+
+**A note for P15/P16.** `_materializePending` wires optional deps into
+`api.deps` silently when present and skips them when absent, so an optional
+dependent reads `api.deps[id]?.exports[id]` only behind `api.has(id)`. The
+fixture pair is the copyable shape.

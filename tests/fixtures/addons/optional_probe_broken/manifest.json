@@ -1,0 +1,12 @@
+{
+  "id": "optional_probe_broken",
+  "name": "Optional Probe (missing requirement)",
+  "version": "0.1.0",
+  "author": "Faber Leaf refactor tests",
+  "entry": "src/main.ts",
+  "dependencies": ["optional_probe_absent"],
+  "optional": true,
+  "description": "Requires an addon that does not exist; must be disabled with a reason, not thrown over (P14 §6).",
+  "buildMode": "prebuilt",
+  "defaultEnabled": true
+}

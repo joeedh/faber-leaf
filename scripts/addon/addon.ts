@@ -1,6 +1,7 @@
 import {AddonAPI, IAddon} from './addon_base'
 import * as util from '../util/util'
-import {IAddonManifest, sortManifestsByDeps, validateManifest} from './manifest'
+import {DisabledAddon, IAddonManifest, resolveManifests, validateManifest} from './manifest'
+import {isForceDisabled} from './force_disable'
 import type {AddonStorage} from './storage'
 import {Menu} from '../path.ux/scripts/widgets/ui_menu'
 
@@ -11,7 +12,7 @@ import {Menu} from '../path.ux/scripts/widgets/ui_menu'
  */
 export interface AddonOpResult {
   ok: boolean
-  reason?: 'unknown' | 'missing-dep' | 'register-threw' | 'has-dependents' | 'unregister-threw'
+  reason?: 'unknown' | 'missing-dep' | 'register-threw' | 'has-dependents' | 'unregister-threw' | 'force-disabled'
   dependents?: AddonRecord<IAddon>[]
   message?: string
   error?: unknown
@@ -30,6 +31,18 @@ interface AddonSource {
   builtin: boolean
   /** Present only for external addons; becomes the AddonRecord.url + urlmap key. */
   url?: string
+}
+
+/**
+ * An addon that is known but not loaded, and why. Force-disabled addons and
+ * ones the resolver rejected both land here, so the UI can say what happened
+ * instead of the addon simply not appearing.
+ */
+export interface UnloadedAddon {
+  id: string
+  name?: string
+  reason: DisabledAddon['reason'] | 'force-disabled'
+  message: string
 }
 
 export class AddonRecord<T extends IAddon> {
@@ -123,6 +136,13 @@ export class AddonManager {
   idmap: Map<string, AddonRecord<IAddon>>
 
   /**
+   * Addons that were seen but did not load, keyed by id: force-disabled, or
+   * rejected by the resolver for a missing required dependency. Never a fatal
+   * state — one bad manifest must not take the app down. See P14 §10.2 D1/D2.
+   */
+  unloaded: Map<string, UnloadedAddon>
+
+  /**
    * Storage backend for third-party addons. Set once at boot via setStorage().
    * Built-in addons don't go through storage — they ship in the main bundle
    * via registerBuiltin.
@@ -141,6 +161,7 @@ export class AddonManager {
     this.addons = []
     this.urlmap = new Map()
     this.idmap = new Map()
+    this.unloaded = new Map()
     this.pendingSources = new Map()
     this.started = false
   }
@@ -192,6 +213,9 @@ export class AddonManager {
     if (this.pendingSources.has(m.id) || this.idmap.has(m.id)) {
       return
     }
+    if (this._skipForceDisabled(m)) {
+      return
+    }
     const source: AddonSource = {manifest: m, loadModule: () => module, builtin: true}
     this.pendingSources.set(m.id, source)
 
@@ -240,6 +264,9 @@ export class AddonManager {
 
       if (this.pendingSources.has(m.id) || this.idmap.has(m.id)) {
         continue // builtin / already-loaded wins
+      }
+      if (this._skipForceDisabled(m)) {
+        continue
       }
 
       const builtin = !!(raw as {builtin?: boolean}).builtin
@@ -293,6 +320,9 @@ export class AddonManager {
         console.warn(`installed addon "${m.id}" collides with an already-loaded id; skipping`)
         continue
       }
+      if (this._skipForceDisabled(m)) {
+        continue
+      }
       const entryJs = m.entry.replace(/\.ts$/, '.js')
       this.pendingSources.set(m.id, {
         manifest  : m,
@@ -314,9 +344,13 @@ export class AddonManager {
   private async _materializePending(ids?: string[]): Promise<void> {
     const wanted = ids ?? [...this.pendingSources.keys()]
     const manifests: IAddonManifest[] = []
+    const byId = new Map<string, IAddonManifest>()
     for (const id of wanted) {
       const src = this.pendingSources.get(id)
-      if (src) manifests.push(src.manifest)
+      if (src) {
+        manifests.push(src.manifest)
+        byId.set(src.manifest.id, src.manifest)
+      }
     }
     if (manifests.length === 0) return
 
@@ -332,8 +366,23 @@ export class AddonManager {
 
     let sorted: IAddonManifest[]
     try {
-      sorted = sortManifestsByDeps([...loadedStubs, ...manifests])
+      const {loaded, disabled} = resolveManifests([...loadedStubs, ...manifests])
+      sorted = loaded
+      for (const d of disabled) {
+        // An already-loaded stub cannot be un-loaded here; only pending ones
+        // are actually withheld.
+        if (!this.pendingSources.has(d.id)) continue
+        this.pendingSources.delete(d.id)
+        this.unloaded.set(d.id, {
+          id     : d.id,
+          name   : byId.get(d.id)?.name,
+          reason : d.reason,
+          message: d.message,
+        })
+        console.warn(d.message)
+      }
     } catch (err) {
+      // Only a cycle or a duplicate id reaches here — both programming errors.
       console.error('addon dependency sort failed:', err)
       // Fall back to unsorted pending order so we at least try to load.
       sorted = manifests
@@ -361,6 +410,14 @@ export class AddonManager {
           api.deps[depId] = depApi
         } else {
           console.warn(`addon "${m.id}": dep "${depId}" not yet loaded`)
+        }
+      }
+      // Optional deps are wired when present and silent when not — their
+      // absence is the state the addon is expected to handle.
+      for (const depId of m.optionalDependencies ?? []) {
+        const depApi = this.getAddonAPI(depId)
+        if (depApi !== undefined) {
+          api.deps[depId] = depApi
         }
       }
 
@@ -412,11 +469,41 @@ export class AddonManager {
   }
 
   /**
+   * Is this addon loaded *and* enabled — i.e. are its registrations live right
+   * now? This is what `api.has(id)` answers, because a disabled addon has had
+   * its classes, ops and menu entries unregistered and is no more usable than
+   * an absent one.
+   */
+  isEnabled(id: string): boolean {
+    return this.idmap.get(id)?.enabled === true
+  }
+
+  /**
+   * Records a force-disabled addon as unloaded and reports whether the caller
+   * should skip it. Force-disable withholds the source entirely — no module
+   * import, no record — so `isEnabled()` is false by construction.
+   */
+  private _skipForceDisabled(m: IAddonManifest): boolean {
+    if (!isForceDisabled(m.id)) return false
+    this.unloaded.set(m.id, {
+      id     : m.id,
+      name   : m.name,
+      reason : 'force-disabled',
+      message: `addon "${m.id}" is force-disabled for this session`,
+    })
+    return true
+  }
+
+  /**
    * Enables an addon and all of its (transitive) dependencies first. Idempotent.
    * Returns {ok:false} with a reason if a dependency is missing or the addon's
    * register() throws (in which case it is rolled back).
    */
   enable(id: string): AddonOpResult {
+    if (isForceDisabled(id)) {
+      const message = `addon "${id}" is force-disabled for this session`
+      return {ok: false, reason: 'force-disabled', message}
+    }
     const rec = this.idmap.get(id)
     if (!rec) {
       console.error(`enable: unknown addon "${id}"`)
@@ -465,6 +552,9 @@ export class AddonManager {
       return {ok: true}
     }
 
+    // Only *required* dependents block. An optional dependent that blocked its
+    // optional dependency from being turned off would make "optional" mean
+    // nothing at the one moment it is tested. See P14 §10.2 D3.
     const dependents = this.addons.filter(
       (r) => r.enabled && r !== rec && (r.manifest?.dependencies ?? []).includes(id)
     )

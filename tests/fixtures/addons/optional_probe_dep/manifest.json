@@ -1,0 +1,12 @@
+{
+  "id": "optional_probe_dep",
+  "name": "Optional Probe Dependency",
+  "version": "0.1.0",
+  "author": "Faber Leaf refactor tests",
+  "entry": "src/main.ts",
+  "dependencies": [],
+  "optional": true,
+  "description": "The optional dependency half of the P14 optional-addon probe pair.",
+  "buildMode": "prebuilt",
+  "defaultEnabled": true
+}

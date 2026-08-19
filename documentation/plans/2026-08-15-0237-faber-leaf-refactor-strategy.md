@@ -1321,7 +1321,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P11 | [LeafMesh host integration](./2026-08-15-0350-leafmesh-host-integration.md) | risk mitigation | 8 | P3, P8 | **landed** |
 | P12 | [LeafMesh modeling toolmode](./2026-08-15-0355-leafmesh-modeling-toolmode.md) | open decisions #2, #8 | 8 | P11 | **landed** |
 | P13 | [W1e — delete the TS BREP](./2026-08-15-0400-w1-delete-ts-brep.md) | W1 §4 | 9 | P5, P9, P10, P12 | **landed** |
-| P14 | [Addon manager — optional dependencies](./2026-08-15-0405-addon-manager-optional-dependencies.md) | W3 §0 | 10 | P9 | **written** |
+| P14 | [Addon manager — optional dependencies](./2026-08-15-0405-addon-manager-optional-dependencies.md) | W3 §0 | 10 | P9 | **landed** |
 | P15 | [W3a — LiteMesh becomes an optional addon](./2026-08-15-0410-w3-litemesh-optional-addon.md) | W3 §1 | 10 | P13, P14 | **written** |
 | P16 | [W3b — sculptcore build decoupling](./2026-08-15-0415-w3-sculptcore-build-decoupling.md) | W3 §2–4 | 10 | P15 | **written** |
 | P17 | [W5a — distributions + cycle cleanup](./2026-08-15-0420-w5-distributions.md) | W5 §1–2 | 11 | P16 | **written** |
@@ -1795,7 +1795,7 @@ ungrounded input just argues a wrong plan more convincingly.
 > enable/disable. That semantics is what P15, P16 and every third-party addon
 > inherit.
 
-- [ ] **P14 — [Addon manager: optional dependencies](./2026-08-15-0405-addon-manager-optional-dependencies.md)** — **`[xhigh]`**
+- [x] **P14 — [Addon manager: optional dependencies](./2026-08-15-0405-addon-manager-optional-dependencies.md)** — **`[xhigh]`**
   - The manifest schema has no notion of an optional or disabled builtin.
     `"optional": true` is **silently dropped** — `AddonManifest`
     (`manifest.ts:9-47`) does not declare it, `validateManifest:123-135` does

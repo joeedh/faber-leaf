@@ -1,0 +1,13 @@
+{
+  "id": "optional_probe",
+  "name": "Optional Probe",
+  "version": "0.1.0",
+  "author": "Faber Leaf refactor tests",
+  "entry": "src/main.ts",
+  "dependencies": [],
+  "optionalDependencies": ["optional_probe_dep"],
+  "optional": true,
+  "description": "Degrades rather than fails when its optional dependency is absent (P14 §6).",
+  "buildMode": "prebuilt",
+  "defaultEnabled": true
+}

@@ -130,6 +130,18 @@ SettingsEditor {
         })
       }
     }
+
+    // An addon that did not load has no `settings.addons[id]` to bind, so it
+    // would otherwise just be missing from this list with no explanation.
+    if (addonManager.unloaded.size > 0) {
+      tab.label('Not loaded')
+      for (const entry of addonManager.unloaded.values()) {
+        const row = tab.row()
+        row.useIcons(false)
+        row.label(entry.name ?? entry.id)
+        row.label(entry.message)
+      }
+    }
   }
 
   /** Feature-flag toggles. */

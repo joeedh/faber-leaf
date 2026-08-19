@@ -309,13 +309,17 @@ export class AddonAPI<T> {
   }
 
   /**
-   * Is the addon with this manifest id loaded? An addon that needs an optional
-   * subsystem can hard-depend on it, crash at first use, or ask and degrade;
-   * only the third lets a distribution ship without the subsystem, which is the
-   * point of the layered architecture. See geometry-contract.md §9.
+   * Is the addon with this manifest id loaded *and enabled* — are its
+   * registrations live? An addon that needs an optional subsystem can
+   * hard-depend on it, crash at first use, or ask and degrade; only the third
+   * lets a distribution ship without the subsystem, which is the point of the
+   * layered architecture. See geometry-contract.md §9 and documentation/addons.md.
+   *
+   * Enabled, not merely loaded: a disabled addon has had its classes, ops and
+   * menu entries unregistered, so it is no more usable than an absent one.
    */
   has(id: string): boolean {
-    return this.getAddon(id) !== undefined
+    return window._addons?.isEnabled(id) === true
   }
 
   // -------------------------------------------------------------------------

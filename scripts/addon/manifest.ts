@@ -4,6 +4,9 @@
  * Every addon (builtin or third-party) ships a `manifest.json` declaring its
  * id, version, dependencies, and entry point. The loader parses these, builds
  * a dependency graph, and topologically orders the loads. See plan §2.2 and §2.5.
+ *
+ * What "optional" means across the manifest, the resolver and the boot path is
+ * normative in documentation/addons.md; P14 §10.2 records why.
  */
 
 export interface IAddonManifest {
@@ -44,7 +47,38 @@ export interface IAddonManifest {
   /** Whether the addon is enabled out-of-the-box (no persisted user pref).
    * Defaults to true; set false for addons that should ship disabled. */
   defaultEnabled?: boolean
+
+  /** May a build ship without this addon, and may the user turn it off? An
+   * optional addon's absence is a normal state; a required one's is a defect.
+   * Defaults to false. */
+  optional?: boolean
+
+  /** Ids loaded before this one *when present*. Unlike `dependencies`, an
+   * absent entry does not disable this addon — it loads degraded and asks
+   * `api.has(id)`. */
+  optionalDependencies?: string[]
 }
+
+/**
+ * Every field the schema knows. An unrecognised key is an error: `optional`
+ * spent this project's whole history being silently dropped, and a validator
+ * that ignores what it does not understand is how that happens.
+ */
+const KNOWN_FIELDS = new Set([
+  'id',
+  'name',
+  'version',
+  'author',
+  'entry',
+  'dependencies',
+  'permissions',
+  'description',
+  'icon',
+  'buildMode',
+  'defaultEnabled',
+  'optional',
+  'optionalDependencies',
+])
 
 export class ManifestValidationError extends Error {
   constructor(
@@ -70,6 +104,14 @@ export function validateManifest(raw: unknown, manifestPath?: string): IAddonMan
   }
   const m = raw as Record<string, unknown>
 
+  const unknown = Object.keys(m).filter((k) => !KNOWN_FIELDS.has(k))
+  if (unknown.length > 0) {
+    throw new ManifestValidationError(
+      `unknown manifest field(s): ${unknown.map((k) => JSON.stringify(k)).join(', ')}`,
+      manifestPath
+    )
+  }
+
   if (typeof m.id !== 'string' || !ID_RE.test(m.id)) {
     throw new ManifestValidationError(
       `"id" must be a lowercase identifier matching ${ID_RE} (got ${JSON.stringify(m.id)})`,
@@ -92,15 +134,30 @@ export function validateManifest(raw: unknown, manifestPath?: string): IAddonMan
     throw new ManifestValidationError('"entry" must not contain ".."', manifestPath)
   }
 
-  if (m.dependencies !== undefined) {
-    if (!Array.isArray(m.dependencies) || m.dependencies.some((d) => typeof d !== 'string')) {
-      throw new ManifestValidationError('"dependencies" must be an array of strings', manifestPath)
+  for (const field of ['dependencies', 'optionalDependencies'] as const) {
+    const v = m[field]
+    if (v === undefined) continue
+    if (!Array.isArray(v) || v.some((d) => typeof d !== 'string')) {
+      throw new ManifestValidationError(`"${field}" must be an array of strings`, manifestPath)
     }
-    for (const d of m.dependencies as string[]) {
+    for (const d of v as string[]) {
       if (!ID_RE.test(d)) {
-        throw new ManifestValidationError(`dependency id ${JSON.stringify(d)} does not match ${ID_RE}`, manifestPath)
+        throw new ManifestValidationError(
+          `${field} id ${JSON.stringify(d)} does not match ${ID_RE}`,
+          manifestPath
+        )
       }
     }
+  }
+
+  const bothLists = new Set(((m.dependencies as string[] | undefined) ?? []).filter((d) =>
+    ((m.optionalDependencies as string[] | undefined) ?? []).includes(d)
+  ))
+  if (bothLists.size > 0) {
+    throw new ManifestValidationError(
+      `${[...bothLists].map((d) => JSON.stringify(d)).join(', ')} listed as both a required and an optional dependency`,
+      manifestPath
+    )
   }
 
   if (m.permissions !== undefined) {
@@ -116,8 +173,10 @@ export function validateManifest(raw: unknown, manifestPath?: string): IAddonMan
     )
   }
 
-  if (m.defaultEnabled !== undefined && typeof m.defaultEnabled !== 'boolean') {
-    throw new ManifestValidationError('"defaultEnabled" must be a boolean', manifestPath)
+  for (const field of ['defaultEnabled', 'optional'] as const) {
+    if (m[field] !== undefined && typeof m[field] !== 'boolean') {
+      throw new ManifestValidationError(`"${field}" must be a boolean`, manifestPath)
+    }
   }
 
   return {
@@ -130,16 +189,42 @@ export function validateManifest(raw: unknown, manifestPath?: string): IAddonMan
     permissions   : m.permissions as string[] | undefined,
     description   : typeof m.description === 'string' ? m.description : undefined,
     icon          : (m.icon as string | number | undefined) ?? undefined,
-    buildMode     : (m.buildMode as 'prebuilt' | 'source' | undefined) ?? 'prebuilt',
-    defaultEnabled: (m.defaultEnabled as boolean | undefined) ?? true,
+    buildMode           : (m.buildMode as 'prebuilt' | 'source' | undefined) ?? 'prebuilt',
+    defaultEnabled      : (m.defaultEnabled as boolean | undefined) ?? true,
+    optional            : (m.optional as boolean | undefined) ?? false,
+    optionalDependencies: (m.optionalDependencies as string[] | undefined) ?? [],
   }
 }
 
+/** Why an addon in the input set did not make it into the load order. */
+export interface DisabledAddon {
+  id: string
+  reason: 'missing-dep' | 'dep-disabled'
+  /** The dependency that was absent, or the disabled one this addon required. */
+  dependency: string
+  message: string
+}
+
+/** The resolver's partition: what loads, in order, and what does not, with why. */
+export interface ManifestResolution {
+  loaded: IAddonManifest[]
+  disabled: DisabledAddon[]
+}
+
 /**
- * Topologically sorts a list of manifests so dependencies load before their
- * dependents. Throws on missing or cyclic dependencies.
+ * Orders manifests so dependencies load before dependents, and partitions off
+ * the ones that cannot load.
+ *
+ * A missing *required* dependency disables the dependent (and, transitively,
+ * whatever required it) with a recorded reason — it does not throw, because one
+ * absent addon must not take the whole app down. A cycle or a duplicate id
+ * still throws: those are programming errors, not configuration states.
+ * `optionalDependencies` order but never satisfy. See P14 §10.2 D2/D3.
+ *
+ * Order is a function of the manifest set alone — roots are visited in id
+ * order — so it does not inherit `storage.list()`'s filesystem ordering.
  */
-export function sortManifestsByDeps(manifests: IAddonManifest[]): IAddonManifest[] {
+export function resolveManifests(manifests: IAddonManifest[]): ManifestResolution {
   const byId = new Map<string, IAddonManifest>()
   for (const m of manifests) {
     if (byId.has(m.id)) {
@@ -148,27 +233,59 @@ export function sortManifestsByDeps(manifests: IAddonManifest[]): IAddonManifest
     byId.set(m.id, m)
   }
 
-  const visited = new Map<string, 'in-progress' | 'done'>()
-  const out: IAddonManifest[] = []
+  const state = new Map<string, 'in-progress' | 'loaded' | 'disabled'>()
+  const loaded: IAddonManifest[] = []
+  const disabled: DisabledAddon[] = []
 
-  const visit = (m: IAddonManifest, stack: string[]) => {
-    const state = visited.get(m.id)
-    if (state === 'done') return
-    if (state === 'in-progress') {
+  const reject = (m: IAddonManifest, d: DisabledAddon) => {
+    state.set(m.id, 'disabled')
+    disabled.push(d)
+  }
+
+  const visit = (m: IAddonManifest, stack: string[]): 'loaded' | 'disabled' => {
+    const seen = state.get(m.id)
+    if (seen === 'loaded' || seen === 'disabled') return seen
+    if (seen === 'in-progress') {
       throw new Error(`addon dependency cycle: ${[...stack, m.id].join(' -> ')}`)
     }
-    visited.set(m.id, 'in-progress')
+    state.set(m.id, 'in-progress')
+
+    // Optional deps order but never satisfy: visit for placement, ignore the
+    // verdict.
+    for (const depId of [...(m.optionalDependencies ?? [])].sort()) {
+      const dep = byId.get(depId)
+      if (dep) visit(dep, [...stack, m.id])
+    }
+
     for (const depId of m.dependencies ?? []) {
       const dep = byId.get(depId)
       if (!dep) {
-        throw new Error(`addon "${m.id}" depends on unknown addon "${depId}"`)
+        reject(m, {
+          id        : m.id,
+          reason    : 'missing-dep',
+          dependency: depId,
+          message   : `addon "${m.id}" requires "${depId}", which is not available`,
+        })
+        return 'disabled'
       }
-      visit(dep, [...stack, m.id])
+      if (visit(dep, [...stack, m.id]) === 'disabled') {
+        reject(m, {
+          id        : m.id,
+          reason    : 'dep-disabled',
+          dependency: depId,
+          message   : `addon "${m.id}" requires "${depId}", which is itself disabled`,
+        })
+        return 'disabled'
+      }
     }
-    visited.set(m.id, 'done')
-    out.push(m)
+
+    state.set(m.id, 'loaded')
+    loaded.push(m)
+    return 'loaded'
   }
 
-  for (const m of manifests) visit(m, [])
-  return out
+  for (const id of [...byId.keys()].sort()) {
+    visit(byId.get(id)!, [])
+  }
+  return {loaded, disabled}
 }

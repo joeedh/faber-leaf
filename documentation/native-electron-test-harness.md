@@ -77,6 +77,7 @@ through untouched to the renderer harness):
 | `--list-scenes` | Print registered scene names. |
 | `--exit` | Quit the app once the scenario completes (via `nw.App.quit()`). |
 | `--app-storage-dir <path>` | Put all app state (`settings.json`, `feature-flags.json`, `startup.bin`, `autosave/`) there instead of `<cwd>/.sculptcore`. Parsed in `scripts/core/app_storage.ts`, not the harness, so it applies to any boot. |
+| `--disable-addon <id>` | (repeatable, also comma-separated) Force-disable an addon by id for this boot: it is never loaded at all, builtins included. Parsed in `scripts/addon/force_disable.ts`, not the harness, so it applies to any boot. See [addons.md](addons.md#force-disable). |
 
 A normal launch (`pnpm run nwjs`) sets none of these and is unaffected.
 

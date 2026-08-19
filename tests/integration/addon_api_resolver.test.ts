@@ -91,12 +91,14 @@ describeOnce('addon_api_plugin (runtime resolver)', () => {
     const built = readBuiltWithChunks(BUILT_ENTRY)
 
     // The stub reaches into globalThis._addons.getAddonAPI("leafmesh") and
-    // pulls each requested symbol from the exports.leafmesh namespace.
+    // pulls each requested symbol from the exports.leafmesh namespace, falling
+    // back to a throwing sentinel when the addon did not supply it.
     expect(built).toMatch(/globalThis\._addons.*getAddonAPI/s)
-    expect(built).toMatch(/__ns\["LeafMesh"\]/)
-    expect(built).toMatch(/__ns\["LeafMeshData"\]/)
-    expect(built).toMatch(/__ns\["AttrType"\]/)
-    expect(built).toMatch(/__ns\["makeCube"\]/)
+    expect(built).toMatch(/__missing/)
+    expect(built).toMatch(/__pick\("LeafMesh"\)/)
+    expect(built).toMatch(/__pick\("LeafMeshData"\)/)
+    expect(built).toMatch(/__pick\("AttrType"\)/)
+    expect(built).toMatch(/__pick\("makeCube"\)/)
 
     // The actual leafmesh implementation must NOT appear here. The stub *names*
     // every symbol api.ts re-exports, so a bare name proves nothing — spot-check
@@ -149,6 +151,36 @@ describeOnce('addon_api_plugin (runtime resolver)', () => {
     mod.register()
     mod.unregister()
     expect(mod.seen).toEqual(['register', 'unregister'])
+  })
+
+  test('an absent addon yields symbols that throw on use, not undefined', async () => {
+    // A copy beside the entry, so its relative chunk import still resolves but
+    // it is a module the loader has not evaluated yet — the top-level host
+    // lookup has to run again, this time against an absent host.
+    const copy = Path.join(Path.dirname(BUILT_ENTRY), 'main.__nohost.test.js')
+    fs.copyFileSync(BUILT_ENTRY, copy)
+
+    const g = globalThis as unknown as {_addons?: unknown}
+    const saved = g._addons
+    delete g._addons
+
+    let resolved: Record<string, unknown>
+    try {
+      const mod = (await import('file://' + copy)) as {
+        getResolvedSymbols: () => Record<string, unknown>
+      }
+      resolved = mod.getResolvedSymbols()
+    } finally {
+      g._addons = saved
+      fs.rmSync(copy, {force: true})
+    }
+
+    // Holding the value is safe; using it names the addon and the symbol.
+    expect(resolved.makeCube).toBeDefined()
+    expect(() => (resolved.makeCube as () => void)()).toThrow(/addon "leafmesh".*"makeCube"/s)
+    expect(() => new (resolved.LeafMesh as new () => unknown)()).toThrow(/addon "leafmesh".*"LeafMesh"/s)
+    expect(() => (resolved.AttrType as {F32: number}).F32).toThrow(/is not loaded/)
+    expect(() => (resolved.makeCube as () => void)()).toThrow(/api\.has\("leafmesh"\)/)
   })
 
   test('build emits the consumer manifest into the index', () => {
