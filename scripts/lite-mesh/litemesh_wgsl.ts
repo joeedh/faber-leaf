@@ -158,66 +158,6 @@ fn fs_main(in : VsOut) -> @location(0) vec4f {
 }
 `
 
-/**
- * Solid-mode textured draw shader: the basic-lit look plus the material's
- * active image-node texture, sampled with the mesh UV attribute (slot 2) or
- * local XY when the mesh has no UV layer. Installed through setDrawShader by
- * the non-render viewport pass for objects whose drawMode is TEXTURED — so it
- * follows the material vertex contract (position/normal at 0/1, requested
- * attrs from 2) and reads frame/object uniforms by reflection.
- */
-export function buildSolidTexturedWgsl(withUv: boolean): string {
-  const uvIn = withUv ? '  @location(2) attr_uv : vec2f,\n' : ''
-  const uvVary = withUv ? '  @location(2) vUv : vec2f,\n' : ''
-  const uvAssign = withUv ? '  out.vUv = in.attr_uv;\n' : ''
-  const uvExpr = withUv ? 'in.vUv' : 'in.vLocalCo.xy + vec2f(0.5, 0.5)'
-  return `
-struct FrameUniforms {
-  projectionMatrix : mat4x4f,
-};
-struct ObjectUniforms {
-  objectMatrix : mat4x4f,
-  normalMatrix : mat4x4f,
-};
-@group(0) @binding(0) var<uniform> frame : FrameUniforms;
-@group(2) @binding(0) var<uniform> object : ObjectUniforms;
-@group(1) @binding(0) var solidtex_tex : texture_2d<f32>;
-@group(1) @binding(1) var solidtex_smp : sampler;
-
-struct VsIn {
-  @location(0) position : vec3f,
-  @location(1) normal   : vec3f,
-${uvIn}};
-
-struct VsOut {
-  @builtin(position) clipPos : vec4f,
-  @location(0) vNormal  : vec3f,
-  @location(1) vLocalCo : vec3f,
-${uvVary}};
-
-@vertex
-fn vs_main(in : VsIn) -> VsOut {
-  var out : VsOut;
-  let p_obj = object.objectMatrix * vec4f(in.position, 1.0);
-  out.clipPos = frame.projectionMatrix * vec4f(p_obj.xyz, 1.0);
-  out.vNormal = (object.normalMatrix * vec4f(in.normal, 0.0)).xyz;
-  out.vLocalCo = in.position;
-${uvAssign}  return out;
-}
-
-@fragment
-fn fs_main(in : VsOut) -> @location(0) vec4f {
-  let no = normalize(in.vNormal);
-  let f1 = dot(no, normalize(vec3f(0.1, 0.2, -1.0)));
-  var f = f1;
-  if (f1 < 0.0) { f = -f1 * 0.2; }
-  f = f * 0.8 + 0.2;
-  let texc = textureSample(solidtex_tex, solidtex_smp, ${uvExpr});
-  return vec4f(texc.rgb * f, 1.0);
-}
-`
-}
-
 export function wgslForSpatialShader(sdef: ShaderDef): string {
   const name = sdef.name
   if (name === 'Basic Mesh Shader') return SPATIAL_BASIC_MESH_WGSL

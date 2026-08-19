@@ -44,6 +44,7 @@ import * as view3d_shaders from '../../shaders/shaders.js'
 import {
   buildMaterialPipelineDescriptor,
   buildMaterialVertexLayout,
+  buildSolidTexturedWgsl,
   type MaterialVertexAttr,
 } from '../../shaders/wgsl_shaders.js'
 import {asMaterialAttrConsumer, type MaterialAttrRequest} from '../../core/vertex_layout.js'
@@ -52,7 +53,6 @@ import {LightGenWgsl, type IRenderLights} from '../../shadernodes/shader_lib_wgs
 import {sharedLinearSampler} from '../../shadernodes/shader_nodes_wgsl.js'
 import {nextUniformFrameEpoch} from '../../webgpu/uniform_bindings.js'
 import {ImageNode} from '../../shadernodes/shader_nodes.js'
-import {buildSolidTexturedWgsl} from '../../lite-mesh/litemesh_wgsl.js'
 import {DrawModes} from '../../sceneobject/drawmode.js'
 
 export interface WebGpuViewport {
