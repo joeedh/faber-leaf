@@ -640,6 +640,56 @@ as a claim.
 
 This step opened **no** gap of its own; G8 was opened before it, by it.
 
+### Step 9 — close-out and the criterion-12 audit
+
+**The audit.** All nine P12 commits have an empty `git diff --stat -- scripts/`.
+No module under `addons/builtin/leafmesh/src/` imports anything outside the
+addon except `@framework/api` (21 sites) and `@framework/pathux` (5); there is
+not one relative escape, and the out-of-bundle build means one would not resolve
+if it were written. `"dependencies": []` is still true after eighteen modules.
+
+Three contract gaps were closed in P7 instead of being worked around, each as
+its own commit, each a change every provider gets: **G6** `8b05090d`
+(`IToolModeDefine`, `normalizeSelMask`, `selMaskToNames`), **G7** `10fe2fb7`
+(`ITransDataType` and its three data types), **G8** `52ce03dc` (a tool path
+resolvable after the addon that registers it is enabled — §13).
+
+**§10's criteria, one at a time.**
+
+- *A cube modelled into a hole-bearing shape, headlessly reproducible* — step 8,
+  `runLeafMeshHeadlessDemo`. Reproducible: yes, and it proves it, replaying
+  itself to the same hash. *In a sculptcore-free build*: at the module level,
+  yes; at boot, not yet, and step 8 records why — `init()` awaits `getWasm()`
+  unconditionally, which is P16's to make optional. This is the one criterion
+  that closes elsewhere, and it closes for reasons that have nothing to do with
+  LeafMesh.
+- *Every tool in §4 works, is undoable, and has a hole-bearing test case* — the
+  eight topology ops and six selection ops are registered by path; each has a
+  test file, and `holes.test.ts` plus the tube fixtures in `modeling`,
+  `subdivide`, `bevel` and `select_geom` carry the hole cases. `transform_geom`
+  has none, deliberately: transform moves vertex positions and cannot change a
+  ring's membership, so a holed fixture there would assert nothing.
+- *`ITransDataType` registered through `AddonAPI`, no type literal in
+  `transform_ops.ts`* — `api.registerTransType(LeafMeshTransType)`, and the grep
+  is clean. Implementor #2 exists, so criterion 14's pair is complete.
+- *Decisions #2 and #8 recorded in the strategy doc's §9.4* — done, both
+  **Resolved — yes**, with §4's scope named as what bounds #8 and what P17
+  freezes.
+- *No `scripts/` change, or every one recorded as a P7/P8 gap* — see the audit
+  above.
+
+**Size.** 4,861 lines under the addon and 1,981 of tests. §11 called this
+correctly in advance: the box-modeling toolmode's 1,592-line ops file was never
+the budget, because its topology tools delegate to sculptcore C++ and LeafMesh
+has nothing to delegate to. The topology algorithms *are* the phase —
+`modeling.ts`, `subdivide.ts` and `bevel.ts` alone are 1,427 lines of new code
+that did not exist in any form.
+
+**What is deliberately not here**, restated so it does not creep: knife,
+boolean, bridge, symmetrize, remesh and the UV tools. §4 said the list is the
+deliverable and additions are separate plans, and P17 freezes this list, not a
+larger one.
+
 ## 13. Contract gaps
 
 Numbering continues from the P11 plan (G1-G5 are recorded there).

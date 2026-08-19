@@ -1319,7 +1319,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P9 | [W1d — layer ratchet to `error`](./2026-08-15-0340-w1-layer-ratchet.md) | W1 §3 | 6 | P8 | **landed** |
 | P10 | [Serialization + file-compat hardening](./2026-08-15-0345-serialization-and-file-compat-hardening.md) | W1 §5 (promoted) | 7 | P8 | **landed** |
 | P11 | [LeafMesh host integration](./2026-08-15-0350-leafmesh-host-integration.md) | risk mitigation | 8 | P3, P8 | **landed** |
-| P12 | [LeafMesh modeling toolmode](./2026-08-15-0355-leafmesh-modeling-toolmode.md) | open decisions #2, #8 | 8 | P11 | **written** |
+| P12 | [LeafMesh modeling toolmode](./2026-08-15-0355-leafmesh-modeling-toolmode.md) | open decisions #2, #8 | 8 | P11 | **landed** |
 | P13 | [W1e — delete the TS BREP](./2026-08-15-0400-w1-delete-ts-brep.md) | W1 §4 | 9 | P5, P9, P10, P12 | **written** |
 | P14 | [Addon manager — optional dependencies](./2026-08-15-0405-addon-manager-optional-dependencies.md) | W3 §0 | 10 | P9 | **written** |
 | P15 | [W3a — LiteMesh becomes an optional addon](./2026-08-15-0410-w3-litemesh-optional-addon.md) | W3 §1 | 10 | P13, P14 | **written** |
@@ -1755,7 +1755,7 @@ ungrounded input just argues a wrong plan more convincingly.
   - Exit: LeafMesh renders, picks, round-trips through `.wproj`, and an OBJ
     file imports — with the BREP still present, so P13 has a safety net.
 
-- [ ] **P12 — [LeafMesh modeling toolmode](./2026-08-15-0355-leafmesh-modeling-toolmode.md)**
+- [x] **P12 — [LeafMesh modeling toolmode](./2026-08-15-0355-leafmesh-modeling-toolmode.md)** — landed 2026-08-18 (`b7dd8534`..`c875e793`)
   - **Contingent on open decisions #2 and #8**, and it is on the critical path:
     the BREP delete (P13) is what removes the tree's only authorable geometry
     type, so this lands *first*.
@@ -1917,19 +1917,29 @@ ungrounded input just argues a wrong plan more convincingly.
 | §7 decision | Settled in | Deadline |
 | --- | --- | --- |
 | 1. Built-in geometry type | **Resolved** — LeafMesh (P3, P11) | — |
-| 2. Modeling without sculptcore | P12 | before P13 |
+| 2. Modeling without sculptcore | **Resolved — yes**; LeafMesh's modeling toolmode is it (P12, landed 2026-08-18) | — |
 | 3. File compatibility (pin ids vs. rewrite `_origBytes`) | **Resolved** — pin ids (`stableStructId` in nstructjs, `APP_VERSION` 8→9); P10 §4.3a, landed 2026-08-18 | — |
 | 4. Curves / tets / hair / subsurf | P13 | at the delete |
 | 5. Texture painting | **Resolved** — deleted in P5, port plan deferred (landed 2026-08-16) | — |
 | 6. UV unwrapping | decided in P13 (rescue), executed in P19 | rescue before the delete |
 | 7. Rename's storage keys | **Resolved** — migrate (P2, landed 2026-08-15) | — |
-| 8. Does `faber-leaf-core` model on day one? | P12 | **before P13 is scheduled** — it decides the phase order |
+| 8. Does `faber-leaf-core` model on day one? | **Resolved — yes**, at P12 §4's scope (landed 2026-08-18) | — |
 | 9. One-way format break | **Resolved — there is no one-way break**; the forward-version guard ships in v9 anyway (P10 §6a, landed 2026-08-18). Embedder-facing wording still P20 | — |
 | 10. Does the sculptcore submodule go away? | **Resolved — no** (§7) | — |
 
 Decisions 3, 8 and 9 are the ones that change the *shape* of the plan rather than
-its content. All three must be answered before phase 9 is scheduled. 3 and 9 are
-closed; 8 is still open.
+its content. All three must be answered before phase 9 is scheduled, and all
+three now are.
+
+**2 and 8 are one answer read twice.** 2 asks whether modeling without
+sculptcore is possible; 8 asks whether the core distribution ships it. P12
+answered both by building it: the toolmode is an addon with `"dependencies": []`
+that touches no `scripts/` file, and §8's headless run drives a cube and a
+holed tube through the real ToolOps end to end. What bounds 8 is P12 §4's scope
+list — select, transform, extrude, inset, bevel, split-off, subdivide, loop-cut
+— with knife, boolean, bridge, symmetrize, remesh and the UV tools explicitly
+out and belonging to later phases. `faber-leaf-core` models on day one; it does
+not model everything on day one.
 
 ### 9.5 Where the success criteria are closed
 
@@ -1951,7 +1961,7 @@ closed; 8 is still open.
 | 11. UV editor on a non-LiteMesh source | P18 |
 | 12. Third-party geometry type, no `scripts/` edit | P11 (proved), P14 (registry) |
 | 13. That type renders an `AttributeNode` material | P7 (contract), P11 (proof) |
-| 14. That type transforms through a registered `ITransDataType` | P7 (contract), P12 (proof) |
+| 14. That type transforms through a registered `ITransDataType` | P7 (contract), P12 (proof, landed 2026-08-18) |
 | 15. `documentation/embedding.md` | P20 |
 
 Criteria 12–14 are each closed by a *pair*: the plan that writes the contract and
