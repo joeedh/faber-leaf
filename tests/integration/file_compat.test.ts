@@ -124,12 +124,18 @@ interface FutureResult {
 }
 
 function boot(nwExe: string, evalExpr: string, tmpPrefix: string): unknown {
-  const out = Path.join(fs.mkdtempSync(Path.join(os.tmpdir(), tmpPrefix)), 'dump.json')
+  const dir = fs.mkdtempSync(Path.join(os.tmpdir(), tmpPrefix))
+  const out = Path.join(dir, 'dump.json')
   execFileSync(
     nwExe,
     [
       REPO_ROOT,
       ...isolatedProfileArgs(),
+      // A Chromium profile is not app state: settings.json lives in
+      // `<cwd>/.sculptcore`, so without this the boot inherits whichever addons
+      // the developer last had enabled -- and the cycle below reads that.
+      '--app-storage-dir',
+      Path.join(dir, 'storage'),
       '--apptest-headless',
       '--no-devtools',
       '--gen-scene',

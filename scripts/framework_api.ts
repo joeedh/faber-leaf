@@ -157,7 +157,7 @@ export * as simplemesh from './webgl/simplemesh.js'
 export {Texture} from './webgl/webgl.js'
 export type {IUniformsBlock, ShaderProgram} from './webgl/webgl.js'
 export * as webgl from './webgl/webgl.js'
-export {Shapes, setShapesObjLoader} from './webgl/simplemesh_shapes.js'
+export {Shapes} from './webgl/simplemesh_shapes.js'
 
 // webgpu/* — a provider that brings its own Drawable creates its own vertex
 // buffers, so it needs the usage flags the DOM lib declares as types only.
@@ -213,7 +213,7 @@ export type {Scene} from './scene/scene.js'
 export {Light} from './light/light.js'
 export {NullObject} from './nullobject/nullobject.js'
 
-// extern — jszip is loaded by side effect; no value-level exports.
+// extern — jszip is side-effect imported by core/appstate.ts; no value exports.
 
 // addon
 export {default as addonManager} from './addon/addon.js'

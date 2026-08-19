@@ -31,6 +31,7 @@ import {isDefaultBackendPass} from './split'
 const __filename = fileURLToPath(import.meta.url)
 const REPO_ROOT = Path.resolve(Path.dirname(__filename), '..', '..')
 const BUILT_ENTRY = Path.join(REPO_ROOT, 'build/addons/api_consumer/src/main.js')
+const INDEX_PATH = Path.join(REPO_ROOT, 'build/addons/index.json')
 
 /**
  * Reads the built entry plus any sibling chunk(s) it statically imports, joined.
@@ -54,6 +55,16 @@ function readBuiltWithChunks(entry: string): string {
   return parts.join('\n')
 }
 
+/** Whether `build/addons/index.json` currently lists an addon by id. */
+function indexNames(id: string): boolean {
+  try {
+    const json = JSON.parse(fs.readFileSync(INDEX_PATH, 'utf-8'))
+    return json.some((e: {manifest: {id: string}}) => e.manifest.id === id)
+  } catch {
+    return false
+  }
+}
+
 interface MockAddonAPI {
   exports: {[name: string]: Record<string, unknown>}
 }
@@ -63,7 +74,10 @@ const describeOnce = isDefaultBackendPass() ? describe : describe.skip
 
 describeOnce('addon_api_plugin (runtime resolver)', () => {
   beforeAll(() => {
-    if (!fs.existsSync(BUILT_ENTRY)) {
+    // Both artifacts, not just the entry: a plain `pnpm build` rewrites
+    // index.json without the fixtures while leaving their bundles on disk, so
+    // an entry-only guard skips the rebuild the index test needs.
+    if (!fs.existsSync(BUILT_ENTRY) || !indexNames('api_consumer')) {
       execSync('node tools/build-addons.js --include-fixtures', {
         cwd  : REPO_ROOT,
         stdio: 'pipe',
@@ -84,11 +98,12 @@ describeOnce('addon_api_plugin (runtime resolver)', () => {
     expect(built).toMatch(/__ns\["AttrType"\]/)
     expect(built).toMatch(/__ns\["makeCube"\]/)
 
-    // The actual leafmesh implementation must NOT appear here. We spot-check
-    // hallmark strings unique to the implementation, not just the type names.
+    // The actual leafmesh implementation must NOT appear here. The stub *names*
+    // every symbol api.ts re-exports, so a bare name proves nothing — spot-check
+    // definitions, plus a name api.ts does not re-export at all.
     expect(built).not.toMatch(/class LeafMeshData extends SceneObjectData/)
-    expect(built).not.toMatch(/splitEdge/) // a topo.ts method
-    expect(built).not.toMatch(/triangulateMesh/) // a triangulate.ts export
+    expect(built).not.toMatch(/splitEdge/) // a topo.ts method, not an api.ts export
+    expect(built).not.toMatch(/function triangulateMesh/) // a triangulate.ts definition
     // And the bundle should be small — much smaller than even one leafmesh file.
     expect(built.length).toBeLessThan(20 * 1024) // 20kb cap
   })
@@ -137,8 +152,7 @@ describeOnce('addon_api_plugin (runtime resolver)', () => {
   })
 
   test('build emits the consumer manifest into the index', () => {
-    const indexPath = Path.join(REPO_ROOT, 'build/addons/index.json')
-    const index = JSON.parse(fs.readFileSync(indexPath, 'utf-8'))
+    const index = JSON.parse(fs.readFileSync(INDEX_PATH, 'utf-8'))
     const consumer = index.find((e: {manifest: {id: string}}) => e.manifest.id === 'api_consumer')
     expect(consumer).toBeDefined()
     expect(consumer.manifest.dependencies).toEqual(['leafmesh'])

@@ -20,8 +20,10 @@ import {
 
 import './polyfill'
 
-// fbxloader's side-effect import lives in entry_point.js now; was here as a
-// hangover from when fbxloader was in scripts/util/. Removed in plan §12.
+// JSZip is a UMD bundle that sets a global, which `createFile` and `loadFile`
+// read directly for compressed .wproj. It used to arrive by side effect through
+// the BREP's fbxloader; P13 deleted that, so the consumer imports it itself.
+import '../extern/jszip/jszip.js'
 
 import {loadShapes} from '../webgl/simplemesh_shapes'
 

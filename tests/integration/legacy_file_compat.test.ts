@@ -9,9 +9,10 @@
  * being deleted.
  *
  * It carries a `Mesh` block and a `curve` BlockSet with no blocks in it, so it
- * exercises both halves of the addon seam at once: a datablock type this build
- * still has a class for, and one it does not. After P13 the `Mesh` half changes
- * sides, and this test is what notices if that stops working.
+ * exercises both halves of the addon seam at once. P13 deleted the BREP, so the
+ * `Mesh` half has now changed sides: this build has no class for a `mesh` block
+ * either, and what the file exercises is the preservation path rather than the
+ * load path. The assertions below say what that path is contracted to do.
  *
  * The assertions are deliberately about *structure surviving a round-trip*, not
  * about pixels: load, re-save, re-load, and check the same blocks and object
@@ -155,6 +156,23 @@ if (!canRun && isDefaultBackendPass()) {
 
 const describeMaybe = canRun ? describe : describe.skip
 
+/** Lib type of the BREP mesh blocks P13 deleted the class for. */
+const BREP_LIB_TYPE = 'mesh'
+
+/** Class name the authoring build wrote for a `mesh`-backed object's data. */
+const BREP_DATA_CLS = 'Mesh'
+
+/**
+ * The authoring record, transformed by the one thing this build does
+ * differently. An object bound to a block whose class is gone gets a
+ * `NullObject` stub from `sceneobject.ts`'s `dataLink`, which carries the
+ * original lib_id and name forward so the next save writes the reference back
+ * unchanged — hence the name still matches and only the class differs.
+ */
+function asThisBuildReportsIt(objects: LegacyMeta['objects']) {
+  return objects.map((ob) => (ob.dataCls === BREP_DATA_CLS ? {...ob, dataCls: 'NullObject'} : ob))
+}
+
 describeMaybe('a file-version 7 .wproj still opens (P10 step 8)', () => {
   let meta: LegacyMeta
   let res: LegacyResult
@@ -176,7 +194,7 @@ describeMaybe('a file-version 7 .wproj still opens (P10 step 8)', () => {
   })
 
   test('objects keep their geometry binding, by class and by name', () => {
-    expect(res.afterLoad!.objects).toEqual(meta.objects)
+    expect(res.afterLoad!.objects).toEqual(asThisBuildReportsIt(meta.objects))
   })
 
   test('a datablock type this build has no addon for survives as an empty set', () => {
@@ -188,15 +206,16 @@ describeMaybe('a file-version 7 .wproj still opens (P10 step 8)', () => {
     }
   })
 
-  test('nothing in it decodes as a MissingDataBlock in the default build', () => {
-    // Not a general invariant — it is true of *this* fixture, and it is the
-    // assertion that flips when P13 moves Mesh behind the addon boundary.
-    expect(res.afterLoad!.missing).toEqual([])
+  test('the block this build has no class for is preserved, not dropped', () => {
+    // This is the assertion the pre-P13 build made in the negative (nothing
+    // missing). `mesh` is a MissingDataBlock now, and preservation is the point:
+    // blockCounts above already showed it survives the round-trip intact.
+    expect(res.afterLoad!.missing).toEqual([BREP_LIB_TYPE])
   })
 
   test('re-saving and re-opening it preserves the same scene', () => {
     expect(res.afterRoundTrip!.blockCounts).toEqual(meta.blockCounts)
-    expect(res.afterRoundTrip!.objects).toEqual(meta.objects)
+    expect(res.afterRoundTrip!.objects).toEqual(asThisBuildReportsIt(meta.objects))
     expect(res.resavedBytes).toBeGreaterThan(0)
   })
 })

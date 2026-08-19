@@ -6,5 +6,6 @@
   "entry": "src/main.ts",
   "dependencies": ["leafmesh"],
   "description": "Smoke-test addon that imports from @addon/leafmesh/api via the runtime resolver.",
-  "buildMode": "prebuilt"
+  "buildMode": "prebuilt",
+  "defaultEnabled": false
 }

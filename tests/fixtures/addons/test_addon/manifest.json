@@ -6,5 +6,6 @@
   "entry": "src/main.ts",
   "dependencies": [],
   "description": "Smoke-test addon used by tests/build/addon_build.test.ts.",
-  "buildMode": "prebuilt"
+  "buildMode": "prebuilt",
+  "defaultEnabled": false
 }
