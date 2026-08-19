@@ -9,6 +9,8 @@ import {AttrType, Domain} from '../../../addons/builtin/leafmesh/src/attrs'
 import {
   extrudeFaceRegion,
   extrudeFacesIndividual,
+  insetFaceRegion,
+  insetFacesIndividual,
   meshSnapshotBytes,
   regionBoundaryEdges,
   splitOffFaces,
@@ -244,6 +246,101 @@ describe('split off', () => {
 
     expect(counts(mesh)).toEqual(before)
     expect(mesh.validateAndRepair()).toBe(0)
+  })
+})
+
+describe('inset', () => {
+  /** How far a face's vertices sit from the axis, on average. */
+  function meanRadius(mesh: LeafMesh, verts: readonly number[]): number {
+    let r = 0
+    for (const v of verts) {
+      r += Math.hypot(mesh.v.co[v * 3], mesh.v.co[v * 3 + 1])
+    }
+    return r / verts.length
+  }
+
+  test('a cube face keeps its plane and gains a band', () => {
+    const mesh = new LeafMesh()
+    makeCube(mesh, 2)
+    const before = counts(mesh)
+
+    const out = insetFaceRegion(mesh, [faceFacing(mesh, [0, 0, 1])], {amount: 0.5})
+
+    expect(out.walls.length).toBe(4)
+    expect(counts(mesh)).toEqual({verts: before.verts + 4, edges: before.edges + 8, faces: before.faces + 4})
+
+    // Half a unit in from each of the four sides, and still on the top plane.
+    for (const v of faceVerts(mesh, out.faces[0])) {
+      expect(Math.abs(mesh.v.co[v * 3])).toBeCloseTo(0.5, 12)
+      expect(Math.abs(mesh.v.co[v * 3 + 1])).toBeCloseTo(0.5, 12)
+      expect(mesh.v.co[v * 3 + 2]).toBeCloseTo(1, 12)
+    }
+    expect(mesh.validateAndRepair()).toBe(0)
+  })
+
+  test('depth lifts the inset face off the plane it came from', () => {
+    const mesh = new LeafMesh()
+    makeCube(mesh, 2)
+
+    const out = insetFaceRegion(mesh, [faceFacing(mesh, [0, 0, 1])], {amount: 0.25, depth: -0.5})
+
+    expect(faceCentre(mesh, out.faces[0])[2]).toBeCloseTo(0.5, 12)
+    expect(mesh.validateAndRepair()).toBe(0)
+  })
+
+  test('the outer ring goes in and the hole ring goes out', () => {
+    const mesh = new LeafMesh()
+    makeTube(mesh, 16, 1, 0.5)
+    const cap = [...mesh.f].find((f) => faceHoleCount(mesh, f) === 1 && mesh.faceNormal(f)[2] > 0.9) as number
+
+    const loops = [...mesh.faceLoops(cap)]
+    const outerBefore = meanRadius(mesh, mesh.loopVerts(loops[0]))
+    const holeBefore = meanRadius(mesh, mesh.loopVerts(loops[1]))
+
+    const out = insetFaceRegion(mesh, [cap], {amount: 0.1})
+    const after = [...mesh.faceLoops(out.faces[0])]
+
+    expect(faceHoleCount(mesh, out.faces[0])).toBe(1)
+    expect(out.walls.length).toBe(32)
+    // Both rings move toward the material between them: the outer one shrinks,
+    // the hole grows. A naive per-ring inset would shrink the hole too.
+    expect(meanRadius(mesh, mesh.loopVerts(after[0]))).toBeLessThan(outerBefore)
+    expect(meanRadius(mesh, mesh.loopVerts(after[1]))).toBeGreaterThan(holeBefore)
+    expect(mesh.validateAndRepair()).toBe(0)
+  })
+
+  test('a region insets as one, with no band along its interior', () => {
+    const mesh = new LeafMesh()
+    const grid = makeGrid(mesh, 2, 2)
+    const pair = [grid.faces[0], grid.faces[1]]
+
+    const out = insetFaceRegion(mesh, pair, {amount: 0.1})
+
+    expect(out.walls.length).toBe(6)
+    expect(out.faces.length).toBe(2)
+    expect(mesh.validateAndRepair()).toBe(0)
+  })
+
+  test('individually, each face keeps its own band', () => {
+    const mesh = new LeafMesh()
+    const grid = makeGrid(mesh, 2, 2)
+    const pair = [grid.faces[0], grid.faces[1]]
+
+    const out = insetFacesIndividual(mesh, pair, {amount: 0.1})
+
+    expect(out.walls.length).toBe(8)
+    expect(new Set(out.verts).size).toBe(8)
+    expect(mesh.validateAndRepair()).toBe(0)
+  })
+
+  test('the band faces the same way the face it came from does', () => {
+    const mesh = new LeafMesh()
+    makeCube(mesh, 2)
+    const out = insetFaceRegion(mesh, [faceFacing(mesh, [0, 0, 1])], {amount: 0.5})
+
+    for (const w of out.walls) {
+      expect(mesh.faceNormal(w)[2]).toBeCloseTo(1, 9)
+    }
   })
 })
 

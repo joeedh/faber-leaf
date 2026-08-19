@@ -221,6 +221,11 @@ leafmesh.LeafMeshToolMode {
     strip.tool('leafmesh.select_box()')
     strip.tool('leafmesh.select_circle()')
 
+    const tools = addHeaderRow().strip()
+    tools.useIcons(true)
+    tools.tool('leafmesh.extrude_region(transform=true)')
+    tools.tool('leafmesh.inset_faces()')
+
     header.flushUpdate()
   }
 
@@ -367,7 +372,15 @@ leafmesh.LeafMeshToolMode {
       new HotKey('E', [], 'leafmesh.extrude_region(transform=true)'),
       new HotKey('E', ['alt'], 'leafmesh.extrude_individual(transform=true)'),
       new HotKey('V', [], 'leafmesh.split_off(transform=true)'),
+      new HotKey('I', [], 'leafmesh.inset_faces()'),
+      new HotKey('B', ['ctrl'], (ctx) => this._bevel(ctx as ViewContext)),
     ])
+  }
+
+  /** Bevel what the mode is selecting: edges when edge mode is on, else verts. */
+  private _bevel(ctx: ViewContext): void {
+    const edges = (this.leafMeshSelMode & SelMask.EDGE) !== 0
+    ctx.api.execTool(ctx, edges ? 'leafmesh.bevel_edges()' : 'leafmesh.bevel_verts()')
   }
 
   loadSTRUCT(reader: StructReader<this>): void {

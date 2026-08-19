@@ -27,13 +27,23 @@ export interface RegionResult {
   verts: number[]
   /** The region's faces, rebuilt on `verts`. */
   faces: number[]
-  /** Walls raised along the region's rim; empty for a split-off. */
+  /**
+   * The band raised along the region's rim: an extrude's walls, an inset's
+   * skirt. Empty for a split-off, and for a region with no rim.
+   */
   walls: number[]
   /**
    * The region's averaged face normal — the axis an interactive extrude
    * constrains its follow-up grab to. `[0, 0, 1]` when the region was empty.
    */
   normal: Vec3
+}
+
+export interface InsetOptions {
+  /** How far the rim slides into the region, measured in the face plane. */
+  amount?: number
+  /** How far the inset region then moves along its own normal. */
+  depth?: number
 }
 
 export interface ExtrudeOptions {
@@ -67,8 +77,16 @@ interface RegionSnapshot {
   boundary: Map<number, [number, number]>
 }
 
+/**
+ * How a rewrite moves the duplicated vertices. `at` maps an original vertex to
+ * its copy; everything else the mover closes over. Extrude slides along the
+ * region normal and inset slides in the face plane — that is the whole of the
+ * difference between the two tools.
+ */
+type MoveFn = (at: (v: number) => number) => void
+
 interface RewriteOptions {
-  offset: number
+  move?: MoveFn
   walls: boolean
 }
 
@@ -153,8 +171,8 @@ export function regionBoundaryEdges(mesh: LeafMesh, faces: Iterable<number>): nu
   return [...snapshotRegion(mesh, asRegion(mesh, faces)).boundary.keys()]
 }
 
-/** Move each new vertex along the summed normal of the region faces it came from. */
-function offsetRegion(mesh: LeafMesh, snap: RegionSnapshot, at: (v: number) => number, offset: number): void {
+/** Each region vertex's normal: the region faces' normals at it, renormalized. */
+function regionVertNormals(snap: RegionSnapshot): Map<number, Vec3> {
   const dirs = new Map<number, Vec3>()
 
   for (const fs of snap.faces) {
@@ -172,16 +190,25 @@ function offsetRegion(mesh: LeafMesh, snap: RegionSnapshot, at: (v: number) => n
     }
   }
 
-  const co = mesh.v.co
-  for (const [v, d] of dirs) {
+  for (const d of dirs.values()) {
     const len = Math.hypot(d[0], d[1], d[2])
-    if (len === 0) {
-      continue
+    if (len > 0) {
+      for (let k = 0; k < 3; k++) {
+        d[k] /= len
+      }
     }
+  }
+  return dirs
+}
 
+/** Move each new vertex along the normal of the region faces it came from. */
+function offsetRegion(mesh: LeafMesh, snap: RegionSnapshot, at: (v: number) => number, offset: number): void {
+  const co = mesh.v.co
+
+  for (const [v, d] of regionVertNormals(snap)) {
     const nv = at(v)
     for (let k = 0; k < 3; k++) {
-      co[nv * 3 + k] += (offset / len) * d[k]
+      co[nv * 3 + k] += offset * d[k]
     }
   }
 }
@@ -231,9 +258,7 @@ function rewriteRegion(
 
   const at = (v: number): number => copies.get(v) ?? v
 
-  if (opts.offset !== 0) {
-    offsetRegion(mesh, snap, at, opts.offset)
-  }
+  opts.move?.(at)
 
   for (const fs of snap.faces) {
     mesh.killFace(fs.face)
@@ -323,19 +348,18 @@ export function extrudeFaceRegion(mesh: LeafMesh, faces: Iterable<number>, opts:
     dup.add(mesh.e.v2[e])
   }
 
-  return rewriteRegion(mesh, snap, dup, {offset: opts.offset ?? 0, walls: true})
+  const offset = opts.offset ?? 0
+  const move = offset === 0 ? undefined : (at: (v: number) => number) => offsetRegion(mesh, snap, at, offset)
+
+  return rewriteRegion(mesh, snap, dup, {move, walls: true})
 }
 
-/** Extrude each face on its own, so neighbours come apart rather than moving together. */
-export function extrudeFacesIndividual(
-  mesh: LeafMesh,
-  faces: Iterable<number>,
-  opts: ExtrudeOptions = {}
-): RegionResult {
+/** Run a one-face-at-a-time tool over a region and join up what it produced. */
+function mergeRegions(region: ReadonlySet<number>, run: (f: number) => RegionResult): RegionResult {
   const out: RegionResult = {verts: [], faces: [], walls: [], normal: [0, 0, 0]}
 
-  for (const f of asRegion(mesh, faces)) {
-    const one = extrudeFaceRegion(mesh, [f], opts)
+  for (const f of region) {
+    const one = run(f)
     out.verts.push(...one.verts)
     out.faces.push(...one.faces)
     out.walls.push(...one.walls)
@@ -346,6 +370,15 @@ export function extrudeFacesIndividual(
 
   out.normal = averageNormal([{normal: out.normal}])
   return out
+}
+
+/** Extrude each face on its own, so neighbours come apart rather than moving together. */
+export function extrudeFacesIndividual(
+  mesh: LeafMesh,
+  faces: Iterable<number>,
+  opts: ExtrudeOptions = {}
+): RegionResult {
+  return mergeRegions(asRegion(mesh, faces), (f) => extrudeFaceRegion(mesh, [f], opts))
 }
 
 /**
@@ -367,7 +400,115 @@ export function splitOffFaces(mesh: LeafMesh, faces: Iterable<number>): RegionRe
     }
   }
 
-  return rewriteRegion(mesh, snap, dup, {offset: 0, walls: false})
+  return rewriteRegion(mesh, snap, dup, {walls: false})
+}
+
+/** Unit vector perpendicular to edge `a → b`, in the plane of `n`, to its left. */
+function leftOf(co: ArrayLike<number>, n: Readonly<Vec3>, a: number, b: number): Vec3 {
+  const d: Vec3 = [co[b * 3] - co[a * 3], co[b * 3 + 1] - co[a * 3 + 1], co[b * 3 + 2] - co[a * 3 + 2]]
+  const c: Vec3 = [n[1] * d[2] - n[2] * d[1], n[2] * d[0] - n[0] * d[2], n[0] * d[1] - n[1] * d[0]]
+  const len = Math.hypot(c[0], c[1], c[2])
+
+  if (len > 0) {
+    for (let k = 0; k < 3; k++) {
+      c[k] /= len
+    }
+  }
+  return c
+}
+
+/**
+ * Slide each rim copy into the region by `amount` and along its normal by
+ * `depth`. The offset is measured perpendicular to the rim, not along the
+ * bisector, so a corner of any angle keeps the band a constant width.
+ */
+function insetRim(
+  mesh: LeafMesh,
+  snap: RegionSnapshot,
+  at: (v: number) => number,
+  amount: number,
+  depth: number
+): void {
+  const normals = regionVertNormals(snap)
+  const prev = new Map<number, number>()
+  const next = new Map<number, number>()
+
+  for (const [a, b] of snap.boundary.values()) {
+    next.set(a, b)
+    prev.set(b, a)
+  }
+
+  const co = mesh.v.co
+  for (const [v, n] of normals) {
+    const p = prev.get(v)
+    const q = next.get(v)
+    if (p === undefined && q === undefined) {
+      continue
+    }
+
+    const sides: Vec3[] = []
+    if (p !== undefined) {
+      sides.push(leftOf(co, n, p, v))
+    }
+    if (q !== undefined) {
+      sides.push(leftOf(co, n, v, q))
+    }
+
+    const bis: Vec3 = [0, 0, 0]
+    for (const side of sides) {
+      for (let k = 0; k < 3; k++) {
+        bis[k] += side[k]
+      }
+    }
+
+    const len = Math.hypot(bis[0], bis[1], bis[2])
+    if (len === 0) {
+      // A perfect spike: the two sides cancel and there is no inward direction.
+      continue
+    }
+
+    for (let k = 0; k < 3; k++) {
+      bis[k] /= len
+    }
+
+    const cos = bis[0] * sides[0][0] + bis[1] * sides[0][1] + bis[2] * sides[0][2]
+    const scale = cos > 1e-6 ? amount / cos : 0
+    const nv = at(v)
+
+    for (let k = 0; k < 3; k++) {
+      co[nv * 3 + k] += scale * bis[k] + depth * n[k]
+    }
+  }
+}
+
+/**
+ * Inset `faces` as one region: the rim slides into the region by `amount` and
+ * the band it leaves behind becomes faces.
+ *
+ * A face with holes needs no special case. The inward direction at a rim vertex
+ * is the left of the rim as the region's own faces walk it, and a hole ring is
+ * already wound the other way round — so one expression moves an outer ring in
+ * and a hole ring out, both toward the material, which is what §5 asks for.
+ */
+export function insetFaceRegion(mesh: LeafMesh, faces: Iterable<number>, opts: InsetOptions = {}): RegionResult {
+  const snap = snapshotRegion(mesh, asRegion(mesh, faces))
+  const dup = new Set<number>()
+
+  for (const e of snap.boundary.keys()) {
+    dup.add(mesh.e.v1[e])
+    dup.add(mesh.e.v2[e])
+  }
+
+  const amount = opts.amount ?? 0
+  const depth = opts.depth ?? 0
+  const move = (at: (v: number) => number) => insetRim(mesh, snap, at, amount, depth)
+
+  return rewriteRegion(mesh, snap, dup, {move, walls: true})
+}
+
+/** Inset each face on its own, so every face keeps its own band. */
+export function insetFacesIndividual(mesh: LeafMesh, faces: Iterable<number>, opts: InsetOptions = {}): RegionResult {
+  return mergeRegions(asRegion(mesh, faces), (f) => insetFaceRegion(mesh, [f], opts))
 }
 
 /**

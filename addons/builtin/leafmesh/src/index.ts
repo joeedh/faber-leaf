@@ -83,8 +83,13 @@ export type {MovableVerts, NearVertQuery} from './transform_geom.js'
 export {
   extrudeFaceRegion,
   extrudeFacesIndividual,
+  insetFaceRegion,
+  insetFacesIndividual,
   meshSnapshotBytes,
   regionBoundaryEdges,
   splitOffFaces,
 } from './modeling.js'
-export type {ExtrudeOptions, RegionResult} from './modeling.js'
+export type {ExtrudeOptions, InsetOptions, RegionResult} from './modeling.js'
+
+export {bevelEdges, bevelVerts} from './bevel.js'
+export type {BevelOptions, BevelResult} from './bevel.js'

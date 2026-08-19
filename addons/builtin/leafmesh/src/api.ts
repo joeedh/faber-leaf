@@ -41,16 +41,24 @@ export {LeafMeshTransElem, LeafMeshTransList, LeafMeshTransType} from './transty
 export {
   extrudeFaceRegion,
   extrudeFacesIndividual,
+  insetFaceRegion,
+  insetFacesIndividual,
   meshSnapshotBytes,
   regionBoundaryEdges,
   splitOffFaces,
 } from './modeling.js'
-export type {ExtrudeOptions, RegionResult} from './modeling.js'
+export type {ExtrudeOptions, InsetOptions, RegionResult} from './modeling.js'
+
+export {bevelEdges, bevelVerts} from './bevel.js'
+export type {BevelOptions, BevelResult} from './bevel.js'
 
 export {
   LEAFMESH_MODELING_OPS,
+  LeafMeshBevelEdgesOp,
+  LeafMeshBevelVertsOp,
   LeafMeshExtrudeIndividualOp,
   LeafMeshExtrudeRegionOp,
+  LeafMeshInsetOp,
   LeafMeshSplitOffOp,
   LeafMeshTopoOpBase,
 } from './modeling_ops.js'

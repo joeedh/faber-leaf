@@ -422,6 +422,68 @@ anywhere. Both extrudes also carry a plain `offset` input, which is what makes
 `@framework/pathux` and `@framework/api`, so this step opened **no** gap: the
 addon-side diff carries no `scripts/`.
 
+### Step 5 — inset and bevel
+
+- **`modeling.ts`** (pure) gained `insetFaceRegion` / `insetFacesIndividual`
+  and `InsetOptions` — 6 more tests.
+- **`bevel.ts`** (pure, new): `bevelVerts`, `bevelEdges` — 12 tests.
+- **`modeling_ops.ts`** (framework) gained `leafmesh.inset_faces`,
+  `leafmesh.bevel_verts` and `leafmesh.bevel_edges` on a shared
+  `LeafMeshDragOpBase`.
+
+**Inset is extrude with a different mover.** `rewriteRegion` used to take a
+scalar offset; it now takes a `MoveFn`, and that is the whole difference between
+the two tools — an extrude slides the duplicated rim along the region normal, an
+inset slides it in the face plane. Walls, rim classification, attribute
+snapshotting and orphan-edge cleanup are shared unchanged.
+
+**§5's outer-ring-in / hole-rings-out rule falls out of winding and needs no
+special case.** The inward direction at a rim vertex is `cross(N, d)` for the
+rim direction `d` — the left of the rim as the region's own faces walk it. A
+hole ring is wound the other way, so the one expression moves an outer ring in
+and a hole ring out, both toward the material. Exact width comes from the
+bisector: `bis = normalize(w1 + w2)`, scaled by `amount / (bis · w1)`. The tube
+test pins it — the outer ring's mean radius falls, the hole ring's rises, the
+face keeps its hole, and 32 skirt faces come up.
+
+**Vertex bevel and edge bevel are one construction seen twice.** Around a vertex
+the incident edges form a cyclic fan; the bevel replaces the vertex with one
+point per fan edge, each incident face taking the two points of the edges it
+sits between, and closes the hole with a cap. Beveling an edge is the same at
+each of its ends with that edge's own point left out: the fan becomes an arc,
+and the gap the arc leaves is filled by the bevel quad instead of by a cap — so
+a three-edge end needs no cap (the single face between the arc's two points
+already spans it) and a four-edge end gets a triangular one.
+
+**Winding is derived, not tested for.** A fan face between `edges[i]` and
+`edges[i + 1]` walks its ring as `other(edges[i]) → v → other(edges[i + 1])`,
+so it uses the directed edge `p_i → p_(i+1)`; a cap therefore walks the fan
+backwards, and the quad crosses head-to-tail between the two arcs. No normal
+test appears anywhere in `bevel.ts` — `validateAndRepair() === 0` in every case
+is what proves it.
+
+**A bevel refuses what it cannot do, explicitly.** `vertFan` returns nothing for
+a boundary vertex, a wire edge, a face meeting the vertex twice or a
+non-manifold disk, and `bevelEdges` additionally requires two faces per edge and
+**no two selected edges sharing a vertex** — a chain needs one shared offset
+point at the vertex the edges meet in, which is a vertex bevel's job. Refused
+elements come back in `BevelResult.skipped` and the mesh is left untouched;
+both refusals are tests. Lifting that restriction is future work, not silent
+breakage.
+
+**These three drag rather than chaining a translate.** An inset width has no
+`TranslateOp` analogue, so `LeafMeshDragOpBase` is modal: it reads a horizontal
+drag through the same object-local-units-per-pixel unprojection
+`litemesh_modeling_ops.ts` uses, and each move restores the undo snapshot and
+re-runs `exec` from the new width. `exec` doing the whole job from its inputs is
+what keeps them scriptable — §8's headless sequences set `amount` / `depth` /
+`individual` and never touch a pointer. Cancel needs no code: `modalEnd(true)`
+runs the toolstack's cancel, which is the base class's `undo`.
+
+Hotkeys: `I` insets; `Ctrl+B` bevels whatever the mode is selecting — edges when
+edge mode is on, vertices otherwise. This step opened **no** gap either; the
+addon-side diff carries no `scripts/`.
+
 ## 13. Contract gaps
 
 Numbering continues from the P11 plan (G1-G5 are recorded there).
