@@ -618,3 +618,21 @@ The re-export is routed through `transform_ops.js` rather than
 is: the hub depends on `transform_ops.js` either way, whereas a direct edge on
 `transform_base.js` puts `framework_api.ts` into one more import cycle and
 `check:layers` refuses the +1.
+
+### G8 — an addon enabled after startup had unreachable tool paths
+
+`parseToolPath` builds its `toolpath -> class` map once, on the first call, and
+never again (`scripts/path.ux/scripts/path-controller/toolsys/toolpath.ts`). An
+addon that is not `defaultEnabled` registers its ToolOps when the user enables
+it, which is always after the first menu or keymap has parsed a path — so every
+one of its tools answered `unknown tool`, by path, forever. The leafmesh addon
+is the first builtin with `defaultEnabled: false`, which is why nothing had hit
+this before; §8's headless sequence hit it on its first `createTool`.
+
+Not LeafMesh's defect and not fixable from an addon, so it is P7's by §2's test.
+A miss now rescans `ToolClasses` before deciding the tool is absent. Fixed in
+path-controller `5049af1 fix(toolpath): rescan tool paths when a lookup misses`,
+carried into the parent by the gitlink bump that records this gap.
+
+This one is under `scripts/` only in the sense that the vendored submodule lives
+there; the criterion-12 audit reads it as a submodule pointer, not a host edit.
