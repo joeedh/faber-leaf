@@ -105,15 +105,11 @@ export type {IMaterialAttrConsumer, MaterialAttrRequest, VertexAttrDesc, VertexA
 // Properties-editor panel contributions (§9). A leaf like the two above.
 export {ANY_DATA_KIND} from './core/props_panels.js'
 export type {IPropsPanel} from './core/props_panels.js'
-// `core/data_kinds.ts` is deliberately NOT re-exported here: it reaches
-// `core/context.ts`, and the hub is on context's own import path, so a re-export
-// closes a cycle. Addons register a kind through `AddonAPI.registerDataKind`.
+// `core/data_kinds.ts` is deliberately NOT re-exported here: a kind is
+// registered, not imported, so it goes through `AddonAPI.registerDataKind`.
 
-// sceneobject/* and View3DOp — MUST be re-exported BEFORE context.ts.
-// context.ts pulls in editors/all → editors/view3d → tools/tools.ts → the
-// toolmode modules. Any addon class extending `SceneObjectData` or `View3DOp`
-// TDZs if those base classes aren't bound by the time the context-triggered
-// chain re-enters the addon. Keep these re-exports above `ViewContext`.
+// sceneobject/* and View3DOp — the base classes an addon's geometry type and
+// its viewport ops extend.
 export {SceneObject, ObjectFlags, Colors, composeObjectMatrix} from './sceneobject/sceneobject.js'
 export {DrawModes, DrawFlags} from './sceneobject/drawmode.js'
 export {SceneObjectData} from './sceneobject/sceneobject_base.js'

@@ -1,6 +1,6 @@
 # P17 — W5a: distributions + cycle cleanup
 
-**Status:** step 0 verified, step 1 landed; step 2 not started.
+**Status:** landed — steps 0, 1 and 2 all complete.
 
 **Citations note:** the file:line references below were a 2026-08-15 snapshot
 taken before any of this work landed. Where step 1 found one stale, the text is
@@ -175,6 +175,35 @@ non-deterministic crash.
   asserts identical resulting state. That is the direct test of the property
   that matters, and it is cheap.
 
+**Landed 2026-08-19.** The finder walks the shipped graph from
+`scripts/core/appstate.ts` (320 modules) and found **16** cycles. Every one with
+a host file in it is closed; the **9** that remain are wholly inside the vendored
+`path.ux` (8) and `mathl` (1) submodules, so the ratchet counts the two owners
+separately and budgets host at **0**.
+
+| knot | cycles | fix |
+| --- | --- | --- |
+| `render/queue_factory` → `webgpu/queue_adapter` → `webgl/simplemesh` | 1 | the adapter imported `simplemesh.ts` for the `PrimitiveTypes` enum alone, dragging in the shader stack and the WebGPU queue with it. The enum family moved to the new zero-import leaf `scripts/webgl/primitive_types.ts`; `simplemesh.ts` re-exports it. |
+| `view3d` ⇄ `view3d_toolmode` | 4 | the toolmode base imported the editor that hosts it, for `DrawLine` (already defined in `view3d_base.ts` and merely re-exported by `view3d.ts`) and `ITempText`. `ITempText` moved down beside `DrawLine`/`DrawQuad`; the toolmode imports `view3d_base.ts`. |
+| `core/context` → `resbrowser` → `screengen` → `PropsEditor` → ... → back | 2 | both return edges were `ViewContext` imports that never needed a value: one already type-only in `texture/proceduralTex.ts`, one outright unused in `addon/addon_base.ts`. |
+
+`tools/check-cycles.js` + `tools/cycle-baseline.json` are the ratchet, wired into
+`pr.yml` as `pnpm cyclecheck`; `pnpm cyclecheck:list` prints the raw report. A
+cycle counts as submodule-owned only when **every** member is under `path.ux` or
+`mathl`, so a new host cycle routed through a submodule is still host.
+
+The `framework_api.ts` ordering comments are gone on evidence rather than on
+faith: the same walk started at `scripts/framework_api.ts` also reports 9 cycles,
+all submodule, and `check:layers` holds `core-no-addons`, `core-no-addons-typeonly`
+and `core-no-addons-transitive` at 0 — so no host module imports an addon and the
+"the chain re-enters the addon before its base class is bound" hazard cannot
+arise.
+
+One wart survives, recorded in the baseline's `$note`: `core/context.ts` still
+value-imports seven editor classes to use as `getContextArea()` keys. That closes
+no cycle now, but it is why core cannot be embedded without the editors; a
+name-keyed lookup through `areaclasses` would finish the job.
+
 ## 5. Tests
 
 - **Criterion 10**: both distributions build from one tree, boot, and pass a
@@ -191,13 +220,28 @@ non-deterministic crash.
 - **Packaging**: the re-pointed external-addon build test passes, including the
   `index.json` dependency entry.
 - **Shuffle test** (§4): distribution addon order does not affect resulting
-  state.
-- `pnpm cyclecheck` at or below the published baseline, gated.
+  state. **Met (2026-08-19)**: `tests/unit/distribution_shuffle.test.ts` walks
+  all 120 permutations of a five-addon fixture — a required chain, a diamond, an
+  optional dependency and an addon whose required dependency is absent — and
+  asserts each one yields the same `resolveManifests` order and disabled set and
+  the same `isInDistribution` / `distributionEnabled` / `activeDefaultScene`
+  answers, plus an anchor assertion that the shared answer is the *right* one
+  rather than merely a stable one. It is a true unit test because
+  `scripts/addon/distribution.ts` and `scripts/addon/manifest.ts` are both
+  zero-import leaves.
+- `pnpm cyclecheck` at or below the published baseline, gated. **Met
+  (2026-08-19)**: host 0, submodule 9.
 - `faber-leaf-core` runs the P12 modeling flow end to end; `faber-leaf` runs the
   full sculpt suites.
 - Both distributions' `.wproj` files interoperate to the degree P10 defines:
   a core-written file opens in full, and a full-written file opens in core with
   LiteMesh blocks preserved-but-inert.
+
+**Local-run hazard:** `pnpm build:core` overwrites `build/` in place and the
+integration suites run against whatever is sitting there, so a core build
+followed by `pnpm test` fails with a wall of unrelated-looking assertions. Run
+`pnpm build` again first. CI is unaffected — the two lanes are separate jobs on
+separate runners.
 
 ## 6. Risks
 

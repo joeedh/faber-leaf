@@ -1324,7 +1324,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P14 | [Addon manager — optional dependencies](./2026-08-15-0405-addon-manager-optional-dependencies.md) | W3 §0 | 10 | P9 | **landed** |
 | P15 | [W3a — LiteMesh becomes an optional addon](./2026-08-15-0410-w3-litemesh-optional-addon.md) | W3 §1 | 10 | P13, P14 | **landed** |
 | P16 | [W3b — sculptcore build decoupling](./2026-08-15-0415-w3-sculptcore-build-decoupling.md) | W3 §2–4 | 10 | P15 | **landed** |
-| P17 | [W5a — distributions + cycle cleanup](./2026-08-15-0420-w5-distributions.md) | W5 §1–2 | 11 | P16 | **step 1 landed** |
+| P17 | [W5a — distributions + cycle cleanup](./2026-08-15-0420-w5-distributions.md) | W5 §1–2 | 11 | P16 | **landed** |
 | P18 | [W4a — `IUVSource` + UV editor rewrite](./2026-08-15-0425-w4-iuvsource-uv-editor.md) | W4 | 12 | P8, P11 | **written** |
 | P19 | [W4b — port the unwrapping solvers](./2026-08-15-0430-w4-unwrapping-port.md) | W4 | 12 | P18, P13 (rescue) | **written** |
 | P20 | [W5b — de-globalize + embedding contract](./2026-08-15-0435-w5-deglobalize-embedding-api.md) | W5 §3–4 | 13 | P17, P18 | **written** |
@@ -1854,8 +1854,7 @@ ungrounded input just argues a wrong plan more convincingly.
   - Exit: success criteria #3 and #4 — the boundary is real, **and** the default
     build is no harder to work in than it is today.
 
-- [ ] **P17 — [W5a: distributions + cycle cleanup](./2026-08-15-0420-w5-distributions.md)**
-      — step 1 landed, step 2 open
+- [x] **P17 — [W5a: distributions + cycle cleanup](./2026-08-15-0420-w5-distributions.md)**
   - [x] `defineDistribution({id, title, addons, defaultScene})`; `entry_point`
     becomes generic (one `@distribution` import, then `loadDistribution`);
     `tools/esbuilder.js` takes `--distribution <name>`;
@@ -1867,13 +1866,19 @@ ungrounded input just argues a wrong plan more convincingly.
   - [x] **Restore a packaging test.** P13 already re-pointed it:
     `tests/integration/leafmesh_real_build.test.ts` covers the external ship
     mode including the `index.json` entry. Verified, not re-done.
-  - [ ] Kill the load-order fragility: the TDZ comments in `framework_api.ts`
-    are a circular-dependency smell, and arbitrary addon load order under a
-    manifest will turn them into non-deterministic crashes. Drive
-    `pnpm cyclecheck` to a clean baseline and gate it. (The registry's own
-    import-order comments went with the file.)
-  - Exit: success criterion #10 **met**; the packaging test is green; the cycle
-    baseline and shuffle test remain.
+  - [x] Kill the load-order fragility: the TDZ comments in `framework_api.ts`
+    were a circular-dependency smell, and arbitrary addon load order under a
+    manifest would have turned them into non-deterministic crashes. 16 cycles
+    measured from `scripts/core/appstate.ts`, every host one closed (a
+    `PrimitiveTypes` leaf, `ITempText` moved down to `view3d_base.ts`, two dead
+    `ViewContext` value-imports); the 9 left are wholly inside `path.ux` and
+    `mathl`. `pnpm cyclecheck` gates host at 0 in `pr.yml`. The comments came out
+    only after the evidence did. (The registry's own import-order comments went
+    with the file.)
+  - [x] Shuffle test: `tests/unit/distribution_shuffle.test.ts` walks all 120
+    orderings of a five-addon distribution and asserts one state.
+  - Exit: success criterion #10 **met**; packaging test green; cycle ratchet and
+    shuffle test landed.
 
 - [ ] **P18 — [W4a: `IUVSource` + UV editor rewrite](./2026-08-15-0425-w4-iuvsource-uv-editor.md)**
   - Define `IUVSource` per §4 W4 — opaque handles, bulk arrays-in/arrays-out,

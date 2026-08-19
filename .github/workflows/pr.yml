@@ -37,7 +37,7 @@ concurrency:
 
 jobs:
   checks:
-    name: typecheck / format / layers
+    name: typecheck / format / layers / cycles
     runs-on: ubuntu-latest
     steps:
       - name: Checkout (with submodules)
@@ -94,6 +94,14 @@ jobs:
       # only thing keeping the numbers monotone.
       - name: Layer boundaries (ratchet)
         run: pnpm check:layers
+
+      # Ratchet for import cycles, walked from the app's root module. The host
+      # budget is 0: a distribution lists its addons in whatever order it likes,
+      # so a cycle is no longer a fixed hazard that the hardcoded entry point
+      # happened to survive — it is a load-order-dependent crash. The nine
+      # cycles still budgeted are inside the path.ux and mathl submodules.
+      - name: Import cycles (ratchet)
+        run: pnpm cyclecheck
 
   test:
     name: test (sculptcore present)

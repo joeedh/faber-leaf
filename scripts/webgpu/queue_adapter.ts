@@ -14,7 +14,7 @@ import type {Pipeline, PipelineCache, PipelineDescriptor} from './pipeline.js'
 import {applySurfaceFormat, markInstancedPointSprite} from './pipeline.js'
 import {buildPipelineDescriptor, lookupWgslShader} from '../shaders/wgsl_shaders.js'
 import {BufferUsage} from './flags.js'
-import {PrimitiveTypes} from '../webgl/simplemesh.js'
+import {PrimitiveTypes} from '../webgl/primitive_types.js'
 import {UniformBindings} from './uniform_bindings.js'
 
 /**

@@ -74,15 +74,24 @@
     "addons/builtin/litemesh/src, and cut the five host edges that reached them",
     "(api_define's side-effect import, framework_api's LiteMesh/PaintToolModeBase",
     "re-exports, tools.ts's toolmode aggregation, entry_point's two lite-mesh",
-    "imports). The cycles those edges closed go with them: no-circular 459 -> 400."
+    "imports). The cycles those edges closed go with them: no-circular 459 -> 400.",
+    "",
+    "P17 (W5a) step 2 closed every host import cycle (16 -> 9, all nine now",
+    "inside path.ux/mathl): PrimitiveTypes split out of simplemesh.ts,",
+    "ITempText moved down to view3d_base.ts, and two stray context imports",
+    "in proceduralTex.ts / addon_base.ts dropped. no-circular 400 -> 399.",
+    "The entry-walk ratchet lives separately in tools/cycle-baseline.json;",
+    "this count is dependency-cruiser sweeping every root, so path.ux",
+    "dominates it and the two numbers do not track each other."
   ],
   "measured": "2026-08-19",
   "config": ".dependency-cruiser.cjs",
   "roots": [
     "scripts",
-    "addons"
+    "addons",
+    "distributions"
   ],
-  "total": 400,
+  "total": 399,
   "rules": {
     "core-no-view3d-tools": 0,
     "core-no-addons": 0,
@@ -90,6 +99,6 @@
     "core-no-addons-transitive": 0,
     "core-no-litemesh": 0,
     "core-no-sculptcore": 0,
-    "no-circular": 400
+    "no-circular": 399
   }
 }

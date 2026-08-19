@@ -12,49 +12,14 @@ import {GpuBuffer, ensureGpuBuffer} from '../webgpu/buffer.js'
 import {isWebGPU} from '../core/renderer_flag.js'
 import {getActiveWebGpuContext, createDrawQueue} from '../render/queue_factory.js'
 import {isInstancedPointSprite} from '../webgpu/pipeline.js'
+import {LayerTypeNames, LayerTypes, PrimitiveTypes, TypeSizes} from './primitive_types'
+
+export {LayerTypeNames, LayerTypes, PrimitiveTypes, TypeSizes}
 
 type OpenVector = number[] | Float32Array | Float64Array | Vector2Like | Vector3Like | Vector4Like
 
 //class IIDMap extends Map<number, number> {}
 class IIDMap extends util.IDMap<number> {}
-
-export enum PrimitiveTypes {
-  NONE = 0,
-  POINTS = 1,
-  LINES = 2,
-  TRIS = 4,
-  ADVANCED_LINES = 8,
-  ALL = 1 | 2 | 4 | 8,
-}
-
-export enum LayerTypes {
-  LOC = 1,
-  UV = 2,
-  COLOR = 4,
-  NORMAL = 8,
-  ID = 16,
-  CUSTOM = 32,
-  INDEX = 64,
-}
-
-export const LayerTypeNames = {
-  [LayerTypes.LOC]   : 'position',
-  [LayerTypes.UV]    : 'uv',
-  [LayerTypes.COLOR] : 'color',
-  [LayerTypes.ID]    : 'id',
-  [LayerTypes.NORMAL]: 'normal',
-  [LayerTypes.CUSTOM]: 'custom',
-}
-
-export const TypeSizes = {
-  [LayerTypes.LOC]   : 3,
-  [LayerTypes.UV]    : 2,
-  [LayerTypes.COLOR] : 4,
-  [LayerTypes.NORMAL]: 3,
-  [LayerTypes.ID]    : 1,
-  [LayerTypes.CUSTOM]: 4,
-  [LayerTypes.INDEX] : 1,
-}
 
 const line2_temp4s = util.cachering.fromConstructor(Vector4, 64)
 const line2_stripuvs = [

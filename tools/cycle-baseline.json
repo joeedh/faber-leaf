@@ -1,0 +1,36 @@
+{
+  "$comment": "Ratchet baseline for tools/check-cycles.js. Only ever lower these.",
+  "$note": [
+    "P17 (W5a) step 2 measured 16 cycles and closed every host one, leaving the",
+    "nine the vendored submodules own (eight in path.ux, one in mathl).",
+    "",
+    "Three knots, three fixes, none of them a budget raise:",
+    "",
+    "  render/queue_factory -> webgpu/queue_adapter -> webgl/simplemesh: the",
+    "  adapter imported simplemesh.ts for the PrimitiveTypes enum alone, which",
+    "  dragged in the shader stack and the WebGPU queue. The enum family moved",
+    "  to the new leaf webgl/primitive_types.ts; simplemesh re-exports it.",
+    "",
+    "  view3d <-> view3d_toolmode (four cycles): the toolmode base imported the",
+    "  editor it is hosted by, for DrawLine (already defined in view3d_base and",
+    "  merely re-exported by view3d) and ITempText. ITempText moved down to",
+    "  view3d_base next to DrawLine/DrawQuad.",
+    "",
+    "  core/context -> resbrowser -> screengen -> PropsEditor -> ... -> back:",
+    "  the two return edges were an already-type-only ViewContext in",
+    "  texture/proceduralTex.ts and an outright unused `import {ViewContext}` in",
+    "  addon/addon_base.ts.",
+    "",
+    "The host budget is 0 and there is no outstanding exception. core/context.ts",
+    "still value-imports seven editor classes to use as getContextArea() keys;",
+    "that no longer closes a cycle, but it is why core cannot be embedded without",
+    "the editors, and a name-keyed lookup would finish the job."
+  ],
+  "measured": "2026-08-19",
+  "entry": "scripts/core/appstate.ts",
+  "total": 9,
+  "budgets": {
+    "host": 0,
+    "submodule": 9
+  }
+}

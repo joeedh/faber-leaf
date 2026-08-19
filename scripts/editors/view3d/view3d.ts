@@ -65,13 +65,6 @@ import {
   type ViewLike,
 } from './view3d_draw_webgpu'
 
-export interface ITempText {
-  co: Vector3
-  text: string
-  color: Vector4
-  size: number
-}
-
 const curtemps = util.cachering.fromConstructor(Vector3, 32)
 
 declare global {
@@ -225,8 +218,8 @@ function loadWgslShaderStubs(): void {
   }
 }
 
-import {DrawLine, DrawQuad} from './view3d_base.js'
-export {DrawLine, DrawQuad}
+import {DrawLine, DrawQuad, type ITempText} from './view3d_base.js'
+export {DrawLine, DrawQuad, type ITempText}
 
 type CanvasWithExtra = (HTMLCanvasElement | OffscreenCanvas) & {dpi: number}
 

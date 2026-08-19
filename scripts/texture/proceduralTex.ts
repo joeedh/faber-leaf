@@ -37,7 +37,7 @@ import {IUniformsBlock} from '../webgl/webgl'
 import type {CompiledJS} from '../mathl/index.ts'
 import {HashDigest} from '../util/util.js'
 import {StructReader} from '../path.ux/scripts/util/nstructjs.js'
-import {ViewContext} from '../core/context.js'
+import type {ViewContext} from '../core/context.js'
 
 export enum PatternRecalcFlags {
   PREVIEW = 1,

@@ -10,6 +10,14 @@ import {
 } from '../../util/vectormath'
 import {util} from '../../path.ux/scripts/pathux'
 
+/** A screen-space label the viewport draws this frame and forgets the next. */
+export interface ITempText {
+  co: Vector3
+  text: string
+  color: Vector4
+  size: number
+}
+
 const proj_temps = util.cachering.fromConstructor(Vector4, 32)
 const unproj_temps = util.cachering.fromConstructor(Vector4, 32)
 
