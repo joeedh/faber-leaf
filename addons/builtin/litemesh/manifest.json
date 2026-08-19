@@ -1,0 +1,11 @@
+{
+  "id": "litemesh",
+  "name": "Lite Mesh",
+  "version": "1.0.0",
+  "author": "joeedh",
+  "entry": "src/main.ts",
+  "dependencies": [],
+  "optional": true,
+  "description": "Sculptcore-backed triangle mesh: the sculpt and box-modeling toolmodes, dyntopo, sculpt layers, multires and VDM.",
+  "buildMode": "prebuilt"
+}

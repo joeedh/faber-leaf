@@ -37,8 +37,9 @@ const BUNDLE = Path.join(REPO_ROOT, 'build', 'entry_point.js')
  * `pnpm build` produces alongside the main one, so gating on the bundle (below)
  * is enough to know it is there. */
 const EXTRA_ADDONS = ['leafmesh']
-/** Present and default-on; stands in for the key-removed case below. */
-const DEFAULT_ON_ADDON = 'sculptcore'
+/** Present and default-on; stands in for the key-removed case below. P15
+ * merged the `sculptcore` shim into `litemesh`, which took over that role. */
+const DEFAULT_ON_ADDON = 'litemesh'
 /** An id no build in the tree has — stands in for an addon set A shipped. */
 const GHOST = 'ghost_addon'
 /** Set A renames its mesh object so the reader can tell a real load from the

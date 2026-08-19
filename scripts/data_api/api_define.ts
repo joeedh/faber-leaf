@@ -46,8 +46,6 @@ import {VelPan, VelPanFlags} from '../editors/velpan.js'
 import {SelMask} from '../core/select_types.js'
 import {ToolContext} from '../core/context.js'
 import type {ViewContext} from '../core/context.js'
-// LiteMesh self-registers at module scope; api_define is its only importer.
-import '../lite-mesh/litemesh.js'
 import {ShaderNetwork} from '../shadernodes/shadernetwork.js'
 import {Material} from '../core/material.js'
 import '../shadernodes/allnodes.js'

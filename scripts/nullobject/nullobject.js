@@ -6,6 +6,7 @@ import {SelMask} from '../core/select_types.js'
 import {Shaders} from '../shaders/shaders.js'
 import {Shapes} from '../webgl/simplemesh_shapes.js'
 import {nstructjs} from '../path.ux/scripts/pathux.js'
+import {registerDataAPI} from '../data_api/api_define_registry.js'
 
 export class NullObject extends SceneObjectData {
   static STRUCT = nstructjs.inlineRegister(
@@ -67,3 +68,8 @@ export class NullObject extends SceneObjectData {
 
 DataBlock.register(NullObject)
 SceneObjectData.register(NullObject)
+
+// SceneObject.dataLink substitutes a NullObject whenever an object's data block
+// belongs to a disabled addon, so `object.data` resolves to one on any ordinary
+// load; without a struct the data API throws `invalid path` there (P10 seam).
+registerDataAPI(NullObject)

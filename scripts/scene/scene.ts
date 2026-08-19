@@ -855,6 +855,13 @@ propIslandOnly : bool;
       const def = (mode.constructor as unknown as {toolModeDefine(): {name: string}}).toolModeDefine()
       const i = Scene.toolModeProp.values[def.name]
 
+      // A mode whose addon is disabled is still deserializable (nstructjs knows
+      // the struct) but has no enum slot, so it stays in `toolmodes` to round-trip
+      // and out of the runtime maps, which are keyed by that slot.
+      if (i === undefined) {
+        continue
+      }
+
       if (i === this.toolmode_i) {
         found = 1
       }

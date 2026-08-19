@@ -11,9 +11,10 @@
  * import).
  *
  * P13 deleted the BREP, and with it four of the five entries this file used to
- * carry. `sculptcore` is the only in-bundle builtin left; `leafmesh` is not
- * here because P11 ships it out-of-bundle (build/addons/leafmesh/), which is
- * the direction the rest should travel too.
+ * carry; P15 merged the `sculptcore` shim into `litemesh`, which is now the only
+ * in-bundle builtin left. `leafmesh` is not here because P11 ships it
+ * out-of-bundle (build/addons/leafmesh/), which is the direction litemesh
+ * travels in P16.
  *
  * `manifest.json` stays the single metadata source — imported here directly.
  */
@@ -21,7 +22,7 @@
 import addonManager from '../../scripts/addon/addon.js'
 import type {IAddon} from '../../scripts/addon/addon_base'
 
-import sculptcoreManifest from './sculptcore/manifest.json'
-import * as sculptcoreAddon from './sculptcore/src/main.js'
+import litemeshManifest from './litemesh/manifest.json'
+import * as litemeshAddon from './litemesh/src/main.js'
 
-addonManager.registerBuiltin(sculptcoreManifest, sculptcoreAddon as IAddon)
+addonManager.registerBuiltin(litemeshManifest, litemeshAddon as IAddon)

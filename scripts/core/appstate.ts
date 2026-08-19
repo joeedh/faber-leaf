@@ -31,9 +31,10 @@ import '../editors/resbrowser/resbrowser'
 import '../editors/resbrowser/resbrowser_ops'
 import '../editors/resbrowser/resbrowser_types'
 
-// View3D toolmode registrations moved out of core: entry_point.js side-effect
-// imports `editors/view3d/tools/tools` so the addon registry sees them. core
-// itself only depends on the ToolMode base + the toolmode enum builder.
+// View3D toolmode registrations moved out of core: the always-present ones are
+// side-effect imports in `editors/view3d/tools/tools`, the rest arrive through
+// their addon's `register(api)` hook. core itself only depends on the ToolMode
+// base + the toolmode enum builder.
 import {App} from '../editors/editor_base'
 import {Library, DataBlock, DataRef, BlockFlags, BlockLoader} from './lib_api'
 import * as util from '../util/util'

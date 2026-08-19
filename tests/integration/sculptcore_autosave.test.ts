@@ -2,7 +2,7 @@
  * Autosave round-trip integration test (plan §3/§5, M1–M3).
  *
  * Boots the real NW.js app headlessly per backend on the spherified
- * `litemesh-cube`, then drives `__autosaveTest()` (scripts/lite-mesh/
+ * `litemesh-cube`, then drives `__autosaveTest()` (addons/builtin/litemesh/src/
  * litemesh_autosavetest_support.ts) via `--eval`: ~5 seconds of randomly-placed
  * dyntopo DRAW strokes with two randomly-timed autosaves through the real
  * AutosaveManager + split serializer (Mesh_serializeRaw → lz4 worker → WASV

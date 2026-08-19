@@ -3,7 +3,7 @@
  * boundedness, mask painting, brush.color piping, accumulate-by-default flags).
  *
  * Drives the real NW.js app headlessly per backend on the spherified
- * `litemesh-cube` scene, runs `__brushTest()` (scripts/lite-mesh/
+ * `litemesh-cube` scene, runs `__brushTest()` (addons/builtin/litemesh/src/
  * litemesh_brushtest_support.ts) via `--eval`, and asserts the structured
  * result reflected into the `--dump` JSON as `brushtest`. The driver runs
  * scripted strokes at the sphere's axis poles via `runSculptcoreStroke` and

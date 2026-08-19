@@ -175,10 +175,6 @@ export {ToolMode} from './editors/view3d/view3d_toolmode.js'
 // Every addon-owned toolmode has to return one of these from
 // `toolModeDefine()`, so the shape rides the hub with the class.
 export type {IToolModeDefine} from './editors/view3d/view3d_toolmode.js'
-// The stroke-toolmode base every sculpt/paint toolmode derives from. Addons
-// that need to ask "is a paint toolmode active?" test against this rather than
-// a concrete toolmode class.
-export {PaintToolModeBase} from './editors/view3d/tools/stroke_base.js'
 export {
   SelMask,
   SelOneToolModes,
@@ -221,6 +217,3 @@ export type {AddonAPI, IAddon, IAddonDefine} from './addon/addon_base.js'
 
 // mathl
 export {sym, binop, checksym, unaryop, call} from './mathl/transform/sym.js'
-
-// lite-mesh
-export {LiteMesh} from './lite-mesh/index.js'

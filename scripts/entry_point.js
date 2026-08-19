@@ -22,25 +22,11 @@ import './test/test.js'
 // here so core stops importing from editors/view3d/tools. See plan §3 / §12.
 import './editors/view3d/tools/tools.js'
 
-// The single in-bundle builtin registry. Imported AFTER tools.js so the
-// toolmode class modules (sculptcore) are evaluated before the registry
-// references them. Registers each in-bundle builtin as an addon source; the
-// unified startAddons() pipeline materializes + enables them. Replaces the
-// per-addon addon_register.js side-effect imports.
+// The single in-bundle builtin registry: registers each in-bundle builtin as an
+// addon source; the unified startAddons() pipeline materializes + enables them.
 import '../addons/builtin/builtin_registry.js'
 
 import addon, {startAddons} from './addon/addon.js'
-
-// Registers the 'litemesh-cube' test scene into core's test-scene registry so
-// the CLI harness (`--gen-scene litemesh-cube`) can build a sculptcore-backed
-// LiteMesh scene. Side-effect import; lite-mesh layer registering downward.
-// See documentation/plans/native-electron.md (Workstream F).
-import './lite-mesh/litemesh_test_scene.js'
-
-// Overrides the mesh subsystem's startup cube with a LiteMesh sphere +
-// sculptcore startup toolmode. Must come AFTER builtin_registry, which pulls in
-// the mesh addon's default_scene, so this builder wins. See ImmediateTODOs #2.
-import './lite-mesh/litemesh_default_scene.js'
 
 import {getAppArgv, getArg} from './core/app_argv.js'
 import {runTestHarness} from './core/test_harness.js'

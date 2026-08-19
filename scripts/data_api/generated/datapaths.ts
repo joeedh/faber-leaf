@@ -70,7 +70,6 @@ export type GeneratedDataPath =
   | "library.collection"
   | "library.image"
   | "library.light"
-  | "library.litemesh"
   | "library.material"
   | "library.nullobject"
   | "library.object"
@@ -182,172 +181,12 @@ export type GeneratedDataPath =
   | "scene.tool.type"
   | "scene.toolmode"
   | "scene.tools"
-  | "scene.tools.boxmodel"
-  | "scene.tools.boxmodel.boxModelSelMode"
-  | "scene.tools.boxmodel.drawPoints"
-  | "scene.tools.boxmodel.drawSelectionOverlay"
-  | "scene.tools.boxmodel.drawWireframe"
-  | "scene.tools.boxmodel.selectRadius"
-  | "scene.tools.boxmodel.transformWidget"
-  | "scene.tools.boxmodel.type"
-  | "scene.tools.boxmodel.xray"
   | "scene.tools.object"
   | "scene.tools.object.transformWidget"
   | "scene.tools.object.type"
   | "scene.tools.pan"
   | "scene.tools.pan.transformWidget"
   | "scene.tools.pan.type"
-  | "scene.tools.sculptcore"
-  | "scene.tools.sculptcore.brush"
-  | "scene.tools.sculptcore.brush.anchoredDragRadius"
-  | "scene.tools.sculptcore.brush.anchoredLiveMode"
-  | "scene.tools.sculptcore.brush.autosmooth"
-  | "scene.tools.sculptcore.brush.autosmoothInflate"
-  | "scene.tools.sculptcore.brush.bgcolor"
-  | "scene.tools.sculptcore.brush.cavityBlurSteps"
-  | "scene.tools.sculptcore.brush.cavityCurve"
-  | "scene.tools.sculptcore.brush.cavityFactor"
-  | "scene.tools.sculptcore.brush.color"
-  | "scene.tools.sculptcore.brush.colorMixMode"
-  | "scene.tools.sculptcore.brush.concaveFilter"
-  | "scene.tools.sculptcore.brush.dynTopo"
-  | "scene.tools.sculptcore.brush.dynTopo.decimateFactor"
-  | "scene.tools.sculptcore.brush.dynTopo.edgeCount"
-  | "scene.tools.sculptcore.brush.dynTopo.edgeMode"
-  | "scene.tools.sculptcore.brush.dynTopo.edgeSize"
-  | "scene.tools.sculptcore.brush.dynTopo.flag"
-  | "scene.tools.sculptcore.brush.dynTopo.maxDepth"
-  | "scene.tools.sculptcore.brush.dynTopo.overrides"
-  | "scene.tools.sculptcore.brush.dynTopo.repeat"
-  | "scene.tools.sculptcore.brush.dynTopo.spacing"
-  | "scene.tools.sculptcore.brush.dynTopo.spacingMode"
-  | "scene.tools.sculptcore.brush.dynTopo.subdivMode"
-  | "scene.tools.sculptcore.brush.dynTopo.subdivideFactor"
-  | "scene.tools.sculptcore.brush.dynTopo.valenceGoal"
-  | "scene.tools.sculptcore.brush.dynTopoSC"
-  | "scene.tools.sculptcore.brush.dynTopoSC.collapseRatio"
-  | "scene.tools.sculptcore.brush.dynTopoSC.dynTopoSpacing"
-  | "scene.tools.sculptcore.brush.dynTopoSC.edgeMode"
-  | "scene.tools.sculptcore.brush.dynTopoSC.edgeSize"
-  | "scene.tools.sculptcore.brush.dynTopoSC.flag"
-  | "scene.tools.sculptcore.brush.dynTopoSC.grade"
-  | "scene.tools.sculptcore.brush.dynTopoSC.maxCollapses"
-  | "scene.tools.sculptcore.brush.dynTopoSC.maxRounds"
-  | "scene.tools.sculptcore.brush.dynTopoSC.maxSplits"
-  | "scene.tools.sculptcore.brush.dynTopoSC.mode"
-  | "scene.tools.sculptcore.brush.dynTopoSC.overrides"
-  | "scene.tools.sculptcore.brush.dynTopoSC.smoothLambda"
-  | "scene.tools.sculptcore.brush.dynamics"
-  | "scene.tools.sculptcore.brush.dynamics.autosmooth"
-  | "scene.tools.sculptcore.brush.dynamics.autosmooth.curve"
-  | "scene.tools.sculptcore.brush.dynamics.autosmooth.useDynamics"
-  | "scene.tools.sculptcore.brush.dynamics.autosmoothInflate"
-  | "scene.tools.sculptcore.brush.dynamics.autosmoothInflate.curve"
-  | "scene.tools.sculptcore.brush.dynamics.autosmoothInflate.useDynamics"
-  | "scene.tools.sculptcore.brush.dynamics.concaveFilter"
-  | "scene.tools.sculptcore.brush.dynamics.concaveFilter.curve"
-  | "scene.tools.sculptcore.brush.dynamics.concaveFilter.useDynamics"
-  | "scene.tools.sculptcore.brush.dynamics.pinch"
-  | "scene.tools.sculptcore.brush.dynamics.pinch.curve"
-  | "scene.tools.sculptcore.brush.dynamics.pinch.useDynamics"
-  | "scene.tools.sculptcore.brush.dynamics.radius"
-  | "scene.tools.sculptcore.brush.dynamics.radius.curve"
-  | "scene.tools.sculptcore.brush.dynamics.radius.useDynamics"
-  | "scene.tools.sculptcore.brush.dynamics.rake"
-  | "scene.tools.sculptcore.brush.dynamics.rake.curve"
-  | "scene.tools.sculptcore.brush.dynamics.rake.useDynamics"
-  | "scene.tools.sculptcore.brush.dynamics.sharp"
-  | "scene.tools.sculptcore.brush.dynamics.sharp.curve"
-  | "scene.tools.sculptcore.brush.dynamics.sharp.useDynamics"
-  | "scene.tools.sculptcore.brush.dynamics.smoothProj"
-  | "scene.tools.sculptcore.brush.dynamics.smoothProj.curve"
-  | "scene.tools.sculptcore.brush.dynamics.smoothProj.useDynamics"
-  | "scene.tools.sculptcore.brush.dynamics.strength"
-  | "scene.tools.sculptcore.brush.dynamics.strength.curve"
-  | "scene.tools.sculptcore.brush.dynamics.strength.useDynamics"
-  | "scene.tools.sculptcore.brush.enhanceInner"
-  | "scene.tools.sculptcore.brush.enhanceRings"
-  | "scene.tools.sculptcore.brush.falloff"
-  | "scene.tools.sculptcore.brush.falloff2"
-  | "scene.tools.sculptcore.brush.flag"
-  | "scene.tools.sculptcore.brush.graph_flag"
-  | "scene.tools.sculptcore.brush.graph_id"
-  | "scene.tools.sculptcore.brush.inputs"
-  | "scene.tools.sculptcore.brush.lib_flag"
-  | "scene.tools.sculptcore.brush.lib_id"
-  | "scene.tools.sculptcore.brush.name"
-  | "scene.tools.sculptcore.brush.normalfac"
-  | "scene.tools.sculptcore.brush.outputs"
-  | "scene.tools.sculptcore.brush.pinch"
-  | "scene.tools.sculptcore.brush.planeNormalMode"
-  | "scene.tools.sculptcore.brush.planeoff"
-  | "scene.tools.sculptcore.brush.radius"
-  | "scene.tools.sculptcore.brush.radiusMode"
-  | "scene.tools.sculptcore.brush.rake"
-  | "scene.tools.sculptcore.brush.rakeCurvatureFactor"
-  | "scene.tools.sculptcore.brush.sharp"
-  | "scene.tools.sculptcore.brush.smoothProj"
-  | "scene.tools.sculptcore.brush.smoothRadiusMul"
-  | "scene.tools.sculptcore.brush.spacing"
-  | "scene.tools.sculptcore.brush.spacingMode"
-  | "scene.tools.sculptcore.brush.strength"
-  | "scene.tools.sculptcore.brush.strokeMethod"
-  | "scene.tools.sculptcore.brush.texUser"
-  | "scene.tools.sculptcore.brush.texUser.flag"
-  | "scene.tools.sculptcore.brush.texUser.mode"
-  | "scene.tools.sculptcore.brush.texUser.pinch"
-  | "scene.tools.sculptcore.brush.texUser.scale"
-  | "scene.tools.sculptcore.brush.texUser.texture"
-  | "scene.tools.sculptcore.brush.texUser.texture.brightness"
-  | "scene.tools.sculptcore.brush.texUser.texture.contrast"
-  | "scene.tools.sculptcore.brush.texUser.texture.generator"
-  | "scene.tools.sculptcore.brush.texUser.texture.graph_flag"
-  | "scene.tools.sculptcore.brush.texUser.texture.graph_id"
-  | "scene.tools.sculptcore.brush.texUser.texture.inputs"
-  | "scene.tools.sculptcore.brush.texUser.texture.lib_flag"
-  | "scene.tools.sculptcore.brush.texUser.texture.lib_id"
-  | "scene.tools.sculptcore.brush.texUser.texture.mode"
-  | "scene.tools.sculptcore.brush.texUser.texture.name"
-  | "scene.tools.sculptcore.brush.texUser.texture.outputs"
-  | "scene.tools.sculptcore.brush.texUser.texture.power"
-  | "scene.tools.sculptcore.brush.texUser.texture.scale"
-  | "scene.tools.sculptcore.brush.tool"
-  | "scene.tools.sculptcore.brush.viewNormalFalloff"
-  | "scene.tools.sculptcore.brush.viewNormalLimit"
-  | "scene.tools.sculptcore.brush.wingAngle"
-  | "scene.tools.sculptcore.brushRadius"
-  | "scene.tools.sculptcore.cullBackfaces"
-  | "scene.tools.sculptcore.drawBVH"
-  | "scene.tools.sculptcore.drawColPatches"
-  | "scene.tools.sculptcore.drawFeatureOverlay"
-  | "scene.tools.sculptcore.drawFlat"
-  | "scene.tools.sculptcore.drawMask"
-  | "scene.tools.sculptcore.drawNodeIds"
-  | "scene.tools.sculptcore.drawPolyGroupEdges"
-  | "scene.tools.sculptcore.drawWireframe"
-  | "scene.tools.sculptcore.dynTopo"
-  | "scene.tools.sculptcore.dynTopo.collapseRatio"
-  | "scene.tools.sculptcore.dynTopo.dynTopoSpacing"
-  | "scene.tools.sculptcore.dynTopo.edgeMode"
-  | "scene.tools.sculptcore.dynTopo.edgeSize"
-  | "scene.tools.sculptcore.dynTopo.flag"
-  | "scene.tools.sculptcore.dynTopo.grade"
-  | "scene.tools.sculptcore.dynTopo.maxCollapses"
-  | "scene.tools.sculptcore.dynTopo.maxRounds"
-  | "scene.tools.sculptcore.dynTopo.maxSplits"
-  | "scene.tools.sculptcore.dynTopo.mode"
-  | "scene.tools.sculptcore.dynTopo.overrides"
-  | "scene.tools.sculptcore.dynTopo.smoothLambda"
-  | "scene.tools.sculptcore.dynTopoStatsLabel"
-  | "scene.tools.sculptcore.gpuBrushStatsLabel"
-  | "scene.tools.sculptcore.inheritDynTopo"
-  | "scene.tools.sculptcore.reprojectCustomData"
-  | "scene.tools.sculptcore.sceneCullBackfaces"
-  | "scene.tools.sculptcore.sharedBrushRadius"
-  | "scene.tools.sculptcore.symmetryAxes"
-  | "scene.tools.sculptcore.tool"
-  | "scene.tools.sculptcore.transformWidget"
-  | "scene.tools.sculptcore.type"
   | "screen"
   | "screen.editors"
   | "selectmode"
@@ -397,17 +236,6 @@ export type GeneratedDataPath =
   | "toolDefaults.app.prop_set.fullSaveUndo"
   | "toolDefaults.app.prop_set.massSetPath"
   | "toolDefaults.app.prop_set.useFlagBit"
-  | "toolDefaults.brush"
-  | "toolDefaults.brush.load_default"
-  | "toolDefaults.brush.load_default.dataPath"
-  | "toolDefaults.brush.set_radius"
-  | "toolDefaults.brush.set_radius.brush"
-  | "toolDefaults.brush.set_radius.radius"
-  | "toolDefaults.brush.set_radius_mode"
-  | "toolDefaults.brush.set_radius_mode.brush"
-  | "toolDefaults.brush.set_radius_mode.mode"
-  | "toolDefaults.brush.swap_colors"
-  | "toolDefaults.brush.swap_colors.dataPath"
   | "toolDefaults.curve1d"
   | "toolDefaults.curve1d.bspline_add_point"
   | "toolDefaults.curve1d.bspline_add_point.dataPath"
@@ -460,100 +288,6 @@ export type GeneratedDataPath =
   | "toolDefaults.listbox.set_active.hasKey"
   | "toolDefaults.listbox.set_active.key"
   | "toolDefaults.listbox.set_active.numericKey"
-  | "toolDefaults.litemesh"
-  | "toolDefaults.litemesh.add_attr"
-  | "toolDefaults.litemesh.add_attr.domain"
-  | "toolDefaults.litemesh.add_attr.type"
-  | "toolDefaults.litemesh.add_attr.use"
-  | "toolDefaults.litemesh.add_cube"
-  | "toolDefaults.litemesh.add_cube.goalFaces"
-  | "toolDefaults.litemesh.add_cube.size"
-  | "toolDefaults.litemesh.add_cube.sphere"
-  | "toolDefaults.litemesh.add_plane"
-  | "toolDefaults.litemesh.add_plane.size"
-  | "toolDefaults.litemesh.assign_material"
-  | "toolDefaults.litemesh.assign_material.slot"
-  | "toolDefaults.litemesh.assign_material_polygroup"
-  | "toolDefaults.litemesh.assign_material_polygroup.slot"
-  | "toolDefaults.litemesh.generate_uv"
-  | "toolDefaults.litemesh.generate_uv.margin"
-  | "toolDefaults.litemesh.mark_seam"
-  | "toolDefaults.litemesh.mark_seam.vEnd"
-  | "toolDefaults.litemesh.mark_seam.vStart"
-  | "toolDefaults.litemesh.mark_sharp_by_angle"
-  | "toolDefaults.litemesh.mark_sharp_by_angle.angle"
-  | "toolDefaults.litemesh.multires_enable"
-  | "toolDefaults.litemesh.multires_enable.levels"
-  | "toolDefaults.litemesh.multires_set_level"
-  | "toolDefaults.litemesh.multires_set_level.level"
-  | "toolDefaults.litemesh.quad_remesh"
-  | "toolDefaults.litemesh.quad_remesh.autoDensity"
-  | "toolDefaults.litemesh.quad_remesh.curvatureSmoothIters"
-  | "toolDefaults.litemesh.quad_remesh.curvatureSmoothLambda"
-  | "toolDefaults.litemesh.quad_remesh.curvatureWeight"
-  | "toolDefaults.litemesh.quad_remesh.densityGradation"
-  | "toolDefaults.litemesh.quad_remesh.densityGradationIters"
-  | "toolDefaults.litemesh.quad_remesh.densityMax"
-  | "toolDefaults.litemesh.quad_remesh.densityMin"
-  | "toolDefaults.litemesh.quad_remesh.fieldSmoothness"
-  | "toolDefaults.litemesh.quad_remesh.preRemesh"
-  | "toolDefaults.litemesh.quad_remesh.preRemeshAlign"
-  | "toolDefaults.litemesh.quad_remesh.preRemeshBootstrapIters"
-  | "toolDefaults.litemesh.quad_remesh.preRemeshConvergeEps"
-  | "toolDefaults.litemesh.quad_remesh.preRemeshDensity"
-  | "toolDefaults.litemesh.quad_remesh.preRemeshFieldCadence"
-  | "toolDefaults.litemesh.quad_remesh.preRemeshGradation"
-  | "toolDefaults.litemesh.quad_remesh.preRemeshGradationIters"
-  | "toolDefaults.litemesh.quad_remesh.preRemeshIters"
-  | "toolDefaults.litemesh.quad_remesh.preRemeshPreserveFeatures"
-  | "toolDefaults.litemesh.quad_remesh.preRemeshSharpAngle"
-  | "toolDefaults.litemesh.quad_remesh.preRemeshSmoothIters"
-  | "toolDefaults.litemesh.quad_remesh.preRemeshSmoothLambda"
-  | "toolDefaults.litemesh.quad_remesh.preRemeshTarget"
-  | "toolDefaults.litemesh.quad_remesh.reproject"
-  | "toolDefaults.litemesh.quad_remesh.seed"
-  | "toolDefaults.litemesh.quad_remesh.sharpAngle"
-  | "toolDefaults.litemesh.quad_remesh.singularityCancel"
-  | "toolDefaults.litemesh.quad_remesh.singularityCancelMaxSep"
-  | "toolDefaults.litemesh.quad_remesh.smoothIterations"
-  | "toolDefaults.litemesh.quad_remesh.smoothStrength"
-  | "toolDefaults.litemesh.quad_remesh.targetEdgeLength"
-  | "toolDefaults.litemesh.quad_remesh.targetQuadCount"
-  | "toolDefaults.litemesh.quad_remesh.triage"
-  | "toolDefaults.litemesh.quad_remesh.triageMinComponentFrac"
-  | "toolDefaults.litemesh.quad_remesh.triageWeldRel"
-  | "toolDefaults.litemesh.quad_remesh.useCurvature"
-  | "toolDefaults.litemesh.quad_remesh.useDensity"
-  | "toolDefaults.litemesh.quad_remesh.useSharpFeatures"
-  | "toolDefaults.litemesh.sculpt_layer_remove"
-  | "toolDefaults.litemesh.sculpt_layer_remove.layer"
-  | "toolDefaults.litemesh.sculpt_layer_set_flag"
-  | "toolDefaults.litemesh.sculpt_layer_set_flag.kind"
-  | "toolDefaults.litemesh.sculpt_layer_set_flag.layer"
-  | "toolDefaults.litemesh.sculpt_layer_set_flag.value"
-  | "toolDefaults.litemesh.sculpt_layer_set_target"
-  | "toolDefaults.litemesh.sculpt_layer_set_target.layer"
-  | "toolDefaults.litemesh.sculpt_layer_set_weight"
-  | "toolDefaults.litemesh.sculpt_layer_set_weight.layer"
-  | "toolDefaults.litemesh.sculpt_layer_set_weight.weight"
-  | "toolDefaults.litemesh.select_all"
-  | "toolDefaults.litemesh.select_all.mode"
-  | "toolDefaults.litemesh.select_circle"
-  | "toolDefaults.litemesh.select_circle.radius"
-  | "toolDefaults.litemesh.select_similar"
-  | "toolDefaults.litemesh.select_similar.extend"
-  | "toolDefaults.litemesh.select_similar.threshold"
-  | "toolDefaults.litemesh.select_similar.type"
-  | "toolDefaults.litemesh.subdivide"
-  | "toolDefaults.litemesh.subdivide.numCuts"
-  | "toolDefaults.litemesh.symmetrize"
-  | "toolDefaults.litemesh.symmetrize.axes"
-  | "toolDefaults.litemesh.symmetrize.direction"
-  | "toolDefaults.litemesh.symmetrize.threshold"
-  | "toolDefaults.litemesh.symmetrize_snap"
-  | "toolDefaults.litemesh.symmetrize_snap.axes"
-  | "toolDefaults.litemesh.symmetrize_snap.direction"
-  | "toolDefaults.litemesh.symmetrize_snap.threshold"
   | "toolDefaults.material"
   | "toolDefaults.material.new"
   | "toolDefaults.material.new.dataPathToSet"
@@ -631,14 +365,6 @@ export type GeneratedDataPath =
   | "toolDefaults.object.toggle_select_all.mode"
   | "toolDefaults.object.toggle_select_all.nodeEditorPath"
   | "toolDefaults.object.toggle_select_all.useNodeEditorGraph"
-  | "toolDefaults.sculptcore"
-  | "toolDefaults.sculptcore.paint"
-  | "toolDefaults.sculptcore.paint.brush"
-  | "toolDefaults.sculptcore.paint.falloff"
-  | "toolDefaults.sculptcore.paint.rendermat"
-  | "toolDefaults.sculptcore.paint.samples"
-  | "toolDefaults.sculptcore.paint.symmetryAxes"
-  | "toolDefaults.sculptcore.paint.viewportSize"
   | "toolDefaults.velpan"
   | "toolDefaults.velpan.pan"
   | "toolDefaults.velpan.pan.velpanPath"
@@ -749,7 +475,6 @@ declare module "@framework/pathux" {
     "library.collection": true;
     "library.image": true;
     "library.light": true;
-    "library.litemesh": true;
     "library.material": true;
     "library.nullobject": true;
     "library.object": true;
@@ -861,172 +586,12 @@ declare module "@framework/pathux" {
     "scene.tool.type": true;
     "scene.toolmode": true;
     "scene.tools": true;
-    "scene.tools.boxmodel": true;
-    "scene.tools.boxmodel.boxModelSelMode": true;
-    "scene.tools.boxmodel.drawPoints": true;
-    "scene.tools.boxmodel.drawSelectionOverlay": true;
-    "scene.tools.boxmodel.drawWireframe": true;
-    "scene.tools.boxmodel.selectRadius": true;
-    "scene.tools.boxmodel.transformWidget": true;
-    "scene.tools.boxmodel.type": true;
-    "scene.tools.boxmodel.xray": true;
     "scene.tools.object": true;
     "scene.tools.object.transformWidget": true;
     "scene.tools.object.type": true;
     "scene.tools.pan": true;
     "scene.tools.pan.transformWidget": true;
     "scene.tools.pan.type": true;
-    "scene.tools.sculptcore": true;
-    "scene.tools.sculptcore.brush": true;
-    "scene.tools.sculptcore.brush.anchoredDragRadius": true;
-    "scene.tools.sculptcore.brush.anchoredLiveMode": true;
-    "scene.tools.sculptcore.brush.autosmooth": true;
-    "scene.tools.sculptcore.brush.autosmoothInflate": true;
-    "scene.tools.sculptcore.brush.bgcolor": true;
-    "scene.tools.sculptcore.brush.cavityBlurSteps": true;
-    "scene.tools.sculptcore.brush.cavityCurve": true;
-    "scene.tools.sculptcore.brush.cavityFactor": true;
-    "scene.tools.sculptcore.brush.color": true;
-    "scene.tools.sculptcore.brush.colorMixMode": true;
-    "scene.tools.sculptcore.brush.concaveFilter": true;
-    "scene.tools.sculptcore.brush.dynTopo": true;
-    "scene.tools.sculptcore.brush.dynTopo.decimateFactor": true;
-    "scene.tools.sculptcore.brush.dynTopo.edgeCount": true;
-    "scene.tools.sculptcore.brush.dynTopo.edgeMode": true;
-    "scene.tools.sculptcore.brush.dynTopo.edgeSize": true;
-    "scene.tools.sculptcore.brush.dynTopo.flag": true;
-    "scene.tools.sculptcore.brush.dynTopo.maxDepth": true;
-    "scene.tools.sculptcore.brush.dynTopo.overrides": true;
-    "scene.tools.sculptcore.brush.dynTopo.repeat": true;
-    "scene.tools.sculptcore.brush.dynTopo.spacing": true;
-    "scene.tools.sculptcore.brush.dynTopo.spacingMode": true;
-    "scene.tools.sculptcore.brush.dynTopo.subdivMode": true;
-    "scene.tools.sculptcore.brush.dynTopo.subdivideFactor": true;
-    "scene.tools.sculptcore.brush.dynTopo.valenceGoal": true;
-    "scene.tools.sculptcore.brush.dynTopoSC": true;
-    "scene.tools.sculptcore.brush.dynTopoSC.collapseRatio": true;
-    "scene.tools.sculptcore.brush.dynTopoSC.dynTopoSpacing": true;
-    "scene.tools.sculptcore.brush.dynTopoSC.edgeMode": true;
-    "scene.tools.sculptcore.brush.dynTopoSC.edgeSize": true;
-    "scene.tools.sculptcore.brush.dynTopoSC.flag": true;
-    "scene.tools.sculptcore.brush.dynTopoSC.grade": true;
-    "scene.tools.sculptcore.brush.dynTopoSC.maxCollapses": true;
-    "scene.tools.sculptcore.brush.dynTopoSC.maxRounds": true;
-    "scene.tools.sculptcore.brush.dynTopoSC.maxSplits": true;
-    "scene.tools.sculptcore.brush.dynTopoSC.mode": true;
-    "scene.tools.sculptcore.brush.dynTopoSC.overrides": true;
-    "scene.tools.sculptcore.brush.dynTopoSC.smoothLambda": true;
-    "scene.tools.sculptcore.brush.dynamics": true;
-    "scene.tools.sculptcore.brush.dynamics.autosmooth": true;
-    "scene.tools.sculptcore.brush.dynamics.autosmooth.curve": true;
-    "scene.tools.sculptcore.brush.dynamics.autosmooth.useDynamics": true;
-    "scene.tools.sculptcore.brush.dynamics.autosmoothInflate": true;
-    "scene.tools.sculptcore.brush.dynamics.autosmoothInflate.curve": true;
-    "scene.tools.sculptcore.brush.dynamics.autosmoothInflate.useDynamics": true;
-    "scene.tools.sculptcore.brush.dynamics.concaveFilter": true;
-    "scene.tools.sculptcore.brush.dynamics.concaveFilter.curve": true;
-    "scene.tools.sculptcore.brush.dynamics.concaveFilter.useDynamics": true;
-    "scene.tools.sculptcore.brush.dynamics.pinch": true;
-    "scene.tools.sculptcore.brush.dynamics.pinch.curve": true;
-    "scene.tools.sculptcore.brush.dynamics.pinch.useDynamics": true;
-    "scene.tools.sculptcore.brush.dynamics.radius": true;
-    "scene.tools.sculptcore.brush.dynamics.radius.curve": true;
-    "scene.tools.sculptcore.brush.dynamics.radius.useDynamics": true;
-    "scene.tools.sculptcore.brush.dynamics.rake": true;
-    "scene.tools.sculptcore.brush.dynamics.rake.curve": true;
-    "scene.tools.sculptcore.brush.dynamics.rake.useDynamics": true;
-    "scene.tools.sculptcore.brush.dynamics.sharp": true;
-    "scene.tools.sculptcore.brush.dynamics.sharp.curve": true;
-    "scene.tools.sculptcore.brush.dynamics.sharp.useDynamics": true;
-    "scene.tools.sculptcore.brush.dynamics.smoothProj": true;
-    "scene.tools.sculptcore.brush.dynamics.smoothProj.curve": true;
-    "scene.tools.sculptcore.brush.dynamics.smoothProj.useDynamics": true;
-    "scene.tools.sculptcore.brush.dynamics.strength": true;
-    "scene.tools.sculptcore.brush.dynamics.strength.curve": true;
-    "scene.tools.sculptcore.brush.dynamics.strength.useDynamics": true;
-    "scene.tools.sculptcore.brush.enhanceInner": true;
-    "scene.tools.sculptcore.brush.enhanceRings": true;
-    "scene.tools.sculptcore.brush.falloff": true;
-    "scene.tools.sculptcore.brush.falloff2": true;
-    "scene.tools.sculptcore.brush.flag": true;
-    "scene.tools.sculptcore.brush.graph_flag": true;
-    "scene.tools.sculptcore.brush.graph_id": true;
-    "scene.tools.sculptcore.brush.inputs": true;
-    "scene.tools.sculptcore.brush.lib_flag": true;
-    "scene.tools.sculptcore.brush.lib_id": true;
-    "scene.tools.sculptcore.brush.name": true;
-    "scene.tools.sculptcore.brush.normalfac": true;
-    "scene.tools.sculptcore.brush.outputs": true;
-    "scene.tools.sculptcore.brush.pinch": true;
-    "scene.tools.sculptcore.brush.planeNormalMode": true;
-    "scene.tools.sculptcore.brush.planeoff": true;
-    "scene.tools.sculptcore.brush.radius": true;
-    "scene.tools.sculptcore.brush.radiusMode": true;
-    "scene.tools.sculptcore.brush.rake": true;
-    "scene.tools.sculptcore.brush.rakeCurvatureFactor": true;
-    "scene.tools.sculptcore.brush.sharp": true;
-    "scene.tools.sculptcore.brush.smoothProj": true;
-    "scene.tools.sculptcore.brush.smoothRadiusMul": true;
-    "scene.tools.sculptcore.brush.spacing": true;
-    "scene.tools.sculptcore.brush.spacingMode": true;
-    "scene.tools.sculptcore.brush.strength": true;
-    "scene.tools.sculptcore.brush.strokeMethod": true;
-    "scene.tools.sculptcore.brush.texUser": true;
-    "scene.tools.sculptcore.brush.texUser.flag": true;
-    "scene.tools.sculptcore.brush.texUser.mode": true;
-    "scene.tools.sculptcore.brush.texUser.pinch": true;
-    "scene.tools.sculptcore.brush.texUser.scale": true;
-    "scene.tools.sculptcore.brush.texUser.texture": true;
-    "scene.tools.sculptcore.brush.texUser.texture.brightness": true;
-    "scene.tools.sculptcore.brush.texUser.texture.contrast": true;
-    "scene.tools.sculptcore.brush.texUser.texture.generator": true;
-    "scene.tools.sculptcore.brush.texUser.texture.graph_flag": true;
-    "scene.tools.sculptcore.brush.texUser.texture.graph_id": true;
-    "scene.tools.sculptcore.brush.texUser.texture.inputs": true;
-    "scene.tools.sculptcore.brush.texUser.texture.lib_flag": true;
-    "scene.tools.sculptcore.brush.texUser.texture.lib_id": true;
-    "scene.tools.sculptcore.brush.texUser.texture.mode": true;
-    "scene.tools.sculptcore.brush.texUser.texture.name": true;
-    "scene.tools.sculptcore.brush.texUser.texture.outputs": true;
-    "scene.tools.sculptcore.brush.texUser.texture.power": true;
-    "scene.tools.sculptcore.brush.texUser.texture.scale": true;
-    "scene.tools.sculptcore.brush.tool": true;
-    "scene.tools.sculptcore.brush.viewNormalFalloff": true;
-    "scene.tools.sculptcore.brush.viewNormalLimit": true;
-    "scene.tools.sculptcore.brush.wingAngle": true;
-    "scene.tools.sculptcore.brushRadius": true;
-    "scene.tools.sculptcore.cullBackfaces": true;
-    "scene.tools.sculptcore.drawBVH": true;
-    "scene.tools.sculptcore.drawColPatches": true;
-    "scene.tools.sculptcore.drawFeatureOverlay": true;
-    "scene.tools.sculptcore.drawFlat": true;
-    "scene.tools.sculptcore.drawMask": true;
-    "scene.tools.sculptcore.drawNodeIds": true;
-    "scene.tools.sculptcore.drawPolyGroupEdges": true;
-    "scene.tools.sculptcore.drawWireframe": true;
-    "scene.tools.sculptcore.dynTopo": true;
-    "scene.tools.sculptcore.dynTopo.collapseRatio": true;
-    "scene.tools.sculptcore.dynTopo.dynTopoSpacing": true;
-    "scene.tools.sculptcore.dynTopo.edgeMode": true;
-    "scene.tools.sculptcore.dynTopo.edgeSize": true;
-    "scene.tools.sculptcore.dynTopo.flag": true;
-    "scene.tools.sculptcore.dynTopo.grade": true;
-    "scene.tools.sculptcore.dynTopo.maxCollapses": true;
-    "scene.tools.sculptcore.dynTopo.maxRounds": true;
-    "scene.tools.sculptcore.dynTopo.maxSplits": true;
-    "scene.tools.sculptcore.dynTopo.mode": true;
-    "scene.tools.sculptcore.dynTopo.overrides": true;
-    "scene.tools.sculptcore.dynTopo.smoothLambda": true;
-    "scene.tools.sculptcore.dynTopoStatsLabel": true;
-    "scene.tools.sculptcore.gpuBrushStatsLabel": true;
-    "scene.tools.sculptcore.inheritDynTopo": true;
-    "scene.tools.sculptcore.reprojectCustomData": true;
-    "scene.tools.sculptcore.sceneCullBackfaces": true;
-    "scene.tools.sculptcore.sharedBrushRadius": true;
-    "scene.tools.sculptcore.symmetryAxes": true;
-    "scene.tools.sculptcore.tool": true;
-    "scene.tools.sculptcore.transformWidget": true;
-    "scene.tools.sculptcore.type": true;
     "screen": true;
     "screen.editors": true;
     "selectmode": true;
@@ -1076,17 +641,6 @@ declare module "@framework/pathux" {
     "toolDefaults.app.prop_set.fullSaveUndo": true;
     "toolDefaults.app.prop_set.massSetPath": true;
     "toolDefaults.app.prop_set.useFlagBit": true;
-    "toolDefaults.brush": true;
-    "toolDefaults.brush.load_default": true;
-    "toolDefaults.brush.load_default.dataPath": true;
-    "toolDefaults.brush.set_radius": true;
-    "toolDefaults.brush.set_radius.brush": true;
-    "toolDefaults.brush.set_radius.radius": true;
-    "toolDefaults.brush.set_radius_mode": true;
-    "toolDefaults.brush.set_radius_mode.brush": true;
-    "toolDefaults.brush.set_radius_mode.mode": true;
-    "toolDefaults.brush.swap_colors": true;
-    "toolDefaults.brush.swap_colors.dataPath": true;
     "toolDefaults.curve1d": true;
     "toolDefaults.curve1d.bspline_add_point": true;
     "toolDefaults.curve1d.bspline_add_point.dataPath": true;
@@ -1139,100 +693,6 @@ declare module "@framework/pathux" {
     "toolDefaults.listbox.set_active.hasKey": true;
     "toolDefaults.listbox.set_active.key": true;
     "toolDefaults.listbox.set_active.numericKey": true;
-    "toolDefaults.litemesh": true;
-    "toolDefaults.litemesh.add_attr": true;
-    "toolDefaults.litemesh.add_attr.domain": true;
-    "toolDefaults.litemesh.add_attr.type": true;
-    "toolDefaults.litemesh.add_attr.use": true;
-    "toolDefaults.litemesh.add_cube": true;
-    "toolDefaults.litemesh.add_cube.goalFaces": true;
-    "toolDefaults.litemesh.add_cube.size": true;
-    "toolDefaults.litemesh.add_cube.sphere": true;
-    "toolDefaults.litemesh.add_plane": true;
-    "toolDefaults.litemesh.add_plane.size": true;
-    "toolDefaults.litemesh.assign_material": true;
-    "toolDefaults.litemesh.assign_material.slot": true;
-    "toolDefaults.litemesh.assign_material_polygroup": true;
-    "toolDefaults.litemesh.assign_material_polygroup.slot": true;
-    "toolDefaults.litemesh.generate_uv": true;
-    "toolDefaults.litemesh.generate_uv.margin": true;
-    "toolDefaults.litemesh.mark_seam": true;
-    "toolDefaults.litemesh.mark_seam.vEnd": true;
-    "toolDefaults.litemesh.mark_seam.vStart": true;
-    "toolDefaults.litemesh.mark_sharp_by_angle": true;
-    "toolDefaults.litemesh.mark_sharp_by_angle.angle": true;
-    "toolDefaults.litemesh.multires_enable": true;
-    "toolDefaults.litemesh.multires_enable.levels": true;
-    "toolDefaults.litemesh.multires_set_level": true;
-    "toolDefaults.litemesh.multires_set_level.level": true;
-    "toolDefaults.litemesh.quad_remesh": true;
-    "toolDefaults.litemesh.quad_remesh.autoDensity": true;
-    "toolDefaults.litemesh.quad_remesh.curvatureSmoothIters": true;
-    "toolDefaults.litemesh.quad_remesh.curvatureSmoothLambda": true;
-    "toolDefaults.litemesh.quad_remesh.curvatureWeight": true;
-    "toolDefaults.litemesh.quad_remesh.densityGradation": true;
-    "toolDefaults.litemesh.quad_remesh.densityGradationIters": true;
-    "toolDefaults.litemesh.quad_remesh.densityMax": true;
-    "toolDefaults.litemesh.quad_remesh.densityMin": true;
-    "toolDefaults.litemesh.quad_remesh.fieldSmoothness": true;
-    "toolDefaults.litemesh.quad_remesh.preRemesh": true;
-    "toolDefaults.litemesh.quad_remesh.preRemeshAlign": true;
-    "toolDefaults.litemesh.quad_remesh.preRemeshBootstrapIters": true;
-    "toolDefaults.litemesh.quad_remesh.preRemeshConvergeEps": true;
-    "toolDefaults.litemesh.quad_remesh.preRemeshDensity": true;
-    "toolDefaults.litemesh.quad_remesh.preRemeshFieldCadence": true;
-    "toolDefaults.litemesh.quad_remesh.preRemeshGradation": true;
-    "toolDefaults.litemesh.quad_remesh.preRemeshGradationIters": true;
-    "toolDefaults.litemesh.quad_remesh.preRemeshIters": true;
-    "toolDefaults.litemesh.quad_remesh.preRemeshPreserveFeatures": true;
-    "toolDefaults.litemesh.quad_remesh.preRemeshSharpAngle": true;
-    "toolDefaults.litemesh.quad_remesh.preRemeshSmoothIters": true;
-    "toolDefaults.litemesh.quad_remesh.preRemeshSmoothLambda": true;
-    "toolDefaults.litemesh.quad_remesh.preRemeshTarget": true;
-    "toolDefaults.litemesh.quad_remesh.reproject": true;
-    "toolDefaults.litemesh.quad_remesh.seed": true;
-    "toolDefaults.litemesh.quad_remesh.sharpAngle": true;
-    "toolDefaults.litemesh.quad_remesh.singularityCancel": true;
-    "toolDefaults.litemesh.quad_remesh.singularityCancelMaxSep": true;
-    "toolDefaults.litemesh.quad_remesh.smoothIterations": true;
-    "toolDefaults.litemesh.quad_remesh.smoothStrength": true;
-    "toolDefaults.litemesh.quad_remesh.targetEdgeLength": true;
-    "toolDefaults.litemesh.quad_remesh.targetQuadCount": true;
-    "toolDefaults.litemesh.quad_remesh.triage": true;
-    "toolDefaults.litemesh.quad_remesh.triageMinComponentFrac": true;
-    "toolDefaults.litemesh.quad_remesh.triageWeldRel": true;
-    "toolDefaults.litemesh.quad_remesh.useCurvature": true;
-    "toolDefaults.litemesh.quad_remesh.useDensity": true;
-    "toolDefaults.litemesh.quad_remesh.useSharpFeatures": true;
-    "toolDefaults.litemesh.sculpt_layer_remove": true;
-    "toolDefaults.litemesh.sculpt_layer_remove.layer": true;
-    "toolDefaults.litemesh.sculpt_layer_set_flag": true;
-    "toolDefaults.litemesh.sculpt_layer_set_flag.kind": true;
-    "toolDefaults.litemesh.sculpt_layer_set_flag.layer": true;
-    "toolDefaults.litemesh.sculpt_layer_set_flag.value": true;
-    "toolDefaults.litemesh.sculpt_layer_set_target": true;
-    "toolDefaults.litemesh.sculpt_layer_set_target.layer": true;
-    "toolDefaults.litemesh.sculpt_layer_set_weight": true;
-    "toolDefaults.litemesh.sculpt_layer_set_weight.layer": true;
-    "toolDefaults.litemesh.sculpt_layer_set_weight.weight": true;
-    "toolDefaults.litemesh.select_all": true;
-    "toolDefaults.litemesh.select_all.mode": true;
-    "toolDefaults.litemesh.select_circle": true;
-    "toolDefaults.litemesh.select_circle.radius": true;
-    "toolDefaults.litemesh.select_similar": true;
-    "toolDefaults.litemesh.select_similar.extend": true;
-    "toolDefaults.litemesh.select_similar.threshold": true;
-    "toolDefaults.litemesh.select_similar.type": true;
-    "toolDefaults.litemesh.subdivide": true;
-    "toolDefaults.litemesh.subdivide.numCuts": true;
-    "toolDefaults.litemesh.symmetrize": true;
-    "toolDefaults.litemesh.symmetrize.axes": true;
-    "toolDefaults.litemesh.symmetrize.direction": true;
-    "toolDefaults.litemesh.symmetrize.threshold": true;
-    "toolDefaults.litemesh.symmetrize_snap": true;
-    "toolDefaults.litemesh.symmetrize_snap.axes": true;
-    "toolDefaults.litemesh.symmetrize_snap.direction": true;
-    "toolDefaults.litemesh.symmetrize_snap.threshold": true;
     "toolDefaults.material": true;
     "toolDefaults.material.new": true;
     "toolDefaults.material.new.dataPathToSet": true;
@@ -1310,14 +770,6 @@ declare module "@framework/pathux" {
     "toolDefaults.object.toggle_select_all.mode": true;
     "toolDefaults.object.toggle_select_all.nodeEditorPath": true;
     "toolDefaults.object.toggle_select_all.useNodeEditorGraph": true;
-    "toolDefaults.sculptcore": true;
-    "toolDefaults.sculptcore.paint": true;
-    "toolDefaults.sculptcore.paint.brush": true;
-    "toolDefaults.sculptcore.paint.falloff": true;
-    "toolDefaults.sculptcore.paint.rendermat": true;
-    "toolDefaults.sculptcore.paint.samples": true;
-    "toolDefaults.sculptcore.paint.symmetryAxes": true;
-    "toolDefaults.sculptcore.paint.viewportSize": true;
     "toolDefaults.velpan": true;
     "toolDefaults.velpan.pan": true;
     "toolDefaults.velpan.pan.velpanPath": true;

@@ -1260,8 +1260,8 @@ export class RealtimeEngine extends RenderEngine {
       //     category default), so setRequestedAttrs would short-circuit and the
       //     buffers would stay default-filled; refreshRequestedAttrs forces the
       //     per-attribute buffers to re-gather without relinking the shader.
-      // Duck-typed to keep the renderengine decoupled from the lite-mesh layer.
-      const litemesh = ob.data as unknown as {
+      // Duck-typed to keep the renderengine decoupled from any one geometry provider.
+      const treeProvider = ob.data as unknown as {
         setRequestedAttrs?: (reqs: RequestedAttrDesc[]) => void
         setDrawShader?: (wgsl: string) => void
         getMissingAttrSlots?: () => number[]
@@ -1275,24 +1275,24 @@ export class RealtimeEngine extends RenderEngine {
       // push an empty draw shader instead (hash 0 keys the "no material" state).
       const wantMaterial = (ob.drawMode & DrawModes.TEXTURED) !== 0
       const effHash = wantMaterial ? state.hash : 0
-      const layerSig = litemesh.attrLayersSignature?.() ?? 0
-      const matChanged = litemesh._engineDrawShaderHash !== effHash
-      const layersChanged = litemesh._engineAttrLayersSig !== layerSig
-      if (typeof litemesh.setDrawShader === 'function' && (matChanged || layersChanged)) {
+      const layerSig = treeProvider.attrLayersSignature?.() ?? 0
+      const matChanged = treeProvider._engineDrawShaderHash !== effHash
+      const layersChanged = treeProvider._engineAttrLayersSig !== layerSig
+      if (typeof treeProvider.setDrawShader === 'function' && (matChanged || layersChanged)) {
         try {
           if (!wantMaterial) {
             if (matChanged) {
-              litemesh.setDrawShader('')
+              treeProvider.setDrawShader('')
             }
           } else {
-            litemesh.setRequestedAttrs?.(state.requestedAttrs)
+            treeProvider.setRequestedAttrs?.(state.requestedAttrs)
             if (matChanged) {
-              litemesh.setDrawShader(state.wgsl)
+              treeProvider.setDrawShader(state.wgsl)
             } else {
               // Only the mesh layers moved — re-gather buffers, keep the shader.
-              litemesh.refreshRequestedAttrs?.()
+              treeProvider.refreshRequestedAttrs?.()
             }
-            const missing = litemesh.getMissingAttrSlots?.() ?? []
+            const missing = treeProvider.getMissingAttrSlots?.() ?? []
             if (missing.length > 0) {
               const names = state.requestedAttrs.filter((r) => missing.includes(r.slot)).map((r) => r.name)
               console.warn(
@@ -1301,10 +1301,10 @@ export class RealtimeEngine extends RenderEngine {
               )
             }
           }
-          litemesh._engineDrawShaderHash = effHash
-          litemesh._engineAttrLayersSig = layerSig
+          treeProvider._engineDrawShaderHash = effHash
+          treeProvider._engineAttrLayersSig = layerSig
         } catch (err) {
-          console.error(`[renderengine.webgpu] LiteMesh attr push failed for mat-${mat.lib_id}:`, err)
+          console.error(`[renderengine.webgpu] tree attr push failed for mat-${mat.lib_id}:`, err)
         }
       } else if (matChanged || layersChanged) {
         // Every other provider that binds material attributes by name
@@ -1315,8 +1315,8 @@ export class RealtimeEngine extends RenderEngine {
         if (consumer) {
           try {
             consumer.setRequestedAttrs(wantMaterial ? state.requestedAttrs : [])
-            litemesh._engineDrawShaderHash = effHash
-            litemesh._engineAttrLayersSig = layerSig
+            treeProvider._engineDrawShaderHash = effHash
+            treeProvider._engineAttrLayersSig = layerSig
           } catch (err) {
             console.error(`[renderengine.webgpu] attr push failed for mat-${mat.lib_id}:`, err)
           }

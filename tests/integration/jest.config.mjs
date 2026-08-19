@@ -28,11 +28,13 @@ const config = {
 
   moduleFileExtensions: ['ts', 'tsx', 'mts', 'cts', 'js', 'mjs', 'cjs', 'json'],
 
-  // Every suite here boots a real NW.js app; letting jest scale workers to the
-  // core count spawns far too many at once.
-  // TODO: 5, not 6, is a temporary global job cap for the Faber Leaf refactor
-  // (see that strategy doc's §9.3 note). Restore 6 when the refactor lands.
-  maxWorkers: 5,
+  // Every suite here boots a real NW.js app, so this is a count of concurrent
+  // Chromium+WASM processes, not of cheap workers. Measured 2026-08-19: at 5,
+  // seven suites died on `spawnSync nw.exe ETIMEDOUT`; at 2, all 22 pass.
+  // TODO: unlike the unit config's, this 2 is not the Faber Leaf global job cap
+  // (strategy §9.3) — it is the real ceiling for NW.js suites. Raise it only
+  // with a measurement, not when the cap is reverted.
+  maxWorkers: 2,
 
   testMatch: slow ? SLOW_GLOBS : ['<rootDir>/integration/**/*.test.ts'],
 

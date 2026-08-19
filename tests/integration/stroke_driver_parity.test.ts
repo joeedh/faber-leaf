@@ -1,7 +1,7 @@
 /**
  * TS <-> C++ stroke-sampler parity gate.
  *
- * `scripts/editors/view3d/tools/stroke_driver.ts` (TS `BrushStrokeDriver`) and
+ * `addons/builtin/litemesh/src/stroke_driver.ts` (TS `BrushStrokeDriver`) and
  * `sculptcore/source/brush/stroke_driver.{h,cc}` (the C++ port, reached through
  * `stroke_driver_native.ts`) must emit the *same* dabs for the same pointer
  * path: same count, same positions / view vectors / radii / spacing state. Both

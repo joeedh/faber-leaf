@@ -11,8 +11,8 @@
       "@addon/leafmesh/api": [
         "./addons/builtin/leafmesh/src/api.ts"
       ],
-      "@addon/sculptcore/api": [
-        "./addons/builtin/sculptcore/src/api.ts"
+      "@addon/litemesh/api": [
+        "./addons/builtin/litemesh/src/api.ts"
       ]
     }
   }

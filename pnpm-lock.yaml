@@ -93,6 +93,18 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3
 
+  addons/builtin/litemesh:
+    dependencies:
+      '@litestl/typescript-runtime':
+        specifier: workspace:*
+        version: link:../../../sculptcore/source/litestl/binding/typescriptRuntime
+      '@sculptcore/api':
+        specifier: workspace:*
+        version: link:../../../sculptcore/typescript
+      nstructjs:
+        specifier: workspace:*
+        version: link:../../../vendor/nstructjs
+
   addons/code_editor:
     dependencies:
       monaco-editor:

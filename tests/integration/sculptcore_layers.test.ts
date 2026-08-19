@@ -3,7 +3,7 @@
  * (documentation/plans/displacementAndSubSurf.md).
  *
  * Drives the real NW.js app headlessly per backend on the spherified
- * `litemesh-cube` scene, runs `__layerTest()` (scripts/lite-mesh/
+ * `litemesh-cube` scene, runs `__layerTest()` (addons/builtin/litemesh/src/
  * litemesh_layertest_support.ts) via `--eval`, and asserts the structured
  * result reflected into the `--dump` JSON as `layertest`. The driver adds a
  * sculpt layer, runs one LAYERDRAW stroke at the +Z pole with the brush

@@ -4,7 +4,7 @@
  *
  * Boots the real Electron app headlessly per backend on the spherified
  * `litemesh-cube` scene and runs `__fuzzTest({iters, seed})`
- * (scripts/lite-mesh/litemesh_fuzztest_support.ts) via `--eval`. The driver
+ * (addons/builtin/litemesh/src/litemesh_fuzztest_support.ts) via `--eval`. The driver
  * runs random sculptcore strokes — random valid brush tool, random surface
  * anchor, 1–6 dabs, with a 1/5 chance of toggling dynamic topology — and after
  * every stroke refreshes the spatial tree and scans for non-finite vertices.

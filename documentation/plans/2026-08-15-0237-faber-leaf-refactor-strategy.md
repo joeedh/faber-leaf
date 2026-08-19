@@ -1322,7 +1322,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P12 | [LeafMesh modeling toolmode](./2026-08-15-0355-leafmesh-modeling-toolmode.md) | open decisions #2, #8 | 8 | P11 | **landed** |
 | P13 | [W1e — delete the TS BREP](./2026-08-15-0400-w1-delete-ts-brep.md) | W1 §4 | 9 | P5, P9, P10, P12 | **landed** |
 | P14 | [Addon manager — optional dependencies](./2026-08-15-0405-addon-manager-optional-dependencies.md) | W3 §0 | 10 | P9 | **landed** |
-| P15 | [W3a — LiteMesh becomes an optional addon](./2026-08-15-0410-w3-litemesh-optional-addon.md) | W3 §1 | 10 | P13, P14 | **written** |
+| P15 | [W3a — LiteMesh becomes an optional addon](./2026-08-15-0410-w3-litemesh-optional-addon.md) | W3 §1 | 10 | P13, P14 | **landed** |
 | P16 | [W3b — sculptcore build decoupling](./2026-08-15-0415-w3-sculptcore-build-decoupling.md) | W3 §2–4 | 10 | P15 | **written** |
 | P17 | [W5a — distributions + cycle cleanup](./2026-08-15-0420-w5-distributions.md) | W5 §1–2 | 11 | P16 | **written** |
 | P18 | [W4a — `IUVSource` + UV editor rewrite](./2026-08-15-0425-w4-iuvsource-uv-editor.md) | W4 | 12 | P8, P11 | **written** |
@@ -1399,16 +1399,19 @@ ungrounded input just argues a wrong plan more convincingly.
 >
 > - `pnpm test` runs through `tools/run-tests.mjs`, which serializes turbo
 >   packages (`--concurrency=1`) and caps jest / vitest workers at 5.
-> - `tests/jest.config.ts` and `tests/integration/jest.config.mjs` are at
->   `maxWorkers: 5` (were 6).
+> - `tests/jest.config.ts` is at `maxWorkers: 5` (was 6).
+> - `tests/integration/jest.config.mjs` is at **`maxWorkers: 2`**, which is *not*
+>   this cap: P15 measured it as the ceiling above which concurrent NW.js boots
+>   start wedging each other. It stays at 2 after the cap is lifted.
 > - Sculptcore builds are capped by `BUILD_JOBS: 5` in the gitignored
 >   `sculptcore/local-build-options.mjs`; pass `-j 5` explicitly on any
 >   invocation that bypasses it.
 >
-> None of this belongs in the shipped configuration. **Revert all four when the
+> None of this belongs in the shipped configuration. **Revert it when the
 > Faber Leaf refactor is done** — `pnpm test` back to `turbo test`, delete the
-> wrapper, restore `maxWorkers`, delete the local build options. The CI workflow
-> is deliberately *not* capped: it runs on its own runner.
+> wrapper, restore `tests/jest.config.ts` to `maxWorkers: 6`, delete the local
+> build options; leave the integration config at 2. The CI workflow is
+> deliberately *not* capped: it runs on its own runner.
 
 - [x] **P1 — [CI + layer-gate repair](./2026-08-15-0300-ci-and-layer-gate-repair.md)** — landed 2026-08-15, commit `2144aeef`. Real layer baseline is **2483**, not the 288 this doc cited. ESLint is **not** gated (untriaged ~17k backlog; deferred to P9) — see that plan's §5 step 4 correction. `master` branch protection still has to mark the jobs required.
   - Add a PR workflow: `pnpm test`, `pnpm typecheck`, `pnpm eslint`,
@@ -1814,7 +1817,7 @@ ungrounded input just argues a wrong plan more convincingly.
 > wiring; P18 implements an interface P7 already designed; P19 is a port of
 > working math. Five plans at `high` before the last switch.
 
-- [ ] **P15 — [W3a: LiteMesh becomes an optional addon](./2026-08-15-0410-w3-litemesh-optional-addon.md)**
+- [x] **P15 — [W3a: LiteMesh becomes an optional addon](./2026-08-15-0410-w3-litemesh-optional-addon.md)**
   - Move `scripts/lite-mesh/` (15,307 lines) plus the sculpt and boxmodel
     toolmodes into `addons/builtin/litemesh/` with `"buildMode": "prebuilt"`
     and `"optional": true` (which P14 made real).

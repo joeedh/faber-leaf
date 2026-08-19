@@ -3,7 +3,7 @@
  * (documentation/plans/displacementAndSubSurf.md; closes V2's deferred gate).
  *
  * Drives the real NW.js app headlessly per backend on the spherified
- * `litemesh-cube` scene, runs `__vdmTest()` (scripts/lite-mesh/
+ * `litemesh-cube` scene, runs `__vdmTest()` (addons/builtin/litemesh/src/
  * litemesh_vdmtest_support.ts) via `--eval`, and asserts the structured result
  * reflected into the `--dump` JSON as `vdmtest`. The driver UV-charts every
  * face, updates frames, tags the mesh VDM-carried, and splats one dab at the

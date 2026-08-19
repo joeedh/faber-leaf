@@ -68,7 +68,13 @@ import * as sceneobject from '../sceneobject/index'
 import {ViewContext} from '../core/context'
 import type {ToolContext} from '../core/context'
 import {registerDataKind, unregisterDataKind, type IDataKindDescriptor} from '../core/data_kinds'
-import {getDefaultSceneBuilder, setDefaultSceneBuilder, type DefaultSceneBuilder} from '../core/default_file'
+import {
+  getDefaultSceneBuilder,
+  getDefaultToolMode,
+  setDefaultSceneBuilder,
+  setDefaultToolMode,
+  type DefaultSceneBuilder,
+} from '../core/default_file'
 import {registerTestScene, unregisterTestScene, type TestSceneBuilder} from '../core/test_scenes'
 import {registerFileMigrator, unregisterFileMigrator, type IFileMigrator} from '../core/file_migrations'
 import {registerFileFormat, unregisterFileFormat, type IFileFormat} from '../core/file_formats'
@@ -350,14 +356,20 @@ export class AddonAPI<T> {
   /**
    * Supply the contents of the default scene, so a distribution's startup file
    * is not hardcoded in core. There is one slot; registering replaces whatever
-   * held it, and unloading restores the previous occupant.
+   * held it, and unloading restores the previous occupant. `toolMode` is the
+   * mode the new file opens in — it belongs to the scene, so it travels with it.
    */
-  registerDefaultSceneBuilder(fn: DefaultSceneBuilder): void {
+  registerDefaultSceneBuilder(fn: DefaultSceneBuilder, toolMode?: string): void {
     const prev = getDefaultSceneBuilder()
+    const prevMode = getDefaultToolMode()
     setDefaultSceneBuilder(fn)
+    if (toolMode !== undefined) {
+      setDefaultToolMode(toolMode)
+    }
     this._undoRegistrations.push(() => {
       if (getDefaultSceneBuilder() === fn) {
         setDefaultSceneBuilder(prev)
+        setDefaultToolMode(prevMode)
       }
     })
   }

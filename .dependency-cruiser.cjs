@@ -84,9 +84,11 @@ module.exports = {
       severity: 'error',
       comment:
         'Core must not depend on the LiteMesh implementation. Does not fire today and must not ' +
-        'start: LiteMesh is a geometry type like any other (strategy §3).',
+        'start: LiteMesh is a geometry type like any other (strategy §3). P15 moved it into an ' +
+        'addon, so this is now a named specialization of core-no-addons — kept separate because ' +
+        'a LiteMesh edge is the one this project keeps regrowing.',
       from    : {path: CORE},
-      to      : {path: '^scripts/lite-mesh/'},
+      to      : {path: '^addons/builtin/litemesh/'},
     },
     {
       name    : 'core-no-sculptcore',
@@ -110,8 +112,8 @@ module.exports = {
   ],
 
   options: {
-    // Anchored: an unanchored 'sculptcore' also matched addons/builtin/sculptcore/
-    // and scripts/editors/view3d/tools/sculptcore*.ts, silently truncating the graph.
+    // Anchored: an unanchored 'sculptcore' also matched the addon's own
+    // sculptcore*.ts modules, silently truncating the graph.
     doNotFollow: {
       path: ['node_modules', '^sculptcore/', '^build/', '^dist/'],
     },

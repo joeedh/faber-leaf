@@ -83,12 +83,11 @@ describe('no string-keyed lookup of a BREP struct', () => {
 
 describe('no addon toolpath in a host keymap', () => {
   /**
-   * Toolpaths that still sit in host files, by namespace. `litemesh` is the two
-   * toolmodes (`view3d/tools/boxmodel.ts`, `view3d/tools/sculptcore.ts`) that are
-   * themselves awaiting extraction — the hotkey and the tool leave together, so
-   * they are recorded rather than moved. Shrink this list, never grow it.
+   * Toolpaths that still sit in host files, by namespace. Empty since P15 moved
+   * the sculpt and box-modeling toolmodes into addons/builtin/litemesh, taking
+   * their hotkeys with them. Shrink this list, never grow it.
    */
-  const ALLOWED_NAMESPACES = new Set(['litemesh'])
+  const ALLOWED_NAMESPACES = new Set<string>()
 
   test('no host HotKey names a mesh ToolOp', () => {
     expect(grep(/new HotKey\([^)]*['"]mesh[._]/)).toEqual([])

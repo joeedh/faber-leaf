@@ -4,7 +4,7 @@
  *
  * Boots the real NW.js app headlessly per backend on the `litemesh-cube` scene
  * and runs `__gpuBrushTest({runShadow: true, capture: true})`
- * (scripts/lite-mesh/litemesh_gpubrush_test_support.ts), asserting the result
+ * (addons/builtin/litemesh/src/litemesh_gpubrush_test_support.ts), asserting the result
  * reflected into the `--dump` JSON as `gpubrushtest`:
  *
  *  - §8.2 strict parity: the WORLD-SPACE dab sequence (runSculptcoreStroke, no

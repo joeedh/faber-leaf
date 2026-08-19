@@ -1,6 +1,6 @@
 /**
  * Regression test for the Anchored / Drag Dot stroke methods
- * (`scripts/editors/view3d/tools/stroke_driver.ts`, `StrokeMethod.ANCHORED` /
+ * (`addons/builtin/litemesh/src/stroke_driver.ts`, `StrokeMethod.ANCHORED` /
  * `.DRAG_DOT`). Both methods keep re-applying a live-preview dab as the
  * pointer moves, rolling back the previous preview before the next lands
  * (`beginPreviewDab`/`rollbackPreviewDab`, `sculptcore_ops.ts` `applyDabOne`) so

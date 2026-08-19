@@ -27,6 +27,7 @@ import {DataBlock, setMissingDataBlockType} from './lib_api.js'
 import {nstructjs} from '../path.ux/scripts/pathux.js'
 import {ToolMode} from '../editors/view3d/view3d_toolmode.js'
 import {MissingNode, MissingNodeSocket} from './graph.js'
+import {registerDataAPI} from '../data_api/api_define_registry.js'
 
 // Constructor for an addon's opaque custom-data placeholder, registered at
 // addon-load time via `registerOpaqueCustomDataElem` so this module names no
@@ -196,6 +197,10 @@ DataBlock.register(MissingDataBlock)
 // Library.loadSTRUCT needs the class to keep an unknown block type's BlockSet
 // alive; it cannot import this module, which imports it.
 setMissingDataBlockType(MissingDataBlock)
+
+// A preserved block sits in the datalib like any other, so `library.<type>[id]`
+// resolves to one; without a struct the data API throws `invalid path`.
+registerDataAPI(MissingDataBlock)
 
 // ----------------------------------------------------------------------------
 // MissingToolMode — placeholder for a ToolMode subclass from an unloaded addon

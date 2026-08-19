@@ -5,7 +5,8 @@
  * moved out of `pbvh_base.ts` / `pbvh_paintsample.ts` and into `stroke_base.ts`.
  * nstructjs keys off the struct name, not the module path, so a pure file move
  * is invisible to the format — but only as long as nobody renames a struct or
- * drops a field on the way past. Any .wproj saved with `save_toolstack` set
+ * drops a field on the way past. P15 moved the file again, into the litemesh
+ * addon; same reasoning, which is the point of the guard. Any .wproj saved with `save_toolstack` set
  * carries these four on disk; `examples/brush_asymmetric_toolstack.wproj` is
  * the committed one.
  */
@@ -16,7 +17,7 @@ import {fileURLToPath} from 'url'
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
 const WPROJ = path.join(ROOT, 'examples', 'brush_asymmetric_toolstack.wproj')
-const STROKE_BASE = path.join(ROOT, 'scripts', 'editors', 'view3d', 'tools', 'stroke_base.ts')
+const STROKE_BASE = path.join(ROOT, 'addons', 'builtin', 'litemesh', 'src', 'stroke_base.ts')
 
 /** The hoisted classes, each with the struct it inherits its leading fields from. */
 const HOISTED: ReadonlyArray<readonly [string, string | null]> = [

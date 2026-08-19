@@ -3,7 +3,7 @@
  * documentation/plans -> per-face material unblocked the Material criterion).
  *
  * Boots the real NW.js app headlessly per backend on the `litemesh-cube` scene,
- * runs `__selectSimilarTest()` (scripts/lite-mesh/litemesh_selectsimilartest_support.ts)
+ * runs `__selectSimilarTest()` (addons/builtin/litemesh/src/litemesh_selectsimilartest_support.ts)
  * via `--eval`, and asserts the structured `evalResult`: seeding an active
  * element and running litemesh.select_similar gathers the matching elements
  * (FACE_MATERIAL count checked against an independent faceMaterial() count,

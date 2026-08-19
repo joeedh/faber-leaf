@@ -4,7 +4,7 @@
  * lower `.x/.y/.z` to litestl Vec operator[]).
  *
  * Boots the real NW.js app headlessly per backend on the `litemesh-cube` scene,
- * runs `__colorMixTest()` (scripts/lite-mesh/litemesh_colormixtest_support.ts)
+ * runs `__colorMixTest()` (addons/builtin/litemesh/src/litemesh_colormixtest_support.ts)
  * via `--eval`, and asserts the structured `evalResult`: from a uniform base
  * color, each mix mode blends the brush color as its formula predicts (MULTIPLY
  * darkens, SCREEN lightens, DIFFERENCE lowest on R, DARKEN clamps G, LIGHTEN

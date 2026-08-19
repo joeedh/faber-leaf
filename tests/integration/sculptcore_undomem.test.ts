@@ -3,7 +3,7 @@
  * calculation for sculptcore's toolops + the maximum undo memory limit).
  *
  * Drives the real NW.js app headlessly per backend on the `litemesh-cube`
- * scene, runs `__undoMemTest()` (scripts/lite-mesh/litemesh_undomem_support.ts)
+ * scene, runs `__undoMemTest()` (addons/builtin/litemesh/src/litemesh_undomem_support.ts)
  * via `--eval`, and asserts the structured result reflected into the `--dump`
  * JSON as `undomemtest`. The driver runs real sculpt strokes (one with dyntopo
  * so topo chunks are measured), checks per-step MeshLog accounting

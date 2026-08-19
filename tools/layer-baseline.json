@@ -67,7 +67,14 @@
     "BREP: SceneBVH (dead -- every method early-returned without the addon it",
     "looked up), calcUpdateHash's element-count block, transform_types'",
     "always-true object-skip clause, and the STL exporter's loopTris walk, which",
-    "now reads ITriangleSource. no-circular 461 -> 459."
+    "now reads ITriangleSource. no-circular 461 -> 459.",
+    "",
+    "P15 (W3a) moved the whole lite-mesh cluster -- 30 scripts/lite-mesh modules",
+    "plus the sculpt/boxmodel toolmodes and P4's stroke_base cluster -- into",
+    "addons/builtin/litemesh/src, and cut the five host edges that reached them",
+    "(api_define's side-effect import, framework_api's LiteMesh/PaintToolModeBase",
+    "re-exports, tools.ts's toolmode aggregation, entry_point's two lite-mesh",
+    "imports). The cycles those edges closed go with them: no-circular 459 -> 400."
   ],
   "measured": "2026-08-19",
   "config": ".dependency-cruiser.cjs",
@@ -75,7 +82,7 @@
     "scripts",
     "addons"
   ],
-  "total": 459,
+  "total": 400,
   "rules": {
     "core-no-view3d-tools": 0,
     "core-no-addons": 0,
@@ -83,6 +90,6 @@
     "core-no-addons-transitive": 0,
     "core-no-litemesh": 0,
     "core-no-sculptcore": 0,
-    "no-circular": 459
+    "no-circular": 400
   }
 }

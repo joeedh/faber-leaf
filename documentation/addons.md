@@ -105,8 +105,8 @@ absent one. That is the guard an optional dependent degrades on:
 
 ```ts
 export function register(api: AddonAPI<IAddon>) {
-  if (api.has('sculptcore')) {
-    const sc = api.deps['sculptcore'].exports['sculptcore']
+  if (api.has('litemesh')) {
+    const lm = api.deps['litemesh'].exports['litemesh']
     // …full path
   } else {
     // …degraded path; not an error

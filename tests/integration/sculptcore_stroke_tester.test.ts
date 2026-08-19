@@ -1,6 +1,6 @@
 /**
  * Integration test for the `window._sculptcoreStrokeTester` dev/test driver
- * (scripts/editors/view3d/tools/sculptcore_ops.ts). Unlike `__brushTest`, which
+ * (addons/builtin/litemesh/src/sculptcore_ops.ts). Unlike `__brushTest`, which
  * uses the low-level `runSculptcoreStroke`, this exercises the *real* op path:
  * `_sculptcoreStrokeTester.runStroke` builds evenly-spaced samples through the
  * production `BrushStrokeDriver` (projection + raycast from normalized screen

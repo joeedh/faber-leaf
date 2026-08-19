@@ -65,7 +65,6 @@ describe('only an addon-owned type registers from an addon', () => {
   const HOST_REGISTRATIONS: [string, string][] = [
     ['scripts/editors/view3d/transform/transform_types.ts', 'ObjectTransType'],
     ['scripts/editors/view3d/widgets/widget_utils.ts', 'TransMovWidget'],
-    ['scripts/lite-mesh/litemesh_transtype.ts', 'LiteMeshTransType'],
   ]
 
   test.each(HOST_REGISTRATIONS)('%s registers %s at module scope, with a reason', (rel, name) => {
@@ -76,13 +75,25 @@ describe('only an addon-owned type registers from an addon', () => {
     expect(lines[at - 1].trimStart()).toMatch(/^\/\//)
   })
 
-  test('LeafMeshTransType is registered by its addon, not at module scope', () => {
-    const typesSrc = fs.readFileSync(path.join(TRANSFORM_DIR, 'transform_types.ts'), 'utf8')
-    expect(typesSrc).not.toMatch(/TransDataType\.register\(LeafMeshTransType\)/)
-    // P13 erased the BREP type outright; the host file must not name it either.
-    expect(typesSrc).not.toMatch(/MeshTransType/)
+  // Addon-owned types: the class module must not register, and the addon's
+  // `register(api)` hook must, so the type leaves with the addon.
+  const ADDON_REGISTRATIONS: [string, string, string][] = [
+    ['leafmesh', 'addons/builtin/leafmesh/src/transtype.ts', 'LeafMeshTransType'],
+    ['litemesh', 'addons/builtin/litemesh/src/litemesh_transtype.ts', 'LiteMeshTransType'],
+  ]
 
-    const addon = path.join(REPO_ROOT, 'addons/builtin/leafmesh/src/main.ts')
-    expect(fs.readFileSync(addon, 'utf8')).toMatch(/api\.registerTransType\(LeafMeshTransType\)/)
+  test.each(ADDON_REGISTRATIONS)('%s registers %s from its addon hook', (id, rel, name) => {
+    const src = fs.readFileSync(path.join(REPO_ROOT, rel), 'utf8')
+    expect(src).not.toMatch(/TransDataType\.register\(/)
+
+    const addon = fs.readFileSync(path.join(REPO_ROOT, `addons/builtin/${id}/src/main.ts`), 'utf8')
+    expect(addon).toContain(`api.registerTransType(${name})`)
+  })
+
+  test('the host transform-types module names no addon-owned type', () => {
+    const typesSrc = fs.readFileSync(path.join(TRANSFORM_DIR, 'transform_types.ts'), 'utf8')
+    // Catches LeafMeshTransType and LiteMeshTransType as well as the BREP's own
+    // MeshTransType, which P13 erased outright.
+    expect(typesSrc).not.toMatch(/MeshTransType/)
   })
 })

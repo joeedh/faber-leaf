@@ -3,7 +3,7 @@
  * invariance under brush strokes with/without dyntopo, plus undo/redo).
  *
  * Drives the real NW.js app headlessly per backend on the spherified
- * `litemesh-cube` scene, runs `__boundaryTest()` (scripts/lite-mesh/
+ * `litemesh-cube` scene, runs `__boundaryTest()` (addons/builtin/litemesh/src/
  * litemesh_boundarytest_support.ts) via `--eval`, and asserts the structured
  * result reflected into the `--dump` JSON as `boundarytest`. The driver marks
  * three seam paths into a pole junction with the real `litemesh.mark_seam`

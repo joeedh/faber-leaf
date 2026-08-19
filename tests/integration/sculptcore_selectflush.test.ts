@@ -2,7 +2,7 @@
  * selectFlush integration test (documentation/plans/selectFlush.md M4).
  *
  * Boots the real NW.js app headlessly per backend on the `litemesh-cube`
- * scene, runs `__selectFlushTest()` (scripts/lite-mesh/
+ * scene, runs `__selectFlushTest()` (addons/builtin/litemesh/src/
  * litemesh_selectflushtest_support.ts) via `--eval`, and asserts the
  * structured result reflected into the `--dump` JSON as `evalResult`:
  * a vert-only region selection drives extrude_region (face-domain op) and

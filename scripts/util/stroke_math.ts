@@ -1,6 +1,6 @@
 /**
  * Dependency-free stroke geometry math for the brush stroke driver
- * (`scripts/editors/view3d/tools/stroke_driver.ts`).
+ * (`addons/builtin/litemesh/src/stroke_driver.ts`).
  *
  * Everything here operates on plain `number[]` points (2D for screen space, 3D
  * for world space) and imports nothing from path.ux / vectormath, so it loads in

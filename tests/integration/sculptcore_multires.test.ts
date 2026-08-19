@@ -3,7 +3,7 @@
  * (documentation/plans/displacementAndSubSurf.md).
  *
  * Drives the real NW.js app headlessly per backend on the spherified
- * `litemesh-cube` scene, runs `__multiresTest()` (scripts/lite-mesh/
+ * `litemesh-cube` scene, runs `__multiresTest()` (addons/builtin/litemesh/src/
  * litemesh_multirestest_support.ts) via `--eval`, and asserts the structured
  * result reflected into the `--dump` JSON as `evalResult`. The driver enables
  * a 3-level stack, proves the level round-trip is lossless, strokes the finest

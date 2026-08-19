@@ -3,7 +3,7 @@
  * (sculptcore/documentation/plans/displacementAndSubSurf.md).
  *
  * Boots the real NW.js app headlessly on the `litemesh-vdmrender` scene and
- * drives `__vdmRenderTest(mode)` (scripts/lite-mesh/litemesh_vdmrender_support.ts)
+ * drives `__vdmRenderTest(mode)` (addons/builtin/litemesh/src/litemesh_vdmrender_support.ts)
  * via `--eval` before a `--screenshot`, three ways:
  *   flat — undisplaced mesh, plain node material (baseline image);
  *   vdm  — undisplaced mesh + a VdmStore holding one analytic splat dab,

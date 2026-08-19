@@ -8,7 +8,7 @@
  * remesh (the spherified cube of `litemesh-cube` has eight valence-3 corner
  * singularities the global MIQ field can't satisfy, so it clean-fails; mirrors
  * the C++ synthetic suite's `makeUVSphere`). The `--eval` harness hook calls
- * `globalThis.__quadRemeshTest()` (scripts/lite-mesh/litemesh_quad_remesh_support.ts),
+ * `globalThis.__quadRemeshTest()` (addons/builtin/litemesh/src/litemesh_quad_remesh_support.ts),
  * which runs the op then undo + redo, recording a backend-agnostic topology
  * fingerprint at each stage; the subsequent `--dump` snapshots the redone
  * (remeshed) GPU buffers.
