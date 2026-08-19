@@ -518,6 +518,76 @@ describe('transform', () => {
   })
 })
 
+describe('the selectedFacesOnly scope', () => {
+  // Step 6's point: the flag is an op input, so every entry point has to honour
+  // it, not just the one that draws. A partial selection is what tells a scope
+  // that works from one that is quietly a no-op.
+  const partial = (): UVGridSource => {
+    const source = grid()
+    source.setSelectedFaces([0, 3])
+    return source
+  }
+
+  test('select-all writes inside the scope and nowhere else', () => {
+    const source = partial()
+    const wrote = selectAllUVs(source, 0, 'add', {selectedFacesOnly: true})
+
+    expect(wrote.length).toBe(8)
+    expect(listSelectedUVs(source, 0).length).toBe(8)
+
+    // Unscoped, the same call reaches the whole layer — the two differ, which
+    // is the regression the archived hardcoded filter made untestable.
+    selectAllUVs(source, 0, 'add')
+    expect(listSelectedUVs(source, 0).length).toBe(16)
+  })
+
+  test('auto toggles on what is in scope, ignoring a selection outside it', () => {
+    const source = partial()
+
+    selectAllUVs(source, 0, 'add')
+    selectAllUVs(source, 0, 'sub', {selectedFacesOnly: true})
+    expect(listSelectedUVs(source, 0).length).toBe(8)
+
+    // Eight elements are still selected, all of them out of scope. Auto has to
+    // read that as "nothing selected here" and select, not deselect.
+    selectAllUVs(source, 0, 'auto', {selectedFacesOnly: true})
+    expect(listSelectedUVs(source, 0).length).toBe(16)
+  })
+
+  test('a scoped flag snapshot restores its own faces and leaves the rest alone', () => {
+    const source = partial()
+    const snap = snapshotUVFlags(source, 0, {selectedFacesOnly: true})
+
+    expect(snap.handles.length).toBe(8)
+
+    selectAllUVs(source, 0, 'add')
+    expect(restoreUVFlags(source, 0, snap)).toBe(true)
+
+    // The eight it captured came back unselected; the eight it never saw kept
+    // the selection made after the snapshot.
+    expect(listSelectedUVs(source, 0).length).toBe(8)
+    expect(listSelectedUVs(source, 0, {selectedFacesOnly: true}).length).toBe(0)
+  })
+
+  test('a transform gathers only the selected elements that are in scope', () => {
+    const source = partial()
+    selectAllUVs(source, 0, 'add')
+
+    expect(gatherUVTransData(source, 0).handles.length).toBe(16)
+    expect(gatherUVTransData(source, 0, {selectedFacesOnly: true}).handles.length).toBe(8)
+  })
+
+  test('with no face selected at all, a scoped op is a no-op', () => {
+    const source = grid()
+    source.setSelectedFaces([])
+
+    expect(selectAllUVs(source, 0, 'add', {selectedFacesOnly: true}).length).toBe(0)
+    expect(listSelectedUVs(source, 0).length).toBe(0)
+    expect(snapshotUVFlags(source, 0, {selectedFacesOnly: true}).handles.length).toBe(0)
+    expect(gatherUVTransData(source, 0, {selectedFacesOnly: true}).handles.length).toBe(0)
+  })
+})
+
 describe('an empty or absent layer', () => {
   test('draws nothing rather than throwing', () => {
     const geom = buildUVDrawGeometry(grid(), 99)

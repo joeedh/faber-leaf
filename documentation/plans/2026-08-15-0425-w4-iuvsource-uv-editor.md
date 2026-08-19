@@ -1,10 +1,12 @@
 # P18 — W4a: `IUVSource` + the mesh-agnostic UV editor
 
-**Status:** in progress — §5 steps 1–5 closed (all three implementors landed
+**Status:** in progress — §5 steps 1–6 closed (all three implementors landed
 and run through one conformance suite; the editor's host-free core, its addon,
-its Editor component, every tool path the archive registered, and the redraw
-bus that replaced the `window.redraw_uveditors` global are in). Step 6 —
-`selectedFacesOnly` through the op inputs — is next.
+its Editor component, every tool path the archive registered, the redraw bus
+that replaced the `window.redraw_uveditors` global, and `selectedFacesOnly` as
+a proven op input are in). Step 7 — deleting `archive/uv-editor/` — is next,
+and §6's remaining tests (the `--no-sculptcore` run of the double suite, and
+the `.wproj` round-trip) are the last work in the phase.
 
 **Date:** 2026-08-15 (citations re-verified 2026-08-19)
 
@@ -303,6 +305,25 @@ implementation will otherwise break:
 6. Give `selectedFacesOnly` a real home. `mesh_uvops_base.ts` and its hardcoded
    default are already gone (P13), so this is: pass the flag through the op's
    inputs into `listUVFaces`, and make §6's false-differs-from-true test real.
+   **Done.**
+   - [x] The path already ran end to end after step 3 — `UVOpBase`'s
+     `selectedFacesOnly` input → `_scope()` → `UVScope` → `readUVRings` →
+     `listUVFaces(layer, selectedOnly)` — so step 6 was entirely about proving
+     it, which is what the archived hardcoded `true` made impossible.
+   - [x] `tests/unit/uv_editor/uv_edit_geom.test.ts` covers a *partial* scope
+     against the double: select-all, auto's read of "is anything selected
+     here", a scoped flag snapshot restoring only its own faces, and a
+     transform gathering only in-scope elements. Auto is the one that would
+     rot silently — it has to ignore a selection outside the scope.
+   - [x] `tests/integration/uv_editor_scope.test.ts` proves the *input*
+     arrives: one headless boot on `litemesh-attrtest`, running
+     `uveditor.toggle_select_all` through `ctx.api.execTool(ctx, path, inputs)`
+     with the flag both ways. On the six-quad cube: 0 of 24 UV elements
+     selected scoped with no face selected, 24 unscoped, 24 scoped once
+     `litemesh.select_all` has run.
+   - [x] No default is hardcoded anywhere: the property's own default is
+     `false`, and `UVOpBase.invoke` copies the editor toggle in only when the
+     caller passed no `selectedFacesOnly` at all.
 7. Delete `archive/uv-editor/` and its `archive/README.md` row in the final
    commit, once every behaviour in its TODO table is either implemented or
    explicitly recorded as dropped.
@@ -329,7 +350,9 @@ design left in it.
 - Round-trip: unwrap-free UV edits on a `.wproj` save and reload with selection
   and pin state intact.
 - `selectedFacesOnly` false actually differs from true — the current hardcoded
-  path makes that untestable, so it is a real regression test.
+  path makes that untestable, so it is a real regression test. Landed in step 6
+  at both levels: `uv_edit_geom.test.ts` for a partial scope against the double,
+  `uv_editor_scope.test.ts` for the op input on a real mesh.
 
 ## 7. Risks
 
@@ -344,7 +367,9 @@ design left in it.
   capability on the source, not in the editor.
 - **`selectedFacesOnly` restoration changes behaviour** for anyone relying on
   the hardcoded `true`. It is a placeholder with a comment saying it is a
-  placeholder; restoring it is the fix. Note it in the release notes.
+  placeholder; restoring it is the fix. Note it in the release notes. Settled in
+  step 6: the default is `false`, so an op invoked with no editor and no
+  argument now reads the whole layer where the archive read the selection.
 - **`ImageBus` had neither subscribers nor callers** — P13 archived the
   unwrapping stack that pushed seam draw-lines, so all three triggers were dead
   code, not merely unheard. Settled in step 5: `flagRedraw` got a caller and two
