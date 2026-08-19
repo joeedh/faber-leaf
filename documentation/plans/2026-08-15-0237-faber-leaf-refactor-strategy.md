@@ -1318,7 +1318,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P8 | [W1c — registry hooks + string-key severing](./2026-08-15-0335-w1-registry-hooks-and-string-key-severing.md) | W1 §0, §2 | 5 | P7 | **landed** |
 | P9 | [W1d — layer ratchet to `error`](./2026-08-15-0340-w1-layer-ratchet.md) | W1 §3 | 6 | P8 | **landed** |
 | P10 | [Serialization + file-compat hardening](./2026-08-15-0345-serialization-and-file-compat-hardening.md) | W1 §5 (promoted) | 7 | P8 | **landed** |
-| P11 | [LeafMesh host integration](./2026-08-15-0350-leafmesh-host-integration.md) | risk mitigation | 8 | P3, P8 | **written** |
+| P11 | [LeafMesh host integration](./2026-08-15-0350-leafmesh-host-integration.md) | risk mitigation | 8 | P3, P8 | **landed** |
 | P12 | [LeafMesh modeling toolmode](./2026-08-15-0355-leafmesh-modeling-toolmode.md) | open decisions #2, #8 | 8 | P11 | **written** |
 | P13 | [W1e — delete the TS BREP](./2026-08-15-0400-w1-delete-ts-brep.md) | W1 §4 | 9 | P5, P9, P10, P12 | **written** |
 | P14 | [Addon manager — optional dependencies](./2026-08-15-0405-addon-manager-optional-dependencies.md) | W3 §0 | 10 | P9 | **written** |
