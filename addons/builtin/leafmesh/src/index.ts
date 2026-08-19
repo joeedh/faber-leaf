@@ -35,3 +35,27 @@ export type {LeafMeshPickElem, PickCandidate, PickDomainName, Point3, Projector,
 
 export {OBJ_MAX_WARNINGS, OBJ_UV_LAYER, readOBJ} from './obj_read.js'
 export type {ObjReadResult, ObjReadStats} from './obj_read.js'
+
+export {
+  SELECT_ATTR,
+  applySelection,
+  countSelected,
+  edgeLength,
+  ensureSelectFlags,
+  faceArea,
+  faceEdges,
+  faceHoleCount,
+  faceSides,
+  faceVerts,
+  flushSelection,
+  isSelected,
+  linkedFrom,
+  listSelected,
+  restoreSelection,
+  selectAll,
+  selectFlags,
+  similarTo,
+  snapshotSelection,
+  vertFaces,
+} from './select_geom.js'
+export type {SelectAction, SelectDomain, SelectionSnapshot, SimilarCriterion} from './select_geom.js'

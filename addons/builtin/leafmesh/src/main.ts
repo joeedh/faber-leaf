@@ -9,8 +9,8 @@
  *
  * `"dependencies": []` — the first builtin with none. See P11 §4.
  *
- * This module registers the kind descriptor, the data class, and the OBJ
- * importer.
+ * This module registers the kind descriptor, the data class, the OBJ importer,
+ * and the modeling toolmode with its selection ops (P12).
  */
 
 import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
@@ -18,6 +18,8 @@ import {LEAFMESH_VERTEX_ATTRS} from './draw.js'
 import * as leafmesh from './index.js'
 import {LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry} from './leafmesh.js'
 import {LEAFMESH_OBJ_FORMAT} from './obj.js'
+import {LEAFMESH_SELECT_OPS} from './select_ops.js'
+import {LeafMeshToolMode} from './toolmode.js'
 
 export const addonDefine: IAddonDefine = {
   name       : 'Leaf Mesh',
@@ -48,6 +50,10 @@ export function register(api: AddonAPI<IAddon>) {
   // `importExtensions` above is what a "which kind claims this file" query
   // reads. Both point at the same parser (P11 §6).
   api.registerFileFormat(LEAFMESH_OBJ_FORMAT)
+
+  // The modeling toolmode and its selection ops (P12 step 1). One `register`
+  // dispatch each — no module-scope `ToolMode.register` side effect.
+  api.registerAll(LeafMeshToolMode, ...LEAFMESH_SELECT_OPS)
 }
 
 export function unregister() {}

@@ -61,15 +61,14 @@ import {LeafMeshDrawable} from './draw.js'
 import {ELEM_NONE} from './elem_array.js'
 import * as pick from './pick.js'
 import {deserializeLeafMesh, serializeLeafMesh} from './serialize.js'
-import {LeafMesh} from './topo.js'
-import {TriangulationCache, triangulateMesh} from './triangulate.js'
-
 /**
  * Selection lives in an ordinary attribute layer, one per domain, created the
  * first time it is written. That keeps it out of `topo.ts` — selection is a
- * host concept — and gets persistence for free once §5's column writer lands.
+ * host concept — and the layer persists with every other column.
  */
-const SELECT_ATTR = '.select'
+import {SELECT_ATTR} from './select_geom.js'
+import {LeafMesh} from './topo.js'
+import {TriangulationCache, triangulateMesh} from './triangulate.js'
 
 /** Bit per axis, matching {@link ISymmetryAware.symmetryAxes}. */
 export const LeafMeshSymmetry = {

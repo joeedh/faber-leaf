@@ -239,8 +239,58 @@ thing *every* addon-owned toolmode needs — which is the test P11 §2 applies.
 
 ## 12. What has landed
 
-Nothing yet.
+### Step 1 — toolmode shell + selection ops
+
+- **`select_geom.ts`** (pure, no `scripts/` import): the `.select` byte layer per
+  domain, created on first write; `applySelection` (replace/add/sub/toggle),
+  `flushSelection` (down first, then up, so the upward pass reads a settled
+  vertex layer), `linkedFrom`, `similarTo` over ten criteria, and the
+  measurement helpers they need. `faceArea` subtracts hole rings — the first
+  place §5's hole rule shows up in code. 30 unit tests in
+  `tests/unit/leafmesh/select_geom.test.ts`.
+- **`SELECT_ATTR` moved out of `leafmesh.ts` into `select_geom.ts`.** The
+  framework-facing half now imports the constant from the pure half, which is
+  the direction that keeps the pure module testable.
+- **`select_ops.ts`**: `leafmesh.select_all` / `select_box` / `select_circle` /
+  `select_nearest` / `select_linked` / `select_similar`, all thin over the
+  above. Box and circle are modal and call `exec` themselves on commit, because
+  the toolstack does not (`modalEnd` never calls `exec`) — which is also what
+  makes redo work, since redo is `undoPre` + `exec`.
+- **`toolmode.ts`**: `LeafMeshToolMode` — sel-mode chips, the four overlay
+  toggles step 2 will read, `selectRadius`, click-select, hover highlight, and
+  the A / alt-A / B / C / L / shift-G keymap. Registered from `register(api)`
+  via `api.registerAll(...)`, never at module scope.
+
+**Undo is a snapshot, not a log** (§7). LiteMesh's selection ops delegate
+undo/redo to the C++ `MeshLog`; LeafMesh has nothing to delegate to, so
+`undoPre` copies the three `.select` columns and `undo` puts them back.
+`calcUndoMem` reports those bytes rather than zero. `restoreSelection` tolerates
+a column that has grown since the snapshot — the extra rows stay clear — which
+is sound because P3's handles are stable under tombstoned deletion.
+
+G / R / S are deliberately absent from the keymap until step 3 lands the
+transform bridge; the mode is selection-only until then.
+
+`git diff --stat scripts/` for this commit is empty (criterion 12), with the one
+hub gap it needed landed separately as G6 below.
 
 ## 13. Contract gaps
 
 Numbering continues from the P11 plan (G1-G5 are recorded there).
+
+### G6 — a toolmode's own define type and mask conversion were not on the hub
+
+`scripts/framework_api.ts` re-exported `ToolMode` but not `IToolModeDefine`, the
+type every subclass must return from `toolModeDefine()`; and it re-exported
+`SelMask` but neither `normalizeSelMask` nor `selMaskToNames`, which are both
+halves of the conversion any toolmode that persists a select mask has to do
+(`loadSTRUCT` reads the integer form, the nstructjs field writes the name form).
+An addon-owned toolmode cannot be written without all three, so this is P7's
+defect and not LeafMesh's — exactly the test §2 applies. Fixed in
+`8b05090d refactor(P7): re-export the toolmode-define and sel-mask helpers`,
+which carries `scripts/framework_api.ts` and nothing else.
+
+§11 foresaw a wider gap than this. `ITransDataType` / `TransDataType` /
+`TransDataElem` / `TransDataList` are still missing, but they are step 3's
+problem, not step 1's; and the property classes turned out to be reachable
+already through `@framework/pathux`, so they needed no hub change at all.
