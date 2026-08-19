@@ -12,6 +12,11 @@ import {MeshTransType, MeshTransVert} from './transform_types.js'
 // Re-exported so `@framework/api` can hand the mesh addon its transform type
 // without the hub taking a direct edge on transform_types.js (§8).
 export {MeshTransType} from './transform_types.js'
+// Same reason, for transform_base.js: the hub already depends on this module,
+// so routing the interface through it keeps framework_api.ts out of one more
+// import cycle (§8).
+export {TransDataElem, TransDataList, TransDataType} from './transform_base.js'
+export type {ITransDataType, TransformDefine} from './transform_base.js'
 import {
   ToolOp,
   UndoFlags,

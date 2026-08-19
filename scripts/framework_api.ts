@@ -209,6 +209,13 @@ export type {ScreenPickResult} from './editors/view3d/findnearest.js'
 // more cycles through the mesh addon it imports. The type is the BREP mesh's
 // transform bridge — its own addon registers it (§8), and P11 moves the class.
 export {InflateOp, MeshTransType, TranslateOp, TransformOp} from './editors/view3d/transform/transform_ops.js'
+// The transform-data interface itself, so a geometry addon can contribute a
+// type instead of the host naming one. `TransformDefine` is the return type of
+// a method every implementor must write, and `TransDataElem` / `TransDataList`
+// are the two classes it must subclass, so all four travel together. Routed
+// through transform_ops.js for the same cycle reason as MeshTransType above.
+export {TransDataElem, TransDataList, TransDataType} from './editors/view3d/transform/transform_ops.js'
+export type {ITransDataType, TransformDefine} from './editors/view3d/transform/transform_ops.js'
 export {
   InflateWidget,
   RotateWidget,
