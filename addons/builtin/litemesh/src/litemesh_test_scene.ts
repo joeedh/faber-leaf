@@ -33,6 +33,8 @@ import './litemesh_attrtest_support'
 import './litemesh_quad_remesh_support'
 // Side-effect: registers globalThis.__brushTest for the brush-behavior test.
 import './litemesh_brushtest_support'
+// Side-effect: registers globalThis.__uvsourceLiteMesh for the IUVSource suite.
+import './litemesh_uvsource_support'
 import './litemesh_gpubrush_test_support'
 // Side-effect: registers globalThis.__layerTest for the sculpt-layer test.
 import './litemesh_layertest_support'

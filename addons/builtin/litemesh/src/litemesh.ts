@@ -2628,8 +2628,9 @@ export class LiteMesh extends SceneObjectData {
    * numbers (consistent with the `unknown[]` contract). */
 
   /** Construct two empty bound Vector<int> out-params + an array-like reader.
-   * 'int32' is the WASM manager's registry key for int (native accepts both). */
-  private _intVecOut() {
+   * 'int32' is the WASM manager's registry key for int (native accepts both).
+   * Addon-internal (the `_` prefix); `uv_source.ts` marshals through it too. */
+  _intVecOut() {
     const cls = (
       this.wasm.manager as {findVectorClass(n: string): {buildFullName(): string; findDefaultConstructor(): unknown}}
     ).findVectorClass('int32')
@@ -2640,7 +2641,7 @@ export class LiteMesh extends SceneObjectData {
   }
 
   /** Float sibling of _intVecOut ('float' is the manager's registry key). */
-  private _floatVecOut() {
+  _floatVecOut() {
     const cls = (
       this.wasm.manager as {findVectorClass(n: string): {buildFullName(): string; findDefaultConstructor(): unknown}}
     ).findVectorClass('float')
@@ -3308,11 +3309,14 @@ export class LiteMesh extends SceneObjectData {
     return items
   }
 
-  /** Domain that a given category's layers live on (mirrors the W2b table). */
+  /** Domain a category's layers live on by default (mirrors the W2b table).
+   * UV is the one category `validCategories` permits on more than one domain,
+   * so it is a starting guess for the search in `layerDomainByName`, not a
+   * fact — the unwrapper writes corners, an imported map may not. */
   static categoryDomain(category: number): number {
     if (category & AttrUseFlags.COLOR) return AttrDomain.VERTEX
     if (category & AttrUseFlags.POLYGROUP) return AttrDomain.FACE
-    if (category & AttrUseFlags.UV) return AttrDomain.VERTEX // corner later
+    if (category & AttrUseFlags.UV) return AttrDomain.CORNER
     if (category & AttrUseFlags.SCULPT_LAYER) return AttrDomain.VERTEX
     return 0
   }
@@ -3458,7 +3462,18 @@ export class LiteMesh extends SceneObjectData {
     else if (category & AttrUseFlags.POLYGROUP) name = this._activeAttr.polygroup
     else if (category & AttrUseFlags.UV) name = this._activeAttr.uv
     if (!name) return -1
-    return this.layerIndexByName(LiteMesh.categoryDomain(category), name)
+    const domain = this.layerDomainByName(name, LiteMesh.categoryDomain(category))
+    return domain < 0 ? -1 : this.layerIndexByName(domain, name)
+  }
+
+  /** Domain the layer called `name` is actually on, trying `preferred` first,
+   * or -1 if no domain has it. Names are unique per domain but not across them,
+   * so `preferred` is what breaks a tie. */
+  layerDomainByName(name: string, preferred: number): number {
+    for (const domain of [preferred, AttrDomain.CORNER, AttrDomain.VERTEX, AttrDomain.FACE]) {
+      if (this.layerIndexByName(domain, name) >= 0) return domain
+    }
+    return -1
   }
 
   /** Index of layer `name` within `domain`'s full (unfiltered) AttrGroup.attrs —

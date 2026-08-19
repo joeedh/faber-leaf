@@ -531,24 +531,30 @@ it, but a host developer wiring up a new draw path can, and the failure is a
 runtime throw rather than a compile error. Fixing the call site belongs to the
 plans that touch those paths, not to this contract.
 
-**`IUVSource` is not yet implemented by LiteMesh.** The interface itself is no
-longer a gap: P18 revised it against real implementors and it is reached through
-`scripts/core/uv_sources.ts`, a resolver keyed by data-kind id rather than a
-capability narrow — a source need not be the geometry object, so a provider may
-hand back an adapter over a cached unwrap. What is missing is the LiteMesh side,
-which needs bulk attribute reads across the sculptcore seam: values are paged
-behind `AttrData<T>` and reachable from TS only one element at a time, so the
-adapter waits on new bound methods on the engine's `Mesh`.
+**A UV source in an addon cannot be checked by jest.** An addon imports the
+framework through `@framework/api`, which the unit workspace does not resolve,
+so neither real provider is reachable from `tests/unit`. The rules therefore
+live in `scripts/core/uv_source_conformance.ts` — jest-free, exported from the
+hub — and run *inside* the app: each addon carries a
+`*_uvsource_support.ts` driver, and one headless NW.js boot reports both results
+through `--dump` (`tests/integration/uv_source_conformance.test.ts`).
+`tests/lib/uv_source_conformance.ts` is a thin jest wrapper over the same rules,
+so the in-memory grid still reports one failure per rule. The gap that remains
+is the asymmetry: a provider added to an addon is only as checked as its driver.
 
 ## 12. Who implements this today
 
 Kept deliberately short, and deliberately last: this section is the only place
 in the document where concrete type names belong.
 
-- **LiteMesh** implements the required groups plus elements, spatial queries and
-  attributes. Of the old nine-name invalidation vocabulary it implemented three,
-  as empty stubs — which is the clearest evidence available that the vocabulary
-  was not a contract anyone could satisfy.
+- **LiteMesh** declares `INVALIDATION` and nothing else
+  (`LITEMESH_DATA_KIND`, `litemesh.ts`), so every other narrow returns
+  undefined for it. Its geometry lives in the engine behind a paged attribute
+  store, which is why reaching it takes an adapter over bound bulk accessors
+  rather than a narrow — the shape `IUVSource` below is built in. Of the old
+  nine-name invalidation vocabulary it implemented three, as empty stubs —
+  which is the clearest evidence available that the vocabulary was not a
+  contract anyone could satisfy.
 - **LeafMesh** implements the required groups plus elements, attributes,
   triangles and symmetry, and is the first implementor of `ITransDataType`'s
   peer `IUVSource`. (The BREP mesh was implementor #2 of everything until P13
@@ -558,12 +564,19 @@ in the document where concrete type names belong.
 to and so its implementors need not appear above:
 
 - **LeafMesh**, through `addons/builtin/leafmesh/src/uv_source.ts` — UVs on the
-  corner domain, so a UV element handle *is* a corner handle.
+  corner domain, so a UV element handle *is* a corner handle and `getUVOwners`
+  is the identity.
+- **LiteMesh**, through `addons/builtin/litemesh/src/uv_source.ts` — an adapter
+  over bulk accessors bound on sculptcore's `Mesh`, because attribute values are
+  paged behind `AttrData<T>` and reachable one element at a time otherwise. A UV
+  element is a corner and its owner is a vertex, so owners are many-to-one and a
+  seam is two corners of one vertex disagreeing.
 - **An in-memory grid**, `tests/lib/uv_grid_source.ts` — no geometry object at
   all, and owners that are many-to-one. It exists so the interface cannot
-  quietly become one mesh's storage; both it and LeafMesh are run through the
-  same `tests/lib/uv_source_conformance.ts`.
-- **LiteMesh** — pending, see §11.
+  quietly become one mesh's storage.
+
+All three answer to the one rule set in `scripts/core/uv_source_conformance.ts`;
+where each runs it from is §11.
 
 **The contract must never be down to one implementor.** A contract with one
 implementor has not been tested, it has been described.

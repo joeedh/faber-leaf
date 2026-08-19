@@ -32,6 +32,7 @@ import {LiteMeshTransType} from './litemesh_transtype.js'
 import {SculptCorePaintMode} from './sculptcore.js'
 import {SculptPaintOp} from './sculptcore_ops.js'
 import {PaintToolModeBase, STROKE_BASE_OPS} from './stroke_base.js'
+import {LITEMESH_UV_PROVIDER} from './uv_source.js'
 
 export const addonDefine: IAddonDefine = {
   name       : 'Lite Mesh',
@@ -67,6 +68,11 @@ export function register(api: AddonAPI<IAddon>) {
   api.registerDataKind(LITEMESH_DATA_KIND)
   api.registerAll(...LITEMESH_OPS, ...STROKE_BASE_OPS, SculptPaintOp, SculptCorePaintMode, BoxModelToolMode)
   api.registerTransType(LiteMeshTransType)
+
+  // Implementor #2 of `IUVSource` (P18 §5 step 2). Registered, not narrowed:
+  // the source is an adapter over the engine's bulk UV accessors, so it cannot
+  // be found by a capability query on the data block.
+  api.registerUVSource(LITEMESH_UV_PROVIDER)
 
   // The startup file `faber-leaf` selects: a LiteMesh sphere in sculpt mode.
   // Named, so the distribution picks it rather than load order deciding.

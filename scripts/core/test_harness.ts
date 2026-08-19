@@ -315,6 +315,11 @@ function dumpScene(): unknown {
     // the attr-render integration test assert the requested-attr contract +
     // missing-slot advisory alongside the GPU-buffer evidence in `objects`.
     attrtest       : (globalThis as {__attrtestResult?: unknown}).__attrtestResult,
+    // Reflect the IUVSource conformance drivers (`__uvsourceLiteMesh` /
+    // `__uvsourceLeafMesh`), keyed by source name. The suite is jest-free
+    // because a provider is only reachable from inside the app, so the dump is
+    // how its pass/fail list gets back out.
+    uvsource       : (globalThis as {__uvsourceResult?: unknown}).__uvsourceResult,
     // Reflect the quad-remesh ToolOp driver (`__quadRemeshTest`): before/after/
     // undone/redone topology fingerprints, so the parity test asserts success +
     // undo/redo round-trip per backend alongside the remeshed GPU-buffer parity.

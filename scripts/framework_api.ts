@@ -145,6 +145,18 @@ export type {IFileFormat} from './core/file_formats.js'
 // only the contract, so the type rides the hub; registration still goes through
 // `AddonAPI.registerUVSource`.
 export type {IUVSourceProvider} from './core/uv_sources.js'
+// The contract's own conformance checker (§11), jest-free on purpose: a
+// provider lives in an addon, and an addon is only reachable from inside the
+// running app, where jest is not. Its test-support module calls this.
+export {
+  checkUVSource,
+  checkUVSourceCase,
+  csrRow,
+  recordUVConformance,
+  uvConformanceCaseNames,
+  weldFirstOwner,
+} from './core/uv_source_conformance.js'
+export type {UVConformanceResult} from './core/uv_source_conformance.js'
 export {setDefaultSceneBuilder} from './core/default_file.js'
 // The app's own CLI flags: an addon that takes one (sculptcore's --backend)
 // has to read it from the same place the host does.

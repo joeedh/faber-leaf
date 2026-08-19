@@ -19,6 +19,8 @@ import {runLeafMeshHeadlessDemo} from './headless_demo.js'
 import * as leafmesh from './index.js'
 import {LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry} from './leafmesh.js'
 import {buildLeafMeshDefaultScene} from './leafmesh_default_scene.js'
+// Side-effect: registers globalThis.__uvsourceLeafMesh for the IUVSource suite.
+import './leafmesh_uvsource_support.js'
 import {LEAFMESH_MODELING_OPS} from './modeling_ops.js'
 import {LEAFMESH_OBJ_FORMAT} from './obj.js'
 import {LEAFMESH_SELECT_OPS} from './select_ops.js'

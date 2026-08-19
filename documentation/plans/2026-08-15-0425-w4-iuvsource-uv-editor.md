@@ -1,7 +1,7 @@
 # P18 — W4a: `IUVSource` + the mesh-agnostic UV editor
 
-**Status:** in progress — §5 step 1 closed, step 2 under way (LeafMesh and the
-test double landed; LiteMesh open).
+**Status:** in progress — §5 steps 1 and 2 closed (all three implementors
+landed and run through one conformance suite); step 3 next.
 
 **Date:** 2026-08-15 (citations re-verified 2026-08-19)
 
@@ -182,15 +182,28 @@ implementation will otherwise break:
      `uv_geom.ts`, registered from the addon's `register(api)` hook. UVs are
      corner-domain, so `getUVOwners` is the identity.
    - [x] **The double** — `tests/lib/uv_grid_source.ts`, a W×H grid of quads
-     with vertex owners and no geometry object. `tests/lib/uv_source_conformance.ts`
-     is the shared suite every implementor is run through.
-   - [ ] **LiteMesh** — needs new *bulk* bound methods on sculptcore's `Mesh`
-     (face corner rings, corner→vert, and gather/scatter of a float attribute)
-     because attribute values are paged behind `AttrData<T>` and reachable from
-     TS only one element at a time. That is a C++ change plus a rebuild, hence a
-     second commit; the interface was shaped against those constraints from the
-     start (strictly bulk, CSR, no per-element accessor) so that writing
-     LeafMesh first could not bias it.
+     with vertex owners and no geometry object.
+   - [x] **LiteMesh** — `addons/builtin/litemesh/src/uv_source.ts`, an adapter
+     over ten new *bulk* methods bound on sculptcore's `Mesh` (`liveElems`,
+     `topoStamp`, `uvCornerVerts`, `uvCornersOfVerts`, `uvFaceRings`,
+     `uvGather`/`uvScatter`, `uvFlagsGather`/`uvFlagsScatter`), because
+     attribute values are paged behind `AttrData<T>` and reachable from TS only
+     one element at a time. A UV element is a corner and its owner is a vertex,
+     so owners are many-to-one — the interface was shaped against those
+     constraints from the start (strictly bulk, CSR, no per-element accessor)
+     so that writing LeafMesh first could not bias it. Flags live in a
+     persistent `.uvflags:<layer>` `BYTE` sidecar, named C++-side because names
+     do not cross the generic method binding. Fan welding is computed host-side
+     from the `uvCornersOfVerts` CSR, keeping the tolerance a host policy.
+   - [x] **One suite, three implementors.** The rules moved to
+     `scripts/core/uv_source_conformance.ts` and are jest-free: an addon imports
+     `@framework/api`, which the unit workspace does not resolve, so *neither*
+     real provider could ever have been run from `tests/`. Each addon carries a
+     `*_uvsource_support.ts` driver and one headless NW.js boot runs both
+     (`tests/integration/uv_source_conformance.test.ts`, per backend, so the
+     native and WASM vector seams are both proven);
+     `tests/lib/uv_source_conformance.ts` is now a thin jest wrapper over the
+     same rules for the double.
 3. Reimplement the editor as an addon (`addons/builtin/uv_editor/`), consuming
    `IUVSource` only. Draw, pick (`findnearestUV`'s replacement, reading through
    bulk handles), select, pin, transform.
