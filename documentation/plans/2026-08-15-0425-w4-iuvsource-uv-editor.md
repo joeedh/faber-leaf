@@ -1,22 +1,25 @@
 # P18 — W4a: `IUVSource` + the mesh-agnostic UV editor
 
-**Status:** in progress — §5 steps 1–6 closed (all three implementors landed
-and run through one conformance suite; the editor's host-free core, its addon,
-its Editor component, every tool path the archive registered, the redraw bus
-that replaced the `window.redraw_uveditors` global, and `selectedFacesOnly` as
-a proven op input are in). Step 7 — deleting `archive/uv-editor/` — is next,
-and §6's remaining tests (the `--no-sculptcore` run of the double suite, and
-the `.wproj` round-trip) are the last work in the phase.
+**Status:** in progress — §5 is closed. All three implementors landed and run
+through one conformance suite; the editor's host-free core, its addon, its
+Editor component, every tool path the archive registered, the redraw bus that
+replaced the `window.redraw_uveditors` global, and `selectedFacesOnly` as a
+proven op input are in, and `archive/uv-editor/` is gone. What is left is §6's
+last two tests: the `--no-sculptcore` run of the double suite, and the `.wproj`
+round-trip.
 
 **Date:** 2026-08-15 (citations re-verified 2026-08-19)
 
 **Strategy:** [Faber Leaf refactor strategy](./2026-08-15-0237-faber-leaf-refactor-strategy.md)
 §4 W4, §5 phase 12, §9.3 P18.
 **Reference:** `archive/uv-editor/TODO.md` — the slim-down author's own port
-checklist. Read it in full before starting; it is more accurate than this plan
-about what the old editor did. Two of its statements have since gone stale: the
-directory moved out of `scripts/editors/image/pending-port/` (P13, `8d4ee0c4`),
-and `ImageBus` no longer has the live importer it names — see §2.
+checklist, and more accurate than this plan about what the old editor did.
+Step 7 deleted it with the rest of the directory and records where each of its
+rows landed; read the original out of git history if you need it
+(`git show 1b268752:archive/uv-editor/TODO.md`). Two of its statements were
+already stale by then: the directory had moved out of
+`scripts/editors/image/pending-port/` (P13, `8d4ee0c4`), and `ImageBus` no
+longer has the live importer it names — see §2.
 
 **Workstream / phase:** W4 / phase 12.
 
@@ -39,7 +42,10 @@ them is named in the editor.
 
 The image editor was slimmed to "load `ImageBlock`s and pan/zoom" and the entire
 UV half was moved, unwired, to what is now `archive/uv-editor/` (P13 moved it
-there from `scripts/editors/image/pending-port/`; see `archive/README.md`):
+there from `scripts/editors/image/pending-port/`; see `archive/README.md`).
+Step 7 has since deleted that directory —
+`git show 1b268752:archive/uv-editor/<file>` still reaches every file named
+below, and the same goes for the citations further down this section:
 
 | File | Lines | What it held |
 | --- | --- | --- |
@@ -87,8 +93,8 @@ of this workstream.
 Use it as a **specification**: it is the record of what UV editing in this app
 actually did, including the pieces nobody would think to re-specify (pinning,
 `select_linked`, draw-lines, projection). Read it, list the behaviours, then
-implement them against the interface. `archive/uv-editor/` is deleted at the end
-of this plan, along with its row in `archive/README.md`.
+implement them against the interface. `archive/uv-editor/` was deleted in step 7,
+along with its row in `archive/README.md`.
 
 ## 4. `IUVSource`
 
@@ -324,9 +330,26 @@ implementation will otherwise break:
    - [x] No default is hardcoded anywhere: the property's own default is
      `false`, and `UVOpBase.invoke` copies the editor toggle in only when the
      caller passed no `selectedFacesOnly` at all.
-7. Delete `archive/uv-editor/` and its `archive/README.md` row in the final
-   commit, once every behaviour in its TODO table is either implemented or
-   explicitly recorded as dropped.
+7. **Done.** `archive/uv-editor/` and its `archive/README.md` row are gone; the
+   README keeps a paragraph pointing here instead. The directory's own
+   `TODO.md` *was* the port checklist, so its disposition is recorded here
+   rather than deleted with it:
+
+   | Its checklist row | Where it landed |
+   | --- | --- |
+   | Design the UV-editing abstraction layer | `IUVSource` in `scripts/core/geometry_contract.ts`, reached through `uvSourceFor` (steps 1–2) |
+   | Decide where the select / transform / flag ToolOps live | their own `uv_editor` addon, not the mesh addon (step 3) |
+   | Re-introduce `selectedFacesOnly` and restore its binding | an op input with the editor toggle behind it (step 6). `mesh_uvops_base.ts`, the file the row names, was deleted by P13 |
+   | Replace the `window.redraw_uveditors` global | `ImageBus.flagRedraw` (step 5) |
+   | Port `SetImageTypeOp` (`image.set_type`) | `scripts/image/image_type_ops.ts`, registered from `scripts/entry_point.js` — image-type conversion, not UV, exactly as the row guessed |
+   | Bump relative import depth when a file comes back out | dropped: nothing came back out. The editor was rewritten against the interface (§3), so no file kept its old imports |
+   | Delete the directory | this step |
+
+   All ten `uveditor.*` tool paths it listed are registered again under their
+   original names; `uv_editor_ops.test.ts` holds the list and boots the app to
+   resolve each one. `DrawLine` is the one behaviour deliberately not carried
+   over — P13 archived the unwrapper that drew the lines, so it comes back
+   with P19.
 
 `unwrap` and `pinUVs` are optional on the interface. `unwrap` is only
 implementable once P19 lands the solver; declare it here, leave it unimplemented,
@@ -342,7 +365,8 @@ design left in it.
 - The test double drives the whole editor headlessly: select, transform, write,
   read back. This suite must pass in a `--no-sculptcore` build, which means it
   cannot touch LiteMesh.
-- Every tool path in `archive/uv-editor/TODO.md` is registered and invocable.
+- Every tool path the archived `TODO.md` listed is registered and invocable.
+  The list outlived the file: it is in `uv_editor_ops.test.ts` and in §5 step 7.
 - Every implementor passes `tests/lib/uv_source_conformance.ts`. A case there
   may only use the contract: one that has to know which source it is driving
   means the contract is under-specified, and the fix belongs in
@@ -360,7 +384,8 @@ design left in it.
   Mitigation: §5 step 2 — three implementors in one PR, test double included.
 - **The old editor's behaviours are lost by omission.** Mitigation: `TODO.md`'s
   table is the checklist, and `pending-port/` is not deleted until every row is
-  implemented or recorded as dropped.
+  implemented or recorded as dropped. Settled in step 7: every row is
+  dispositioned in the table there, in the commit that deleted the directory.
 - **`findnearestUV` is rebuilt per-element** and is slow on a real mesh.
   Mitigation: bulk handles (constraint 1) plus the same "no per-element JS
   objects" rule; if picking needs acceleration, it belongs behind an optional
@@ -381,8 +406,8 @@ design left in it.
 - Criterion 11: `IUVSource` exists, is implemented by LiteMesh, LeafMesh and a
   test double, and the UV editor addon names no concrete geometry type.
 - The headless test-double suite passes in a `--no-sculptcore` build.
-- Every `uveditor.*` tool path from `archive/uv-editor/TODO.md` is registered
-  again, under its original name, taking a datapath.
+- Every `uveditor.*` tool path from the archived `TODO.md` (§5 step 7) is
+  registered again, under its original name, taking a datapath.
 - `window.redraw_uveditors` is gone; the editor subscribes to `ImageBus`.
 - `selectedFacesOnly` reaches the source as an argument, with no default
   hardcoded anywhere.

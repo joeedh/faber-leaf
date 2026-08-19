@@ -1,13 +1,15 @@
 /**
  * Every tool path the archived image/UV editor registered is registered again
- * — P18 §6, "Every tool path in `archive/uv-editor/TODO.md` is registered and
+ * — P18 §6, "Every tool path the archived `TODO.md` listed is registered and
  * invocable".
  *
  * A headless NW.js boot rather than a unit test because registration is the
  * thing under test: the ops ship in the *external* `uv_editor` addon, so the
  * only honest check is a real app that started its addons. The paths are
  * transcribed from that TODO's "Tool paths that USED to be registered" list;
- * `image.set_type` is on it and is not UV, which is why it is here too.
+ * `image.set_type` is on it and is not UV, which is why it is here too. P18
+ * step 7 deleted the file, so this list is now the surviving copy of it
+ * (`git show 1b268752:archive/uv-editor/TODO.md` reaches the original).
  *
  * Prerequisites (else self-skips, logged): a resolvable NW.js, the app bundle,
  * and the built addon. The native addon is NOT required — nothing here touches
@@ -131,7 +133,7 @@ maybe('the archived UV tool paths are registered again (headless)', () => {
     result = probe(nwExe!)
   }, 120000)
 
-  test('every path from archive/uv-editor/TODO.md resolves to a ToolOp', () => {
+  test('every path the archived TODO listed resolves to a ToolOp', () => {
     expect(result.missing).toEqual([])
   })
 

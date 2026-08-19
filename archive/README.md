@@ -15,13 +15,17 @@ screenshot dump from old debugging sessions and are gitignored.
 | Directory | Was | Depended on | Who would port it |
 | --- | --- | --- | --- |
 | `unwrapping/` | `addons/builtin/mesh/src/{unwrapping,unwrapping_solve,mesh_paramizer}.ts` | BREP `Mesh`, `Loop`, `UVLayerElem` | **P19** — onto `IUVSource` |
-| `uv-editor/` | `scripts/editors/image/pending-port/` | the unwrapping stack above | **P18** — the UV editor over a registered source |
 | `subsurf/` | `addons/builtin/subsurf/` | BREP `Mesh` | none scheduled; sculptcore owns multires subdivision now |
 | `curve/` | `addons/builtin/curve/` | `CurveSpline extends Mesh` | none scheduled |
 | `tetmesh/addon/` | `addons/builtin/tetmesh/` | BREP `Mesh` + `tetgen/` below | none scheduled |
 | `tetmesh/tetgen/` | `scripts/tet/` | BREP `bvh.ts`, `customdata.ts`, `mesh_base.ts` | none scheduled — 3,875 lines of tetrahedral meshing, the reason this directory exists at all |
 | `hair/strands/` | `scripts/hair/` | `Strand extends CurveSpline` | none scheduled |
 | `hair/addon/` | `addons/strand/` | the strand types above | none scheduled |
+
+`uv-editor/` was here until P18 rewrote it: the editor is now
+`addons/builtin/uv_editor/` over `IUVSource`, and which of the old behaviours
+came back is recorded in [that plan](../documentation/plans/2026-08-15-0425-w4-iuvsource-uv-editor.md)
+§5 step 7 rather than in a file here.
 
 **Porting any of these means rewriting it against LeafMesh**, because each one
 subclasses or consumes the BREP `Mesh` that no longer exists. That is a feature
