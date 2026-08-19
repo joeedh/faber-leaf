@@ -1,6 +1,7 @@
 # P12 — LeafMesh modeling toolmode
 
-**Status:** plan — not started.
+**Status:** in progress — see §11 for the plan of record and §12 for what has
+landed.
 
 **Date:** 2026-08-15
 
@@ -173,3 +174,73 @@ byte count — or large-mesh undo silently mis-budgets.
   table, and §4's scope is what P17 freezes into `faber-leaf-core`.
 - No file under `scripts/` changed, or every change is recorded as a P7/P8 gap
   and closed there.
+
+---
+
+## 11. Plan of record (2026-08-18)
+
+Written after re-verifying §6's citations against the tree, which is what the
+plan header asks for. What survived and what moved:
+
+- `ITransDataType` is `scripts/editors/view3d/transform/transform_base.ts:108`,
+  **13 methods** exactly as §6 says.
+- `MeshTransType` is registered from the mesh addon's `register(api)`
+  (`addons/builtin/mesh/src/main.ts:167`), not at module scope — so P8 already
+  fixed implementor #1. The anti-example §6 cites is still real, but it is
+  `scripts/lite-mesh/litemesh_transtype.ts`'s **last line**, not line 202, and
+  its own comment already says P12 moves it. It moves in **P15**, not here —
+  LiteMesh is host code until then. Correcting the citation, not the point.
+- `transform_ops.ts` **already contains no geometry-type literal.** §6's
+  requirement is met before the phase starts; §8's assertion becomes a
+  regression guard rather than a fix.
+- The toolmode to mirror is `scripts/editors/view3d/tools/boxmodel.ts` (375
+  lines) plus `scripts/lite-mesh/litemesh_modeling_ops.ts` (1,592). The second
+  number is misleading as a budget: its topology tools are thin wrappers over
+  sculptcore C++. **LeafMesh has no C++ to delegate to**, so the topology
+  algorithms are the bulk of this phase and they are new code.
+- P11 already supplies the substrate: `listSelected` / `getSelected` /
+  `setSelected`, `getActiveElement` / `setActiveElement` /
+  `setHighlightElement`, `closestElements`, and the four pick entry points.
+  `SelMask.LEAFMESH` is claimed and `registerSelectType('LEAFMESH')` runs.
+
+### Steps
+
+1. **Toolmode shell + selection ops.** `LeafMeshToolMode` (sel-mode chips,
+   overlay toggles, keymap, click/hover), `select_all` / `box` / `circle` /
+   `nearest` / `linked` / `similar`, on `SelMask` and P11's claimed bit. Pure
+   traversal in a testable module; the ToolOps are thin.
+2. **Selection overlay.** LiteMesh draws its overlay from C++; LeafMesh has to
+   draw its own, or the mode is unusable and every later step is untestable by
+   eye.
+3. **`ITransDataType` (§6).** Registered through `api.registerTransType`, with
+   `calcUndoMem` honest (§7) and proportional edit on `closestElements`.
+4. **Extrude (region + individual) and split-off**, on a new pure `modeling.ts`.
+5. **Inset and bevel**, carrying §5's outer-ring-in / hole-rings-out rule.
+6. **Subdivide and loop-cut**, carrying §5's cut-across-a-hole rule.
+7. **§5's five hole cases as named tests**, plus the Euler property test after
+   every op and the model→save→load→model round-trip.
+8. **The headline (§8)**: a cube modelled into a hole-bearing shape as a
+   scripted ToolOp sequence, headless, and the sculptcore-free run recorded.
+9. **Close-out**: decisions #2 and #8 into the strategy doc's §9.4 table, and
+   the criterion-12 audit.
+
+### Rules carried from P11
+
+§2's rule holds unchanged and is the same one P11 ran under: **if the toolmode
+needs a change under `scripts/`, P7 is not finished — fix P7, in its own
+commit, and record the gap in §13.** Gaps continue the P11 numbering (G1-G5 are
+in the P11 plan), so the first one here is **G6**.
+
+Foreseen already, from grepping the hub for what a toolmode needs: `ToolMode` is
+exported but `IToolModeDefine` is not; none of `ITransDataType` /
+`TransDataType` / `TransDataElem` / `TransDataList` are; neither are
+`normalizeSelMask` / `selMaskToNames`. Each is a hub re-export, and each is a
+thing *every* addon-owned toolmode needs — which is the test P11 §2 applies.
+
+## 12. What has landed
+
+Nothing yet.
+
+## 13. Contract gaps
+
+Numbering continues from the P11 plan (G1-G5 are recorded there).
