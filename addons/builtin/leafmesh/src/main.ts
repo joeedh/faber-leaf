@@ -15,6 +15,7 @@
 
 import type {AddonAPI, IAddon, IAddonDefine} from '@framework/api'
 import {LEAFMESH_VERTEX_ATTRS} from './draw.js'
+import {runLeafMeshHeadlessDemo} from './headless_demo.js'
 import * as leafmesh from './index.js'
 import {LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry} from './leafmesh.js'
 import {LEAFMESH_MODELING_OPS} from './modeling_ops.js'
@@ -32,7 +33,13 @@ export const addonDefine: IAddonDefine = {
 
 export function register(api: AddonAPI<IAddon>) {
   // Keep in sync with addons/builtin/leafmesh/src/api.ts.
-  api.exportNamespace('leafmesh', {...leafmesh, LEAFMESH_CAPABILITIES, LeafMeshData, LeafMeshSymmetry})
+  api.exportNamespace('leafmesh', {
+    ...leafmesh,
+    LEAFMESH_CAPABILITIES,
+    LeafMeshData,
+    LeafMeshSymmetry,
+    runLeafMeshHeadlessDemo,
+  })
   api.register(LeafMeshData)
 
   // Declaring a capability is what makes `asElementSource` and friends return

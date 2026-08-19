@@ -580,6 +580,66 @@ is not a snapshot of a finished mesh; it is a pause in the middle of one.
 
 This step opened **no** gap; the diff carries no `scripts/`.
 
+### Step 8 — the headline, headless
+
+`addons/builtin/leafmesh/src/headless_demo.ts` models a cube into a hole-bearing
+shape and a tube through its holed cap, entirely through the real ToolOps, and
+reports what each one did. It lives in the addon, not in `scripts/`, so
+criterion 12 survives it; `runLeafMeshHeadlessDemo` is exported on the
+`leafmesh` namespace and the harness reaches it by name.
+
+**The invocation**, since renderer stdout never reaches the launcher and
+`--dump` is how an eval answers back:
+
+```
+node nwjs/launch.mjs --headless --app-storage-dir <dir>   --eval "_framework.api.addonManager.enable('leafmesh')"   --eval "globalThis.__evalTestResult = _framework.api.addonManager.getAddonAPI('leafmesh').exports.leafmesh.runLeafMeshHeadlessDemo(_appstate.ctx)"   --dump <out.json> --exit
+```
+
+`__evalTestResult` is reflected into the dump as `evalResult`
+(`scripts/core/test_harness.ts`), and the evals run after the scene is built.
+Enabling the addon by hand is the first thing the script does because leafmesh
+is the first builtin that is not `defaultEnabled` — which is also how G8 was
+found.
+
+**The cube.** Subdivide every face, inset a quad of the top, extrude it into a
+boss, inset the cap, split the cap centre off, bevel the far corner: 8/12/6
+becomes 40/63/25, the Euler term stays 2 throughout, and `boundaryEdges` goes
+0 → 8 at the split-off. That eight-edge ring is the hole.
+
+**No op in §4 creates a face that carries a hole ring**, so the cube's hole is
+an opening in its surface, not an inner ring — which is why the demo also runs
+a tube. `makeTube` starts holed (two annular caps, `holeRings` 2, Euler term 0
+for genus one), and inset, extrude, subdivide and loop-cut take it from
+48/72/26 to 101/176/77 with both rings intact and the term unmoved. The cube
+proves the sequence; the tube proves the ops handle a face that already has a
+hole.
+
+Every step reports `repairs: 0`.
+
+**A redo re-runs `exec` against the live selection.** `ToolStack.redo` calls
+`tool.redo(ctx)`, which is `undoPre; execPre; exec; execPost` — and every
+modelling op reads `listSelected(mesh, domain)`, i.e. mesh state, not op inputs.
+So undoing a whole run is exact (the undo snapshot restores the selection attrs
+with everything else), but redoing one only reproduces it when the selections
+are themselves on the stack. In the app they are: selection is
+`leafmesh.select_*`. This fixture sets selection with plain helpers on purpose,
+so it cycles undo/redo **per step, in place** — which is what §8 asked for
+anyway — then undoes the whole run to the base and replays it. `undo → base`
+and `replay == final` both hold for both shapes, hashed order-independently.
+
+**Sculptcore-free, measured two ways.** At the module level it already holds:
+the addon's only mentions of sculptcore are seven prose comments, and the
+seventeen `tests/unit/leafmesh/` suites (256 tests, 4.3s) run in plain jest with
+no sculptcore anywhere in the graph. At the *boot* level it does not yet:
+`scripts/entry_point.js`'s `init()` awaits `sculptcore.getWasm()`
+unconditionally, so with `build/sculptcore-browser.wasm` moved aside the app
+never reaches the eval stage and the run produces no dump at all. That is a host
+boot fact, not a LeafMesh dependency, and making the sculptcore-free lane real
+is P16's — recorded here as the measured result §8 asked for rather than left
+as a claim.
+
+This step opened **no** gap of its own; G8 was opened before it, by it.
+
 ## 13. Contract gaps
 
 Numbering continues from the P11 plan (G1-G5 are recorded there).
