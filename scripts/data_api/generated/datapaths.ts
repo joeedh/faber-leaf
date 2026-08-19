@@ -65,7 +65,6 @@ export type GeneratedDataPath =
   | "last_tool"
   | "library"
   | "library.MissingDataBlock"
-  | "library.TetMesh"
   | "library.brush"
   | "library.camera"
   | "library.collection"
@@ -78,7 +77,6 @@ export type GeneratedDataPath =
   | "library.scene"
   | "library.screen"
   | "library.shadernetwork"
-  | "library.strands"
   | "library.texture"
   | "light"
   | "light.graph_flag"
@@ -100,35 +98,6 @@ export type GeneratedDataPath =
   | "material.name"
   | "material.outputs"
   | "material.shader"
-  | "mesh"
-  | "mesh.bvhSettings"
-  | "mesh.bvhSettings.depthLimit"
-  | "mesh.bvhSettings.drawLevelOffset"
-  | "mesh.bvhSettings.leafLimit"
-  | "mesh.edges"
-  | "mesh.edgesData"
-  | "mesh.edgesData.layers"
-  | "mesh.faces"
-  | "mesh.facesData"
-  | "mesh.facesData.layers"
-  | "mesh.flag"
-  | "mesh.graph_flag"
-  | "mesh.graph_id"
-  | "mesh.inputs"
-  | "mesh.lib_flag"
-  | "mesh.lib_id"
-  | "mesh.loops"
-  | "mesh.loopsData"
-  | "mesh.loopsData.layers"
-  | "mesh.materials"
-  | "mesh.name"
-  | "mesh.outputs"
-  | "mesh.symFlag"
-  | "mesh.triCount"
-  | "mesh.usesMaterial"
-  | "mesh.verts"
-  | "mesh.vertsData"
-  | "mesh.vertsData.layers"
   | "nodeViewer"
   | "nodeViewer.graphPath"
   | "nodeViewer.pos"
@@ -670,27 +639,10 @@ export type GeneratedDataPath =
   | "toolDefaults.sculptcore.paint.samples"
   | "toolDefaults.sculptcore.paint.symmetryAxes"
   | "toolDefaults.sculptcore.paint.viewportSize"
-  | "toolDefaults.strand"
-  | "toolDefaults.strand.create"
-  | "toolDefaults.strand.create.setActive"
-  | "toolDefaults.strand.create.target"
-  | "toolDefaults.tet"
-  | "toolDefaults.tet.solidify_wireframe"
-  | "toolDefaults.tet.solidify_wireframe.maxDepth"
-  | "toolDefaults.tet.solidify_wireframe.minDepth"
-  | "toolDefaults.tet.solidify_wireframe.project"
-  | "toolDefaults.tet.solidify_wireframe.size"
   | "toolDefaults.velpan"
   | "toolDefaults.velpan.pan"
   | "toolDefaults.velpan.pan.velpanPath"
   | "toolDefaults.view3d"
-  | "toolDefaults.view3d.inflate"
-  | "toolDefaults.view3d.inflate.factor"
-  | "toolDefaults.view3d.inflate.propEnabled"
-  | "toolDefaults.view3d.inflate.propMode"
-  | "toolDefaults.view3d.inflate.propradius"
-  | "toolDefaults.view3d.inflate.snapMode"
-  | "toolDefaults.view3d.inflate.value"
   | "toolDefaults.view3d.rotate"
   | "toolDefaults.view3d.rotate.euler"
   | "toolDefaults.view3d.rotate.propEnabled"
@@ -704,19 +656,6 @@ export type GeneratedDataPath =
   | "toolDefaults.view3d.scale.propradius"
   | "toolDefaults.view3d.scale.snapMode"
   | "toolDefaults.view3d.scale.value"
-  | "toolDefaults.view3d.to_sphere"
-  | "toolDefaults.view3d.to_sphere.factor"
-  | "toolDefaults.view3d.to_sphere.propEnabled"
-  | "toolDefaults.view3d.to_sphere.propMode"
-  | "toolDefaults.view3d.to_sphere.propradius"
-  | "toolDefaults.view3d.to_sphere.snapMode"
-  | "toolDefaults.view3d.to_sphere.value"
-  | "toolDefaults.view3d.transform_inset"
-  | "toolDefaults.view3d.transform_inset.propEnabled"
-  | "toolDefaults.view3d.transform_inset.propMode"
-  | "toolDefaults.view3d.transform_inset.propradius"
-  | "toolDefaults.view3d.transform_inset.snapMode"
-  | "toolDefaults.view3d.transform_inset.value"
   | "toolDefaults.view3d.translate"
   | "toolDefaults.view3d.translate.graphClass"
   | "toolDefaults.view3d.translate.graphPath"
@@ -805,7 +744,6 @@ declare module "@framework/pathux" {
     "last_tool": true;
     "library": true;
     "library.MissingDataBlock": true;
-    "library.TetMesh": true;
     "library.brush": true;
     "library.camera": true;
     "library.collection": true;
@@ -818,7 +756,6 @@ declare module "@framework/pathux" {
     "library.scene": true;
     "library.screen": true;
     "library.shadernetwork": true;
-    "library.strands": true;
     "library.texture": true;
     "light": true;
     "light.graph_flag": true;
@@ -840,35 +777,6 @@ declare module "@framework/pathux" {
     "material.name": true;
     "material.outputs": true;
     "material.shader": true;
-    "mesh": true;
-    "mesh.bvhSettings": true;
-    "mesh.bvhSettings.depthLimit": true;
-    "mesh.bvhSettings.drawLevelOffset": true;
-    "mesh.bvhSettings.leafLimit": true;
-    "mesh.edges": true;
-    "mesh.edgesData": true;
-    "mesh.edgesData.layers": true;
-    "mesh.faces": true;
-    "mesh.facesData": true;
-    "mesh.facesData.layers": true;
-    "mesh.flag": true;
-    "mesh.graph_flag": true;
-    "mesh.graph_id": true;
-    "mesh.inputs": true;
-    "mesh.lib_flag": true;
-    "mesh.lib_id": true;
-    "mesh.loops": true;
-    "mesh.loopsData": true;
-    "mesh.loopsData.layers": true;
-    "mesh.materials": true;
-    "mesh.name": true;
-    "mesh.outputs": true;
-    "mesh.symFlag": true;
-    "mesh.triCount": true;
-    "mesh.usesMaterial": true;
-    "mesh.verts": true;
-    "mesh.vertsData": true;
-    "mesh.vertsData.layers": true;
     "nodeViewer": true;
     "nodeViewer.graphPath": true;
     "nodeViewer.pos": true;
@@ -1410,27 +1318,10 @@ declare module "@framework/pathux" {
     "toolDefaults.sculptcore.paint.samples": true;
     "toolDefaults.sculptcore.paint.symmetryAxes": true;
     "toolDefaults.sculptcore.paint.viewportSize": true;
-    "toolDefaults.strand": true;
-    "toolDefaults.strand.create": true;
-    "toolDefaults.strand.create.setActive": true;
-    "toolDefaults.strand.create.target": true;
-    "toolDefaults.tet": true;
-    "toolDefaults.tet.solidify_wireframe": true;
-    "toolDefaults.tet.solidify_wireframe.maxDepth": true;
-    "toolDefaults.tet.solidify_wireframe.minDepth": true;
-    "toolDefaults.tet.solidify_wireframe.project": true;
-    "toolDefaults.tet.solidify_wireframe.size": true;
     "toolDefaults.velpan": true;
     "toolDefaults.velpan.pan": true;
     "toolDefaults.velpan.pan.velpanPath": true;
     "toolDefaults.view3d": true;
-    "toolDefaults.view3d.inflate": true;
-    "toolDefaults.view3d.inflate.factor": true;
-    "toolDefaults.view3d.inflate.propEnabled": true;
-    "toolDefaults.view3d.inflate.propMode": true;
-    "toolDefaults.view3d.inflate.propradius": true;
-    "toolDefaults.view3d.inflate.snapMode": true;
-    "toolDefaults.view3d.inflate.value": true;
     "toolDefaults.view3d.rotate": true;
     "toolDefaults.view3d.rotate.euler": true;
     "toolDefaults.view3d.rotate.propEnabled": true;
@@ -1444,19 +1335,6 @@ declare module "@framework/pathux" {
     "toolDefaults.view3d.scale.propradius": true;
     "toolDefaults.view3d.scale.snapMode": true;
     "toolDefaults.view3d.scale.value": true;
-    "toolDefaults.view3d.to_sphere": true;
-    "toolDefaults.view3d.to_sphere.factor": true;
-    "toolDefaults.view3d.to_sphere.propEnabled": true;
-    "toolDefaults.view3d.to_sphere.propMode": true;
-    "toolDefaults.view3d.to_sphere.propradius": true;
-    "toolDefaults.view3d.to_sphere.snapMode": true;
-    "toolDefaults.view3d.to_sphere.value": true;
-    "toolDefaults.view3d.transform_inset": true;
-    "toolDefaults.view3d.transform_inset.propEnabled": true;
-    "toolDefaults.view3d.transform_inset.propMode": true;
-    "toolDefaults.view3d.transform_inset.propradius": true;
-    "toolDefaults.view3d.transform_inset.snapMode": true;
-    "toolDefaults.view3d.transform_inset.value": true;
     "toolDefaults.view3d.translate": true;
     "toolDefaults.view3d.translate.graphClass": true;
     "toolDefaults.view3d.translate.graphPath": true;

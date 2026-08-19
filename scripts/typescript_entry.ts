@@ -1,8 +1,4 @@
-import '../addons/builtin/mesh/src/customdata'
-import '../addons/builtin/mesh/src/mesh_base'
-import '../addons/builtin/mesh/src/mesh_customdata'
 import './core/settings'
-import '../addons/builtin/mesh/src/mesh_types'
 import './camera/camera'
 import './sculptcore_demo'
 import './webgpu/index'

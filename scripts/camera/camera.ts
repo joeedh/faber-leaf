@@ -7,6 +7,7 @@ import {BlockLoader, BlockLoaderAddUser, DataBlock, DataRef} from '../core/lib_a
 import {Camera, IUniformsBlock} from '../webgl/webgl.js'
 import {SelMask} from '../core/select_types.js'
 import {NodeFlags} from '../core/graph.js'
+import type {DependSocket} from '../core/graphsockets.js'
 import {SimpleMesh, LayerTypes} from '../webgl/simplemesh.js'
 import {CameraTypes} from './camera_types.js'
 import {ShaderProgram} from '../webgl/webgl.js'
@@ -14,7 +15,17 @@ import type {View3D} from '../editors/view3d/view3d.js'
 import type {SceneObject} from '../sceneobject/sceneobject.js'
 import type {ToolContext} from '../core/context.js'
 import type {DrawQueue, FrameContext} from '../render/queue.js'
-import type {CurveSpline} from '../../addons/builtin/curve/src/curve.js'
+
+/**
+ * What a SPLINE_PATH camera needs of the block it follows. The only thing that
+ * ever implemented it was the BREP `CurveSpline`, archived in P13, so no block
+ * satisfies this today — the field and its `DataRef` stay because old files
+ * carry it and must round-trip.
+ */
+interface CameraPathCurve extends DataBlock<{}, {depend: DependSocket}> {
+  length: number
+  evaluate(t: number, tan: Vector3, nor: Vector3): Vector3
+}
 
 export class CameraData extends SceneObjectData {
   camera: Camera
@@ -26,7 +37,7 @@ export class CameraData extends SceneObjectData {
   mesh: SimpleMesh | undefined
   _last_hash: number | undefined
   pathFlipped: boolean
-  curvespline: CurveSpline | DataRef<CurveSpline> | undefined
+  curvespline: CameraPathCurve | DataRef<CameraPathCurve> | undefined
 
   constructor() {
     super()
@@ -183,7 +194,7 @@ export class CameraData extends SceneObjectData {
         this.inputs.depend.connect(curve.outputs.depend)
       }
 
-      console.log('CurveSpline update')
+      console.log('camera path curve update')
       let time = (scene.time * this.speed) / scene.fps
 
       time = time % curve.length
@@ -324,7 +335,10 @@ CameraData {
   dataLink(getblock: BlockLoader, getblock_addUser: BlockLoaderAddUser) {
     super.dataLink(getblock, getblock_addUser)
 
-    this.curvespline = getblock_addUser<CurveSpline>(this.curvespline as unknown as number, this)
+    this.curvespline = getblock_addUser<CameraPathCurve>(
+      this.curvespline as unknown as number,
+      this
+    )
   }
 }
 

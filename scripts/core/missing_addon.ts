@@ -28,16 +28,18 @@ import {nstructjs} from '../path.ux/scripts/pathux.js'
 import {ToolMode} from '../editors/view3d/view3d_toolmode.js'
 import {MissingNode, MissingNodeSocket} from './graph.js'
 
-// Constructor for the mesh-addon's `OpaqueCustomDataElem` placeholder.
-// Registered at addon-load time via `registerOpaqueCustomDataElem` so this
-// module stays mesh-agnostic (see plan §3).
+// Constructor for an addon's opaque custom-data placeholder, registered at
+// addon-load time via `registerOpaqueCustomDataElem` so this module names no
+// attribute base class of its own (see P8 plan §3).
 let opaqueCustomDataElemCls: (new () => unknown) | null = null
 
 /**
- * Called from the mesh addon's `register(api)` hook to publish its
- * `OpaqueCustomDataElem` placeholder class, and with null from `unregister()`.
- * The class must extend mesh's `CustomDataElem` — core does not reference that
- * base directly to keep the `core-no-addons` layer rule clean.
+ * Called from an addon's `register(api)` hook to publish its opaque
+ * custom-data placeholder class, and with null from `unregister()`. The class
+ * must extend whatever attribute base that addon defines — core does not
+ * reference one, to keep the `core-no-addons` layer rule clean. Nothing in the
+ * tree calls this since P13 deleted the BREP; the hook stays because P10's
+ * preserved-but-inert load path is what needs it.
  */
 export function registerOpaqueCustomDataElem(cls: (new () => unknown) | null): void {
   opaqueCustomDataElemCls = cls
@@ -234,11 +236,9 @@ MissingToolMode {
 // instantiated by the onUnknownClass hook for round-tripping serialized data.
 
 // ----------------------------------------------------------------------------
-// OpaqueCustomDataElem placeholder lives in the mesh addon
-// (`addons/builtin/mesh/src/missing_customdata.ts`) since its base class
-// `CustomDataElem` is mesh-defined. The mesh addon calls
-// `registerOpaqueCustomDataElem` (above) at load time so the hook below can
-// hand it back from `onUnknownClass` — keeping core mesh-agnostic.
+// An opaque custom-data placeholder is supplied by whichever addon defines an
+// attribute base class, through `registerOpaqueCustomDataElem` (above), so the
+// hook below can hand it back from `onUnknownClass`.
 // ----------------------------------------------------------------------------
 // nstructjs hooks
 // ----------------------------------------------------------------------------

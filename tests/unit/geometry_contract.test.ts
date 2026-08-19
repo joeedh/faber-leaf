@@ -87,12 +87,12 @@ describe('resolveKindId', () => {
     }
     class Untagged {
       static dataDefine() {
-        return {name: 'TetMesh'}
+        return {name: 'LeafMesh'}
       }
     }
 
     expect(resolveKindId(new Tagged())).toBe('litemesh')
-    expect(resolveKindId(new Untagged())).toBe('tetmesh')
+    expect(resolveKindId(new Untagged())).toBe('leafmesh')
   })
 
   test('caches on the constructor and tolerates a type that has no dataDefine', () => {
@@ -100,12 +100,12 @@ describe('resolveKindId', () => {
     class Counted {
       static dataDefine() {
         calls++
-        return {dataKind: 'curve'}
+        return {dataKind: 'imaginary'}
       }
     }
 
-    expect(resolveKindId(new Counted())).toBe('curve')
-    expect(resolveKindId(new Counted())).toBe('curve')
+    expect(resolveKindId(new Counted())).toBe('imaginary')
+    expect(resolveKindId(new Counted())).toBe('imaginary')
     expect(calls).toBe(1)
 
     expect(resolveKindId({})).toBeUndefined()

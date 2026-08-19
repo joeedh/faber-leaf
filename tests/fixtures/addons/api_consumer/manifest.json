@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "author": "Faber Leaf refactor tests",
   "entry": "src/main.ts",
-  "dependencies": ["mesh"],
-  "description": "Smoke-test addon that imports from @addon/mesh/api via the runtime resolver.",
+  "dependencies": ["leafmesh"],
+  "description": "Smoke-test addon that imports from @addon/leafmesh/api via the runtime resolver.",
   "buildMode": "prebuilt"
 }

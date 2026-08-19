@@ -76,11 +76,13 @@ describe('only an addon-owned type registers from an addon', () => {
     expect(lines[at - 1].trimStart()).toMatch(/^\/\//)
   })
 
-  test('MeshTransType is registered by its addon, not at module scope', () => {
+  test('LeafMeshTransType is registered by its addon, not at module scope', () => {
     const typesSrc = fs.readFileSync(path.join(TRANSFORM_DIR, 'transform_types.ts'), 'utf8')
-    expect(typesSrc).not.toMatch(/TransDataType\.register\(MeshTransType\)/)
+    expect(typesSrc).not.toMatch(/TransDataType\.register\(LeafMeshTransType\)/)
+    // P13 erased the BREP type outright; the host file must not name it either.
+    expect(typesSrc).not.toMatch(/MeshTransType/)
 
-    const addon = path.join(REPO_ROOT, 'addons/builtin/mesh/src/main.ts')
-    expect(fs.readFileSync(addon, 'utf8')).toMatch(/api\.registerTransType\(MeshTransType\)/)
+    const addon = path.join(REPO_ROOT, 'addons/builtin/leafmesh/src/main.ts')
+    expect(fs.readFileSync(addon, 'utf8')).toMatch(/api\.registerTransType\(LeafMeshTransType\)/)
   })
 })

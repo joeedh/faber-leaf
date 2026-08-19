@@ -38,14 +38,11 @@ const EXPORT_NAME = 'getDataAPI'
 // customdata→barrel→mesh_customdata cycle the other way and hits a
 // "Class extends undefined" TDZ. Co-located with api_define.js so these
 // relative specifiers resolve identically.
-// The builtin_data_api bridge registers the addon-owned data-API classes (Mesh,
-// Vertex, Element, BVHSettings, CurveSpline) into the registry api_define walks.
-// The generator never boots addons, so without this import those classes — and
-// every path under `ctx.mesh` — would be missing from the catalog. Imported
-// after _framework_runtime (keeping the barrel rooted first, which orders
-// CustomDataElem ahead of its subclasses) and before api_define.
+// P13 deleted the builtin_data_api bridge along with the BREP addon it fed, so
+// there is nothing addon-owned left to pull in here: the generator never boots
+// addons, and every surviving builtin contributes its data API through the
+// per-addon lifecycle instead.
 const GEN_ENTRY_SRC = `import '../_framework_runtime.js'
-import '../../addons/builtin/builtin_data_api.js'
 export {${EXPORT_NAME}} from './api_define.js'
 `
 const OUT_DIR = resolve(REPO_ROOT, 'scripts/data_api/generated')

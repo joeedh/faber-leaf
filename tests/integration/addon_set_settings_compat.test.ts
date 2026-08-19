@@ -3,11 +3,11 @@
  * addon set load in a build with a different one.
  *
  * Two NW.js boots sharing an app-storage directory. The first ("set A") turns
- * on every default-off in-bundle builtin, changes a couple of scalar prefs,
- * saves settings, and saves a scene as the startup file. The blob is then edited
- * into what a *fuller* build's blob looks like from here — an addon switched
- * off, one addon's key removed entirely, and a key for an addon this build has
- * never heard of — and the second boot ("set B") reads both files back.
+ * on every default-off builtin, changes a couple of scalar prefs, saves
+ * settings, and saves a scene as the startup file. The blob is then edited into
+ * what a *fuller* build's blob looks like from here — an addon switched off,
+ * one addon's key removed entirely, and a key for an addon this build has never
+ * heard of — and the second boot ("set B") reads both files back.
  *
  * The startup file is the assertion that matters: `genDefaultFile` catches a
  * failed load and silently falls back to the default scene, and the default
@@ -32,10 +32,13 @@ import {isDefaultBackendPass} from './split'
 
 const BUNDLE = Path.join(REPO_ROOT, 'build', 'entry_point.js')
 
-/** Default-off builtins set A turns on, so set B can be strictly smaller. Only
- * in-bundle ones (addons/builtin/builtin_registry.ts) — `tetmesh` ships as an
- * external per-addon bundle and is absent unless that pipeline ran. */
-const EXTRA_ADDONS = ['curve', 'subsurf', 'mesh_edit']
+/** Default-off builtins set A turns on, so set B can be strictly smaller. P13
+ * left exactly one: `leafmesh`. It ships as an external per-addon bundle, which
+ * `pnpm build` produces alongside the main one, so gating on the bundle (below)
+ * is enough to know it is there. */
+const EXTRA_ADDONS = ['leafmesh']
+/** Present and default-on; stands in for the key-removed case below. */
+const DEFAULT_ON_ADDON = 'sculptcore'
 /** An id no build in the tree has — stands in for an addon set A shipped. */
 const GHOST = 'ghost_addon'
 /** Set A renames its mesh object so the reader can tell a real load from the
@@ -185,8 +188,8 @@ describeMaybe('settings + startup file across an addon-set change (P10, criterio
     // Turn the blob into one a *fuller* build wrote: an addon the user turned
     // off, one whose key predates this build, and one this build never had.
     const edited = JSON.parse(JSON.stringify(writtenBlob)) as AddonSettingsJSON
-    edited.addonSettings.curve.enabled = false
-    delete edited.addonSettings.mesh_edit
+    edited.addonSettings.leafmesh.enabled = false
+    delete edited.addonSettings[DEFAULT_ON_ADDON]
     edited.addonSettings[GHOST] = {name: GHOST, enabled: true, settings: {}}
     fs.writeFileSync(settingsPath, JSON.stringify(edited))
 
@@ -214,16 +217,21 @@ describeMaybe('settings + startup file across an addon-set change (P10, criterio
   })
 
   test('set B honors the persisted disable, so its live addon set really differs', () => {
-    expect(reader.live!.curve).toBe(false)
-    expect(reader.live!.subsurf).toBe(true)
-    expect(reader.live!.mesh).toBe(true)
+    // leafmesh is default-off, so set A had to turn it on and the edited blob
+    // turns it back off: the disable is the user's, not the manifest's.
+    expect(reader.live!.leafmesh).toBe(false)
+    expect(reader.live![DEFAULT_ON_ADDON]).toBe(true)
   })
 
-  test('an addon the blob never mentions comes back at its own default, not enabled', () => {
-    // mesh_edit ships defaultEnabled:false; syncAddonList() must capture that
-    // rather than treat a freshly-seen addon as something the user asked for.
-    expect(reader.persisted!.mesh_edit).toBe(false)
-    expect(reader.live!.mesh_edit).toBe(false)
+  test('an addon the blob never mentions comes back at its own default', () => {
+    // The key was deleted outright, so syncAddonList() has to re-create it from
+    // the manifest. sculptcore ships default-on, so this reads `true` either
+    // way -- P13 left leafmesh as the only default-off builtin and it is spoken
+    // for above. What is actually asserted here is that the key comes *back*
+    // rather than staying missing.
+    expect(reader.persisted![DEFAULT_ON_ADDON]).toBe(true)
+    expect(reader.live![DEFAULT_ON_ADDON]).toBe(true)
+    expect(readBlob.addonSettings[DEFAULT_ON_ADDON]).toBeDefined()
   })
 
   test('a setting for an addon this build does not have is kept, not dropped', () => {

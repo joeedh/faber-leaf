@@ -3,7 +3,7 @@
  *
  * This module is the boundary between core / scene / sceneobject code and the
  * concrete BVH living inside the mesh subsystem (today scripts/util/bvh.ts, soon
- * addons/builtin/mesh/src/bvh.ts — see plan §3). Anything that needs to ray-cast
+ * the BREP's own bvh.ts, deleted in P13 — see plan §3). Anything that needs to ray-cast
  * against a surface or talk about BVH vertices should depend on these interfaces,
  * not on the BVH class.
  *

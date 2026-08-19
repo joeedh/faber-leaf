@@ -14,7 +14,6 @@ import {Node, Graph, NodeFlags, NodeSocketType, INodeConstructor, INodeSocketSet
 import {Icons} from '../editors/icon_enum.js'
 
 import type {SculptBrush} from '../brush/brush'
-import type {Mesh} from '../../addons/builtin/mesh/src/mesh'
 import type {Collection} from '../scene/collection'
 import type {SceneObject} from '../sceneobject/sceneobject.js'
 import type {ToolContext} from './context.js'
@@ -870,7 +869,6 @@ Library {
   block_namemap: {[k: string]: DataBlock}
 
   brush: BlockSet<SculptBrush>
-  mesh: BlockSet<Mesh>
   collection: BlockSet<Collection>
   object: BlockSet<SceneObject>
   scene: BlockSet<Scene>
@@ -889,7 +887,6 @@ Library {
 
     // make TS happy even though we programatically create getters/setters later
     this.brush = this.libmap.brush!
-    this.mesh = this.libmap.brush!
     this.collection = this.libmap.brush!
     this.object = this.libmap.object!
     this.scene = this.libmap.scene!

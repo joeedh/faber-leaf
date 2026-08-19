@@ -14,13 +14,8 @@ import {
 
 import * as editors from '../editors/all.js'
 
-import '../tet/wiregen_ops.js'
-
 import '../image/image_ops.js'
 import '../image/image.js'
-import '../hair/strand.js'
-import '../hair/strand_ops.js'
-import '../hair/strand_selectops.js'
 import '../light/light.js'
 import '../light/light_ops.js'
 
@@ -315,7 +310,7 @@ export function getDataAPI(): MyDataAPI {
   // runs each registered class exactly once. Order is irrelevant — subclass `defineAPI`s
   // chain their parent, declaring its members onto the child struct, so none depends on
   // another's struct first. Core classes self-register at module scope (reached as an
-  // import side-effect here); builtin-addon classes via the `builtin_data_api.ts` bridge.
+  // import side-effect here); addon classes through their own `register(api)` hook.
   // By here the registry is fully populated.
   for (let cls of getDataAPIRegistry()) {
     defineOnce(dataApi, cls)

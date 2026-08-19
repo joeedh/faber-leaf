@@ -122,23 +122,8 @@ export class AddonClasses<T> {
   structClasses: GenericConstructor[] = []
   toolModeClasses: GenericConstructor[] = []
   sceneObjectDataClasses: GenericConstructor[] = []
-  customDataClasses: GenericConstructor[] = []
   editorClasses: GenericConstructor[] = []
   other: GenericConstructor[] = []
-}
-
-/**
- * Looks up an addon's exported namespace via `window._addons`. Returns
- * undefined if the addon manager isn't initialized yet or the addon hasn't
- * registered. Used by the mesh/bvh/subsurf getters below so this file no
- * longer imports addon source directly (see plan §3.2).
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function lookupAddonExport(addonId: string, exportName: string): any {
-  const manager = (typeof window !== 'undefined' ? window._addons : undefined) as
-    | {getAddonAPI: (id: string) => {exports?: Record<string, unknown>} | undefined}
-    | undefined
-  return manager?.getAddonAPI(addonId)?.exports?.[exportName]
 }
 
 /** Narrows a registered class to one carrying the data-API `defineAPI` contract. */
@@ -158,29 +143,9 @@ export class AddonAPI<T> {
 
   readonly sceneobject = sceneobject
 
-  // Mesh-shaped namespaces are resolved lazily through the addon registry so
-  // this file stays mesh-agnostic. The mesh addon publishes the full surface
-  // from `addons/builtin/mesh/src/addon_register.ts`. See plan §3.2.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get mesh(): any {
-    return lookupAddonExport('mesh', 'mesh')
-  }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get mesh_utils(): any {
-    return lookupAddonExport('mesh', 'mesh_utils')
-  }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get bvh(): any {
-    return lookupAddonExport('mesh', 'bvh')
-  }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get unwrapping(): any {
-    return lookupAddonExport('mesh', 'unwrapping')
-  }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  get subsurf(): any {
-    return lookupAddonExport('subsurf', 'subsurf')
-  }
+  // P13 deleted the `mesh` / `mesh_edit` addons, and with them the lazy
+  // `api.mesh` / `api.bvh` / `api.subsurf` / `api.toolmode.MeshToolBase`
+  // getters. A peer addon reaches another through `@addon/<id>/api`.
 
   readonly KeyMap = KeyMap
   readonly HotKey = HotKey
@@ -208,15 +173,6 @@ export class AddonAPI<T> {
 
   readonly toolmode = {
     ToolMode,
-    // MeshToolBase / MeshEditor live in the `mesh_edit` builtin addon. They
-    // are looked up at access time so this file holds no source-level import
-    // into addons/builtin/. See plan §3.2 / §6 step 8.
-    get MeshToolBase(): any {
-      return lookupAddonExport('mesh_edit', 'mesh_edit')?.MeshToolBase
-    },
-    get MeshEditor(): any {
-      return lookupAddonExport('mesh_edit', 'mesh_edit')?.MeshEditor
-    },
   } as const
   readonly toolop = {
     ToolOp,
@@ -234,8 +190,6 @@ export class AddonAPI<T> {
     DataRefListProperty,
     TransformOp,
     BoolProperty,
-    // MeshOp / MeshDeformOp / MeshOpBaseUV are no longer re-exposed here.
-    // Consumers use `api.mesh.MeshOp` / `api.deps.mesh.exports.mesh.MeshOp`.
   } as const
   readonly graph = {
     ...graph,
@@ -270,8 +224,9 @@ export class AddonAPI<T> {
   /**
    * Resolved dependency addons, keyed by manifest id. Populated by the loader
    * before this addon's `register()` runs (deps are loaded first by topological
-   * sort). Addons can also use the typed `import * as mesh from '@addon/mesh/api'`
-   * shim which resolves to `api.deps.mesh.exports['mesh']` at runtime.
+   * sort). Addons can also use the typed
+   * `import * as leafmesh from '@addon/leafmesh/api'` shim, which resolves to
+   * `api.deps.leafmesh.exports['leafmesh']` at runtime.
    */
   deps: {[id: string]: AddonAPI<unknown>} = {}
 
@@ -318,11 +273,11 @@ export class AddonAPI<T> {
    * Publishes a namespace that other addons can import. Typical use from inside
    * an addon's `register(api)`:
    *
-   *   api.exportNamespace('mesh', {Mesh, MeshFlags, BVH, customdata: {...}})
+   *   api.exportNamespace('leafmesh', {LeafMesh, LeafMeshData, AttrType, ...})
    *
-   * Consumers reach it as `api.getAddon('mesh').exports['mesh']` or, with full
-   * type-checking, via the `@addon/mesh/api` resolver baked into the addon
-   * build pipeline (see tools/build-addons.js).
+   * Consumers reach it as `api.getAddon('leafmesh').exports['leafmesh']` or,
+   * with full type-checking, via the `@addon/leafmesh/api` resolver baked into
+   * the addon build pipeline (see tools/build-addons.js).
    */
   exportNamespace(name: string, exports: Record<string, unknown>): void {
     this.exports[name] = exports
@@ -447,9 +402,9 @@ export class AddonAPI<T> {
   }
 
   /**
-   * Attach a struct under the ToolContext data-API tree (`ctx.mesh`). Builtin
-   * addons contribute through `addons/builtin/builtin_data_api.ts` instead:
-   * `getDataAPI()` runs in the AppState constructor, before any `register(api)`.
+   * Attach a struct under the ToolContext data-API tree. In-bundle builtins
+   * used to go through `builtin_data_api.ts`, which P13 deleted along with the
+   * BREP addon; every addon now uses this hook.
    */
   registerContextStruct(contribution: ContextStructContribution): void {
     registerContextStructImpl(contribution)
@@ -521,15 +476,6 @@ export class AddonAPI<T> {
 
         window.setTimeout(cb)
       }
-    }
-
-    // CustomDataElem lives in the mesh addon; resolve at use time so this
-    // file doesn't import from addons/builtin/mesh/. See plan §3.2.
-    const CustomDataElem = lookupAddonExport('mesh', 'mesh')?.CustomDataElem
-    if (CustomDataElem && subclassOf(cls, CustomDataElem)) {
-      CustomDataElem.register(cls)
-      this.classes.customDataClasses.push(cls)
-      addToOther = false
     }
 
     if (subclassOf(cls, Editor)) {
@@ -662,13 +608,6 @@ export class AddonAPI<T> {
       consolelog('unregistering a toolmode', cls)
 
       ToolMode.unregister(cls)
-    }
-
-    const CustomDataElem = lookupAddonExport('mesh', 'mesh')?.CustomDataElem
-    if (CustomDataElem && subclassOf(cls, CustomDataElem)) {
-      consolelog('unregistering a customdata elem', cls)
-
-      CustomDataElem.unregister(cls)
     }
 
     if (subclassOf(cls, ToolOp)) {

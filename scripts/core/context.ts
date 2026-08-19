@@ -4,7 +4,6 @@ import {NodeViewer} from '../editors/node/NodeViewer.js'
 import {Editor, editorAccessor, getContextArea, IEditorConstructor} from '../editors/editor_base'
 import {ResourceBrowser} from '../editors/resbrowser/resbrowser.js'
 import {SceneObjectData} from '../sceneobject/sceneobject_base.js'
-import type {Mesh} from '../../addons/builtin/mesh/src/mesh.js'
 import {Light} from '../light/light.js'
 import type {Scene} from '../scene/scene'
 import {BlockSet, DataBlock, DataRef, Library} from './lib_api'
@@ -14,8 +13,6 @@ import {Context, DataAPI, ILockableCtx, toLockedImpl} from '../path.ux/scripts/p
 import {SavedToolDefaults, Screen, UIBase} from '../path.ux/scripts/pathux.js'
 import {PropsEditor} from '../editors/properties/PropsEditor.js'
 import {MaterialEditor} from '../editors/node/MaterialEditor.js'
-import {TetMesh} from '../tet/tetgen.js'
-import {StrandSet} from '../hair/strand.js'
 import {Icons} from '../editors/icon_enum.js'
 const passthrus = new Set<string | number | symbol>(['datalib', 'gl', 'graph', 'last_tool', 'toolstack', 'api'])
 
@@ -222,10 +219,10 @@ export class ToolContext extends ContextExtraAPI {
   get material() {
     const ob = this.object
 
-    if (ob) {
-      if (SceneObjectData.dataKindOf(ob.data) === 'mesh' && (ob.data as Mesh).materials.length > 0) {
-        return (ob.data as Mesh).materials[0]
-      }
+    // `usesMaterial` is the kind-agnostic form of the old `dataKindOf() ===
+    // 'mesh'` test: the materials array lives on SceneObjectData itself.
+    if (ob?.data?.usesMaterial && ob.data.materials.length > 0) {
+      return ob.data.materials[0]
     }
   }
 
@@ -281,49 +278,8 @@ export class ToolContext extends ContextExtraAPI {
     return this.datalib.scene.active!
   }
 
-  // get strandset object, for UX purposes
-  // we don't just check active object
-  get strandset_object() {
-    const ob = this.object
-
-    if (this.scene === undefined) {
-      return undefined
-    }
-
-    if (ob && ob.data instanceof StrandSet) {
-      return ob
-    }
-
-    for (const ob of this.scene.objects.selected.editable) {
-      if (ob.data instanceof StrandSet) {
-        return ob
-      }
-    }
-  }
-
-  get strandset() {
-    const ob = this.strandset_object
-
-    return ob ? ob.data : undefined
-  }
-
   get object() {
     return this.scene ? this.scene.objects.active : undefined
-  }
-
-  get tetmesh() {
-    const ob = this.object
-    if (ob !== undefined && ob.data instanceof TetMesh) {
-      return ob.data
-    }
-  }
-
-  get mesh(): Mesh | undefined {
-    const ob = this.object
-    if (ob !== undefined && SceneObjectData.dataKindOf(ob.data) === 'mesh') {
-      return ob.data as Mesh
-    }
-    return undefined
   }
 
   get light() {

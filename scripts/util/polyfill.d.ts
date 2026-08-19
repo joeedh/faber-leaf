@@ -35,8 +35,9 @@ export declare global {
     D6: number | undefined
     DTST2: number | undefined
     _appstate: AppState
-    _unwrap_solvers: Map<any, any>
     FILE_LOADING: boolean
+    /** view3d.ts owns this; it is a throwing WebGPU stub, not a real context. */
+    _gl: WebGL2RenderingContext
     /** resetRenderEngine defaults to true */
     redraw_viewport(resetRenderEngine?: boolean, drawCount?: number): void
     /** resetRenderEngine defaults to true */

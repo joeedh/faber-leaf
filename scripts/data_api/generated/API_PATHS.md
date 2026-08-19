@@ -119,7 +119,6 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | --- | --- | --- | --- | --- |
 | `library` | struct |  |  |  |
 | `library.MissingDataBlock` | list |  |  |  |
-| `library.TetMesh` | list |  |  |  |
 | `library.brush` | list |  |  |  |
 | `library.camera` | list |  |  |  |
 | `library.collection` | list |  |  |  |
@@ -132,7 +131,6 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `library.scene` | list |  |  |  |
 | `library.screen` | list |  |  |  |
 | `library.shadernetwork` | list |  |  |  |
-| `library.strands` | list |  |  |  |
 | `library.texture` | list |  |  |  |
 
 ## light
@@ -164,91 +162,6 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `material.name` | prop | StringProperty | name |  |
 | `material.outputs` | list |  |  |  |
 | `material.shader` | dynamicStruct |  |  | dynamic |
-
-## mesh
-
-| Path | Kind | Type | UI name | Notes |
-| --- | --- | --- | --- | --- |
-| `mesh` | struct |  |  |  |
-| `mesh.bvhSettings` | struct |  |  |  |
-| `mesh.bvhSettings.depthLimit` | prop | IntProperty | Depth Limit | range 1..32 |
-| `mesh.bvhSettings.drawLevelOffset` | prop | IntProperty | Draw Level | range 0..8 |
-| `mesh.bvhSettings.leafLimit` | prop | IntProperty | Tri Limit | range 1..4096 |
-| `mesh.edges` | list |  |  |  |
-| `mesh.edgesData` | struct |  |  |  |
-| `mesh.edgesData.layers` | list |  |  |  |
-| `mesh.edgesData.layers[n].flag` | prop | EnumProperty | Flags | enum {SELECT, SINGLE_LAYER, TEMPORARY, IGNORE_FOR_INDEXBUF, DISABLED, NO_INTERP, NO_INTERP_COPY_ONLY} |
-| `mesh.edgesData.layers[n].index` | prop | IntProperty | index |  |
-| `mesh.edgesData.layers[n].name` | prop | StringProperty | Name |  |
-| `mesh.edgesData.layers[n].settings` | dynamicStruct |  |  | dynamic |
-| `mesh.edgesData.layers[n].typeName` | prop | StringProperty | Type |  |
-| `mesh.edges[n].dataLayers` | list |  |  |  |
-| `mesh.edges[n].flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 114688, 131072, 262144, 524288, 1048576, 2097152, 4194304, 16777216, 33554432, 134217728, 268435456, 536870912, SELECT, HIDE, FLAT, SINGULARITY, ITER_TEMP1, ITER_TEMP2a, ITER_TEMP2b, ITER_TEMP2c, DRAW_DEBUG, TEMP1, TEMP2, TEMP3, UPDATE, BOUNDARY, CURVE_FLIP, SMOOTH_DRAW, MIRROREDX, MIRROREDY, MIRROREDZ, MIRRORED, MIRROR_BOUNDARY, DRAW_DEBUG2, SEAM, COLLAPSE_TEMP, TEMP4, TEMP5, NOAPI_TEMP1, NOAPI_TEMP2, ITER_TEMP3, QUAD_EDGE, GRID_MRES_HIDDEN, MAKE_FACE_TEMP, FACE_EXIST_FLAG} |
-| `mesh.edges[n].id` | prop | IntProperty | ID |  |
-| `mesh.edges[n].namedLayers` | list |  |  |  |
-| `mesh.edges[n].type` | prop | FlagProperty | Type | enum {VERTEX, EDGE, FACE, LOOP, HANDLE} |
-| `mesh.faces` | list |  |  |  |
-| `mesh.facesData` | struct |  |  |  |
-| `mesh.facesData.layers` | list |  |  |  |
-| `mesh.facesData.layers[n].flag` | prop | EnumProperty | Flags | enum {SELECT, SINGLE_LAYER, TEMPORARY, IGNORE_FOR_INDEXBUF, DISABLED, NO_INTERP, NO_INTERP_COPY_ONLY} |
-| `mesh.facesData.layers[n].index` | prop | IntProperty | index |  |
-| `mesh.facesData.layers[n].name` | prop | StringProperty | Name |  |
-| `mesh.facesData.layers[n].settings` | dynamicStruct |  |  | dynamic |
-| `mesh.facesData.layers[n].typeName` | prop | StringProperty | Type |  |
-| `mesh.faces[n].dataLayers` | list |  |  |  |
-| `mesh.faces[n].flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 114688, 131072, 262144, 524288, 1048576, 2097152, 4194304, 16777216, 33554432, 134217728, 268435456, 536870912, SELECT, HIDE, FLAT, SINGULARITY, ITER_TEMP1, ITER_TEMP2a, ITER_TEMP2b, ITER_TEMP2c, DRAW_DEBUG, TEMP1, TEMP2, TEMP3, UPDATE, BOUNDARY, CURVE_FLIP, SMOOTH_DRAW, MIRROREDX, MIRROREDY, MIRROREDZ, MIRRORED, MIRROR_BOUNDARY, DRAW_DEBUG2, SEAM, COLLAPSE_TEMP, TEMP4, TEMP5, NOAPI_TEMP1, NOAPI_TEMP2, ITER_TEMP3, QUAD_EDGE, GRID_MRES_HIDDEN, MAKE_FACE_TEMP, FACE_EXIST_FLAG} |
-| `mesh.faces[n].id` | prop | IntProperty | ID |  |
-| `mesh.faces[n].namedLayers` | list |  |  |  |
-| `mesh.faces[n].type` | prop | FlagProperty | Type | enum {VERTEX, EDGE, FACE, LOOP, HANDLE} |
-| `mesh.flag` | prop | FlagProperty | Modifier Flag | enum {1, SUBSURF} |
-| `mesh.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
-| `mesh.graph_id` | prop | IntProperty | Graph ID |  |
-| `mesh.inputs` | list |  |  |  |
-| `mesh.lib_flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, SELECT, HIDE, FAKE_USER, NO_SAVE} |
-| `mesh.lib_id` | prop | IntProperty | Lib ID |  |
-| `mesh.loops` | list |  |  |  |
-| `mesh.loopsData` | struct |  |  |  |
-| `mesh.loopsData.layers` | list |  |  |  |
-| `mesh.loopsData.layers[n].flag` | prop | EnumProperty | Flags | enum {SELECT, SINGLE_LAYER, TEMPORARY, IGNORE_FOR_INDEXBUF, DISABLED, NO_INTERP, NO_INTERP_COPY_ONLY} |
-| `mesh.loopsData.layers[n].index` | prop | IntProperty | index |  |
-| `mesh.loopsData.layers[n].name` | prop | StringProperty | Name |  |
-| `mesh.loopsData.layers[n].settings` | dynamicStruct |  |  | dynamic |
-| `mesh.loopsData.layers[n].typeName` | prop | StringProperty | Type |  |
-| `mesh.loops[n].dataLayers` | list |  |  |  |
-| `mesh.loops[n].flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 114688, 131072, 262144, 524288, 1048576, 2097152, 4194304, 16777216, 33554432, 134217728, 268435456, 536870912, SELECT, HIDE, FLAT, SINGULARITY, ITER_TEMP1, ITER_TEMP2a, ITER_TEMP2b, ITER_TEMP2c, DRAW_DEBUG, TEMP1, TEMP2, TEMP3, UPDATE, BOUNDARY, CURVE_FLIP, SMOOTH_DRAW, MIRROREDX, MIRROREDY, MIRROREDZ, MIRRORED, MIRROR_BOUNDARY, DRAW_DEBUG2, SEAM, COLLAPSE_TEMP, TEMP4, TEMP5, NOAPI_TEMP1, NOAPI_TEMP2, ITER_TEMP3, QUAD_EDGE, GRID_MRES_HIDDEN, MAKE_FACE_TEMP, FACE_EXIST_FLAG} |
-| `mesh.loops[n].id` | prop | IntProperty | ID |  |
-| `mesh.loops[n].namedLayers` | list |  |  |  |
-| `mesh.loops[n].type` | prop | FlagProperty | Type | enum {VERTEX, EDGE, FACE, LOOP, HANDLE} |
-| `mesh.materials` | list |  |  |  |
-| `mesh.materials[n].graph` | struct |  |  |  |
-| `mesh.materials[n].graph.nodes` | list |  |  |  |
-| `mesh.materials[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
-| `mesh.materials[n].graph_id` | prop | IntProperty | Graph ID |  |
-| `mesh.materials[n].has_shader` | prop | BoolProperty | Has Shader |  |
-| `mesh.materials[n].inputs` | list |  |  |  |
-| `mesh.materials[n].lib_flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, SELECT, HIDE, FAKE_USER, NO_SAVE} |
-| `mesh.materials[n].lib_id` | prop | IntProperty | Lib ID |  |
-| `mesh.materials[n].name` | prop | StringProperty | name |  |
-| `mesh.materials[n].outputs` | list |  |  |  |
-| `mesh.materials[n].shader` | dynamicStruct |  |  | dynamic |
-| `mesh.name` | prop | StringProperty | name |  |
-| `mesh.outputs` | list |  |  |  |
-| `mesh.symFlag` | prop | FlagProperty | Symmetry Flags | enum {1, 2, 4, X, Y, Z} |
-| `mesh.triCount` | prop | IntProperty | Triangles |  |
-| `mesh.usesMaterial` | prop | BoolProperty | Uses Material |  |
-| `mesh.verts` | list |  |  |  |
-| `mesh.vertsData` | struct |  |  |  |
-| `mesh.vertsData.layers` | list |  |  |  |
-| `mesh.vertsData.layers[n].flag` | prop | EnumProperty | Flags | enum {SELECT, SINGLE_LAYER, TEMPORARY, IGNORE_FOR_INDEXBUF, DISABLED, NO_INTERP, NO_INTERP_COPY_ONLY} |
-| `mesh.vertsData.layers[n].index` | prop | IntProperty | index |  |
-| `mesh.vertsData.layers[n].name` | prop | StringProperty | Name |  |
-| `mesh.vertsData.layers[n].settings` | dynamicStruct |  |  | dynamic |
-| `mesh.vertsData.layers[n].typeName` | prop | StringProperty | Type |  |
-| `mesh.verts[n].dataLayers` | list |  |  |  |
-| `mesh.verts[n].flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 114688, 131072, 262144, 524288, 1048576, 2097152, 4194304, 16777216, 33554432, 134217728, 268435456, 536870912, SELECT, HIDE, FLAT, SINGULARITY, ITER_TEMP1, ITER_TEMP2a, ITER_TEMP2b, ITER_TEMP2c, DRAW_DEBUG, TEMP1, TEMP2, TEMP3, UPDATE, BOUNDARY, CURVE_FLIP, SMOOTH_DRAW, MIRROREDX, MIRROREDY, MIRROREDZ, MIRRORED, MIRROR_BOUNDARY, DRAW_DEBUG2, SEAM, COLLAPSE_TEMP, TEMP4, TEMP5, NOAPI_TEMP1, NOAPI_TEMP2, ITER_TEMP3, QUAD_EDGE, GRID_MRES_HIDDEN, MAKE_FACE_TEMP, FACE_EXIST_FLAG} |
-| `mesh.verts[n].id` | prop | IntProperty | ID |  |
-| `mesh.verts[n].namedLayers` | list |  |  |  |
-| `mesh.verts[n].type` | prop | FlagProperty | Type | enum {VERTEX, EDGE, FACE, LOOP, HANDLE} |
 
 ## nodeViewer
 
@@ -875,27 +788,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.sculptcore.paint.samples` | prop | PaintSampleProperty | Samples |  |
 | `toolDefaults.sculptcore.paint.symmetryAxes` | prop | FlagProperty | Symmetry Axes | enum {X, Y, Z} |
 | `toolDefaults.sculptcore.paint.viewportSize` | prop | Vec2Property | Viewport Size |  |
-| `toolDefaults.strand` | struct |  |  |  |
-| `toolDefaults.strand.create` | struct |  |  |  |
-| `toolDefaults.strand.create.setActive` | prop | BoolProperty | Set Active |  |
-| `toolDefaults.strand.create.target` | prop | DataRefProperty | Target |  |
-| `toolDefaults.tet` | struct |  |  |  |
-| `toolDefaults.tet.solidify_wireframe` | struct |  |  |  |
-| `toolDefaults.tet.solidify_wireframe.maxDepth` | prop | IntProperty | Max Depth |  |
-| `toolDefaults.tet.solidify_wireframe.minDepth` | prop | IntProperty | Min Depth |  |
-| `toolDefaults.tet.solidify_wireframe.project` | prop | BoolProperty | Project |  |
-| `toolDefaults.tet.solidify_wireframe.size` | prop | FloatProperty | Size |  |
 | `toolDefaults.velpan` | struct |  |  |  |
 | `toolDefaults.velpan.pan` | struct |  |  |  |
 | `toolDefaults.velpan.pan.velpanPath` | prop | StringProperty | Velpan Path |  |
 | `toolDefaults.view3d` | struct |  |  |  |
-| `toolDefaults.view3d.inflate` | struct |  |  |  |
-| `toolDefaults.view3d.inflate.factor` | prop | FloatProperty | Factor |  |
-| `toolDefaults.view3d.inflate.propEnabled` | prop | BoolProperty | Prop Enabled |  |
-| `toolDefaults.view3d.inflate.propMode` | prop | EnumProperty | Prop mode | enum {SMOOTH, SHARP, EXTRA_SHARP, SPHERE, LINEAR, CONSTANT} |
-| `toolDefaults.view3d.inflate.propradius` | prop | FloatProperty | Prop radius |  |
-| `toolDefaults.view3d.inflate.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
-| `toolDefaults.view3d.inflate.value` | prop | Vec3Property | Value |  |
 | `toolDefaults.view3d.rotate` | struct |  |  |  |
 | `toolDefaults.view3d.rotate.euler` | prop | Vec3Property | Euler |  |
 | `toolDefaults.view3d.rotate.propEnabled` | prop | BoolProperty | Prop Enabled |  |
@@ -909,19 +805,6 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.view3d.scale.propradius` | prop | FloatProperty | Prop radius |  |
 | `toolDefaults.view3d.scale.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
 | `toolDefaults.view3d.scale.value` | prop | Vec3Property | Value |  |
-| `toolDefaults.view3d.to_sphere` | struct |  |  |  |
-| `toolDefaults.view3d.to_sphere.factor` | prop | FloatProperty | Factor |  |
-| `toolDefaults.view3d.to_sphere.propEnabled` | prop | BoolProperty | Prop Enabled |  |
-| `toolDefaults.view3d.to_sphere.propMode` | prop | EnumProperty | Prop mode | enum {SMOOTH, SHARP, EXTRA_SHARP, SPHERE, LINEAR, CONSTANT} |
-| `toolDefaults.view3d.to_sphere.propradius` | prop | FloatProperty | Prop radius |  |
-| `toolDefaults.view3d.to_sphere.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
-| `toolDefaults.view3d.to_sphere.value` | prop | Vec3Property | Value |  |
-| `toolDefaults.view3d.transform_inset` | struct |  |  |  |
-| `toolDefaults.view3d.transform_inset.propEnabled` | prop | BoolProperty | Prop Enabled |  |
-| `toolDefaults.view3d.transform_inset.propMode` | prop | EnumProperty | Prop mode | enum {SMOOTH, SHARP, EXTRA_SHARP, SPHERE, LINEAR, CONSTANT} |
-| `toolDefaults.view3d.transform_inset.propradius` | prop | FloatProperty | Prop radius |  |
-| `toolDefaults.view3d.transform_inset.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
-| `toolDefaults.view3d.transform_inset.value` | prop | Vec3Property | Value |  |
 | `toolDefaults.view3d.translate` | struct |  |  |  |
 | `toolDefaults.view3d.translate.graphClass` | prop | StringProperty | Graph Class |  |
 | `toolDefaults.view3d.translate.graphPath` | prop | StringProperty | Graph Path |  |

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "author": "joeedh",
   "entry": "src/main.ts",
-  "dependencies": ["mesh"],
+  "dependencies": [],
   "description": "Sculptcore-backed paint/sculpt toolmode (next-gen).",
   "buildMode": "prebuilt"
 }

@@ -23,7 +23,7 @@ const dataAPIRegistry: DefineAPIClass[] = []
 /**
  * Register a class so its `defineAPI` runs while the data API is built. Idempotent.
  * Core classes call this at module scope; builtin-addon classes via the
- * `builtin_data_api.ts` bridge; external addons via `addon_base.ts`'s dispatcher.
+ * own `register(api)` hook, via `addon_base.ts`'s dispatcher.
  */
 export function registerDataAPI(cls: DefineAPIClass): void {
   if (!dataAPIRegistry.includes(cls)) {

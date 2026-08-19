@@ -3,13 +3,14 @@
  * (documentation/plans/2026-08-15-0345-serialization-and-file-compat-hardening.md).
  *
  * The invariant: a `.wproj` opened by a build that does not have the addon which
- * wrote part of it must load, preserve that part byte-exactly, re-save it
- * intact, and re-open in the full build as live objects.
+ * wrote part of it must load, preserve that part byte-exactly, and re-save it
+ * intact, so a build that does have the addon can still read it.
  *
  * `tests/integration/fixtures/curve-addon-scene.wproj` is **committed**, written
  * once by `tools/gen-file-compat-fixtures.mjs` under addon set A
  * (mesh + sculptcore + **curve**). Regenerating it from the build under test
- * would prove nothing, so nothing here writes it.
+ * would prove nothing, so nothing here writes it — and after P13 it could not
+ * be regenerated at all: `mesh` is deleted and `curve` is archived.
  *
  * `curve-addon-scene-v8.wproj` is the same scene written before struct ids were
  * derived from struct names (plan §4.3). It is kept, and asserted on separately,
@@ -17,18 +18,23 @@
  * over: an old file still opens anywhere, but the unknown-block bytes inside it
  * stop being portable the moment a partial build re-saves them.
  *
- * Two headless boots, both under addon set B (the default set, which does *not*
- * enable curve):
+ * One headless boot, under addon set B (this build's default set, which has
+ * never heard of curve): it cycles an addon on and off twice, loads the
+ * fixture, makes an unrelated edit, re-saves it, and re-loads its own output.
  *
- * - boot 1 cycles curve on and off twice, loads the fixture, makes an unrelated
- *   edit, re-saves it, and re-loads its own output. The cycle matters: with
- *   curve off by default, `disable` would return early and the teardown path
- *   would never run, so the re-save would be describing bytes from an addon
- *   this build had never *had* rather than one it had turned off — the weaker
- *   of the two cases, and the one that hides a dropped struct schema;
- * - boot 2 enables curve **and** tetmesh — adding as well as removing an addon
- *   relative to A, which is what criterion 8 asks for — and opens boot 1's
- *   output.
+ * The cycle is `leafmesh` rather than `curve`, and it is not incidental: it
+ * exercises the teardown path — the one that drops an addon's struct schemas,
+ * and that used to throw on a class filed as both DataBlock and
+ * SceneObjectData. `LeafMeshData` is that same double-filed shape, so the case
+ * survives the substitution intact.
+ *
+ * **P13 removed the full-build half.** Criterion 8 used to be a second boot
+ * that enabled curve and tetmesh and re-opened boot 1's output as live
+ * objects; both addons are archived out of the build now, so no build can
+ * decode this fixture's curve blocks any more. P13 §7 sanctions exactly that:
+ * "if all were deleted, assert bytes only". What is left is the stronger half
+ * anyway — that a build which *cannot* understand the data still carries it
+ * through load → edit → save → load without touching a byte.
  *
  * A third block covers the other direction of time: the same fixture with its
  * header version bumped past this build's, which must load *and say so* rather
@@ -68,6 +74,7 @@ interface FixtureMeta {
   curveName: string
   obLibId: number
   obName: string
+  /** Only meaningful to a build that can decode the block; none can, post-P13. */
   numVerts: number
   numEdges: number
 }
@@ -95,30 +102,13 @@ interface PartialResult {
   ok: boolean
   error?: string
   stack?: string
-  curveEnabled?: boolean
+  /** Whether this build has a `curve` addon at all. It must not. */
+  curvePresent?: boolean
   /** enable → disable → enable → disable, taken before the fixture is loaded. */
   cycle?: {ok: boolean; reason: string | null}[]
   afterLoad?: PartialProbe
   afterResave?: PartialProbe
   resavedBytes?: number
-}
-
-interface FullResult {
-  ok: boolean
-  error?: string
-  stack?: string
-  curveEnabled?: boolean
-  tetmeshEnabled?: boolean
-  count?: number
-  cls?: string | null
-  libId?: number | null
-  name?: string | null
-  numVerts?: number
-  numEdges?: number
-  obFound?: boolean
-  obDataIsCurve?: boolean
-  obDataLibId?: number | null
-  editObFound?: boolean
 }
 
 /** One load of a file whose header claims a version this build does not know. */
@@ -187,13 +177,17 @@ function partialBuildEval(fixture: string, resaved: string): string {
 ${EVAL_PRELUDE}
     const am = window._addons
 
-    // Turn curve *on* and back off twice before anything else. Left alone this
-    // build never enables curve, so disable() returns early and the teardown
+    // Turn an addon on and back off twice before anything else, so the teardown
     // path -- the one that drops the addon's struct schemas, and that used to
-    // throw on a class filed as both DataBlock and SceneObjectData -- was never
-    // entered. Everything below then runs against a build that had the addon
-    // and turned it off, which is the harder of the two cases.
-    const cycle = [am.enable('curve'), am.disable('curve'), am.enable('curve'), am.disable('curve')]
+    // throw on a class filed as both DataBlock and SceneObjectData -- is really
+    // entered. leafmesh ships defaultEnabled:false and registers LeafMeshData,
+    // which is that same double-filed shape (P13 archived curve).
+    const cycle = [
+      am.enable('leafmesh'),
+      am.disable('leafmesh'),
+      am.enable('leafmesh'),
+      am.disable('leafmesh'),
+    ]
 
     const probe = () => {
       const lib = _appstate.datalib
@@ -245,50 +239,11 @@ ${EVAL_PRELUDE}
 
     return {
       ok          : true,
-      curveEnabled: am.idmap.get('curve').enabled,
+      curvePresent: !!am.idmap.get('curve'),
       cycle       : cycle.map((r) => ({ok: r.ok, reason: r.reason ?? null})),
       afterLoad,
       afterResave,
       resavedBytes: buf.byteLength,
-    }
-  } catch (e) {
-    return {ok: false, error: String(e), stack: String(e.stack)}
-  }
-})()`
-}
-
-function fullBuildEval(resaved: string): string {
-  return `globalThis.__evalTestResult = (() => {
-  try {
-${EVAL_PRELUDE}
-    const am = window._addons
-    const e1 = am.enable('curve')
-    const e2 = am.enable('tetmesh')
-    if (!e1.ok) return {ok: false, error: 'enable(curve): ' + e1.message}
-    if (!e2.ok) return {ok: false, error: 'enable(tetmesh): ' + e2.message}
-
-    _appstate.loadFile(readAB(${JSON.stringify(resaved)}))
-
-    const lib = _appstate.datalib
-    const set = lib.libmap['curve']
-    const blocks = set ? [...set] : []
-    const c = blocks[0]
-    const ob = findObject('CurveObject')
-
-    return {
-      ok            : true,
-      curveEnabled  : am.idmap.get('curve').enabled,
-      tetmeshEnabled: am.idmap.get('tetmesh').enabled,
-      count         : blocks.length,
-      cls           : c ? c.constructor.name : null,
-      libId         : c ? c.lib_id : null,
-      name          : c ? c.name : null,
-      numVerts      : c && c.verts ? c.verts.length : -1,
-      numEdges      : c && c.edges ? c.edges.length : -1,
-      obFound       : !!ob,
-      obDataIsCurve : !!(ob && c && ob.data === c),
-      obDataLibId   : ob && ob.data ? ob.data.lib_id : null,
-      editObFound   : !!findObject('PartialEditObject'),
     }
   } catch (e) {
     return {ok: false, error: String(e), stack: String(e.stack)}
@@ -305,8 +260,6 @@ function futureVersionEval(fixture: string): string {
   return `globalThis.__evalTestResult = (() => {
   try {
 ${EVAL_PRELUDE}
-    window._addons.disable('curve')
-
     const warnings = []
     const realWarn = console.warn
     console.warn = function () {
@@ -361,7 +314,6 @@ const describeMaybe = canRun ? describe : describe.skip
 describeMaybe('cross-build .wproj compatibility (P10)', () => {
   let meta: FixtureMeta
   let partial: PartialResult
-  let full: FullResult
 
   beforeAll(() => {
     meta = JSON.parse(fs.readFileSync(FIXTURE_META, 'utf-8')) as FixtureMeta
@@ -371,13 +323,11 @@ describeMaybe('cross-build .wproj compatibility (P10)', () => {
 
     partial = boot(nwExe!, partialBuildEval(FIXTURE, resaved), 'p10partial-') as PartialResult
     if (!partial.ok) throw new Error(`partial-build boot failed: ${partial.error}\n${partial.stack}`)
-
-    full = boot(nwExe!, fullBuildEval(resaved), 'p10full-') as FullResult
-    if (!full.ok) throw new Error(`full-build boot failed: ${full.error}\n${full.stack}`)
   }, 600000)
 
   test('the reading build really does not have the addon that wrote the file', () => {
-    expect(partial.curveEnabled).toBe(false)
+    // Post-P13 this is stronger than "disabled": the addon is not installable.
+    expect(partial.curvePresent).toBe(false)
   })
 
   test('an addon survives being enabled and disabled repeatedly', () => {
@@ -436,31 +386,11 @@ describeMaybe('cross-build .wproj compatibility (P10)', () => {
     expect(partial.afterLoad!.editObFound).toBe(false)
     expect(partial.afterResave!.editObFound).toBe(true)
   })
-
-  test('criterion 8: the full build re-opens the partial build’s output as live objects', () => {
-    expect(full.curveEnabled).toBe(true)
-    expect(full.tetmeshEnabled).toBe(true)
-
-    expect(full.count).toBe(1)
-    expect(full.cls).toBe('CurveSpline')
-    expect(full.libId).toBe(meta.curveLibId)
-    expect(full.name).toBe(meta.curveName)
-    expect(full.numVerts).toBe(meta.numVerts)
-    expect(full.numEdges).toBe(meta.numEdges)
-
-    expect(full.obFound).toBe(true)
-    expect(full.obDataIsCurve).toBe(true)
-    expect(full.obDataLibId).toBe(meta.curveLibId)
-
-    // The unrelated edit the partial build made survives alongside it.
-    expect(full.editObFound).toBe(true)
-  })
 })
 
 describeMaybe('legacy (registration-order struct id) .wproj files (P10 §4.3)', () => {
   let meta: FixtureMeta
   let partial: PartialResult
-  let full: FullResult
 
   beforeAll(() => {
     meta = JSON.parse(fs.readFileSync(FIXTURE_V8_META, 'utf-8')) as FixtureMeta
@@ -471,13 +401,6 @@ describeMaybe('legacy (registration-order struct id) .wproj files (P10 §4.3)', 
     partial = boot(nwExe!, partialBuildEval(FIXTURE_V8, resaved), 'p10lpartial-') as PartialResult
     if (!partial.ok) throw new Error(`partial-build boot failed: ${partial.error}
 ${partial.stack}`)
-
-    // Deliberately the *original* file, not the re-saved one: an old file has to
-    // keep opening. What it cannot survive is a partial build's re-save, which is
-    // why nothing here asserts on `resaved`.
-    full = boot(nwExe!, fullBuildEval(FIXTURE_V8), 'p10lfull-') as FullResult
-    if (!full.ok) throw new Error(`full-build boot failed: ${full.error}
-${full.stack}`)
   }, 600000)
 
   test('a pre-stable-id file still loads, with the unknown block preserved', () => {
@@ -497,16 +420,6 @@ ${full.stack}`)
     expect(partial.afterResave!.editObFound).toBe(true)
     // Byte preservation is orthogonal to the id scheme: the bytes are opaque.
     expect(partial.afterResave!.origHash).toBe(partial.afterLoad!.origHash)
-  })
-
-  test('the full build still reads a pre-stable-id file as live objects', () => {
-    expect(full.count).toBe(1)
-    expect(full.cls).toBe('CurveSpline')
-    expect(full.libId).toBe(meta.curveLibId)
-    expect(full.name).toBe(meta.curveName)
-    expect(full.numVerts).toBe(meta.numVerts)
-    expect(full.numEdges).toBe(meta.numEdges)
-    expect(full.obDataIsCurve).toBe(true)
   })
 })
 

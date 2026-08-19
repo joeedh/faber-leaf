@@ -17,13 +17,13 @@
  *
  * Runtime:
  *   - The consumer module sees real `export const X = ...` statements with
- *     real values, so `import {X} from '@addon/mesh/api'` works statically.
+ *     real values, so `import {X} from '@addon/leafmesh/api'` works statically.
  *   - No mesh code is duplicated into the consumer bundle. The mesh subsystem
  *     ships once (today in the main bundle as an internal builtin; in a
  *     future step as its own per-addon bundle).
  *
  * Limitations:
- *   - Late binding: if the consumer reaches into `@addon/mesh/api` *before*
+ *   - Late binding: if the consumer reaches into `@addon/leafmesh/api` *before*
  *     the dependency is registered, the lookup yields `undefined`. The
  *     manifest dependency declaration is what guarantees ordering.
  *   - Default exports are not currently supported (mesh's api.ts uses

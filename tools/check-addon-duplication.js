@@ -29,11 +29,11 @@ import fs from 'fs'
  *
  * Phase 0/1: empty (no-op gate). Phase 2: ['tetmesh']. Faber Leaf P11 adds
  * 'leafmesh', which is external from birth — it has no host imports, so nothing
- * ever forced it in-bundle.
+ * ever forced it in-bundle. P13 archived 'tetmesh', leaving leafmesh alone.
  *
  * @type {string[]}
  */
-export const EXTERNAL_IDS = ['tetmesh', 'leafmesh']
+export const EXTERNAL_IDS = ['leafmesh']
 
 /**
  * Builtin addons compiled INTO the main bundle (registered via
@@ -45,7 +45,7 @@ export const EXTERNAL_IDS = ['tetmesh', 'leafmesh']
  *
  * @type {Set<string>}
  */
-export const IN_BUNDLE_BUILTIN_IDS = new Set(['mesh', 'subsurf', 'mesh_edit', 'curve', 'sculptcore'])
+export const IN_BUNDLE_BUILTIN_IDS = new Set(['sculptcore'])
 
 /** Normalize a metafile input key to forward slashes, repo-relative-ish. */
 function normalize(p) {

@@ -6,7 +6,7 @@
  * This lives in the lite-mesh layer — not core — because building the scene
  * constructs a `LiteMesh` (which pulls in sculptcore via `@sculptcore/api`),
  * and core must not depend on lite-mesh / sculptcore. The registration is the
- * same downward-inversion `addons/builtin/mesh/src/default_scene.ts` uses for
+ * same downward-inversion the old BREP default scene used for
  * the startup cube. It's pulled in as a side-effect import from
  * `scripts/entry_point.js`.
  *

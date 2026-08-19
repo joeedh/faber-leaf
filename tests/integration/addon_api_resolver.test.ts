@@ -3,16 +3,16 @@
  *
  * End-to-end test for the `@addon/<id>/api` runtime resolver (deferred
  * follow-up #2). The api_consumer fixture imports symbols from
- * `@addon/mesh/api`; the build pipeline replaces those imports with a tiny
- * lookup stub that reads from `globalThis._addons.getAddonAPI('mesh').
- * exports.mesh.*` at module-load time.
+ * `@addon/leafmesh/api`; the build pipeline replaces those imports with a tiny
+ * lookup stub that reads from `globalThis._addons.getAddonAPI('leafmesh').
+ * exports.leafmesh.*` at module-load time.
  *
  * This test:
  *   1. Runs `node tools/build-addons.js --include-fixtures` to produce
  *      `build/addons/api_consumer/src/main.js`.
  *   2. Asserts that the built bundle contains the lookup stub and does NOT
- *      contain the mesh source code (so we know the resolver did its job).
- *   3. Sets up a mock `_addons` global with stand-in mesh exports, then
+ *      contain the leafmesh source code (so we know the resolver did its job).
+ *   3. Sets up a mock `_addons` global with stand-in leafmesh exports, then
  *      dynamic-imports the built bundle and confirms the resolved symbols
  *      match the mocks. Demonstrates that consumer addons get late-bound
  *      values from the host.
@@ -34,9 +34,9 @@ const BUILT_ENTRY = Path.join(REPO_ROOT, 'build/addons/api_consumer/src/main.js'
 
 /**
  * Reads the built entry plus any sibling chunk(s) it statically imports, joined.
- * esbuild's code-splitting hoists the `@addon/mesh/api` stub into a shared
- * `_chunks/` module when more than one addon imports it (e.g. api_consumer +
- * tetmesh), so the stub may live in a chunk rather than inline in main.js.
+ * esbuild's code-splitting hoists the `@addon/leafmesh/api` stub into a shared
+ * `_chunks/` module when more than one addon imports it, so the stub may live
+ * in a chunk rather than inline in main.js.
  */
 function readBuiltWithChunks(entry: string): string {
   const seen = new Set<string>()
@@ -73,37 +73,37 @@ describeOnce('addon_api_plugin (runtime resolver)', () => {
 
   test('emits a stub bundle, not inlined mesh source', () => {
     // Read main.js + any chunk it imports — esbuild may hoist the shared
-    // @addon/mesh/api stub into a _chunks/ module.
+    // @addon/leafmesh/api stub into a _chunks/ module.
     const built = readBuiltWithChunks(BUILT_ENTRY)
 
-    // The stub reaches into globalThis._addons.getAddonAPI("mesh") and
-    // pulls each requested symbol from the exports.mesh namespace.
+    // The stub reaches into globalThis._addons.getAddonAPI("leafmesh") and
+    // pulls each requested symbol from the exports.leafmesh namespace.
     expect(built).toMatch(/globalThis\._addons.*getAddonAPI/s)
-    expect(built).toMatch(/__ns\["Mesh"\]/)
-    expect(built).toMatch(/__ns\["BVH"\]/)
-    expect(built).toMatch(/__ns\["mesh_utils"\]/)
+    expect(built).toMatch(/__ns\["LeafMesh"\]/)
+    expect(built).toMatch(/__ns\["LeafMeshData"\]/)
+    expect(built).toMatch(/__ns\["AttrType"\]/)
+    expect(built).toMatch(/__ns\["makeCube"\]/)
 
-    // The actual mesh implementation must NOT appear here. The real Mesh
-    // class is ~thousands of lines; we spot-check a few hallmark strings
-    // unique to the implementation (not just the type name).
-    expect(built).not.toMatch(/class Mesh extends SceneObjectData/)
-    expect(built).not.toMatch(/recalcNormals/) // a mesh.ts method
-    expect(built).not.toMatch(/getElemList/) // a mesh_base.ts method
-    // And the bundle should be small — much smaller than even one mesh file.
+    // The actual leafmesh implementation must NOT appear here. We spot-check
+    // hallmark strings unique to the implementation, not just the type names.
+    expect(built).not.toMatch(/class LeafMeshData extends SceneObjectData/)
+    expect(built).not.toMatch(/splitEdge/) // a topo.ts method
+    expect(built).not.toMatch(/triangulateMesh/) // a triangulate.ts export
+    // And the bundle should be small — much smaller than even one leafmesh file.
     expect(built.length).toBeLessThan(20 * 1024) // 20kb cap
   })
 
   test('runtime lookup yields the host-registered symbols', async () => {
     // Mock the host AddonManager surface that the stub reads from.
-    const mockMeshSymbols = {
-      Mesh      : class MockMesh {},
-      MeshFlags : {DEAD: 1, HIDE: 2},
-      BVH       : class MockBVH {},
-      mesh_utils: {answer: 42},
+    const mockLeafSymbols = {
+      LeafMesh    : class MockLeafMesh {},
+      LeafMeshData: class MockLeafMeshData {},
+      AttrType    : {F32: 1, I32: 2},
+      makeCube    : () => 42,
     }
     ;(globalThis as unknown as {_addons: {getAddonAPI: (id: string) => MockAddonAPI | undefined}})._addons = {
       getAddonAPI(id: string): MockAddonAPI | undefined {
-        if (id === 'mesh') return {exports: {mesh: mockMeshSymbols}}
+        if (id === 'leafmesh') return {exports: {leafmesh: mockLeafSymbols}}
         return undefined
       },
     }
@@ -112,10 +112,10 @@ describeOnce('addon_api_plugin (runtime resolver)', () => {
     // we're outside the workspace's module resolver.
     const mod = (await import('file://' + BUILT_ENTRY)) as {
       getResolvedSymbols: () => {
-        Mesh: unknown
-        MeshFlags: unknown
-        BVH: unknown
-        mesh_utils: unknown
+        LeafMesh: unknown
+        LeafMeshData: unknown
+        AttrType: unknown
+        makeCube: unknown
       }
       addonDefine: {name: string}
       register: () => void
@@ -126,10 +126,10 @@ describeOnce('addon_api_plugin (runtime resolver)', () => {
     expect(mod.addonDefine.name).toBe('API Consumer')
 
     const resolved = mod.getResolvedSymbols()
-    expect(resolved.Mesh).toBe(mockMeshSymbols.Mesh)
-    expect(resolved.MeshFlags).toBe(mockMeshSymbols.MeshFlags)
-    expect(resolved.BVH).toBe(mockMeshSymbols.BVH)
-    expect(resolved.mesh_utils).toBe(mockMeshSymbols.mesh_utils)
+    expect(resolved.LeafMesh).toBe(mockLeafSymbols.LeafMesh)
+    expect(resolved.LeafMeshData).toBe(mockLeafSymbols.LeafMeshData)
+    expect(resolved.AttrType).toBe(mockLeafSymbols.AttrType)
+    expect(resolved.makeCube).toBe(mockLeafSymbols.makeCube)
 
     mod.register()
     mod.unregister()
@@ -141,6 +141,6 @@ describeOnce('addon_api_plugin (runtime resolver)', () => {
     const index = JSON.parse(fs.readFileSync(indexPath, 'utf-8'))
     const consumer = index.find((e: {manifest: {id: string}}) => e.manifest.id === 'api_consumer')
     expect(consumer).toBeDefined()
-    expect(consumer.manifest.dependencies).toEqual(['mesh'])
+    expect(consumer.manifest.dependencies).toEqual(['leafmesh'])
   })
 })

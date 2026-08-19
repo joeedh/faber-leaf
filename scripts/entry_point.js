@@ -18,12 +18,6 @@ import {loadShapes} from './webgl/simplemesh_shapes.js'
 import './test/test_base.js'
 import './test/test.js'
 
-// Inversion bridge: registers the builtin-addon classes (Mesh, Vertex, Element,
-// BVHSettings, CurveSpline) into the core data-API registry. Must be imported
-// before preinit() (which constructs AppState → getDataAPI), so the registry is
-// populated when getDataAPI walks it. See addons/builtin/builtin_data_api.ts.
-import '../addons/builtin/builtin_data_api.js'
-
 // View3D toolmode registrations. Was previously in core/appstate.ts; moved
 // here so core stops importing from editors/view3d/tools. See plan §3 / §12.
 import './editors/view3d/tools/tools.js'

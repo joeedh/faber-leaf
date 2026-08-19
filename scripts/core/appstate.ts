@@ -1071,8 +1071,8 @@ export class AppState {
    * Host-owned file migrations: the ones about the *file* rather than about a
    * subsystem's data. Anything that has to read a datablock an addon owns is
    * contributed through `registerFileMigrator` and leaves with that addon —
-   * mesh's three grid migrations live in `addons/builtin/mesh/src/migrations.ts`
-   * (plan §4.4a).
+   * which is what happened to the BREP's three grid migrations when P13 deleted
+   * it (P10 plan §4.4a).
    */
   do_versions(version: number, datalib: Library): void {
     runFileMigrations({fromVersion: version, toVersion: APP_VERSION, datalib})

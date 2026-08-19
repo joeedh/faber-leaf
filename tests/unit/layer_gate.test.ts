@@ -66,7 +66,7 @@ describe('evaluate', () => {
 
   test('a single error-severity violation fails the gate', () => {
     const rules = tally(
-      cruiseResult([violation('core-no-mesh', 'error', 'scripts/core/context.ts', 'addons/builtin/mesh/src/mesh.ts')]),
+      cruiseResult([violation('core-no-addons', 'error', 'scripts/core/context.ts', 'addons/builtin/x/src/x.ts')]),
       RULE_NAMES,
       SEVERITIES
     )

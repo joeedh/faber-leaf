@@ -4,7 +4,7 @@
  * Replaces the mesh subsystem's classic startup cube with a LiteMesh sphere
  * (spherified cube, dimen 50 / size 4) and asks the default file to start in the
  * sculptcore toolmode. Registered as a side-effect import in entry_point.js
- * AFTER addons/builtin/mesh/src/default_scene.ts so this builder wins.
+ * AFTER any addon-contributed builder so this one wins.
  *
  * Lives in the lite-mesh layer (which owns the wasm-backed LiteMesh) rather than
  * the mesh addon, per the "builders register downward from the layer that owns

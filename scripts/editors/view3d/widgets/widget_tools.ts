@@ -11,7 +11,6 @@ import {
   ToolOp,
   ToolFlags,
   UndoFlags,
-  ToolMacro,
   PropFlags,
   PropTypes,
   PropSubTypes,
@@ -25,26 +24,11 @@ import {SelMask} from '../../../core/select_types.js'
 
 import {View3DFlags} from '../view3d_base.js'
 import {WidgetBase, WidgetSphere, WidgetArrow, WidgetFlags, WidgetManager} from './widgets.js'
-import {TranslateOp, ScaleOp, RotateOp, InflateOp} from '../transform/transform_ops.js'
+import {TranslateOp, ScaleOp, RotateOp} from '../transform/transform_ops.js'
 import {calcTransCenter, type TransCenterResult} from '../transform/transform_query.js'
 import {Icons} from '../../icon_enum.js'
 import {ConstraintSpaces} from '../transform/transform_base.js'
-import {InsetTransformOp} from '../transform/transform_inset.js'
 import type {ViewContext} from '../../../core/context.js'
-
-/** The part of a BREP mesh `TransformWidget.validate` reads. Erased with the BREP at P13. */
-interface BrepSelectedVerts {
-  verts: {selected: Iterable<unknown>}
-}
-
-// Late-bound by the mesh addon's register hook so this file does not
-// statically depend on the mesh addon (which would cycle back through
-// mesh_ops_base.ts → mesh.ts). See addons/builtin/mesh/src/addon_register.ts.
-import type {ToolOpAny} from '../../../path.ux/scripts/path-controller/controller/controller_abstract.js'
-let _InsetHoleOp: {invoke(ctx: unknown, args: object): ToolOpAny} | undefined
-export function setInsetHoleOp(op: typeof _InsetHoleOp): void {
-  _InsetHoleOp = op
-}
 
 const update_temps = util.cachering.fromConstructor(Vector3, 64)
 const update_temps4 = util.cachering.fromConstructor(Vector4, 64)
@@ -108,14 +92,6 @@ export class TransformWidget extends WidgetBase {
     if (selmask & SelMask.OBJECT) {
       for (const ob of ctx.selectedObjects) {
         return true
-      }
-    }
-
-    if (selmask & SelMask.GEOM) {
-      for (const ob of ctx.selectedMeshObjects) {
-        for (const v of (ob.data as unknown as BrepSelectedVerts).verts.selected) {
-          return true
-        }
       }
     }
 
@@ -516,77 +492,6 @@ export class RotateWidget extends TransformWidget {
     op.inputs.selmask.setValue(this.ctx!.selectMask)
 
     this.ctx!.api.execTool(this.ctx!, op)
-  }
-
-  draw(gl: WebGL2RenderingContext, manager: WidgetManager, matrix?: Matrix4) {
-    gl.depthMask(true)
-    gl.enable(gl.DEPTH_TEST)
-
-    super.draw(gl, manager, matrix)
-
-    gl.disable(gl.DEPTH_TEST)
-  }
-
-  update(): this {
-    if (!this.ctx?.view3d) {
-      return this
-    }
-
-    if (this._first) {
-      this.create(this.ctx!, this.manager)
-    }
-    super.update()
-    return this
-  }
-}
-
-export class InflateWidget extends TransformWidget {
-  _first: boolean
-  arrow?: WidgetBase
-
-  constructor() {
-    super()
-
-    this._first = true
-  }
-
-  static widgetDefine() {
-    return {
-      description: 'Inflate Widget',
-      uiname     : 'Inflate',
-      name       : 'inflate',
-      icon       : Icons.INFLATE,
-      flag       : 0,
-    }
-  }
-
-  static nodedef() {
-    return {
-      ...super.nodedef(),
-      name: 'inflate_widget',
-    }
-  }
-
-  create(ctx: ViewContext, manager: WidgetManager) {
-    this._first = false
-
-    super.create(ctx, manager)
-
-    this.arrow = this.getBlockArrow(new Matrix4(), new Vector4([0.7, 0.7, 0.7, 1]))
-    this.arrow.onclick = (e: PointerEvent) => {
-      this._handleClick(e)
-    }
-  }
-
-  _handleClick(e: PointerEvent) {
-    const macro = new ToolMacro()
-    if (!_InsetHoleOp) {
-      throw new Error('InsetHoleOp not registered — mesh addon must register before widget use')
-    }
-    macro.add(_InsetHoleOp.invoke(this.ctx!, {}))
-    macro.add(InsetTransformOp.invoke(this.ctx!, {selmask: this.ctx!.selectMask}))
-
-    this.execTool(this.ctx!, macro)
   }
 
   draw(gl: WebGL2RenderingContext, manager: WidgetManager, matrix?: Matrix4) {

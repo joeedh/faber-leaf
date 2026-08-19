@@ -115,12 +115,10 @@ export type {IPropsPanel} from './core/props_panels.js'
 // closes a cycle. Addons register a kind through `AddonAPI.registerDataKind`.
 
 // sceneobject/* and View3DOp — MUST be re-exported BEFORE context.ts.
-// context.ts pulls in editors/all → editors/view3d → tools/tools.ts →
-// the toolmode modules → mesh.ts (and PropsEditor → mesh_ops_base.ts). Any
-// `class X extends SceneObjectData` (mesh.ts:310) or `class MeshOp extends
-// View3DOp` (mesh_ops_base.ts:105) will TDZ if those base classes aren't bound
-// by the time the context-triggered chain re-enters the mesh addon. Keep these
-// re-exports above `ViewContext` to dodge that race.
+// context.ts pulls in editors/all → editors/view3d → tools/tools.ts → the
+// toolmode modules. Any addon class extending `SceneObjectData` or `View3DOp`
+// TDZs if those base classes aren't bound by the time the context-triggered
+// chain re-enters the addon. Keep these re-exports above `ViewContext`.
 export {SceneObject, ObjectFlags, Colors, composeObjectMatrix} from './sceneobject/sceneobject.js'
 export {DrawModes, DrawFlags} from './sceneobject/drawmode.js'
 export {SceneObjectData} from './sceneobject/sceneobject_base.js'
@@ -135,18 +133,6 @@ export type {
 } from './sceneobject/sceneobject_base.js'
 export {StandardTools} from './sceneobject/stdtools.js'
 export {View3DOp} from './editors/view3d/view3d_ops.js'
-
-// tet — TetMesh DataBlock + the geometry helpers the tetmesh addon's ops
-// reach for. TetMesh extends SceneObjectData (above) and is referenced by
-// core/context.ts, so it must stay a single class in the main bundle; the
-// addon imports it through here rather
-// than inlining scripts/tet/tetgen.js (which would re-run its module-scope
-// nstructjs/DataBlock/SceneObjectData.register and throw a duplicate-struct
-// error). Placed after SceneObjectData to avoid TDZ.
-export {TetMesh} from './tet/tetgen.js'
-export {TetTypes, TetFlags, TetRecalcFlags} from './tet/tetgen_base.js'
-export {meshToTetMesh, vertexSmooth, tetMeshToMesh, tetrahedralizeMesh} from './tet/tetgen_utils.js'
-export {tetSolve} from './tet/tet_deform.js'
 
 export {ViewContext} from './core/context.js'
 export type {ToolContext} from './core/context.js'
@@ -204,27 +190,18 @@ export {
 } from './core/select_types.js'
 export {FindNearest, FindNearestRet, castViewRay, CastModes} from './editors/view3d/findnearest.js'
 export type {ScreenPickResult} from './editors/view3d/findnearest.js'
-// MeshTransType rides transform_ops.js rather than transform_types.js: the hub
-// already depends on the former, and a direct edge to the latter closes four
-// more cycles through the mesh addon it imports. The type is the BREP mesh's
-// transform bridge — its own addon registers it (§8), and P11 moves the class.
-export {InflateOp, MeshTransType, TranslateOp, TransformOp} from './editors/view3d/transform/transform_ops.js'
+// Routed through transform_ops.js rather than transform_types.js: the hub
+// already depends on the former, and a direct edge to the latter closed cycles
+// back when transform_types.ts still imported the BREP mesh addon.
+export {TranslateOp, TransformOp} from './editors/view3d/transform/transform_ops.js'
 // The transform-data interface itself, so a geometry addon can contribute a
 // type instead of the host naming one. `TransformDefine` is the return type of
 // a method every implementor must write, and `TransDataElem` / `TransDataList`
 // are the two classes it must subclass, so all four travel together. Routed
-// through transform_ops.js for the same cycle reason as MeshTransType above.
+// through transform_ops.js for the same reason as the ops above.
 export {TransDataElem, TransDataList, TransDataType} from './editors/view3d/transform/transform_ops.js'
 export type {ITransDataType, TransformDefine} from './editors/view3d/transform/transform_ops.js'
-export {
-  InflateWidget,
-  RotateWidget,
-  ScaleWidget,
-  TranslateWidget,
-  setInsetHoleOp,
-} from './editors/view3d/widgets/widget_tools.js'
-// View3DOp is re-exported above (before ViewContext) to avoid TDZ in
-// addons/builtin/mesh/src/mesh_ops_base.ts:105.
+export {RotateWidget, ScaleWidget, TranslateWidget} from './editors/view3d/widgets/widget_tools.js'
 export {Icons} from './editors/icon_enum.js'
 export {ImageBus} from './editors/image/ImageBus.js'
 export type {BoundingBox} from './editors/view3d/view3d_utils.js'

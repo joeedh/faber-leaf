@@ -56,7 +56,7 @@ export default defineConfig([
   // Layer boundaries: prevent core/util from reaching into mesh, prevent cross-addon
   // direct imports. Warn-level today (codebase has legacy violations);
   // converted to error in the cleanup step (§6 step 12) once the mesh body has
-  // moved into addons/builtin/mesh/.
+  // moved into an addon.
   {
     files: ['scripts/core/**/*.{ts,tsx,js,mjs,cjs}'],
     rules: {
