@@ -7,13 +7,9 @@ import './_framework_runtime.js'
 import './typescript_entry.js'
 import './camera/camera.js'
 
-import * as appstate from './core/appstate.js'
-import {migrateAppIdentity} from './core/identity_migration.js'
-import {getAppStorage} from './core/app_storage.js'
 // Registers the OPFS / IndexedDB autosave backend (used when no NW.js fs
 // backend is available). Side-effect import; harmless under NW.js.
 import './core/autosave_backend_browser.js'
-import {loadShapes} from './webgl/simplemesh_shapes.js'
 
 import './test/test_base.js'
 import './test/test.js'
@@ -34,15 +30,16 @@ import './image/image_type_ops.js'
 // the only place the app names a product.
 import distribution from '@distribution'
 
-import addon, {startAddons} from './addon/addon.js'
+import addon from './addon/addon.js'
 
 import {getAppState} from './core/app_instance.js'
 import {getAppArgv} from './core/app_argv.js'
 import {runTestHarness} from './core/test_harness.js'
+import {mountFaberLeaf} from './mount.js'
 
-import config from './config/config.js'
-import {setupPathux} from './setup_pathux.js'
-import {nstructjs} from './path.ux/pathux.js'
+// The embedding surface. `mountFaberLeaf` is a page-level entry, not an addon
+// one, so it ships from the bundle entry rather than @framework/api.
+export {mountFaberLeaf, mountedInstances} from './mount.js'
 
 export function handleNodeArguments() {
   // getAppArgv reads the NW.js user args (nw.App.argv); see
@@ -60,56 +57,17 @@ export function handleNodeArguments() {
 }
 
 export async function init() {
-  // Must run before anything reads the startup scene, settings or the installed
-  // addon list, i.e. before preinit()/startAddons(). Never throws.
-  await migrateAppIdentity(getAppStorage())
-
-  await setupPathux()
-
-  //give addons 500 ms to load
-  let timeout = config.addonLoadWaitTime
-  if (timeout === undefined) {
-    timeout = 500
-  }
-
-  nstructjs.setWarningMode(0)
-  nstructjs.validateStructs()
-
-  appstate.preinit()
-
-  // Declares the distribution's in-bundle addons as sources and installs its
-  // allow-list, startup scene and title. Must precede startAddons().
-  addon.loadDistribution(distribution)
-
-  console.log(`Loading addons for distribution "${distribution.id}"`)
-  // Await the unified pipeline so every addon's toolmodes/editors/datablocks
-  // are registered + enabled before we build the UI (appstate.init). The
-  // distribution's in-bundle sources were registered synchronously just above.
-  // It also awaits each addon's boot task, so any engine an addon needs (e.g.
-  // sculptcore's WASM) is warm before appstate.init reads the startup file.
-  await startAddons(true)
+  const handle = await mountFaberLeaf(document.body, {distribution})
 
   window.setTimeout(() => {
-    loadShapes()
+    window._print_evt_debug = true
+  }, 100)
 
-    appstate.init()
+  if (window.haveNwjs) {
     window.setTimeout(() => {
-      window._print_evt_debug = true
-    }, 100)
+      handleNodeArguments()
+    }, 0)
+  }
 
-    if (window.haveNwjs) {
-      window.setTimeout(() => {
-        handleNodeArguments()
-      }, 0)
-    }
-
-    //shortcut for console use only
-    if (typeof CTX === 'undefined') {
-      Object.defineProperty(window, 'CTX', {
-        get: () => {
-          return getAppState().ctx
-        },
-      })
-    }
-  }, timeout)
+  return handle
 }

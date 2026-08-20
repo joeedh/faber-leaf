@@ -27,24 +27,6 @@
           position: fixed;
       }
 
-      #canvas2d {
-          width: 100%;
-          height: 100%;
-          position: absolute;
-          z-index: -3;
-          background-color: rgba(255, 255, 255, 0);
-          opacity: 1.0;
-      }
-
-      #canvas3d {
-          width: 100%;
-          height: 100%;
-          position: absolute;
-          z-index: -2;
-          background-color: rgba(255, 255, 255, 0);
-          opacity: 1.0;
-      }
-
       #loading-overlay {
           position: fixed;
           top: 0;
@@ -166,47 +148,31 @@
       }
     }
 
-    /* appstate.init() runs on a timeout well after init() resolves, so poll for
-       the screen instead of hiding when the module promise settles. */
-    function waitForAppUI(deadline) {
-      if (window._appstate && window._appstate.screen) {
+    /* The shipped app is an embedder like any other: it mounts one instance
+       into the document body through mountFaberLeaf, which resolves with the
+       screen already built. See documentation/embedding.md. */
+    window.addEventListener('load', () => {
+      /* Backstop: never leave the overlay up if the mount stalls. */
+      const backstop = setTimeout(hideLoadingOverlay, LOADING_TIMEOUT_MS)
+
+      import("./build/entry_point.js").then(entry_point => entry_point.init()).then(() => {
+        clearTimeout(backstop)
         hideLoadingOverlay()
-        return
-      }
-
-      if (Date.now() > deadline) {
-        hideLoadingOverlay()
-        return
-      }
-
-      requestAnimationFrame(() => waitForAppUI(deadline))
-    }
-
-    window.init = function () {
-      waitForAppUI(Date.now() + LOADING_TIMEOUT_MS)
-
-      import("./build/entry_point.js").then(entry_point => {
-        entry_point.init();
       }).catch(err => {
+        clearTimeout(backstop)
         console.error(err)
         loadingOverlayError('Failed to load application; see the console for details.')
       });
-    }
+    })
   </script>
 </head>
-<body onload="init()">
+<body>
 <div id="loading-overlay">
   <img id="loading-logo" src="assets/logo/logo1-with-text-dark.svg" alt="FaberLeaf">
   <div id="loading-spinner"></div>
   <div id="loading-text">Loading&hellip;</div>
 </div>
 <img id="iconsheet" style="display:none" src="assets/iconsheet.svg"></img>
-<div id="content">
-  <canvas id="canvas2d">
-  </canvas>
-  <canvas id="canvas3d">
-  </canvas>
-</div>
 </body>
 </html>
   

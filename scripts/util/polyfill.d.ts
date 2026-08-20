@@ -36,8 +36,11 @@ export declare global {
     DTST2: number | undefined
     _appstate: AppState
     FILE_LOADING: boolean
-    /** view3d.ts owns this; it is a throwing WebGPU stub, not a real context. */
-    _gl: WebGL2RenderingContext
+    /**
+     * Alias to the active instance's context; view3d.ts owns it. Under the
+     * default WebGPU renderer it is a throwing stub, not a real context.
+     */
+    _gl: WebGL2RenderingContext | undefined
     /** resetRenderEngine defaults to true */
     redraw_viewport(resetRenderEngine?: boolean, drawCount?: number): void
     /** resetRenderEngine defaults to true */

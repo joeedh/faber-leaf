@@ -65,7 +65,7 @@ import {
   recoverBlockHeader,
 } from './missing_addon'
 import {runFileMigrations} from './file_migrations'
-import {getAppState, registerAppInstance} from './app_instance'
+import {getAppState} from './app_instance'
 import './app_ops.js'
 import {BinWriter} from 'nstructjs'
 
@@ -165,6 +165,21 @@ export class AppState {
   changeId: number
   /** Periodic crash-recovery autosave (constructed once the app has booted). */
   autosave?: AutosaveManager
+  /**
+   * Whether start() arms crash-recovery autosave. The backend has one slot per
+   * app identity, so only the first-mounted instance may write it — see
+   * documentation/embedding.md §7.
+   */
+  enableAutosave: boolean
+  /** The element this instance mounts into. Every DOM insert goes through it. */
+  container: HTMLElement
+  /** This instance's 3D canvas, created lazily by initWebGL(). */
+  glCanvas?: HTMLCanvasElement
+  /**
+   * Releases run by destroy(), newest first. Layers above core register their
+   * own teardown here rather than making core import them.
+   */
+  private teardownHooks: (() => void)[]
 
   constructor() {
     this.arguments = []
@@ -185,6 +200,13 @@ export class AppState {
 
     this.playing = false
     this.changeId = 0
+    this.container = document.body
+    this.teardownHooks = []
+    this.enableAutosave = true
+  }
+
+  onTeardown(cb: () => void): void {
+    this.teardownHooks.push(cb)
   }
 
   unswapScreen(): void {
@@ -213,7 +235,7 @@ export class AppState {
     this.screen = screen
     screen.ctx = this.ctx
 
-    document.body.appendChild(this.screen as unknown as HTMLElement)
+    this.container.appendChild(this.screen as unknown as HTMLElement)
 
     screen.listen()
     screen.setCSS()
@@ -235,7 +257,7 @@ export class AppState {
 
     this.ctx = new ViewContext(this as unknown as AppState)
 
-    window.addEventListener('contextmenu', (e) => {
+    const onContextMenu = (e: MouseEvent): void => {
       if (this.ignoreEvents) {
         return
       }
@@ -251,14 +273,17 @@ export class AppState {
       if (elem && elem.tagName !== 'TEXTBOX-X') {
         e.preventDefault()
       }
-    })
+    }
+
+    window.addEventListener('contextmenu', onContextMenu)
+    this.onTeardown(() => window.removeEventListener('contextmenu', onContextMenu))
 
     this.screen = document.createElement('webgl-app-x') as unknown as Screen<ViewContext>
     this.screen.ctx = this.ctx
     this.screen.size[0] = window.innerWidth - 45
     this.screen.size[1] = window.innerHeight - 45
 
-    document.body.appendChild(this.screen as unknown as HTMLElement)
+    this.container.appendChild(this.screen as unknown as HTMLElement)
     this.screen.setCSS()
     this.screen.listen()
 
@@ -269,9 +294,11 @@ export class AppState {
 
     // Start crash-recovery autosave now that storage + the default file exist;
     // offer to recover a newer backup before the user starts editing.
-    this.autosave = new AutosaveManager(this)
-    this.autosave.start()
-    void this.autosave.checkRecovery()
+    if (this.enableAutosave) {
+      this.autosave = new AutosaveManager(this)
+      this.autosave.start()
+      void this.autosave.checkRecovery()
+    }
 
     // Converge settings/flags across concurrent NW.js instances sharing one
     // worktree's `.sculptcore` (no-op in the browser / single instance).
@@ -474,7 +501,7 @@ export class AppState {
       }
     }
 
-    document.body.appendChild(screen2 as unknown as HTMLElement)
+    this.container.appendChild(screen2 as unknown as HTMLElement)
   }
 
   _execEditorOnFileLoad(): void {
@@ -594,7 +621,7 @@ export class AppState {
       }
       pcirc.init()
 
-      document.body.appendChild(pcirc as unknown as HTMLElement)
+      this.container.appendChild(pcirc as unknown as HTMLElement)
       pcirc.startTimer()
 
       const timer = window.setInterval(() => {
@@ -950,7 +977,7 @@ export class AppState {
         this.screen.remove()
       }
 
-      document.body.appendChild(screen as unknown as HTMLElement)
+      this.container.appendChild(screen as unknown as HTMLElement)
 
       let ok = false
 
@@ -1212,24 +1239,42 @@ export class AppState {
   }
 
   destroy(): void {
-    this.screen.unlisten()
+    this.autosave?.stop()
+    this.autosave = undefined
+
+    for (const cb of this.teardownHooks.reverse()) {
+      try {
+        cb()
+      } catch (error) {
+        util.print_stack(error as Error)
+      }
+    }
+    this.teardownHooks.length = 0
+
+    const screen = this.screen
+    if (screen !== undefined) {
+      screen.unlisten()
+      screen.remove()
+    }
   }
 
   draw(): void {}
 }
 
-export function preinit(): AppState {
-  const state = new AppState()
+let processGlobalsReady = false
 
-  registerAppInstance(state)
-  // Deprecated alias to the first-mounted instance, kept for console use and
-  // for the CDP harness. P20 §4 dates its removal.
-  window._appstate = state
+/**
+ * Page-wide setup that every mounted instance shares: shape tables, the
+ * path.ux controller, and the `window.redraw_all` / `updateDataGraph` hooks
+ * (which drive whichever instance is active). Idempotent — mounting a second
+ * instance must not install a second keydown listener.
+ */
+export function initProcessGlobals(): void {
+  if (processGlobalsReady) {
+    return
+  }
+  processGlobalsReady = true
 
-  return state
-}
-
-export function init(): void {
   loadShapes()
   initSimpleController()
 
@@ -1300,6 +1345,4 @@ export function init(): void {
     graphreq = 1
     setTimeout(gf, 1)
   }
-
-  getAppState().start()
 }

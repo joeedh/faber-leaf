@@ -1,6 +1,6 @@
 # P20 — W5b: de-globalize + the embedding API — `[xhigh]`
 
-**Status:** plan — not started.
+**Status:** implemented 2026-08-19.
 
 **Date:** 2026-08-15
 
@@ -169,6 +169,27 @@ Requirements:
 `index.html` becomes a thin consumer of `mountFaberLeaf`, so the shipped app
 uses the same path an embedder does. Anything else and the embedding path rots.
 
+*(2026-08-19, as built. `scripts/mount.ts` holds `mountFaberLeaf` plus
+`mountedInstances()`; the process-wide half of the old `appstate.init()` is now
+the idempotent `initProcessGlobals()`, and per-instance boot stays in
+`AppState.start()`. `AppState` gained `container`, `glCanvas`, `enableAutosave`
+and a teardown-hook list — the last so layers above core register their own
+releases (`initWebGL` registers `disposeWebGL`) without core importing them.
+`destroy()` runs those hooks, stops autosave and removes the screen. The old
+one-instance boot pair `appstate.preinit()` / `appstate.init()` is deleted — a
+function that registers "the" instance is the single-instance assumption in
+miniature.*
+
+*`mountFaberLeaf` is exported from `scripts/entry_point.js`, **not**
+`scripts/framework_api.ts`: the hub sits inside the host's import-cycle knot, so
+re-exporting `mount.ts` there put `no-circular` one over budget — and mounting
+the app is a page-level act an addon has no business performing. Embedders
+import it from the built bundle, which is exactly what the test does.*
+
+*Instance count is not fixed at two: `state.enableAutosave` is true only for the
+first mount, because the autosave backend has one slot per app identity. §7 of
+[embedding.md](../embedding.md) records that.)*
+
 ## 4. `documentation/embedding.md`
 
 The deliverable is as much the document as the code:
@@ -187,6 +208,11 @@ The deliverable is as much the document as the code:
 - **Fate of the compatibility shims**: whether `window._appstate` survives as a
   first-instance alias, and if so for how long. Pick one and date it.
 
+  *(2026-08-19: it survives, aliasing the **first-mounted** instance, and both
+  it and `window._gl` are dated **2027-02-01** in
+  [embedding.md](../embedding.md) §5. `window._SelMask` and
+  `window.redraw_uveditors` were deleted outright — nothing read them.)*
+
 ### 4.1 Also record decision #9
 
 The strategy assigns the file-format break's *documentation* here even though
@@ -201,6 +227,12 @@ coherently rather than distributed across P10, P13 and P15's release notes.
   with independent scenes and selections. Automated, not a manual check.
 - Mount → unmount → mount in a loop with no growth in WebGPU resources,
   listeners, or registry entries.
+
+  *(2026-08-19: both live in `tests/integration/mount_lifecycle.test.ts`, which
+  drives the real NW.js app headlessly and reaches `mountFaberLeaf` by importing
+  the shipped bundle — so the test fails if the embedding export ever stops
+  being reachable the way an embedder reaches it. The grep gate below is
+  `tests/unit/document_scope.test.ts`.)*
 - The shipped `index.html` boots through `mountFaberLeaf`, and the existing
   full-app suites pass unchanged through it.
 - P17's external-addon packaging test still passes — `globalThis._framework`
@@ -213,6 +245,12 @@ coherently rather than distributed across P10, P13 and P15's release notes.
 - Two instances with different distributions (`faber-leaf` and
   `faber-leaf-core`) on one page — the strongest form of the test, and worth
   attempting even if it is not made a hard requirement.
+
+  *(2026-08-19: not done, and not a defect in the mount. The addon registry is
+  process-wide, so the distribution is read once by the first mount; a second
+  instance under a different one would need the registry made per-instance,
+  which is a larger change than P20. Recorded as a limit in
+  [embedding.md](../embedding.md) §3 and §7 rather than left implied.)*
 
 ## 6. Risks
 

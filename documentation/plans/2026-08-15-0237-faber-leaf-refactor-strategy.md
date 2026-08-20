@@ -4,6 +4,10 @@
 workstream below needs its own plan doc in `documentation/plans/` before work
 starts.
 
+**All twenty phases landed as of 2026-08-19** (P20 last). §9.3's checklist and
+§9.5's criteria table record where each one closed; what changed against the
+plan is written into the individual plan docs, not summarized away here.
+
 **Date:** 2026-08-15
 
 **Revision:** 2026-08-15, after an adversarial review of §1–§9. The findings are
@@ -1327,7 +1331,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P17 | [W5a — distributions + cycle cleanup](./2026-08-15-0420-w5-distributions.md) | W5 §1–2 | 11 | P16 | **landed** |
 | P18 | [W4a — `IUVSource` + UV editor rewrite](./2026-08-15-0425-w4-iuvsource-uv-editor.md) | W4 | 12 | P8, P11 | **landed** |
 | P19 | [W4b — port the unwrapping solvers](./2026-08-15-0430-w4-unwrapping-port.md) | W4 | 12 | P18, P13 (rescue) | **landed** |
-| P20 | [W5b — de-globalize + embedding contract](./2026-08-15-0435-w5-deglobalize-embedding-api.md) | W5 §3–4 | 13 | P17, P18 | **written** |
+| P20 | [W5b — de-globalize + embedding contract](./2026-08-15-0435-w5-deglobalize-embedding-api.md) | W5 §3–4 | 13 | P17, P18 | **landed** |
 
 Five of them — **P3, P7, P10, P14, P20** — are tagged **`[xhigh]`** in §9.3 and
 are worth writing at raised reasoning effort; the compact-and-switch points are
@@ -1926,16 +1930,29 @@ ungrounded input just argues a wrong plan more convincingly.
 > the semver policy on `@framework/api`. It is the only plan whose output third
 > parties depend on directly, which makes it the hardest one to revise later.
 
-- [ ] **P20 — [W5b: de-globalize + embedding contract](./2026-08-15-0435-w5-deglobalize-embedding-api.md)** — **`[xhigh]`**
-  - Audit and gate `window._appstate`, `window.DEBUG`, `window._SelMask`
+- [x] **P20 — [W5b: de-globalize + embedding contract](./2026-08-15-0435-w5-deglobalize-embedding-api.md)** — **`[xhigh]`**
+  - [x] Audit and gate `window._appstate`, `window.DEBUG`, `window._SelMask`
     (`selectmode.ts:54`), `window.redraw_uveditors`, `globalThis._framework`,
     and the fixed `#canvas2d`/`#canvas3d`/`#iconsheet` IDs in `index.html`.
-  - `mountFaberLeaf(container, options)` returning a handle; debug globals
-    behind a dev flag. `globalThis._framework` is load-bearing for external
-    addons — give it a per-instance registry, do not delete it.
-  - Write `documentation/embedding.md`: host guarantees, what a distribution
-    may override, and the semver policy on `@framework/api`.
-  - Exit: success criterion #15, plus two instances mounted on one page.
+    `_SelMask` and `redraw_uveditors` were deleted outright; `#canvas2d` /
+    `#canvas3d` / `#content` left `index.html` with the DOM lookups that read
+    them, and `tests/unit/document_scope.test.ts` keeps them from coming back.
+    `#iconsheet` survives as `setup_pathux.js`'s fallback when the embedder
+    supplies no `iconSheetUrl` — the NW.js shell depends on it.
+  - [x] `mountFaberLeaf(container, options)` returning a handle. The registry is
+    `scripts/core/app_instance.ts`; `globalThis._framework` was left alone, as
+    the plan required. Debug globals did **not** go behind a dev flag: the whole
+    test infrastructure drives the app through them (P20 §2.3), so they stayed
+    and only their instance-specific parts were scoped.
+  - [x] Write `documentation/embedding.md`: host guarantees, what a distribution
+    may override, the `@framework/api` semver policy, dated shim end-dates, and
+    decision #9's format story.
+  - Exit: **met** — criterion #15's test mounts and unmounts three times, then
+    runs two instances side by side with independent libraries, in the real app
+    (`tests/integration/mount_lifecycle.test.ts`). Two instances under *different
+    distributions* is not possible today and is recorded as a limit rather than
+    left implied: the addon registry is process-wide, so the distribution is read
+    once by the first mount.
 
 > **⏸ End of the sequence — drop back to `high`.** P20 is the last plan; the
 > remaining work is execution against twenty written plans, which is `high`
@@ -1953,7 +1970,7 @@ ungrounded input just argues a wrong plan more convincingly.
 | 6. UV unwrapping | **Resolved — rescued, then ported.** The 4,701-line stack moved to `archive/` in P13's rescue commit before the delete; P19 ported the solvers onto `IUVSource` and dropped the paramizer, voxel unwrap and `fixSeams` | — |
 | 7. Rename's storage keys | **Resolved** — migrate (P2, landed 2026-08-15) | — |
 | 8. Does `faber-leaf-core` model on day one? | **Resolved — yes**, at P12 §4's scope (landed 2026-08-18) | — |
-| 9. One-way format break | **Resolved — there is no one-way break**; the forward-version guard ships in v9 anyway (P10 §6a, landed 2026-08-18). Embedder-facing wording still P20 | — |
+| 9. One-way format break | **Resolved — there is no one-way break**; the forward-version guard ships in v9 anyway (P10 §6a, landed 2026-08-18). Embedder-facing wording written in [embedding.md](../embedding.md) §4 (P20, landed 2026-08-19) | — |
 | 10. Does the sculptcore submodule go away? | **Resolved — no** (§7) | — |
 
 Decisions 3, 8 and 9 are the ones that change the *shape* of the plan rather than
@@ -2001,7 +2018,7 @@ not model everything on day one.
 | 12. Third-party geometry type, no `scripts/` edit | P11 (proved), P14 (registry) |
 | 13. That type renders an `AttributeNode` material | P7 (contract), P11 (proof) |
 | 14. That type transforms through a registered `ITransDataType` | P7 (contract), P12 (proof, landed 2026-08-18) |
-| 15. `documentation/embedding.md` | P20 |
+| 15. `documentation/embedding.md` | P20 (landed 2026-08-19) |
 
 Criteria 12–14 are each closed by a *pair*: the plan that writes the contract and
 the plan that proves it with a second implementor. A contract with one implementor

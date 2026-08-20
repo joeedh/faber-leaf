@@ -388,7 +388,7 @@ async function pumpFrames(n: number): Promise<void> {
 
 async function captureScreenshot(path: string): Promise<void> {
   await pumpFrames(30)
-  const canvas = document.querySelector('#webgl') as HTMLCanvasElement | null
+  const canvas = peekAppState()?.glCanvas
   if (!canvas) {
     console.error(`${TAG} no #webgl canvas to screenshot`)
     return
@@ -418,7 +418,7 @@ async function quit(): Promise<void> {
   window.close()
 }
 
-/** Entry point — called from entry_point.js after appstate.init(). */
+/** Entry point — called from entry_point.js once the app instance is mounted. */
 export async function runTestHarness(argv: string[] = getAppArgv()): Promise<void> {
   const opts = parseHarnessArgs(argv)
 

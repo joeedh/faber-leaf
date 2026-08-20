@@ -58,6 +58,7 @@ import {BusMessage} from '../../core/bus'
 import type {StructReader} from '../../path.ux/scripts/util/nstructjs'
 import {isWebGPU} from '../../core/renderer_flag'
 import {
+  destroyWebGpuViewport,
   drawDrawLinesWebGpu,
   drawGridWebGpu,
   drawViewportWebGpu,
@@ -84,7 +85,12 @@ export function getWebGL() {
   return window._gl
 }
 
-export function initWebGL() {
+/**
+ * Create the instance's 3D canvas and acquire its context. The canvas is owned
+ * by the AppState (`state.glCanvas`) and appended to its container; `window._gl`
+ * is kept as an alias to whichever instance drew last.
+ */
+export function initWebGL(state = peekAppState()) {
   const canvas = document.createElement('canvas')
   const dpi = UIBase.getDPI()
   let w: number
@@ -94,7 +100,7 @@ export function initWebGL() {
   canvas.setAttribute('id', 'webgl')
   canvas.id = 'webgl'
 
-  const screen = peekAppState()?.screen
+  const screen = state?.screen
   if (screen !== undefined) {
     w = screen.size[0]
     h = screen.size[1]
@@ -115,7 +121,11 @@ export function initWebGL() {
 
   canvas.dpi = dpi
 
-  document.body.appendChild(canvas)
+  if (state !== undefined) {
+    state.glCanvas = canvas
+    state.onTeardown(() => disposeWebGL(state))
+  }
+  ;(state?.container ?? document.body).appendChild(canvas)
 
   if (isWebGPU()) {
     // WebGPU mode: skip WebGL2 acquisition + WebGL-only resource init.
@@ -182,6 +192,26 @@ export function initWebGL() {
     },
     false
   )
+}
+
+/**
+ * Undo initWebGL for one instance: drop the canvas out of the document and
+ * release its GPU device. `window._gl` only clears if it still aliases this
+ * instance's context.
+ */
+export function disposeWebGL(state: AppStateGlobal): void {
+  const canvas = state.glCanvas
+  if (canvas === undefined) {
+    return
+  }
+
+  state.glCanvas = undefined
+  destroyWebGpuViewport(canvas)
+  canvas.remove()
+
+  if (window._gl?.canvas === canvas) {
+    window._gl = undefined
+  }
 }
 
 export function loadShaders(gl: WebGL2RenderingContext) {

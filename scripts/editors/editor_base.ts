@@ -1213,7 +1213,7 @@ App {
     const dpi = this.getDPI()
 
     const size = this.size
-    const canvas = document.getElementById('webgl') as HTMLCanvasElement
+    const canvas = this.ctx?.state?.glCanvas
 
     if (!canvas || size === undefined) {
       return

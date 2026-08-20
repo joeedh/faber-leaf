@@ -77,6 +77,35 @@ export function getActiveWebGpuViewport(
 }
 const inflightInits = new WeakMap<HTMLCanvasElement | OffscreenCanvas, Promise<WebGpuViewport>>()
 
+/**
+ * Release a canvas's GPU state — its depth texture, its device, and both
+ * WeakMap entries. Called by an app instance's teardown; mounting and
+ * unmounting in a loop must not accumulate devices.
+ */
+export function destroyWebGpuViewport(canvas: HTMLCanvasElement | OffscreenCanvas | undefined): void {
+  if (!canvas) {
+    return
+  }
+
+  const viewport = viewports.get(canvas)
+
+  viewports.delete(canvas)
+  inflightInits.delete(canvas)
+
+  if (viewport === undefined) {
+    return
+  }
+
+  const dbg = globalThis as unknown as {__webgpuDebug?: {viewport?: WebGpuViewport}}
+  if (dbg.__webgpuDebug?.viewport === viewport) {
+    dbg.__webgpuDebug = undefined
+  }
+
+  viewport.depth?.destroy()
+  viewport.depth = undefined
+  viewport.gpu.destroy()
+}
+
 function fakeDrawMats(): DrawMats {
   return {} as DrawMats
 }

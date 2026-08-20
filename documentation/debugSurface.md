@@ -15,12 +15,12 @@ for the headless `--eval`/`--run` flags.
 
 | Global | What it is | Source |
 |---|---|---|
-| `CTX` | `_appstate.ctx` — the live `ViewContext`. Lazy getter on `window`. **Primary entry point.** | `entry_point.js:142` |
-| `_appstate` | The `AppState` singleton. | `appstate.ts:1150` |
+| `CTX` | `getAppState().ctx` — the **active** instance's live `ViewContext`. Lazy getter on `window`. **Primary entry point.** | `mount.ts` (`installConsoleShortcut`) |
+| `_appstate` | Deprecated alias to the **first-mounted** instance. Prefer `CTX` or `getAppState()`; see [embedding.md §5](./embedding.md). | `mount.ts` (`mountFaberLeaf`) |
 | `_framework` | `globalThis._framework` — the framework API hub addon bundles look up. | `entry_point.js:1` |
 | `DEBUG` | `cconst.DEBUG` — path.ux debug-toggle flags (see below). | path.ux `config/const.ts:192` |
-| `redraw_all()` | Schedules a `requestAnimationFrame` redraw. | `appstate.ts:1163` |
-| `updateDataGraph(force?)` | Re-execs the dependency graph (`force=true` runs synchronously). | `appstate.ts:1207` |
+| `redraw_all()` | Schedules a `requestAnimationFrame` redraw of the active instance. | `appstate.ts` (`initProcessGlobals`) |
+| `updateDataGraph(force?)` | Re-execs the active instance's dependency graph (`force=true` runs synchronously). | `appstate.ts` (`initProcessGlobals`) |
 | `haveNwjs` | Truthy in the NW.js shell. | `entry_point.js` |
 | `__SCULPTCORE_BACKEND` | `'native'`/`'wasm'` backend selector (set early). | `entry_point.js:82` |
 | `__apptestResult` | Where the `--eval` harness records eval success/failure. | `test_harness.ts:451` |
@@ -106,11 +106,23 @@ Installed lazily on the first GPU-brush stroke attempt
 The related feature flags (`sculptcore.gpu_brush`, `.gpu_brush_grab`,
 `.gpu_brush_verify`) are flippable at runtime via `window.FeatureFlags`.
 
-## `_appstate` — direct singleton
+## `_appstate` — the first instance, directly
 
 `_appstate.ctx`, `.screen`, `.toolstack` (`.undo()`/`.redo()`/`.execTool()`),
 `.datalib` (`.get(lib_id)`, `.graph`), `.api`, `.arguments`, `.draw()`,
-`.createFile()`, `.modalFlag`.
+`.createFile()`, `.modalFlag`, `.container`, `.glCanvas`.
+
+There can be more than one app instance on a page now, and `_appstate` only ever
+names the first. The registry is the general form:
+
+```js
+import {mountedInstances} from './build/entry_point.js'   // every instance, in mount order
+CTX.state                                                 // the active one
+```
+
+Anything that used to find the 3D canvas with `document.getElementById('webgl')`
+should read `state.glCanvas` — a fixed id finds the wrong instance's canvas as
+soon as a second one mounts. See [embedding.md](./embedding.md).
 
 ## Caveats / gaps
 
