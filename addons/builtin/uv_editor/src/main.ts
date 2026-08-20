@@ -20,6 +20,10 @@ import * as uvEditor from './index.js'
 import {UVEditor} from './uv_editor_area.js'
 import {UV_OPS} from './uv_ops.js'
 
+// Test support: puts `globalThis.__uvUnwrapAll` in reach of the headless
+// harness. Registers nothing, so it costs a module eval and no behaviour.
+import './uv_unwrap_support.js'
+
 export const addonDefine: IAddonDefine = {
   name       : 'UV Editor',
   version    : [1, 0, 0],

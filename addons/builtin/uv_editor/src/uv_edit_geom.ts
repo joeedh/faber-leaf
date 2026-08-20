@@ -725,6 +725,87 @@ export function restoreUVTransData(source: IUVSource, layer: number, td: UVTrans
 }
 
 // ---------------------------------------------------------------------------
+// Ring layouts
+// ---------------------------------------------------------------------------
+
+/**
+ * Unwrap-free layouts. They only reposition each face's ring, so unlike the
+ * solvers in `uv_solve.ts` they need no 3D positions behind the source and no
+ * vector math — which is also why they live here rather than there.
+ *
+ * Both are tri/quad operations, faithfully: an n-gon gets its first three
+ * corners placed and the rest left alone, exactly as the archived
+ * `mesh.reset_uvs` / `mesh.grid_uvs` did.
+ */
+
+/** Stamp every face in scope with the same unit square. */
+export function resetUVs(source: IUVSource, layer: number, scope: UVScope = {}): boolean {
+  const rings = readUVRings(source, layer, scope)
+  return writeRingBoxes(source, layer, rings, () => [0, 0, 1, 1])
+}
+
+/**
+ * Lay the faces out side by side in a square grid, one cell each, so every
+ * face gets a disjoint patch of the map. The grid is sized off the corner
+ * count rather than the face count: `count * 0.25` is the quad-equivalent
+ * number of faces, and its square root is the side of a grid that holds them.
+ */
+export function gridUVs(source: IUVSource, layer: number, scope: UVScope = {}): boolean {
+  const rings = readUVRings(source, layer, scope)
+  const corners = rings.rings.values.length
+
+  if (corners === 0) {
+    return false
+  }
+
+  const dimen = Math.max(1, Math.ceil(Math.sqrt(corners * 0.25)))
+  const cell = 1.0 / dimen
+  const pad = cell * 0.025
+
+  return writeRingBoxes(source, layer, rings, (i) => {
+    const x = (i % dimen) * cell
+    const y = Math.floor(i / dimen) * cell
+
+    // The far edge is inset by twice the pad, which is the archive's arithmetic
+    // -- the cells end up slightly off-centre rather than evenly bordered.
+    return [x + pad, y + pad, x + cell - pad * 2.0, y + cell - pad * 2.0]
+  })
+}
+
+/** Place each ring's first three (or four) corners on a caller-chosen box. */
+function writeRingBoxes(
+  source: IUVSource,
+  layer: number,
+  rings: UVRings,
+  boxOf: (face: number) => [number, number, number, number]
+): boolean {
+  const handles: number[] = []
+  const uvs: number[] = []
+
+  for (let i = 0; i < rings.faces.length; i++) {
+    const ring = row(rings.rings, i)
+    if (ring.length < 3) {
+      continue
+    }
+
+    const [x1, y1, x2, y2] = boxOf(i)
+    const corners = [x1, y1, x1, y2, x2, y2, x2, y1]
+    const n = ring.length === 4 ? 4 : 3
+
+    for (let j = 0; j < n; j++) {
+      handles.push(ring[j])
+      uvs.push(corners[j * 2], corners[j * 2 + 1])
+    }
+  }
+
+  if (handles.length === 0) {
+    return false
+  }
+  source.setUVs(layer, Int32Array.from(handles), Float32Array.from(uvs))
+  return true
+}
+
+// ---------------------------------------------------------------------------
 
 function toCSR(rows: readonly (readonly number[])[]): {offsets: Int32Array; values: Int32Array} {
   const offsets = new Int32Array(rows.length + 1)

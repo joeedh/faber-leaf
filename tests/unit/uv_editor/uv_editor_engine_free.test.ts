@@ -2,11 +2,11 @@
  * The UV editor's headless suite runs with the engine absent — P18 §6, §8.
  *
  * CI's `no-sculptcore` lane deinits the submodule, so "this suite must pass
- * there" is really a claim about a module graph: if nothing `uv_edit_geom.test.ts`
- * loads at runtime lives under `sculptcore/` or a geometry addon, deleting
- * those cannot change the answer. Walking the graph proves that here, on every
- * run, instead of only in the lane — and it fails on the import that breaks it
- * rather than three months later in CI.
+ * there" is really a claim about a module graph: if nothing the headless UV
+ * suites load at runtime lives under `sculptcore/` or a geometry addon,
+ * deleting those cannot change the answer. Walking the graph proves that here,
+ * on every run, instead of only in the lane — and it fails on the import that
+ * breaks it rather than three months later in CI.
  *
  * Type-only imports are followed but not counted: they are erased before
  * anything runs, which is exactly why the editor core is allowed its
@@ -19,7 +19,7 @@ import {fileURLToPath} from 'node:url'
 
 const HERE = Path.dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = Path.resolve(HERE, '../../..')
-const SUITE = Path.join(HERE, 'uv_edit_geom.test.ts')
+const SUITES = [Path.join(HERE, 'uv_edit_geom.test.ts'), Path.join(HERE, 'uv_solve.test.ts')]
 const EDITOR_CORE = Path.join(REPO_ROOT, 'addons/builtin/uv_editor/src/uv_edit_geom.ts')
 
 /** Directories the suite may not reach through a value import, and why. */
@@ -28,6 +28,15 @@ const FORBIDDEN_DIRS: [RegExp, string][] = [
   [/^addons\/builtin\/litemesh\//, 'an engine-backed geometry addon'],
   [/^addons\/builtin\/mesh\//, 'an engine-backed geometry addon'],
 ]
+
+/**
+ * Aliases jest does resolve, mirroring `jest.config.ts`'s `moduleNameMapper`.
+ * The walk follows them rather than stopping, so what is behind one is held to
+ * the same rules as the rest of the graph.
+ */
+const BARE_ALIASES: Record<string, string> = {
+  '@framework/pathux': Path.join(REPO_ROOT, 'tests/lib/pathux_shim.ts'),
+}
 
 /** Bare specifiers are all unresolvable under jest; these are the fatal ones. */
 const FORBIDDEN_BARE = /^(@sculptcore\/|@builtin\/|@addon\/|@framework\/)/
@@ -86,12 +95,12 @@ interface Graph {
   unresolved: string[]
 }
 
-/** Every file reachable from `root` through value imports, plus what stayed bare. */
-function valueGraph(root: string): Graph {
+/** Every file reachable from `roots` through value imports, plus what stayed bare. */
+function valueGraph(roots: string[]): Graph {
   const seen = new Set<string>()
   const bare = new Set<string>()
   const unresolved: string[] = []
-  const queue = [root]
+  const queue = [...roots]
 
   while (queue.length) {
     const file = queue.pop()!
@@ -105,7 +114,12 @@ function valueGraph(root: string): Graph {
         continue
       }
       if (!spec.startsWith('.')) {
-        bare.add(spec)
+        const alias = BARE_ALIASES[spec]
+        if (alias === undefined) {
+          bare.add(spec)
+        } else {
+          queue.push(alias)
+        }
         continue
       }
       const resolved = resolveRelative(file, spec)
@@ -123,16 +137,22 @@ function valueGraph(root: string): Graph {
   }
 }
 
-describe('the UV editor double suite is engine-free', () => {
-  const graph = valueGraph(SUITE)
+describe('the UV editor double suites are engine-free', () => {
+  const graph = valueGraph(SUITES)
 
   test('every value import resolves, so the walk is not silently short', () => {
     expect(graph.unresolved).toEqual([])
-    // The suite, the editor core, the double and the contract. A resolver that
-    // stopped at the first file would pass every other assertion here.
-    expect(graph.files.length).toBeGreaterThanOrEqual(4)
+    // The suites, the editor core, the solvers, the double and the contract. A
+    // resolver that stopped at the first file would pass every other assertion
+    // here.
+    expect(graph.files.length).toBeGreaterThanOrEqual(8)
     expect(graph.files).toContain('addons/builtin/uv_editor/src/uv_edit_geom.ts')
+    expect(graph.files).toContain('addons/builtin/uv_editor/src/uv_solve.ts')
+    expect(graph.files).toContain('addons/builtin/uv_editor/src/uv_wrangler.ts')
     expect(graph.files).toContain('scripts/core/geometry_contract.ts')
+    // And through the alias, or the rule below would never see path.ux at all.
+    expect(graph.files).toContain('tests/lib/pathux_shim.ts')
+    expect(graph.files).toContain('scripts/path.ux/scripts/path-controller/util/solver.ts')
   })
 
   test('nothing it loads lives under the engine or a geometry addon', () => {

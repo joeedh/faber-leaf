@@ -17,11 +17,17 @@
       "@addon/litemesh/api": [
         "./addons/builtin/litemesh/src/api.ts"
       ],
+      "@addon/uv_editor/api": [
+        "./addons/builtin/uv_editor/src/api.ts"
+      ],
       "@builtin/leafmesh": [
         "./addons/builtin/leafmesh/src/main.ts"
       ],
       "@builtin/litemesh": [
         "./addons/builtin/litemesh/src/main.ts"
+      ],
+      "@builtin/uv_editor": [
+        "./addons/builtin/uv_editor/src/main.ts"
       ]
     }
   },

@@ -161,6 +161,14 @@ export {
   weldFirstOwner,
 } from './core/uv_source_conformance.js'
 export type {UVConformanceResult} from './core/uv_source_conformance.js'
+// The same idea one step further: a named factory per implementor, so a check
+// that lives in one addon can get a source built by another.
+export {
+  registerUVSourceFixture,
+  uvSourceFixtureNames,
+  withUVSourceFixture,
+} from './core/uv_source_fixtures.js'
+export type {UVSourceFixture, UVSourceFixtureFactory} from './core/uv_source_fixtures.js'
 export {setDefaultSceneBuilder} from './core/default_file.js'
 // The app's own CLI flags: an addon that takes one (sculptcore's --backend)
 // has to read it from the same place the host does.
@@ -230,6 +238,7 @@ export type {ITransDataType, TransformDefine} from './editors/view3d/transform/t
 export {RotateWidget, ScaleWidget, TranslateWidget} from './editors/view3d/widgets/widget_tools.js'
 export {Icons} from './editors/icon_enum.js'
 export {ImageBus} from './editors/image/ImageBus.js'
+export type {ImageDrawLine} from './editors/image/ImageBus.js'
 // The image data block and the pointer-with-a-user that an editor holds one
 // through, so an addon-owned editor can show a texture behind what it edits.
 export {ImageBlock, ImageTypes, ImageUser} from './image/image.js'

@@ -28,3 +28,24 @@
      is fine — `mask.sbrush` / SculptTools.MASK_PAINT still paint one — but
      there is no engine-side mask fill, so add a `litemesh.clear_mask` ToolOp
      over a sculptcore fill and put the hotkey back in sculptcore.ts.
+[ ]: voxel unwrap is gone. P19 ported the angle solver, the relaxer and the
+     packer onto `IUVSource` but dropped `VoxelNode` / `VoxelBVH`
+     (~700 lines of octree over a triangle soup) rather than carry a spatial
+     structure into the UV editor for one tool. Nothing on `IUVSource` answers
+     "which triangle is nearest this point", and adding it for a single
+     consumer is what P7 declined. The archive was deleted with the port; read
+     it out of git history:
+     `git show 8d4ee0c4:archive/unwrapping/unwrapping.ts` (`:1242`, `:1317`).
+[ ]: the UV paramizer is gone. `mesh_paramizer.ts` (1,628 lines: `ParamVert`,
+     `paramizeMesh`, `calcGeoDist`) was not ported in P19 — it subclassed the
+     BREP `CustomDataElem` for per-vertex scratch and pulled in the cotangent
+     helpers and `DispLayerVert`, all deleted with the TS BREP in P13.
+     `git show 8d4ee0c4:archive/unwrapping/mesh_paramizer.ts`. Its
+     `ParamVertSettings` were data-API registered, so anyone who tuned them
+     loses that; nothing in the shipped UI read them.
+[ ]: `fixSeams` is gone. It edited the mesh's seam flags from inside the
+     unwrap solver, and `IUVSource` writes UVs and flags but never geometry,
+     so there is no seam for it to write through. If automatic seam repair
+     comes back it belongs in a `litemesh.mark_seam*` sibling op, not inside
+     unwrap.
+     `git show 8d4ee0c4:archive/unwrapping/unwrapping_solve.ts` (`:1389`).

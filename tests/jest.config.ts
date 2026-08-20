@@ -75,7 +75,11 @@ const config: Config = {
   // Framework imports use a .js suffix even on .ts sources (e.g.
   // import {...} from '../path.ux/scripts/pathux.js'). Strip the .js so Jest's
   // resolver finds the .ts.
+  //
+  // @framework/pathux is an esbuild alias for the toolkit barrel, which jest
+  // cannot resolve and would not want to: see lib/pathux_shim.ts.
   moduleNameMapper: {
+    '^@framework/pathux$': '<rootDir>/lib/pathux_shim.ts',
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
 

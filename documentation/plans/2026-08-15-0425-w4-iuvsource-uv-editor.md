@@ -306,7 +306,8 @@ implementation will otherwise break:
      as an unserved surface: `ImageBus` now declares only `flagRedraw`, with a
      comment saying the other two return with the overlay P19 ports. A trigger
      no emitter handles is silently swallowed, so declaring one is worse than
-     not having it.
+     not having it. *(2026-08-19: P19 brought both back — the island packer
+     sends them and `UVEditor.onTrigger` draws them, so they are served now.)*
    - [x] `tests/unit/image_bus.test.ts` pins the trigger's spelling — the one
      string the sender and both editors must agree on — and the registration
      lifecycle, including that a second `on_area_active` does not

@@ -40,6 +40,13 @@ const TOOL_PATHS = [
   'uveditor.set_flag',
   'uveditor.clear_flag',
   'uveditor.toggle_flag',
+  // The unwrapping stack, back from `archive/` under new names (P19 §5 step 4).
+  'uveditor.unwrap',
+  'uveditor.relax',
+  'uveditor.pack_islands',
+  'uveditor.randomize_uvs',
+  'uveditor.reset_uvs',
+  'uveditor.grid_uvs',
   'image.set_type',
 ]
 

@@ -11,13 +11,22 @@ export class ImageBus {
     return {
       // Triggers only: nothing subscribes *to* an image editor.
       events  : [],
-      triggers: ['flagRedraw'],
+      triggers: ['flagRedraw', 'resetDrawLines', 'addDrawLine'],
     } as const
   }
 }
 
-// `resetDrawLines` / `addDrawLine` used to live beside `flagRedraw`, pushed by
-// the UV unwrapper to draw its seam preview over the UV editor. P13 archived
-// that stack (archive/unwrapping/) and P18 rebuilt the editor without a
-// draw-line overlay, so both triggers had neither a caller nor a handler. P19
-// re-adds them with the overlay that needs them.
+/** `addDrawLine`'s payload: two UV-space points and an optional CSS colour. */
+export interface ImageDrawLine {
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+  color?: string
+}
+
+// `resetDrawLines` / `addDrawLine` are an overlay channel rather than a redraw
+// one: a sender pushes UV-space segments the editor draws over its own
+// geometry, and they stay until the next reset. The island packer is the only
+// sender today -- it reports the bins it chose, which is how a bad layout gets
+// diagnosed at all.

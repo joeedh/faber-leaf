@@ -16,7 +16,7 @@
  * across a `topoStamp` change, which is the only way a handle can go stale.
  */
 
-import {SelOneToolModes, SelToolModes, uvSourceFor} from '@framework/api'
+import {ImageBus, SelOneToolModes, SelToolModes, bus, uvSourceFor} from '@framework/api'
 import type {GeometryDataRef, IUVSource, ToolContext, ViewContext} from '@framework/api'
 import {
   BoolProperty,
@@ -43,7 +43,9 @@ import {
   applyUVScale,
   applyUVTranslate,
   gatherUVTransData,
+  gridUVs,
   listSelectedUVs,
+  resetUVs,
   restoreUVCoords,
   restoreUVFlags,
   ringElements,
@@ -55,6 +57,10 @@ import {
   snapshotUVFlags,
 } from './uv_edit_geom.js'
 import type {UVCoordSnapshot, UVFlagSnapshot, UVScope, UVTransData} from './uv_edit_geom.js'
+import {buildUVGraph} from './uv_wrangler.js'
+import type {UVGraph} from './uv_wrangler.js'
+import {UVSolver, packUVIslands, randomizeUVGraph, relaxUVGraph} from './uv_solve.js'
+import type {UVPackDrawLine} from './uv_solve.js'
 
 /** The contract's `UVFlags`, restated for `FlagProperty` — see uv_edit_geom.ts. */
 export const UVFlagEnum = {
@@ -710,47 +716,23 @@ export class UVRotateOp extends UVTransformOpBase<{rotation: FloatProperty}> {
 }
 
 // ---------------------------------------------------------------------------
-// Projection
+// Coordinate ops
 // ---------------------------------------------------------------------------
 
 /**
- * Project element positions through a matrix — the camera's by default — and
- * fit the result to the unit square.
- *
- * `getUVElementPositions` is optional on the contract, so a source with no
- * geometry behind it (a generated layout, the test double) makes this a no-op
- * rather than an error.
+ * Undo for anything that rewrites UVs outright rather than dragging them.
+ * The snapshot covers everything in scope, because a layout op's own result is
+ * what it overwrote — the same reasoning `UVFlagOpBase` uses for selection.
  */
-export class UVProjectOp extends UVOpBase<{matrix: Mat4Property; selectedOnly: BoolProperty}> {
+export abstract class UVCoordOpBase<
+  Inputs extends PropertySlots = {},
+  Outputs extends PropertySlots = {},
+> extends UVOpBase<Inputs, Outputs> {
   _coordUndo?: UVCoordSnapshot
 
-  static tooldef() {
-    return {
-      uiname  : 'UV Project',
-      toolpath: 'uveditor.project_uvs',
-      inputs: ToolOp.inherit({
-        matrix      : new Mat4Property().saveLastValue(),
-        selectedOnly: new BoolProperty(true).saveLastValue(),
-      }),
-    }
-  }
-
-  static invoke(ctx: ViewContext, args: Record<string, unknown>): UVProjectOp {
-    const tool = super.invoke(ctx, args) as UVProjectOp
-    const camera = ctx.view3d?.activeCamera
-
-    if (camera && !('matrix' in args)) {
-      tool.inputs.matrix.setValue(camera.rendermat)
-    }
-
-    return tool
-  }
-
-  /** The elements to project: the selection, or everything in scope. */
+  /** The elements this op may write. Subclasses narrow it. */
   _targets(source: IUVSource, layer: number): Int32Array {
-    return this.inputs.selectedOnly.getValue()
-      ? listSelectedUVs(source, layer, this._scope())
-      : ringElements(readUVRings(source, layer, this._scope()))
+    return ringElements(readUVRings(source, layer, this._scope()))
   }
 
   undoPre(ctx: ToolContext): void {
@@ -778,6 +760,49 @@ export class UVProjectOp extends UVOpBase<{matrix: Mat4Property; selectedOnly: B
   calcUndoMem(): number {
     const snap = this._coordUndo
     return snap === undefined ? 0 : snap.handles.length * 4 + snap.uvs.length * 4
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Projection
+// ---------------------------------------------------------------------------
+
+/**
+ * Project element positions through a matrix — the camera's by default — and
+ * fit the result to the unit square.
+ *
+ * `getUVElementPositions` is optional on the contract, so a source with no
+ * geometry behind it (a generated layout, the test double) makes this a no-op
+ * rather than an error.
+ */
+export class UVProjectOp extends UVCoordOpBase<{matrix: Mat4Property; selectedOnly: BoolProperty}> {
+  static tooldef() {
+    return {
+      uiname  : 'UV Project',
+      toolpath: 'uveditor.project_uvs',
+      inputs: ToolOp.inherit({
+        matrix      : new Mat4Property().saveLastValue(),
+        selectedOnly: new BoolProperty(true).saveLastValue(),
+      }),
+    }
+  }
+
+  static invoke(ctx: ViewContext, args: Record<string, unknown>): UVProjectOp {
+    const tool = super.invoke(ctx, args) as UVProjectOp
+    const camera = ctx.view3d?.activeCamera
+
+    if (camera && !('matrix' in args)) {
+      tool.inputs.matrix.setValue(camera.rendermat)
+    }
+
+    return tool
+  }
+
+  /** The elements to project: the selection, or everything in scope. */
+  _targets(source: IUVSource, layer: number): Int32Array {
+    return this.inputs.selectedOnly.getValue()
+      ? listSelectedUVs(source, layer, this._scope())
+      : super._targets(source, layer)
   }
 
   exec(ctx: ToolContext): void {
@@ -833,6 +858,287 @@ export class UVProjectOp extends UVOpBase<{matrix: Mat4Property; selectedOnly: B
   }
 }
 
+// ---------------------------------------------------------------------------
+// Unwrapping and layout
+// ---------------------------------------------------------------------------
+
+/**
+ * The ops built on `uv_solve.ts`. They share the coordinate undo above and one
+ * more thing: the packer's bin rectangles, which go out over `ImageBus` so
+ * every visible UV editor draws them, not only the one that was clicked in.
+ */
+abstract class UVLayoutOpBase<
+  Inputs extends PropertySlots = {},
+  Outputs extends PropertySlots = {},
+> extends UVCoordOpBase<Inputs, Outputs> {
+  _graph(source: IUVSource, layer: number): UVGraph {
+    return buildUVGraph(source, layer, this._scope())
+  }
+
+  /**
+   * Clear any bins still on screen, and return a sink for new ones when the
+   * caller asked for them. Clearing happens either way, so rectangles from an
+   * earlier run never outlive it.
+   */
+  _bins(show: boolean): UVPackDrawLine | undefined {
+    bus.sendTrigger(ImageBus, 'resetDrawLines')
+
+    if (!show) {
+      return undefined
+    }
+    return (x1, y1, x2, y2) => {
+      bus.sendTrigger(ImageBus, 'addDrawLine', {x1, y1, x2, y2})
+    }
+  }
+}
+
+/**
+ * Angle-based unwrap. `steps` is a fixed iteration count rather than the
+ * archive's 400 ms budget: a ToolOp has to replay identically on redo, and a
+ * wall-clock budget cannot.
+ */
+export class UVUnwrapOp extends UVLayoutOpBase<{
+  preserveIslands: BoolProperty
+  selectedIslandsOnly: BoolProperty
+  steps: IntProperty
+  solverWeight: FloatProperty
+  showBins: BoolProperty
+  seed: IntProperty
+}> {
+  static tooldef() {
+    return {
+      uiname  : 'Unwrap',
+      toolpath: 'uveditor.unwrap',
+      inputs: ToolOp.inherit({
+        preserveIslands    : new BoolProperty(false).saveLastValue(),
+        selectedIslandsOnly: new BoolProperty(false).saveLastValue(),
+        steps              : new IntProperty(25).setRange(1, 500).saveLastValue(),
+        solverWeight       : new FloatProperty(0.4).setRange(0, 1).noUnits().saveLastValue(),
+        showBins           : new BoolProperty(false).saveLastValue(),
+        seed               : new IntProperty(0),
+      }),
+    }
+  }
+
+  exec(ctx: ToolContext): void {
+    const source = this._source(ctx)
+    if (source === undefined || source.getUVElementPositions === undefined) {
+      return
+    }
+
+    const layer = this._layer(source)
+    if (layer < 0) {
+      return
+    }
+
+    const solver = new UVSolver(this._graph(source, layer), {
+      preserveIslands    : this.inputs.preserveIslands.getValue(),
+      selectedIslandsOnly: this.inputs.selectedIslandsOnly.getValue(),
+      seed               : this.inputs.seed.getValue(),
+    })
+
+    const gk = this.inputs.solverWeight.getValue()
+    const steps = this.inputs.steps.getValue()
+
+    solver.start()
+    for (let i = 0; i < steps; i++) {
+      solver.step(gk)
+    }
+    solver.finish(this._bins(this.inputs.showBins.getValue()))
+  }
+}
+
+/**
+ * Even out the spacing inside each island without re-laying it out. Runs the
+ * angle solver afterwards by default, which is what makes it a cleanup pass
+ * rather than a blur.
+ */
+export class UVRelaxOp extends UVLayoutOpBase<{
+  steps: IntProperty
+  boundaryWeight: FloatProperty
+  selectedOnly: BoolProperty
+  doSolve: BoolProperty
+  solverWeight: FloatProperty
+}> {
+  static tooldef() {
+    return {
+      uiname  : 'Relax UVs',
+      toolpath: 'uveditor.relax',
+      inputs: ToolOp.inherit({
+        steps         : new IntProperty(1).setRange(1, 55).saveLastValue(),
+        boundaryWeight: new FloatProperty(400).setRange(1, 10000).noUnits().saveLastValue(),
+        selectedOnly  : new BoolProperty(false).saveLastValue(),
+        doSolve       : new BoolProperty(true).saveLastValue(),
+        solverWeight  : new FloatProperty(0.4).setRange(0, 1).noUnits().saveLastValue(),
+      }),
+    }
+  }
+
+  exec(ctx: ToolContext): void {
+    const source = this._source(ctx)
+    if (source === undefined) {
+      return
+    }
+
+    const layer = this._layer(source)
+    if (layer < 0) {
+      return
+    }
+
+    const graph = this._graph(source, layer)
+    const selectedOnly = this.inputs.selectedOnly.getValue()
+    const steps = this.inputs.steps.getValue()
+
+    for (let i = 0; i < steps; i++) {
+      relaxUVGraph(graph, {boundaryWeight: this.inputs.boundaryWeight.getValue(), selectedOnly})
+    }
+
+    // Relax never re-flows an island, so the solver runs in preserve mode: it
+    // is here to take out the shear smoothing introduces, not to unwrap again.
+    if (this.inputs.doSolve.getValue() && source.getUVElementPositions !== undefined) {
+      const solver = new UVSolver(graph, {preserveIslands: true, selectedIslandsOnly: selectedOnly})
+
+      solver.start()
+      solver.step(this.inputs.solverWeight.getValue())
+      solver.finish()
+      return
+    }
+
+    graph.write()
+  }
+}
+
+/** Lay the existing islands out side by side in the unit square. */
+export class UVPackIslandsOp extends UVLayoutOpBase<{
+  ignorePinned: BoolProperty
+  selectedOnly: BoolProperty
+  showBins: BoolProperty
+  seed: IntProperty
+}> {
+  static tooldef() {
+    return {
+      uiname  : 'Pack Islands',
+      toolpath: 'uveditor.pack_islands',
+      inputs: ToolOp.inherit({
+        ignorePinned: new BoolProperty(true).saveLastValue(),
+        selectedOnly: new BoolProperty(false).saveLastValue(),
+        showBins    : new BoolProperty(true).saveLastValue(),
+        seed        : new IntProperty(0),
+      }),
+    }
+  }
+
+  exec(ctx: ToolContext): void {
+    const source = this._source(ctx)
+    if (source === undefined) {
+      return
+    }
+
+    const layer = this._layer(source)
+    if (layer < 0) {
+      return
+    }
+
+    const graph = this._graph(source, layer)
+
+    packUVIslands(graph, {
+      ignorePinned: this.inputs.ignorePinned.getValue(),
+      selectedOnly: this.inputs.selectedOnly.getValue(),
+      seed        : this.inputs.seed.getValue(),
+      drawLine    : this._bins(this.inputs.showBins.getValue()),
+    })
+
+    graph.write()
+  }
+}
+
+/** Jitter the layout, to shake a degenerate one out of a local minimum. */
+export class UVRandomizeOp extends UVLayoutOpBase<{
+  scale: FloatProperty
+  selectedOnly: BoolProperty
+  seed: IntProperty
+}> {
+  static tooldef() {
+    return {
+      uiname  : 'Randomize UVs',
+      toolpath: 'uveditor.randomize_uvs',
+      inputs: ToolOp.inherit({
+        scale       : new FloatProperty(0.1).setRange(0, 10).noUnits().saveLastValue(),
+        selectedOnly: new BoolProperty(false).saveLastValue(),
+        seed        : new IntProperty(0),
+      }),
+    }
+  }
+
+  exec(ctx: ToolContext): void {
+    const source = this._source(ctx)
+    if (source === undefined) {
+      return
+    }
+
+    const layer = this._layer(source)
+    if (layer < 0) {
+      return
+    }
+
+    const graph = this._graph(source, layer)
+
+    randomizeUVGraph(graph, {
+      scale       : this.inputs.scale.getValue(),
+      selectedOnly: this.inputs.selectedOnly.getValue(),
+      seed        : this.inputs.seed.getValue(),
+    })
+
+    graph.write()
+  }
+}
+
+/** Stamp every face with the unit square. */
+export class UVResetOp extends UVCoordOpBase {
+  static tooldef() {
+    return {
+      uiname  : 'Reset UVs',
+      toolpath: 'uveditor.reset_uvs',
+      inputs  : ToolOp.inherit({}),
+    }
+  }
+
+  exec(ctx: ToolContext): void {
+    const source = this._source(ctx)
+    if (source === undefined) {
+      return
+    }
+
+    const layer = this._layer(source)
+    if (layer >= 0) {
+      resetUVs(source, layer, this._scope())
+    }
+  }
+}
+
+/** Give every face its own cell of a square grid. */
+export class UVGridOp extends UVCoordOpBase {
+  static tooldef() {
+    return {
+      uiname  : 'Grid UVs',
+      toolpath: 'uveditor.grid_uvs',
+      inputs  : ToolOp.inherit({}),
+    }
+  }
+
+  exec(ctx: ToolContext): void {
+    const source = this._source(ctx)
+    if (source === undefined) {
+      return
+    }
+
+    const layer = this._layer(source)
+    if (layer >= 0) {
+      gridUVs(source, layer, this._scope())
+    }
+  }
+}
+
 /** Everything registered under `uveditor.*`, in one list for `main.ts`. */
 export const UV_OPS = [
   ToggleSelectAllUVsOp,
@@ -845,4 +1151,10 @@ export const UV_OPS = [
   UVScaleOp,
   UVRotateOp,
   UVProjectOp,
+  UVUnwrapOp,
+  UVRelaxOp,
+  UVPackIslandsOp,
+  UVRandomizeOp,
+  UVResetOp,
+  UVGridOp,
 ]

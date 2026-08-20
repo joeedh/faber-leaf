@@ -14,7 +14,6 @@ screenshot dump from old debugging sessions and are gitignored.
 
 | Directory | Was | Depended on | Who would port it |
 | --- | --- | --- | --- |
-| `unwrapping/` | `addons/builtin/mesh/src/{unwrapping,unwrapping_solve,mesh_paramizer}.ts` | BREP `Mesh`, `Loop`, `UVLayerElem` | **P19** — onto `IUVSource` |
 | `subsurf/` | `addons/builtin/subsurf/` | BREP `Mesh` | none scheduled; sculptcore owns multires subdivision now |
 | `curve/` | `addons/builtin/curve/` | `CurveSpline extends Mesh` | none scheduled |
 | `tetmesh/addon/` | `addons/builtin/tetmesh/` | BREP `Mesh` + `tetgen/` below | none scheduled |
@@ -26,6 +25,16 @@ screenshot dump from old debugging sessions and are gitignored.
 `addons/builtin/uv_editor/` over `IUVSource`, and which of the old behaviours
 came back is recorded in [that plan](../documentation/plans/2026-08-15-0425-w4-iuvsource-uv-editor.md)
 §5 step 7 rather than in a file here.
+
+`unwrapping/` followed it in P19. The angle solver, the relaxer and the packer
+are `addons/builtin/uv_editor/src/{uv_wrangler,uv_solve}.ts`, rebuilt around
+integer handles from `IUVSource` — the port could not keep `UVWrangler`'s
+representation, which held `Loop` objects. Three capabilities were dropped
+rather than ported: voxel unwrap, the paramizer (`mesh_paramizer.ts`) and
+`fixSeams`. Each is a row in `ImmediateTODOs.md` with the `git show` incantation
+that recovers it, and the reasoning is in
+[the port plan](../documentation/plans/2026-08-15-0430-w4-unwrapping-port.md)
+§3.4, §3.2 and §6.
 
 **Porting any of these means rewriting it against LeafMesh**, because each one
 subclasses or consumes the BREP `Mesh` that no longer exists. That is a feature

@@ -6,17 +6,18 @@
  * inverts that: an editor registers itself while it is on screen, and a sender
  * names only the trigger. This suite pins the trigger's spelling, which is the
  * one thing the sender and the two editors have to agree on, and the
- * registration lifecycle they use to do it.
+ * registration lifecycle they use to do it. P19 added the two overlay triggers
+ * back, so the spelling it pins now covers those as well.
  */
 
 import bus, {MessageBus} from '../../scripts/core/bus'
-import {ImageBus} from '../../scripts/editors/image/ImageBus'
+import {ImageBus, type ImageDrawLine} from '../../scripts/editors/image/ImageBus'
 
 describe('ImageBus', () => {
   test('declares exactly the triggers something handles', () => {
-    // `resetDrawLines` / `addDrawLine` left with P13's archived unwrapper; a
-    // trigger nothing handles is silently swallowed by sendTrigger.
-    expect(ImageBus.busDefine().triggers).toEqual(['flagRedraw'])
+    // The two overlay triggers came back in P19 with the island packer, the
+    // only sender; a trigger nothing handles is swallowed by sendTrigger.
+    expect(ImageBus.busDefine().triggers).toEqual(['flagRedraw', 'resetDrawLines', 'addDrawLine'])
     expect(ImageBus.busDefine().events).toEqual([])
   })
 
@@ -53,6 +54,25 @@ describe('ImageBus', () => {
     local.sendTrigger(ImageBus, 'flagRedraw')
 
     expect(count).toBe(1)
+  })
+
+  test('the overlay channel carries its payload through', () => {
+    const local = new MessageBus()
+    const seen: [string, ImageDrawLine | undefined][] = []
+    const editor = {
+      onTrigger(type: string, line?: ImageDrawLine) {
+        seen.push([type, line])
+      },
+    }
+
+    local.addEmitter(editor, ImageBus)
+    local.sendTrigger(ImageBus, 'resetDrawLines')
+    local.sendTrigger(ImageBus, 'addDrawLine', {x1: 0, y1: 0, x2: 1, y2: 1, color: '#f00'})
+
+    expect(seen).toEqual([
+      ['resetDrawLines', undefined],
+      ['addDrawLine', {x1: 0, y1: 0, x2: 1, y2: 1, color: '#f00'}],
+    ])
   })
 
   test('a trigger with no emitters is a no-op, not a throw', () => {

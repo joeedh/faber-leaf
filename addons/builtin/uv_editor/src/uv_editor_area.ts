@@ -31,6 +31,7 @@ import type {
   BlockLoaderAddUser,
   BusTriggers,
   DataBlock,
+  ImageDrawLine,
   IUVSource,
   StructReader,
   ViewContext,
@@ -50,6 +51,7 @@ const POINT_COLOR = 'rgb(175,175,175)'
 const POINT_SELECTED = 'rgb(255,180,40)'
 const POINT_PINNED = 'rgb(240,70,70)'
 const HIGHLIGHT_COLOR = 'rgb(255,255,255)'
+const DRAW_LINE_COLOR = 'rgba(90,190,255,0.8)'
 
 /** Cells across the unit square, so the checker zooms with the layout. */
 const CHECKER_CELLS = 8
@@ -107,6 +109,10 @@ uveditor.UVEditor {
   _geomKey = ''
   _lastKey = ''
 
+  /** Overlay segments pushed over `ImageBus`, 4 numbers per segment. */
+  _drawLines: number[] = []
+  _drawLineColors: string[] = []
+
   constructor() {
     super()
 
@@ -156,6 +162,16 @@ uveditor.UVEditor {
       'datalib.default_new(blockType="image" dataPathToSet="uvEditor.imageUser.image")|New',
     ])
 
+    row.menu('UV', [
+      'uveditor.unwrap()|Unwrap',
+      'uveditor.relax()|Relax',
+      'uveditor.pack_islands()|Pack Islands',
+      Menu.SEP,
+      'uveditor.reset_uvs()|Reset',
+      'uveditor.grid_uvs()|Grid',
+      'uveditor.randomize_uvs()|Randomize',
+    ])
+
     row.iconbutton(Icons.HOME, 'Reset Pan/Zoom', () => {
       this.velpan.reset()
       this.flagRedraw()
@@ -187,6 +203,8 @@ uveditor.UVEditor {
       new HotKey('R', [], 'uveditor.rotate()'),
       new HotKey('P', [], "uveditor.set_flag(flag='PIN')"),
       new HotKey('P', ['alt'], "uveditor.clear_flag(flag='PIN')"),
+      new HotKey('U', [], 'uveditor.unwrap()'),
+      new HotKey('P', ['ctrl'], 'uveditor.pack_islands()'),
     ])
 
     return this.keymap
@@ -412,7 +430,7 @@ uveditor.UVEditor {
    * emitter while it is the visible one, so a trigger fans out to exactly the
    * editors a user can see, without anyone holding a list of them.
    */
-  onTrigger(type: BusTriggers<typeof ImageBus>): void {
+  onTrigger(type: BusTriggers<typeof ImageBus>, data?: unknown): void {
     // A screen torn down whole (a file load) never fires on_area_inactive, so
     // an emitter that outlived its DOM deregisters itself on first contact.
     if (this.isDead()) {
@@ -421,6 +439,15 @@ uveditor.UVEditor {
     }
 
     if (type === 'flagRedraw') {
+      this.flagRedraw()
+    } else if (type === 'resetDrawLines') {
+      this._drawLines.length = 0
+      this._drawLineColors.length = 0
+      this.flagRedraw()
+    } else if (type === 'addDrawLine') {
+      const line = data as ImageDrawLine
+      this._drawLines.push(line.x1, line.y1, line.x2, line.y2)
+      this._drawLineColors.push(line.color ?? DRAW_LINE_COLOR)
       this.flagRedraw()
     }
   }
@@ -543,6 +570,28 @@ uveditor.UVEditor {
 
     this.drawEdges(g, geom)
     this.drawPoints(g, geom)
+    this.drawOverlay(g)
+  }
+
+  /** Segments a sender pushed over `ImageBus`, drawn on top of everything. */
+  drawOverlay(g: CanvasRenderingContext2D): void {
+    const lines = this._drawLines
+    const p = _tmp1
+
+    g.lineWidth = 1
+
+    for (let i = 0; i < lines.length; i += 4) {
+      g.beginPath()
+      g.strokeStyle = this._drawLineColors[i >> 2]
+
+      this.projectUV(lines[i], lines[i + 1], p)
+      g.moveTo(p[0], p[1])
+
+      this.projectUV(lines[i + 2], lines[i + 3], p)
+      g.lineTo(p[0], p[1])
+
+      g.stroke()
+    }
   }
 
   /** The checkerboard, and the image over it when one is loaded and ready. */

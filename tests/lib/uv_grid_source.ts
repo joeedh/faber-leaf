@@ -99,6 +99,11 @@ export class UVGridSource implements IUVSource {
     }
   }
 
+  /** The one way a subclass reads the corner -> vertex map. */
+  protected ownerOf(corner: number): number {
+    return this.owners[corner]
+  }
+
   /** Stand-in for a topology edit: every handle a caller is holding goes stale. */
   bumpTopoStamp(): void {
     this._topoStamp++
@@ -273,6 +278,65 @@ export class UVGridSource implements IUVSource {
       rows.push([f * 4, f * 4 + 1, f * 4 + 2, f * 4 + 3])
     }
     return toCSR(rows)
+  }
+}
+
+export interface UVGridSurfaceOptions extends UVGridOptions {
+  /**
+   * Height of the dome the grid is lifted onto, as a fraction of its width.
+   * Zero leaves it flat; anything else makes it non-developable, so an
+   * unwrapper has to trade angle error off against itself instead of finding
+   * an exact answer.
+   */
+  bend?: number
+}
+
+/**
+ * The same grid, with 3D positions behind it — P19 §5 step 6.
+ *
+ * `getUVElementPositions` is optional on the contract, and the base class omits
+ * it on purpose: the solver and the projection both feature-detect, and a
+ * source without positions must stay a supported one. This subclass is what
+ * the other half of that branch is tested against.
+ */
+export class UVGridSurface extends UVGridSource {
+  readonly bend: number
+
+  /** Grid vertex -> world position, `3n` for `(w + 1) * (h + 1)` vertices. */
+  private readonly positions: Float32Array
+
+  constructor(opts: UVGridSurfaceOptions = {}) {
+    super(opts)
+    this.bend = opts.bend ?? 0
+
+    const nx = this.w + 1
+    const ny = this.h + 1
+    this.positions = new Float32Array(nx * ny * 3)
+
+    for (let y = 0; y < ny; y++) {
+      for (let x = 0; x < nx; x++) {
+        const u = x / this.w
+        const v = y / this.h
+        const i = (y * nx + x) * 3
+
+        this.positions[i] = u
+        this.positions[i + 1] = v
+        this.positions[i + 2] = this.bend * Math.sin(u * Math.PI) * Math.sin(v * Math.PI)
+      }
+    }
+  }
+
+  getUVElementPositions(_layer: number, handles: ElementHandles, out?: Float32Array): Float32Array {
+    const ret = sized(out, handles.length * 3, () => new Float32Array(handles.length * 3))
+
+    for (let i = 0; i < handles.length; i++) {
+      const v = this.ownerOf(handles[i]) * 3
+
+      ret[i * 3] = this.positions[v]
+      ret[i * 3 + 1] = this.positions[v + 1]
+      ret[i * 3 + 2] = this.positions[v + 2]
+    }
+    return ret
   }
 }
 

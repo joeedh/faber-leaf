@@ -15,7 +15,7 @@
  * Pulled in as a side-effect import from `litemesh_test_scene.ts`.
  */
 
-import {recordUVConformance, weldFirstOwner} from '@framework/api'
+import {recordUVConformance, registerUVSourceFixture, weldFirstOwner} from '@framework/api'
 import type {IUVSource, UVConformanceResult} from '@framework/api'
 import {getWasmImmediate} from '@sculptcore/api/api'
 
@@ -63,6 +63,36 @@ function runLiteMeshUVConformance(): UVConformanceResult {
     }
   }
 }
+
+/**
+ * The same cube offered to the unwrap parity check — P19 §5 step 7. It is
+ * `makeSource` without the fan weld: welding one vertex is a conformance
+ * concern, and an unwrap wants the plain per-face chart, whose islands are what
+ * the solver and the packer are handed.
+ */
+registerUVSourceFixture('litemesh', () => {
+  const wasm = getWasmImmediate()
+  if (!wasm) {
+    throw new Error('sculptcore is not loaded')
+  }
+
+  const lm = new LiteMesh(wasm.Mesh_createCube(2, 1.0, 0.0))
+  const dispose = () => lm.destroy()
+
+  try {
+    lm.markAllSeams()
+    lm.generateUVFromSeams()
+
+    const source = LITEMESH_UV_PROVIDER.resolve(lm)
+    if (!source) {
+      throw new Error('LITEMESH_UV_PROVIDER did not resolve a LiteMesh')
+    }
+    return {source, dispose}
+  } catch (e) {
+    dispose()
+    throw e
+  }
+})
 
 ;(globalThis as {__uvsourceLiteMesh?: typeof runLiteMeshUVConformance}).__uvsourceLiteMesh =
   runLiteMeshUVConformance

@@ -1326,7 +1326,7 @@ are a 2026-08-15 snapshot, not a standing guarantee.
 | P16 | [W3b — sculptcore build decoupling](./2026-08-15-0415-w3-sculptcore-build-decoupling.md) | W3 §2–4 | 10 | P15 | **landed** |
 | P17 | [W5a — distributions + cycle cleanup](./2026-08-15-0420-w5-distributions.md) | W5 §1–2 | 11 | P16 | **landed** |
 | P18 | [W4a — `IUVSource` + UV editor rewrite](./2026-08-15-0425-w4-iuvsource-uv-editor.md) | W4 | 12 | P8, P11 | **landed** |
-| P19 | [W4b — port the unwrapping solvers](./2026-08-15-0430-w4-unwrapping-port.md) | W4 | 12 | P18, P13 (rescue) | **written** |
+| P19 | [W4b — port the unwrapping solvers](./2026-08-15-0430-w4-unwrapping-port.md) | W4 | 12 | P18, P13 (rescue) | **landed** |
 | P20 | [W5b — de-globalize + embedding contract](./2026-08-15-0435-w5-deglobalize-embedding-api.md) | W5 §3–4 | 13 | P17, P18 | **written** |
 
 Five of them — **P3, P7, P10, P14, P20** — are tagged **`[xhigh]`** in §9.3 and
@@ -1776,7 +1776,8 @@ ungrounded input just argues a wrong plan more convincingly.
   - Enumerate the feature-regression list from §6 **before** deleting, and
     decide per feature: drop / port / preserve in `archive/`.
   - **Rescue before delete**: `unwrapping.ts`, `unwrapping_solve.ts`,
-    `mesh_paramizer.ts` move to `archive/` intact — P19 ports them.
+    `mesh_paramizer.ts` move to `archive/` intact — P19 ported the first two
+    and dropped the third.
   - Delete `addons/builtin/mesh/` plus `subsurf`, `curve`, `mesh_edit`,
     `tetmesh`, `scripts/tet/`, `scripts/hair/`, the BREP dyntopo/multires
     files, the `@framework/api` re-exports, `tools/migrate-mesh-registers.js`,
@@ -1901,16 +1902,24 @@ ungrounded input just argues a wrong plan more convincingly.
   - [x] Needs P8's sever, **not** P13's delete — this is deliberately off the
     critical path.
   - Exit: success criterion #11 **met**; a UV selection round-trips through a
-    `.wproj`. `unwrap` is declared and unimplemented, which is P19's whole job.
+    `.wproj`. The solver behind unwrapping is P19's whole job — and note that
+    `IUVSource` never grew an `unwrap` member, contrary to what P19's plan
+    assumed: unwrapping is an op over a source, not a method on one.
 
-- [ ] **P19 — [W4b: port the unwrapping solvers](./2026-08-15-0430-w4-unwrapping-port.md)**
-  - Port `unwrapping.ts`, `unwrapping_solve.ts`, `mesh_paramizer.ts` (~4,700
-    lines rescued to `archive/` by P13) onto `IUVSource`. They are largely
-    topology-agnostic; the work is the element-access seam, not the math.
-  - Settle open decision #6 at P13 time, not here — the rescue must happen
-    before the delete lands.
-  - Exit: unwrap runs on both `IUVSource` implementors, one of them without
-    sculptcore present.
+- [x] **P19 — [W4b: port the unwrapping solvers](./2026-08-15-0430-w4-unwrapping-port.md)**
+  - [x] Port `unwrapping.ts` and `unwrapping_solve.ts` onto `IUVSource`. They
+    are largely topology-agnostic; the work was the element-access seam, not the
+    math — though the seam went deeper than planned, since `UVWrangler`'s
+    internal representation held BREP elements rather than indices.
+  - [x] `mesh_paramizer.ts` was **not** ported. It went with voxel unwrap and
+    `fixSeams` — three drops, each recorded in the plan's §3.4 / §6 and in
+    `ImmediateTODOs.md` rather than left as an omission.
+  - [x] Settle open decision #6 at P13 time, not here — the rescue happened
+    before the delete landed.
+  - Exit: **met**, except the numerical reference against the pre-port code,
+    which no longer exists to capture. Unwrap, relax and pack run on both
+    implementors and on a source that is not a mesh; two of the four parity
+    fixtures never touch sculptcore.
 
 > **⏸ Pause — compact, then switch to `xhigh` one last time.** P20 writes the
 > public embedding surface — `mountFaberLeaf`, the per-instance registry, and
@@ -1941,7 +1950,7 @@ ungrounded input just argues a wrong plan more convincingly.
 | 3. File compatibility (pin ids vs. rewrite `_origBytes`) | **Resolved** — pin ids (`stableStructId` in nstructjs, `APP_VERSION` 8→9); P10 §4.3a, landed 2026-08-18 | — |
 | 4. Curves / tets / hair / subsurf | **Resolved — archive, do not port**; P13 §2/§2.1, moved intact under `archive/` 2026-08-18 | — |
 | 5. Texture painting | **Resolved** — deleted in P5, port plan deferred (landed 2026-08-16) | — |
-| 6. UV unwrapping | **Resolved — rescue**; the 4,701-line stack moved to `archive/` in P13's rescue commit before the delete. The *port* is still P19's | — |
+| 6. UV unwrapping | **Resolved — rescued, then ported.** The 4,701-line stack moved to `archive/` in P13's rescue commit before the delete; P19 ported the solvers onto `IUVSource` and dropped the paramizer, voxel unwrap and `fixSeams` | — |
 | 7. Rename's storage keys | **Resolved** — migrate (P2, landed 2026-08-15) | — |
 | 8. Does `faber-leaf-core` model on day one? | **Resolved — yes**, at P12 §4's scope (landed 2026-08-18) | — |
 | 9. One-way format break | **Resolved — there is no one-way break**; the forward-version guard ships in v9 anyway (P10 §6a, landed 2026-08-18). Embedder-facing wording still P20 | — |
