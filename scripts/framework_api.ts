@@ -173,6 +173,9 @@ export {setDefaultSceneBuilder} from './core/default_file.js'
 // The app's own CLI flags: an addon that takes one (sculptcore's --backend)
 // has to read it from the same place the host does.
 export {getAppArgv, getArg, getArgList, hasArg} from './core/app_argv.js'
+// The mounted-instance registry (P20 §2.1). An addon that used to read the
+// `_appstate` global asks the registry which instance is active instead.
+export {getAppState, peekAppState, listAppInstances, withAppInstance} from './core/app_instance.js'
 // Feature flags: the host defines none, addons register their own through
 // `AddonAPI.registerFeatureFlags`, and read them back through `FeatureFlags`.
 export {

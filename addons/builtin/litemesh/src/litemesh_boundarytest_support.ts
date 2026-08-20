@@ -16,6 +16,7 @@
  * app toolstack.
  */
 
+import {getAppState} from '@framework/api'
 import {Vector3} from '../../../../scripts/path.ux/scripts/pathux.js'
 import {DynTopoFlagsSC, SculptTools} from '../../../../scripts/brush/brush_base'
 import {SculptBrush, DefaultBrushes} from '../../../../scripts/brush/index'
@@ -92,18 +93,8 @@ function leafCount(mesh: LiteMesh): number {
 
 function boundaryTest(): BoundaryTestResult {
   const result: BoundaryTestResult = {ok: false}
-  const g = globalThis as unknown as {
-    _appstate?: {
-      ctx: {
-        object?: {data?: unknown}
-        api?: {execTool: (ctx: unknown, p: string) => void}
-      }
-      toolstack: {undo: () => void; redo: () => void}
-    }
-  }
   try {
-    const app = g._appstate
-    if (!app) throw new Error('no _appstate')
+    const app = getAppState()
     const ctx = app.ctx
     const mesh = ctx.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')

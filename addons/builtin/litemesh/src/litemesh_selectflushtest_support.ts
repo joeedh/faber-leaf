@@ -12,7 +12,7 @@
  */
 
 import {Vector2} from '../../../../scripts/path.ux/scripts/pathux.js'
-import {FeatureFlags} from '@framework/api'
+import {FeatureFlags, getAppState} from '@framework/api'
 import {LiteMesh, type IMeshLogSelect} from './litemesh'
 import type {ViewContext} from '../../../../scripts/core/context'
 import type {View3D} from '../../../../scripts/editors/view3d/view3d'
@@ -39,7 +39,7 @@ const FLAG = 'sculptcore.select_flush_prefer_op_domain'
 async function selectFlushTest(): Promise<SelectFlushTestResult> {
   const r: SelectFlushTestResult = {ok: false}
   try {
-    const ctx = _appstate.ctx as ViewContext
+    const ctx = getAppState().ctx
     const exec = (t: string) => ctx.api.execTool(ctx, t)
     const undo = () => ctx.toolstack.undo()
 

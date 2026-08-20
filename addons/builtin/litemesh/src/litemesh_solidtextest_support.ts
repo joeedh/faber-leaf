@@ -9,6 +9,7 @@
  * lands in the dump as `evalResult`.
  */
 
+import {peekAppState} from '@framework/api'
 import {LiteMesh} from './litemesh'
 import {ImageBlock} from '../../../../scripts/image/image'
 import {ImageNode, DiffuseNode} from '../../../../scripts/shadernodes/shader_nodes'
@@ -31,11 +32,10 @@ interface SolidTexTestResult {
 
 async function solidTexTest(): Promise<SolidTexTestResult> {
   const g = globalThis as unknown as {
-    _appstate?: {ctx: ViewContext}
     __SCULPTCORE_BACKEND?: string
   }
   const backend = g.__SCULPTCORE_BACKEND ?? 'wasm'
-  const ctx = g._appstate?.ctx
+  const ctx = peekAppState()?.ctx
   if (!ctx) {
     return {backend, error: 'no app context'}
   }

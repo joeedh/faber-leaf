@@ -5,13 +5,16 @@ let _api = undefined
 let _get_screen
 let _editors = new Set()
 
+// This addon ships unbuilt, so no `@framework/api` rewrite runs over it and
+// the mounted-instance registry has to be reached through the runtime global.
+const _appState = () => globalThis._framework?.api?.peekAppState()
+
 function _checkeditor(x, y) {
   console.log('check editor')
-  if (!window._appstate || !window._appstate.screen) {
+  let screen = _appState()?.screen
+  if (!screen) {
     return
   }
-
-  let screen = _appstate.screen
 
   let editor = screen.findScreenArea(x, y)
   if (!editor) {

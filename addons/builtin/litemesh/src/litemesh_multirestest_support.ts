@@ -17,7 +17,7 @@
 
 import {BrushFlags, SculptTools} from '../../../../scripts/brush/brush_base'
 import {DefaultBrushes, type SculptBrush} from '../../../../scripts/brush/index'
-import {FeatureFlags} from '@framework/api'
+import {FeatureFlags, getAppState, peekAppState} from '@framework/api'
 import {nstructjs} from '../../../../scripts/path.ux/scripts/pathux'
 import {runSculptcoreStroke, SculptPaintOp} from './sculptcore_ops'
 import {LiteMesh} from './litemesh'
@@ -102,11 +102,10 @@ function dumpCoFlat(mesh: LiteMesh): Float32Array {
 function multiresTest(): MultiresTestResult {
   const result: MultiresTestResult = {ok: false}
   const g = globalThis as unknown as {
-    _appstate?: {ctx?: {object?: {data?: unknown}}}
     __multiresTestResult?: MultiresTestResult
   }
   try {
-    const mesh = g._appstate?.ctx?.object?.data
+    const mesh = peekAppState()?.ctx?.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
 
     const brush = DefaultBrushes.slotMap[SculptTools.DRAW]
@@ -250,11 +249,10 @@ export interface MultiresVdmTestResult {
 function multiresVdmTest(): MultiresVdmTestResult {
   const result: MultiresVdmTestResult = {ok: false}
   const g = globalThis as unknown as {
-    _appstate?: {ctx?: {object?: {data?: unknown}}}
     __multiresVdmTestResult?: MultiresVdmTestResult
   }
   try {
-    const mesh = g._appstate?.ctx?.object?.data
+    const mesh = peekAppState()?.ctx?.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
     const wasm = mesh.wasm
 
@@ -384,11 +382,10 @@ export interface StencilAmplifyTestResult {
 async function stencilAmplifyTest(): Promise<StencilAmplifyTestResult> {
   const result: StencilAmplifyTestResult = {ok: false}
   const g = globalThis as unknown as {
-    _appstate?: {ctx?: {object?: {data?: unknown}}}
     __stencilAmplifyTestResult?: StencilAmplifyTestResult
   }
   try {
-    const mesh = g._appstate?.ctx?.object?.data
+    const mesh = peekAppState()?.ctx?.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
     // The render context registers asynchronously after boot (GpuContext
     // .create); this driver runs from a harness --eval that may precede the
@@ -583,18 +580,10 @@ function fnv1aBytes(bytes: Uint8Array): number {
 function vdmSculptTest(): VdmSculptResult {
   const result: VdmSculptResult = {ok: false}
   const g = globalThis as unknown as {
-    _appstate?: {
-      ctx: {
-        object?: {data?: unknown}
-        api?: {execTool: (ctx: unknown, p: string) => void}
-      }
-      toolstack: {undo: () => void; redo: () => void}
-    }
     __evalTestResult?: unknown
   }
   try {
-    const app = g._appstate
-    if (!app) throw new Error('no _appstate')
+    const app = getAppState()
     const ctx = app.ctx
     const mesh = ctx.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
@@ -744,12 +733,10 @@ interface VdmPersistResult {
 function vdmPersistTest(): VdmPersistResult {
   const result: VdmPersistResult = {ok: false}
   const g = globalThis as unknown as {
-    _appstate?: {ctx: {object?: {data?: unknown}}}
     __evalTestResult?: unknown
   }
   try {
-    const app = g._appstate
-    if (!app) throw new Error('no _appstate')
+    const app = getAppState()
     const mesh = app.ctx.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
     const wasm = mesh.wasm
@@ -849,11 +836,8 @@ export interface MultiresLayerTestResult {
  */
 function multiresLayerTest(): MultiresLayerTestResult {
   const result: MultiresLayerTestResult = {ok: false}
-  const g = globalThis as unknown as {
-    _appstate?: {ctx?: {object?: {data?: unknown}}}
-  }
   try {
-    const mesh = g._appstate?.ctx?.object?.data
+    const mesh = peekAppState()?.ctx?.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
     const brush = DefaultBrushes.slotMap[SculptTools.DRAW]
     if (!brush) throw new Error('no default DRAW brush')
@@ -969,15 +953,8 @@ export interface MultiresAddLevelTestResult {
  */
 function multiresAddLevelTest(): MultiresAddLevelTestResult {
   const result: MultiresAddLevelTestResult = {ok: false}
-  const g = globalThis as unknown as {
-    _appstate?: {
-      ctx: {object?: {data?: unknown}; api?: {execTool: (ctx: unknown, p: string) => void}}
-      toolstack: {undo: () => void; redo: () => void}
-    }
-  }
   try {
-    const app = g._appstate
-    if (!app) throw new Error('no _appstate')
+    const app = getAppState()
     const ctx = app.ctx
     const mesh = ctx.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')

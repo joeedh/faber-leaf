@@ -17,7 +17,7 @@
 
 import {BrushFlags, DynTopoFlagsSC, SculptTools} from '../../../../scripts/brush/brush_base'
 import {DefaultBrushes} from '../../../../scripts/brush/index'
-import {FeatureFlags} from '@framework/api'
+import {FeatureFlags, getAppState, peekAppState} from '@framework/api'
 import {SculptBrushes} from '@sculptcore/api/sculptcore/brush/SculptBrushes'
 import {runSculptcoreStroke, SculptPaintOp} from './sculptcore_ops'
 import {LiteMesh} from './litemesh'
@@ -73,11 +73,10 @@ function maxResidual(a: Float32Array, b: Float32Array): number {
 function layerTest(): LayerTestResult {
   const result: LayerTestResult = {ok: false}
   const g = globalThis as unknown as {
-    _appstate?: {ctx?: {object?: {data?: unknown}}}
     __layerTestResult?: LayerTestResult
   }
   try {
-    const mesh = g._appstate?.ctx?.object?.data
+    const mesh = peekAppState()?.ctx?.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
 
     const brush = DefaultBrushes.slotMap[SculptTools.DRAW]
@@ -222,11 +221,10 @@ function dumpCoFlat(mesh: LiteMesh): Float32Array {
 function layerToolTest(): LayerToolTestResult {
   const result: LayerToolTestResult = {ok: false}
   const g = globalThis as unknown as {
-    _appstate?: {ctx?: {object?: {data?: unknown}}}
     __layerToolTestResult?: LayerToolTestResult
   }
   try {
-    const mesh = g._appstate?.ctx?.object?.data
+    const mesh = peekAppState()?.ctx?.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
     const wasm = mesh.wasm
 
@@ -371,15 +369,11 @@ interface LayerTargetTestResult {
 async function layerTargetTest(): Promise<LayerTargetTestResult> {
   const result: LayerTargetTestResult = {ok: false}
   const g = globalThis as unknown as {
-    _appstate?: {
-      ctx?: {object?: {data?: unknown}; api?: {execTool: (ctx: unknown, p: string) => void}}
-      toolstack?: {undo: () => void; redo: () => void}
-    }
     __layerTargetTestResult?: LayerTargetTestResult
   }
   try {
-    const ctx = g._appstate?.ctx
-    const mesh = ctx?.object?.data
+    const ctx = getAppState().ctx
+    const mesh = ctx.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
     const wasm = mesh.wasm
 
@@ -440,7 +434,7 @@ async function layerTargetTest(): Promise<LayerTargetTestResult> {
       const li = mesh.mesh.sculptLayerAdd()
       mesh.activeSculptLayer = li
       result.layerIndex = li
-      ctx!.api!.execTool(ctx, `litemesh.sculpt_layer_set_target(layer=${li})`)
+      ctx.api.execTool(ctx, `litemesh.sculpt_layer_set_target(layer=${li})`)
       result.targetAfterOp = mesh.mesh.sculptLayerEditTarget()
 
       const preTarget = dumpCoFlat(mesh)
@@ -479,7 +473,7 @@ async function layerTargetTest(): Promise<LayerTargetTestResult> {
       // Fold (explicit C export; the clear-target op below folds again —
       // idempotent), clear the target, and round-trip the weight.
       wasm.Mesh_layerFold(mesh.mesh)
-      ctx!.api!.execTool(ctx, 'litemesh.sculpt_layer_set_target(layer=-1)')
+      ctx.api.execTool(ctx, 'litemesh.sculpt_layer_set_target(layer=-1)')
       wasm.Mesh_layerSetWeight(mesh.mesh, li, 0)
       result.weightZeroResidual = maxResidual(preTarget, dumpCoFlat(mesh))
       wasm.Mesh_layerSetWeight(mesh.mesh, li, 1)
@@ -487,9 +481,9 @@ async function layerTargetTest(): Promise<LayerTargetTestResult> {
 
       // Toolstack undo of the clear-target op re-targets the layer; redo
       // clears it again (folds are undo-transparent, no column snapshots).
-      g._appstate!.toolstack!.undo()
+      getAppState().toolstack.undo()
       result.opUndoTarget = mesh.mesh.sculptLayerEditTarget()
-      g._appstate!.toolstack!.redo()
+      getAppState().toolstack.redo()
       result.opRedoTarget = mesh.mesh.sculptLayerEditTarget()
 
       // ---- MeshLog stroke undo keeps co + the derived delta consistent ----

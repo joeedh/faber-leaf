@@ -18,6 +18,7 @@ import {TextureUsage, BufferUsage} from '../../webgpu/flags.js'
 import {GpuBuffer} from '../../webgpu/buffer.js'
 import {buildDebugDisplayDescriptor, writeDebugUniforms, DEBUG_UNIFORMS_SIZE} from './debug_display_wgsl.js'
 import type {WebGpuViewport} from '../view3d/view3d_draw_webgpu.js'
+import {peekAppState} from '../../core/app_instance.js'
 
 export class GpuTextureHistory {
   readonly max: number
@@ -78,13 +79,11 @@ export class WebGpuDebug {
   }
 
   get debugEditorOpen(): boolean {
-    const w = globalThis as unknown as {
-      _appstate?: {screen?: {sareas?: Iterable<{area?: {constructor: {define: () => {areaname: string}}}}>}}
-    }
-    const sareas = w._appstate?.screen?.sareas
+    const sareas = peekAppState()?.screen?.sareas
     if (!sareas) return false
     for (const sarea of sareas) {
-      const def = sarea.area?.constructor?.define?.()
+      const cls = sarea.area?.constructor as {define?: () => {areaname: string}} | undefined
+      const def = cls?.define?.()
       if (def?.areaname === 'DebugEditor') return true
     }
     return false

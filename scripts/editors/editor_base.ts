@@ -1,4 +1,5 @@
 import {registerDataAPI} from '../data_api/api_define_registry.js'
+import {getAppState, peekAppState} from '../core/app_instance.js'
 import {
   nstructjs,
   Vector2,
@@ -994,7 +995,7 @@ Editor {
   getScreen() {
     return (this.owning_sarea?.screen !== undefined
       ? this.owning_sarea.screen
-      : window._appstate.screen) as unknown as Screen<ViewContext>
+      : getAppState().screen) as unknown as Screen<ViewContext>
   }
 }
 
@@ -1146,16 +1147,16 @@ App {
 
     this.keymap = new KeyMap([
       new HotKey('Z', ['ctrl'], () => {
-        window._appstate.toolstack.undo()
+        getAppState().toolstack.undo()
         window.redraw_viewport()
       }),
       new HotKey('Z', ['ctrl', 'shift'], () => {
-        window._appstate.toolstack.redo()
+        getAppState().toolstack.redo()
         window.redraw_viewport()
       }),
       new HotKey('Y', ['ctrl'], () => {
         console.log('redo!')
-        window._appstate.toolstack.redo()
+        getAppState().toolstack.redo()
         window.redraw_viewport()
       }),
       /*
@@ -1306,7 +1307,8 @@ App {
 }
 
 window.setInterval(() => {
-  if (window._appstate && window._appstate.ctx && window._appstate.screen) {
+  const state = peekAppState()
+  if (state && state.ctx && state.screen) {
     window.updateDataGraph(true)
   }
 
@@ -1314,7 +1316,8 @@ window.setInterval(() => {
 }, 50)
 
 window.setInterval(() => {
-  if (window._appstate && window._appstate.ctx) {
+  const state = peekAppState()
+  if (state && state.ctx) {
     messageBus.validateSubscribers()
   }
 }, 5000)
@@ -1366,41 +1369,7 @@ ScreenBlock {
 
 DataBlock.register(ScreenBlock)
 
-/*
-let last_time = util.time_ms();
 
-if (0) {
-  window.setInterval(() => {
-    if (window._appstate && _appstate.ctx && _appstate.ctx.scene && _appstate.ctx.view3d) {
-      //for debugging purposes, check if screen is listening
-      if (_appstate.screen.listen_timer === undefined) {
-        return;
-      }
-
-      window.redraw_viewport();
-
-      if (_appstate.playing) {
-        let scene = _appstate.ctx.scene;
-        if (scene.fps !== 30 && util.time_ms() - last_time < 1000.0/scene.fps) {
-          return;
-        }
-
-        let t = scene.time;
-        t++;
-
-        if (t > _appstate.ctx.timeEnd) {
-          t = _appstate.ctx.timeStart;
-        } else if (t < _appstate.ctx.timeStart) {
-          t = _appstate.ctx.timeStart;
-        }
-
-        scene.changeTime(t);
-      }
-
-      last_time = util.time_ms();
-    }
-  }, 1000.0/30.0);
-}*/
 
 export class MaterialChooser extends Container<ViewContext> {
   addButton?: UIBase<ViewContext> = undefined

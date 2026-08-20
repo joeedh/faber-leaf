@@ -22,6 +22,7 @@
  * pushes the material (with `hasVdm` → VDM_MODE) through the real M6 wiring.
  */
 
+import {peekAppState} from '@framework/api'
 import {Material} from '../../../../scripts/core/material'
 import {AttributeNode, DiffuseNode, OutputNode} from '../../../../scripts/shadernodes/shader_nodes'
 import {View3DFlags} from '../../../../scripts/editors/view3d/view3d_base'
@@ -71,19 +72,11 @@ function vdmRenderTest(
 ): VdmRenderResult {
   const result: VdmRenderResult = {ok: false, mode}
   const g = globalThis as unknown as {
-    _appstate?: {
-      ctx?: {
-        object?: {data?: unknown}
-        scene?: {lights: Iterable<unknown>; toolmode?: {drawFeatureOverlay?: boolean}}
-        view3d?: {flag: number; activeCamera: {pos: ArrayLike<number>}}
-      }
-      datalib: {add(b: unknown): void}
-    }
     __evalTestResult?: VdmRenderResult
     __vdmRenderFlagLoop?: boolean
   }
   try {
-    const app = g._appstate
+    const app = peekAppState()
     const mesh = app?.ctx?.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
     const view3d = app?.ctx?.view3d
@@ -151,7 +144,7 @@ function vdmRenderTest(
     let bestDot = -Infinity
     for (const axis of [0, 1, 2]) {
       for (const sign of [1, -1]) {
-        const d = sign * camPos[axis]
+        const d = sign * camPos[axis]!
         if (d > bestDot) {
           bestDot = d
           n = [0, 0, 0]
@@ -256,7 +249,7 @@ function vdmRenderTest(
 
     // The seam overlay would draw every edge (markAllSeams) over the A/B
     // images — and would track the ref displacement but not the vdm one.
-    const toolmode = app?.ctx?.scene?.toolmode
+    const toolmode = app?.ctx?.scene?.toolmode as {drawFeatureOverlay?: boolean} | undefined
     if (toolmode) toolmode.drawFeatureOverlay = false
 
     // Rendered shading: the engine BasePass owns the LiteMesh draw from here
@@ -267,9 +260,9 @@ function vdmRenderTest(
     if (!g.__vdmRenderFlagLoop) {
       g.__vdmRenderFlagLoop = true
       const assertRenderMode = (): void => {
-        const v = g._appstate?.ctx?.view3d
+        const v = peekAppState()?.ctx?.view3d
         if (v) v.flag |= View3DFlags.SHOW_RENDER
-        const tm = g._appstate?.ctx?.scene?.toolmode
+        const tm = peekAppState()?.ctx?.scene?.toolmode as {drawFeatureOverlay?: boolean} | undefined
         if (tm) tm.drawFeatureOverlay = false
         requestAnimationFrame(assertRenderMode)
       }

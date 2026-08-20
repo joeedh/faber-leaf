@@ -65,6 +65,7 @@ import {
   recoverBlockHeader,
 } from './missing_addon'
 import {runFileMigrations} from './file_migrations'
+import {getAppState, registerAppInstance} from './app_instance'
 import './app_ops.js'
 import {BinWriter} from 'nstructjs'
 
@@ -72,7 +73,6 @@ import {BinWriter} from 'nstructjs'
 // See plan §4 and scripts/core/missing_addon.ts.
 installMissingAddonHooks()
 
-declare let _appstate: AppState
 declare let JSZip: {
   deflate(data: number[] | Uint8Array, options?: {level?: number}): Uint8Array
   inflate(data: Uint8Array): Uint8Array
@@ -240,7 +240,7 @@ export class AppState {
         return
       }
 
-      const screen = _appstate.screen
+      const screen = this.screen
       if (screen === undefined) {
         return
       }
@@ -1218,8 +1218,15 @@ export class AppState {
   draw(): void {}
 }
 
-export function preinit(): void {
-  window._appstate = new AppState() as unknown as AppState
+export function preinit(): AppState {
+  const state = new AppState()
+
+  registerAppInstance(state)
+  // Deprecated alias to the first-mounted instance, kept for console use and
+  // for the CDP harness. P20 §4 dates its removal.
+  window._appstate = state
+
+  return state
 }
 
 export function init(): void {
@@ -1230,7 +1237,7 @@ export function init(): void {
   const f = (): void => {
     animreq = undefined
 
-    _appstate.draw()
+    getAppState().draw()
   }
   window.redraw_all = function (): void {
     if (animreq !== undefined) {
@@ -1249,8 +1256,9 @@ export function init(): void {
       e.preventDefault()
       e.stopPropagation()
 
-      const mpos = _appstate.screen.mpos
-      const elem = _appstate.screen.pickElement(mpos[0], mpos[1])
+      const screen = getAppState().screen
+      const mpos = screen.mpos
+      const elem = screen.pickElement(mpos[0], mpos[1])
 
       console.log(elem ? elem.tagName : elem, mpos)
     }
@@ -1259,8 +1267,9 @@ export function init(): void {
       e.preventDefault()
     }
 
-    const mpos = _appstate.screen ? _appstate.screen.mpos : [0, 0]
-    const preventdef = !(_appstate.screen && checkForTextBox(_appstate.screen, mpos[0], mpos[1]))
+    const screen2 = getAppState().screen
+    const mpos = screen2 ? screen2.mpos : [0, 0]
+    const preventdef = !(screen2 && checkForTextBox(screen2, mpos[0], mpos[1]))
     if (preventdef && e.keyCode === keymap['A'] && e.ctrlKey) {
       e.preventDefault()
     }
@@ -1273,12 +1282,14 @@ export function init(): void {
 
   function gf(): void {
     graphreq = undefined
-    _appstate.datalib.graph.exec(_appstate.ctx)
+    const state = getAppState()
+    state.datalib.graph.exec(state.ctx)
   }
 
   window.updateDataGraph = function (force = false): void {
     if (force) {
-      _appstate.datalib.graph.exec(_appstate.ctx)
+      const state = getAppState()
+      state.datalib.graph.exec(state.ctx)
       return
     }
 
@@ -1290,5 +1301,5 @@ export function init(): void {
     setTimeout(gf, 1)
   }
 
-  _appstate.start()
+  getAppState().start()
 }

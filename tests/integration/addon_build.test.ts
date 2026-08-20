@@ -3,7 +3,8 @@
  * (plan §7.2 Layer D).
  *
  * Approach:
- *   1. Run the build script against the test fixture in tests/fixtures/addons/.
+ *   1. Run the build script against the test fixture in tests/fixtures/addons/,
+ *      into a private --out-dir (never the shared build/addons the app loads).
  *   2. Verify the expected output files exist + the index.json shape.
  *   3. Dynamic-import the built module and exercise register/unregister with
  *      a mock AddonAPI to confirm the addon's exportNamespace landed.
@@ -22,7 +23,11 @@ import {isDefaultBackendPass} from './split'
 
 const __filename = fileURLToPath(import.meta.url)
 const REPO_ROOT = Path.resolve(Path.dirname(__filename), '../..')
-const OUT_DIR = Path.join(REPO_ROOT, 'build', 'addons')
+// A private output directory, not the shared `build/addons`: this suite wipes
+// its output before building, and every other suite that boots the app reads
+// `build/addons/index.json` while it does.
+const OUT_DIR_REL = 'build/addons-buildtest'
+const OUT_DIR = Path.join(REPO_ROOT, 'build', 'addons-buildtest')
 const TEST_ADDON_BUILT_ENTRY = Path.join(OUT_DIR, 'test_addon', 'src', 'main.js')
 const INDEX_PATH = Path.join(OUT_DIR, 'index.json')
 
@@ -34,11 +39,15 @@ describeOnce('tools/build-addons.js', () => {
     // Clean output then build the fixture addon. Slow-ish (~few seconds for
     // esbuild's first invocation) but acceptable for a CI smoke test.
     fs.rmSync(OUT_DIR, {recursive: true, force: true})
-    execSync('node tools/build-addons.js --include-fixtures', {
+    execSync(`node tools/build-addons.js --include-fixtures --out-dir ${OUT_DIR_REL}`, {
       cwd  : REPO_ROOT,
       stdio: 'pipe',
     })
   }, 30000)
+
+  afterAll(() => {
+    fs.rmSync(OUT_DIR, {recursive: true, force: true})
+  })
 
   test('emits the built addon entry', () => {
     expect(fs.existsSync(TEST_ADDON_BUILT_ENTRY)).toBe(true)

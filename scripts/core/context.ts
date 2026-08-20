@@ -358,7 +358,7 @@ export class ToolContext extends ContextExtraAPI {
 /**
  * Debugging / test-automation surface hanging off `ViewContext.debug`. Reach it
  * from any renderer-JS eval context as `CTX.debug` (the `CTX` window global is
- * `_appstate.ctx`, defined in entry_point.js) or as `ctx.debug` in app code.
+ * `getAppState().ctx`, defined in entry_point.js) or as `ctx.debug` in app code.
  *
  * Its main job is reflecting over the editor registry and forcing a given
  * editor on-screen (`showEditor`) — handy in integration tests, where many

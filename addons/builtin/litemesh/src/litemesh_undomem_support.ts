@@ -15,6 +15,7 @@
  *    undo/redo alignment of the surviving steps.
  */
 
+import {getAppState} from '@framework/api'
 import {DynTopoFlagsSC, SculptTools} from '../../../../scripts/brush/brush_base'
 import {DefaultBrushes, type SculptBrush} from '../../../../scripts/brush/index'
 import {runSculptcoreStroke, SculptPaintOp} from './sculptcore_ops'
@@ -54,23 +55,8 @@ interface UndoMemTestResult {
 
 function undoMemTest(): UndoMemTestResult {
   const result: UndoMemTestResult = {ok: false}
-  const g = globalThis as unknown as {
-    _appstate?: {
-      ctx: {object?: {data?: unknown}; settings: {limitUndoMem: boolean; undoMemLimit: number}}
-      toolstack: {
-        length: number
-        cur: number
-        memLimit: number
-        enforceMemLimit: boolean
-        push: (op: unknown) => void
-        limitMemory: (limit: number, ctx: unknown) => number
-        _syncSettings: (ctx: unknown) => void
-      }
-    }
-  }
   try {
-    const app = g._appstate
-    if (!app) throw new Error('no _appstate')
+    const app = getAppState()
     const ctx = app.ctx
     const mesh = ctx.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')

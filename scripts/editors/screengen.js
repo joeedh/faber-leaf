@@ -1,6 +1,7 @@
 import {MenuBarEditor} from './menu/MainMenu.js'
 import {PropsEditor} from './properties/PropsEditor.js'
 import {View3D} from './view3d/view3d.js'
+import {getAppState} from '../core/app_instance.js'
 
 export function genResBrowserScreen(appstate, ResourceBrowser) {
   let screen = document.createElement('webgl-app-x')
@@ -29,7 +30,7 @@ export function genResBrowserScreen(appstate, ResourceBrowser) {
 }
 
 export function genDefaultScreen(appstate) {
-  let screen = _appstate.screen
+  let screen = getAppState().screen
 
   screen.clear()
   screen.ctx = appstate.ctx

@@ -24,6 +24,7 @@
  * is not spatial and the coherent numbers are meaningless.
  */
 
+import {getAppState} from '@framework/api'
 import {LiteMesh} from './litemesh'
 import type {ViewContext} from '../../../../scripts/core/context'
 
@@ -116,7 +117,7 @@ const SCENARIOS: Scenario[] = [
 async function materialFragTest(opts?: {only?: string}): Promise<MaterialFragTestResult> {
   const r: MaterialFragTestResult = {ok: false}
   try {
-    const ctx = _appstate.ctx as ViewContext
+    const ctx = getAppState().ctx
     const mesh = ctx.scene.objects.active!.data as LiteMesh
     const m = mesh.mesh as unknown as {f: {count: number}}
     const n = m.f.count

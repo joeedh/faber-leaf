@@ -6,11 +6,10 @@ import {getAppStorage} from './app_storage'
 import {APP_KEY_NAME} from './const'
 import {registerSyncTarget, noteLocalWrite} from './storage_sync'
 import {FeatureFlags, FeatureFlagManager} from './feature-flag'
+import {getAppState, peekAppState} from './app_instance'
 
 import '../util/polyfill.d.ts'
 import {StructReader} from '../path.ux/scripts/util/nstructjs.js'
-
-declare let _appstate: any
 
 export class SavedScreen {
   static STRUCT = nstructjs.inlineRegister(
@@ -31,7 +30,7 @@ SavedScreen {
   }
 
   static create(name = 'Screen'): SavedScreen {
-    const file = _appstate.createFile({save_screen: true, save_library: false, save_settings: false})
+    const file = getAppState().createFile({save_screen: true, save_library: false, save_settings: false})
     return new SavedScreen(name, file)
   }
 
@@ -220,7 +219,7 @@ AppSettings {
     const st = struct ?? api.mapStruct(this, true)
 
     const onchange = function (this: {dataref: AppSettings}) {
-      if (this.dataref === _appstate.settings) {
+      if (this.dataref === peekAppState()?.settings) {
         this.dataref.save()
       }
     }
@@ -231,9 +230,9 @@ AppSettings {
     // Autosave: persist immediately on change and re-arm the running timer so a
     // new interval / enable toggle takes effect without a restart.
     const onAutosaveChange = function (this: {dataref: AppSettings}) {
-      if (this.dataref === _appstate.settings) {
+      if (this.dataref === peekAppState()?.settings) {
         this.dataref.save()
-        ;(window as unknown as {_appstate?: {autosave?: {rearm(): void}}})._appstate?.autosave?.rearm()
+        peekAppState()?.autosave?.rearm()
       }
     }
 
@@ -277,7 +276,7 @@ AppSettings {
       // Reconcile every persisted flag to the real enabled state — a blocked
       // toggle snaps the checkbox back, and an enable that pulled deps on marks
       // those deps enabled too.
-      const settings = (window as any)._appstate?.settings as AppSettings | undefined
+      const settings = peekAppState()?.settings as AppSettings | undefined
       if (settings) {
         settings.syncEnabledFlags()
         settings.save()
@@ -406,7 +405,7 @@ AppSettings {
     } catch (error) {
       util.print_stack(error as Error)
     }
-    ;(window as unknown as {_appstate?: {autosave?: {rearm(): void}}})._appstate?.autosave?.rearm()
+    peekAppState()?.autosave?.rearm()
   }
 
   _loadAddons(): void {
@@ -546,5 +545,5 @@ registerDataAPI(AppSettings)
 // captured one, since AppSettings is swapped on file load.
 registerSyncTarget({
   key   : SETTINGS_KEY,
-  reload: () => (window as unknown as {_appstate?: {settings?: AppSettings}})._appstate?.settings?.syncFromDisk(),
+  reload: () => peekAppState()?.settings?.syncFromDisk(),
 })

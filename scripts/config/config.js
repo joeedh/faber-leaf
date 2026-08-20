@@ -1,6 +1,5 @@
 let exports = {
   addonLoadWaitTime: 500,
-  svgIcons         : true,
   pathuxConfig: {
     addHelpPickers: true,
 

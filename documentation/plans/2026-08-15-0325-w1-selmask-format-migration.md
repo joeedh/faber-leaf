@@ -166,6 +166,9 @@ uses); 34 import it from `selectmode.ts`. Six further `scripts/` files import
 `window._SelMask = SelMask` at `selectmode.ts:54` is a global; P20 gates it. Do
 not delete it here.
 
+*(2026-08-19: it moved to `select_types.ts:240` with the constants and P20
+deleted it — nothing in-tree, in `nwjs/` or in `tests/` ever read it.)*
+
 ## 4. Non-goals
 
 - Redesigning selection. The semantics stay identical.

@@ -10,6 +10,7 @@
  *   node tools/build-addons.js --watch  # watch mode
  *   node tools/build-addons.js --include-fixtures  # also build tests/fixtures/addons/*
  *   node tools/build-addons.js --release  # release build: no source maps
+ *   node tools/build-addons.js --out-dir build/addons-x  # build somewhere else
  *
  * Each addon is bundled as ESM with `splitting: true` and shared chunks in
  * `build/addons/_chunks/`. The bundling currently inlines `scripts/*` imports
@@ -29,7 +30,6 @@ import {checkFromFiles, EXTERNAL_IDS, IN_BUNDLE_BUILTIN_IDS} from './check-addon
 const __filename = fileURLToPath(import.meta.url)
 const REPO_ROOT = Path.resolve(Path.dirname(__filename), '..')
 const MAIN_META_PATH = Path.join(REPO_ROOT, 'build', 'meta-main.json')
-const ADDON_META_PATH = Path.join(REPO_ROOT, 'build', 'addons', 'meta-addons.json')
 
 /**
  * Stub out framework-global side-effect imports (numeric.js, the extern Math
@@ -63,10 +63,16 @@ const WATCH = args.includes('--watch') || args.includes('-w')
 const INCLUDE_FIXTURES = args.includes('--include-fixtures')
 // Passed through by tools/esbuilder.js --release. See documentation/releaseBuild.md.
 const RELEASE = args.includes('--release')
+// `--out-dir <path>` (relative to the repo root) redirects the whole build.
+// Keep the same depth as the default so esbuild's rebasing of the externals
+// left relative by frameworkGlobalsStubPlugin still resolves.
+const OUT_DIR_ARG = args[args.indexOf('--out-dir') + 1]
+const OUT_DIR_REL = args.includes('--out-dir') && OUT_DIR_ARG ? OUT_DIR_ARG : 'build/addons'
 
 const BUILTIN_DIR = Path.join(REPO_ROOT, 'addons', 'builtin')
 const FIXTURE_DIR = Path.join(REPO_ROOT, 'tests', 'fixtures', 'addons')
-const OUT_DIR = Path.join(REPO_ROOT, 'build', 'addons')
+const OUT_DIR = Path.resolve(REPO_ROOT, OUT_DIR_REL)
+const ADDON_META_PATH = Path.join(OUT_DIR, 'meta-addons.json')
 
 /**
  * Scans a directory for manifests. Returns objects shaped like

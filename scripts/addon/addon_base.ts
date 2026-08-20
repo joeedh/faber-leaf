@@ -76,6 +76,7 @@ import {registerFileMigrator, unregisterFileMigrator, type IFileMigrator} from '
 import {registerFileFormat, unregisterFileFormat, type IFileFormat} from '../core/file_formats'
 import {registerUVSource, unregisterUVSource, type IUVSourceProvider} from '../core/uv_sources'
 import {registerPropsPanel, unregisterPropsPanel, type IPropsPanel} from '../core/props_panels'
+import {getAppState, peekAppState} from '../core/app_instance'
 import {registerKeymapEntries as registerKeymapEntriesImpl, unregisterKeymapEntries} from '../core/keymap_contributions'
 import {
   registerLegacyStructNames as registerLegacyStructNamesImpl,
@@ -391,7 +392,7 @@ export class AddonAPI<T> {
     this._undoRegistrations.push(() => FeatureFlags.unregisterFlags(flags.map((f) => f.key)))
 
     this._whenAppstateReady(() => {
-      const st = _appstate.api.mapStruct(FeatureFlagManager, true)
+      const st = getAppState().api.mapStruct(FeatureFlagManager, true)
       for (const flag of flags) {
         if (FeatureFlags.markDefined(flag.key)) {
           defineFeatureFlagMember(st, flag)
@@ -466,11 +467,11 @@ export class AddonAPI<T> {
   }
 
   get argv() {
-    return _appstate.arguments
+    return getAppState().arguments
   }
 
   get ctx() {
-    return _appstate.ctx
+    return getAppState().ctx
   }
 
   register(cls: unknown) {
@@ -505,16 +506,16 @@ export class AddonAPI<T> {
       this.classes.toolModeClasses.push(cls)
       addToOther = false
 
-      if (window._appstate) {
-        cls.defineAPI(_appstate.api)
+      if (peekAppState() !== undefined) {
+        cls.defineAPI(getAppState().api)
       } else {
         const cb = () => {
-          if (!window._appstate) {
+          if (peekAppState() === undefined) {
             window.setTimeout(cb, 5)
             return
           }
 
-          cls.defineAPI(_appstate.api)
+          cls.defineAPI(getAppState().api)
         }
 
         window.setTimeout(cb)
@@ -530,7 +531,7 @@ export class AddonAPI<T> {
       // by the one-shot `getDataAPI` build, which has already run by now; an
       // addon-owned editor attaches itself so its `prop()` bindings resolve.
       const editorCls = cls as unknown as IEditorConstructor
-      this._whenAppstateReady(() => defineEditorAPI(_appstate.api, editorCls))
+      this._whenAppstateReady(() => defineEditorAPI(getAppState().api, editorCls))
     }
 
     if (subclassOf(cls, SceneObjectData)) {
@@ -555,7 +556,7 @@ export class AddonAPI<T> {
   /**
    * Live-define a data-API class against the running `DataAPI`. `getDataAPI` is
    * one-shot (it runs before addons start), so an addon enabled afterward defines
-   * its classes itself; retries until `_appstate` exists, and runs at most once.
+   * its classes itself; retries until an instance exists, and runs at most once.
    */
   private _defineDataAPIWhenReady(cls: DefineAPIClass): void {
     this._whenAppstateReady(() => {
@@ -563,18 +564,18 @@ export class AddonAPI<T> {
         return
       }
       markDataAPIDefined(cls)
-      cls.defineAPI(_appstate.api)
+      cls.defineAPI(getAppState().api)
     })
   }
 
-  /** Runs `fn` once `_appstate` exists — now if it already does, else polling. */
+  /** Runs `fn` once an instance exists — now if one already does, else polling. */
   private _whenAppstateReady(fn: () => void): void {
-    if (window._appstate) {
+    if (peekAppState() !== undefined) {
       fn()
       return
     }
     const cb = () => {
-      if (!window._appstate) {
+      if (peekAppState() === undefined) {
         window.setTimeout(cb, 5)
         return
       }
@@ -682,7 +683,7 @@ export class AddonAPI<T> {
   unregisterAll() {
     let graph
 
-    if (window._appstate) {
+    if (peekAppState() !== undefined) {
       graph = this.ctx.graph
     }
 

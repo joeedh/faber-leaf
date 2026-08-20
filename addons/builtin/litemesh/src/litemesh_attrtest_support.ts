@@ -15,6 +15,7 @@
  * and is pulled in as a side-effect import from `litemesh_test_scene.ts`.
  */
 
+import {peekAppState} from '@framework/api'
 import {Material} from '../../../../scripts/core/material'
 import {AttributeNode, DiffuseNode, OutputNode} from '../../../../scripts/shadernodes/shader_nodes'
 import type {IRenderLights} from '../../../../scripts/shadernodes/shader_lib_wgsl'
@@ -53,8 +54,9 @@ interface AttrTestOpts {
 function applyAttrTestMaterial(requests: AttrTestRequest[], opts: AttrTestOpts = {}): AttrTestResult {
   const result: AttrTestResult = {ok: false, requested: [], missing: []}
   try {
-    const app = (globalThis as {_appstate?: {ctx: {scene: unknown}}})._appstate
-    const scene = app?.ctx?.scene as {lights: Iterable<unknown>; objects: {active?: {data?: unknown}}} | undefined
+    const scene = peekAppState()?.ctx?.scene as
+      | {lights: Iterable<unknown>; objects: {active?: {data?: unknown}}}
+      | undefined
     if (!scene) throw new Error('no active scene')
 
     const lite = scene.objects.active?.data
@@ -131,8 +133,7 @@ function applyAttrTestMaterial(requests: AttrTestRequest[], opts: AttrTestOpts =
  */
 function buildAttrTestWgsl(requests: AttrTestRequest[]): {wgsl: string; requestedAttrs: unknown[]} | {error: string} {
   try {
-    const app = (globalThis as {_appstate?: {ctx: {scene: unknown}}})._appstate
-    const scene = app?.ctx?.scene as {lights: Iterable<unknown>} | undefined
+    const scene = peekAppState()?.ctx?.scene as {lights: Iterable<unknown>} | undefined
     if (!scene) throw new Error('no active scene')
 
     const mat = new Material()

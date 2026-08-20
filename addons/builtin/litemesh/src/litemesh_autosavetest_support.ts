@@ -28,6 +28,7 @@
  * macrotask, so the in-memory serialized bytes are validated directly.
  */
 
+import {getAppState} from '@framework/api'
 import {AutosaveManager} from '../../../../scripts/core/autosave'
 import {isAutosaveContainer, parseAutosaveContainer} from '../../../../scripts/core/autosave_format'
 import {SplitSerializer} from '../../../../scripts/core/autosave_serialize'
@@ -179,11 +180,7 @@ async function autosaveTest(): Promise<AutosaveTestResult> {
   }
   setStage('start')
   try {
-    const g = globalThis as unknown as {
-      _appstate?: {ctx?: {object?: {data?: unknown}}; settings: Record<string, unknown>}
-    }
-    const app = g._appstate
-    if (!app) throw new Error('no _appstate')
+    const app = getAppState()
     let mesh = app.ctx?.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
 

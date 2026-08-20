@@ -14,6 +14,7 @@
  * — which must be UNCHANGED, since a VDM splat writes texels, not geometry.
  */
 
+import {peekAppState} from '@framework/api'
 import {LiteMesh} from './litemesh'
 import {livePoleExtent, readGpuBuffer} from './litemesh_brushtest_support'
 
@@ -109,11 +110,10 @@ interface VdmStoreBound {
 function vdmTest(): VdmTestResult {
   const result: VdmTestResult = {ok: false}
   const g = globalThis as unknown as {
-    _appstate?: {ctx?: {object?: {data?: unknown}}}
     __vdmTestResult?: VdmTestResult
   }
   try {
-    const mesh = g._appstate?.ctx?.object?.data
+    const mesh = peekAppState()?.ctx?.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
     const wasm = mesh.wasm
 

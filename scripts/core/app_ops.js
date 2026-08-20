@@ -5,6 +5,7 @@ import * as platform from './platform.js'
 import {exportSTLMesh} from '../util/stlformat.js'
 import {formatForFilename, listImportFormats} from './file_formats.js'
 import {genDefaultFile} from './gen_default_file.js'
+import {getAppState} from './app_instance.js'
 
 // AppImportOBJOp moved to scripts/mesh/import_obj_op.js so core stops
 // importing from mesh. The class is registered there via ToolOp.register.
@@ -49,17 +50,17 @@ export class FileSaveOp extends ToolOp {
     console.log('File save')
 
     let needDialog = this.inputs.forceDialog.getValue()
-    needDialog = needDialog || !_appstate.saveHandle
+    needDialog = needDialog || !getAppState().saveHandle
 
     let args = {save_toolstack: this.inputs.saveToolStack.getValue()}
 
     if (!needDialog) {
-      let data = new DataView(_appstate.createFile(args))
+      let data = new DataView(getAppState().createFile(args))
 
       platform.platform
-        .writeFile(data, _appstate.saveHandle, 'application/x-octet-stream')
+        .writeFile(data, getAppState().saveHandle, 'application/x-octet-stream')
         .then(() => {
-          _appstate.autosave?.onProjectSaved()
+          getAppState().autosave?.onProjectSaved()
           ctx.message('File saved')
         })
         .catch((err) => {
@@ -70,7 +71,7 @@ export class FileSaveOp extends ToolOp {
       return
     }
 
-    let savefunc = () => _appstate.createFile(args)
+    let savefunc = () => getAppState().createFile(args)
 
     platform.platform
       .showSaveDialog('Save File', savefunc, {
@@ -83,11 +84,11 @@ export class FileSaveOp extends ToolOp {
         ],
       })
       .then((saveHandle) => {
-        _appstate.saveHandle = saveHandle
-        _appstate.autosave?.onProjectSaved()
+        getAppState().saveHandle = saveHandle
+        getAppState().autosave?.onProjectSaved()
         ctx.message('File saved')
       })
-    //saveFile(_appstate.createFile(), "unnamed."+cconst.FILE_EXT, ["."+cconst.FILE_EXT]);
+    //saveFile(getAppState().createFile(), "unnamed."+cconst.FILE_EXT, ["."+cconst.FILE_EXT]);
   }
 }
 
@@ -127,12 +128,12 @@ export class FileOpenOp extends ToolOp {
       })
       .then((data) => {
         console.log('got data!', data)
-        _appstate.saveHandle = undefined
-        _appstate.loadFileAsync(data, {reset_toolstack: true, load_screen: true, reset_context: true})
+        getAppState().saveHandle = undefined
+        getAppState().loadFileAsync(data, {reset_toolstack: true, load_screen: true, reset_context: true})
       })
 
     //loadFile(undefined, ["."+cconst.FILE_EXT]).then((filedata) => {
-    //_appstate.loadFile(filedata);
+    //getAppState().loadFile(filedata);
     //});
   }
 }
@@ -150,7 +151,7 @@ export class LoadLastAutosaveOp extends ToolOp {
   }
 
   exec(ctx) {
-    const mgr = _appstate.autosave
+    const mgr = getAppState().autosave
     if (!mgr) {
       console.warn('autosave manager not ready')
       return
@@ -180,9 +181,9 @@ export class FileNewOp extends ToolOp {
     console.log('File new')
     if (confirm('Make new file?')) {
       //paranoia check, clear this here
-      _appstate.saveHandle = undefined
+      getAppState().saveHandle = undefined
 
-      genDefaultFile(_appstate, false)
+      genDefaultFile(getAppState(), false)
     }
   }
 }
@@ -222,10 +223,10 @@ export class FileExportSTL extends ToolOp {
         ],
       })
       .then((saveHandle) => {
-        _appstate.saveHandle = saveHandle
+        getAppState().saveHandle = saveHandle
         ctx.message('File saved')
       })
-    //saveFile(_appstate.createFile(), "unnamed."+cconst.FILE_EXT, ["."+cconst.FILE_EXT]);
+    //saveFile(getAppState().createFile(), "unnamed."+cconst.FILE_EXT, ["."+cconst.FILE_EXT]);
   }
 }
 

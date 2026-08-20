@@ -352,72 +352,6 @@ export function getShader(gl: WebGL2RenderingContext, shaderdef: IShaderDef): Sh
   return shader
 }
 
-//
-// loadShader
-//
-// 'shaderId' is the id of a <script> element containing the shader source string.
-// Load this shader and return the WebGLShader object corresponding to it.
-//
-function loadShader(ctx: any, shaderId: string) {
-  /* Is this function used anywhere? */
-  console.error('webgl.loadShader called')
-
-  let shaderScript = document.getElementById(shaderId) as HTMLScriptElement
-
-  if (!shaderScript) {
-    // @ts-ignore
-    shaderScript = {text: shaderId, type: undefined}
-
-    if (shaderId.trim().toLowerCase().startsWith('//vertex')) {
-      shaderScript.type = 'x-shader/x-vertex'
-    } else if (shaderId.trim().toLowerCase().startsWith('//fragment')) {
-      shaderScript.type = 'x-shader/x-fragment'
-    } else {
-      console.trace()
-      console.log('Invalid shader type')
-      console.log('================')
-      console.log(format_lines(shaderScript.text))
-      console.log('================')
-      throw new Error('Invalid shader type for shader script;\n script must start with //vertex or //fragment')
-    }
-  }
-
-  let shaderType: number
-
-  if (shaderScript.type === 'x-shader/x-vertex') shaderType = ctx.VERTEX_SHADER
-  else if (shaderScript.type === 'x-shader/x-fragment') shaderType = ctx.FRAGMENT_SHADER
-  else {
-    console.log("*** Error: shader script '" + shaderId + "' of undefined type '" + shaderScript.type + "'")
-    return null
-  }
-
-  // Create the shader object
-  if (ctx?.createShader === undefined) console.trace()
-
-  const shader = ctx.createShader(shaderType)
-
-  // Load the shader source
-  ctx.shaderSource(shader, shaderScript.text)
-
-  // Compile the shader
-  ctx.compileShader(shader)
-
-  // Check the compile status
-  const compiled = ctx.getShaderParameter(shader, ctx.COMPILE_STATUS)
-  if (!compiled && !ctx.isContextLost()) {
-    // Something went wrong during compilation; get the error
-    const error = ctx.getShaderInfoLog(shader)
-
-    console.log(format_lines(shaderScript.text))
-    console.log('\nError compiling shader: ', error)
-
-    ctx.deleteShader(shader)
-    return null
-  }
-
-  return shader
-}
-
 const _safe_arrays = [
   new Float32Array(0),
   new Float32Array(1),
@@ -647,33 +581,6 @@ v${attr} = ${attr};
       }
     }
     ret += '#endif\n'
-
-    return ret
-  }
-
-  //this function was originally asyncrounous
-  static load_shader(scriptid: string, attrs: string[]): ShaderProgram {
-    const script = document.getElementById(scriptid) as HTMLScriptElement
-    const text = script.text
-
-    const ret = new ShaderProgram(undefined, '', '', ['position', 'normal', 'uv', 'color', 'id'])
-
-    const lowertext = text.toLowerCase()
-    const vshader = text.slice(0, lowertext.search('//fragment'))
-    const fshader = text.slice(lowertext.search('//fragment'), text.length)
-
-    ret.vertexSource = vshader
-    ret.fragmentSource = fshader
-    ret.ready = true
-
-    /*
-    ret.promise = new Promise(function (accept, reject) {
-      accept(ret);
-    });
-
-    ret.then = function () {
-      return this.promise.then.apply(this.promise, arguments);
-    }*/
 
     return ret
   }

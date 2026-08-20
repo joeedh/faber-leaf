@@ -1,5 +1,6 @@
 import {Editor, HotKey, VelPan} from '../editor_base.ts'
 import {Icons} from '../icon_enum.js'
+import {getAppState} from '../../core/app_instance.js'
 import {Vector2, Vector3, Vector4, Matrix4, Quat} from '../../util/vectormath.js'
 import * as util from '../../util/util.js'
 import {
@@ -53,14 +54,14 @@ editors.DataPathBrowser {
     let dstruct = this.ctx.api.rootContextStruct
 
     function makeDataListPanel(dpath, path2, con) {
-      let ctx = _appstate.ctx
+      let ctx = getAppState().ctx
 
       let panel = con.panel(dpath.apiname)
       panel.closed = true
 
       function load() {
         try {
-          let ctx = _appstate.ctx
+          let ctx = getAppState().ctx
           let api = ctx.api
 
           let list = dpath.data

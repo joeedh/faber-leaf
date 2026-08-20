@@ -42,6 +42,7 @@ import {getTestScene, listTestScenes, TestSceneArgs} from './test_scenes'
 import type {ToolContext} from './context'
 import type {Library} from './lib_api'
 import type {Scene} from '../scene/scene'
+import {peekAppState} from './app_instance'
 
 const TAG = '[apptest]'
 
@@ -56,7 +57,7 @@ interface AppStateLike {
 }
 
 function appstate(): AppStateLike {
-  return (globalThis as {_appstate?: AppStateLike})._appstate as AppStateLike
+  return peekAppState() as unknown as AppStateLike
 }
 
 function nodeRequire(): ((m: string) => unknown) | undefined {

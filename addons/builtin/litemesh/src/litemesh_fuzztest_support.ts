@@ -15,6 +15,7 @@
  * seeded, so a crashing run's `seed` reproduces it exactly.
  */
 
+import {peekAppState} from '@framework/api'
 import {SculptTools} from '../../../../scripts/brush/brush_base'
 import {DynTopoFlagsSC} from '../../../../scripts/brush/brush_base'
 import {DefaultBrushes, type SculptBrush} from '../../../../scripts/brush/index'
@@ -97,10 +98,7 @@ function fuzzTest(opts: {iters?: number; seed?: number; maxMs?: number} = {}): F
   const result: FuzzTestResult = {ok: false, seed, iters, ranStrokes: 0, log: []}
 
   try {
-    const g = globalThis as unknown as {
-      _appstate?: {ctx?: {object?: {data?: unknown}}}
-    }
-    const mesh = g._appstate?.ctx?.object?.data
+    const mesh = peekAppState()?.ctx?.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
     const slotMap = DefaultBrushes.slotMap
     const need = (tool: number): SculptBrush => {

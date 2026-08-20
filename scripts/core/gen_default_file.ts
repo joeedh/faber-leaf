@@ -11,6 +11,7 @@ import {Library} from './lib_api'
 import {genDefaultScreen} from '../editors/screengen'
 import {buildDefaultSceneContents, getDefaultToolMode} from './default_file'
 import {getAppStorage} from './app_storage'
+import {getAppState} from './app_instance'
 
 /*root operator for when loading files*/
 export class RootFileOp extends ToolOp {
@@ -84,7 +85,7 @@ export class BasicFileOp extends ToolOp {
     collection.lib_addUser(scene)
 
     const screenblock = new ScreenBlock()
-    screenblock.screen = _appstate.screen as typeof screenblock.screen
+    screenblock.screen = getAppState().screen as typeof screenblock.screen
 
     lib.add(screenblock)
     lib.setActive(screenblock)
@@ -116,7 +117,7 @@ export class BasicFileOp extends ToolOp {
 }
 
 export function genDefaultFile(appstate: AppState, dont_load_startup = 0) {
-  _appstate.saveHandle = undefined
+  getAppState().saveHandle = undefined
 
   const startup = dont_load_startup ? undefined : getAppStorage().getBlob(constants.APP_KEY_NAME)
   if (startup) {

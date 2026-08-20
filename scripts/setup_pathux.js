@@ -9,66 +9,20 @@ _setUIBase(UIBase)
 
 export var iconmanager
 
-export function setupIconsRastered() {
-  iconmanager = new IconManager(
-    [
-      document.getElementById('iconsheet16'),
-      document.getElementById('iconsheet24'),
-      document.getElementById('iconsheet32'),
-      document.getElementById('iconsheet40'),
-      document.getElementById('iconsheet50'),
-      document.getElementById('iconsheet64'),
-      document.getElementById('iconsheet64'),
-    ],
-    [16, [24, 24], 32, [40, 32], [50, 32], [64, 32], [64, 64], [80, 64], [128, 64]],
-    16
-  )
-
-  setIconMap(Icons)
-  let _last_dpi = undefined
-
-  window.updateIconDPI = () => {
-    let dpi = UIBase.getDPI()
-
-    if (dpi === _last_dpi) return
-
-    _last_dpi = dpi
-
-    if (dpi < 1.0) {
-      setIconManager(iconmanager, {
-        SMALL : 0,
-        LARGE : 2,
-        XLARGE: 6,
-      })
-    } else if (dpi <= 1.25) {
-      setIconManager(iconmanager, {
-        SMALL : 0,
-        LARGE : 2,
-        XLARGE: 6,
-      })
-    } else if (dpi <= 1.5) {
-      setIconManager(iconmanager, {
-        SMALL : 1,
-        LARGE : 3,
-        XLARGE: 6,
-      })
-    } else {
-      setIconManager(iconmanager, {
-        SMALL : 2,
-        LARGE : 5,
-        XLARGE: 6,
-      })
-    }
-  }
-
-  updateIconDPI()
-}
-
-export function setupIconsSvg() {
-  const existingSheet = document.getElementById('iconsheet')
+/**
+ * @param {string|undefined} iconSheetUrl explicit sheet URL; when omitted the
+ *        host document's `#iconsheet` is used, then a prefix-resolved default.
+ *        The NW.js shell needs the markup: its window.html sits one directory
+ *        down, so resolvePath() would aim at `nwjs/assets/`.
+ */
+export function setupIconsSvg(iconSheetUrl = undefined) {
+  const existingSheet = document.querySelector('#iconsheet')
   let iconsheet
 
-  if (existingSheet instanceof HTMLImageElement) {
+  if (iconSheetUrl !== undefined) {
+    iconsheet = document.createElement('img')
+    iconsheet.src = iconSheetUrl
+  } else if (existingSheet instanceof HTMLImageElement) {
     iconsheet = existingSheet
   } else {
     iconsheet = document.createElement('img')
@@ -97,7 +51,14 @@ export function setupIconsSvg() {
   }
 }
 
-export async function setupPathux() {
+/**
+ * Process-wide path.ux setup: constants, units and the icon manager. path.ux
+ * holds these as module globals, so this runs once per page, not per mounted
+ * app instance.
+ *
+ * @param {{iconSheetUrl?: string}} options
+ */
+export async function setupPathux(options = {}) {
   await loadConfigLocal()
 
   config.pathuxConfig.DEBUG = config.DEBUG || {}
@@ -107,9 +68,5 @@ export async function setupPathux() {
   setBaseUnit('meter')
   setMetric(true)
 
-  if (config.svgIcons) {
-    setupIconsSvg()
-  } else {
-    setupIconsRastered()
-  }
+  setupIconsSvg(options.iconSheetUrl)
 }

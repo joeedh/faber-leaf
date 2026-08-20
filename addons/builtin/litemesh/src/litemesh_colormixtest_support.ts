@@ -14,6 +14,7 @@
  * is lowest on R, DARKEN clamps G down, LIGHTEN raises B.
  */
 
+import {getAppState} from '@framework/api'
 import {Vector4} from '../../../../scripts/path.ux/scripts/pathux.js'
 import {SculptTools, ColorMixModes} from '../../../../scripts/brush/brush_base'
 import {DefaultBrushes, type SculptBrush} from '../../../../scripts/brush/index'
@@ -115,7 +116,7 @@ function meanPainted(before: Float32Array, after: Float32Array): ModeMean {
 async function colorMixTest(): Promise<ColorMixTestResult> {
   const r: ColorMixTestResult = {ok: false}
   try {
-    const ctx = (globalThis as unknown as {_appstate: {ctx: {object?: {data?: unknown}}}})._appstate.ctx
+    const ctx = getAppState().ctx
     const mesh = ctx.object?.data
     if (!(mesh instanceof LiteMesh)) {
       throw new Error('active object is not a LiteMesh')

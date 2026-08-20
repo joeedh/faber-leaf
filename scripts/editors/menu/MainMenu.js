@@ -20,6 +20,7 @@ const menuSize = 27
 
 import * as platform from '../../core/platform.js'
 import addonManager from '../../addon/addon.js'
+import {getAppState} from '../../core/app_instance.js'
 
 export class ToolHistoryConsole extends ColumnFrame {
   constructor() {
@@ -148,7 +149,7 @@ MenuBarEditor {
     def.push([
       'Undo',
       () => {
-        _appstate.toolstack.undo()
+        getAppState().toolstack.undo()
       },
       'Ctrl+Z',
       Icons.UNDO,
@@ -156,7 +157,7 @@ MenuBarEditor {
     def.push([
       'Redo',
       () => {
-        _appstate.toolstack.undo()
+        getAppState().toolstack.undo()
       },
       'Ctrl+Shift+Z',
       Icons.REDO,
@@ -198,7 +199,7 @@ MenuBarEditor {
       /* ["Save", () => {
          console.log("File save");
 
-         platform.platform.showSaveDialog("Save File", _appstate.createFile(),{
+         platform.platform.showSaveDialog("Save File", getAppState().createFile(),{
            filters : [
              {
                defaultPath : "unnamed." + cconst.FILE_EXT,
@@ -209,7 +210,7 @@ MenuBarEditor {
          }).then(() => {
            this.ctx.message("File saved");
          });
-         //saveFile(_appstate.createFile(), "unnamed."+cconst.FILE_EXT, ["."+cconst.FILE_EXT]);
+         //saveFile(getAppState().createFile(), "unnamed."+cconst.FILE_EXT, ["."+cconst.FILE_EXT]);
        }],*/
       'app.open()',
       'app.load_last_autosave()',
@@ -248,14 +249,14 @@ MenuBarEditor {
         'Save Default File  ',
         () => {
           console.log('saving default file')
-          _appstate.saveStartupFile()
+          getAppState().saveStartupFile()
         },
       ],
       [
         'Clear Default File  ',
         () => {
           console.log('saving default file')
-          _appstate.clearStartupFile()
+          getAppState().clearStartupFile()
         },
       ],
     ])
@@ -322,7 +323,7 @@ MenuBarEditor {
       lib.add(sblock2)
       lib.setActive(sblock2)
 
-      _appstate.switchScreen(sblock2)
+      getAppState().switchScreen(sblock2)
       //this.rebuildScreenSwitcher();
     } else {
       console.log(tab.id)
@@ -338,7 +339,7 @@ MenuBarEditor {
 
   _makeSwitcherHash() {
     let ret = ''
-    for (let k of _appstate.datalib.screen) {
+    for (let k of getAppState().datalib.screen) {
       ret += k + '|'
     }
 

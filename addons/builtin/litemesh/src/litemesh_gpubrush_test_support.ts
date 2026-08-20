@@ -12,7 +12,7 @@
  * microtask chain, no screen-tick).
  */
 
-import {FeatureFlags} from '@framework/api'
+import {FeatureFlags, peekAppState} from '@framework/api'
 import {getActiveWebGpuContext} from '../../../../scripts/render/queue_factory'
 import {ensureGpuBrushDebug} from './sculptcore_gpu_stroke'
 import {LiteMesh} from './litemesh'
@@ -120,7 +120,6 @@ interface TestOpts {
 
 async function gpuBrushTest(opts: TestOpts = {}): Promise<GpuBrushTestResult> {
   const g = globalThis as unknown as {
-    _appstate?: {ctx?: {object?: {data?: unknown}}}
     _sculptcoreStrokeTester?: {
       frameMeshInCamera(): void
       runStroke(o: object): {redrawPromise: Promise<unknown>}
@@ -139,7 +138,7 @@ async function gpuBrushTest(opts: TestOpts = {}): Promise<GpuBrushTestResult> {
   }
   const backend = (globalThis as unknown as {__SCULPTCORE_BACKEND?: string}).__SCULPTCORE_BACKEND ?? 'wasm'
 
-  const mesh = g._appstate?.ctx?.object?.data
+  const mesh = peekAppState()?.ctx?.object?.data
   if (!(mesh instanceof LiteMesh)) {
     return {backend, error: 'active object is not a LiteMesh'}
   }

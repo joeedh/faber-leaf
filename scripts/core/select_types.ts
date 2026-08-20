@@ -37,12 +37,6 @@
  * save and the load. Readers accept either — see `normalizeSelMask`.
  */
 
-declare global {
-  interface Window {
-    _SelMask: typeof SelMask
-  }
-}
-
 export const SelToolModes = {
   ADD : 0,
   SUB : 1,
@@ -236,5 +230,3 @@ export function normalizeSelMask(value: unknown, fallback: number): number {
   }
   return fallback
 }
-
-window._SelMask = SelMask

@@ -13,6 +13,7 @@ import {
 } from '../../path.ux/scripts/pathux'
 
 import {spawnToolSearchMenu} from '../editor_base'
+import {getAppState, peekAppState} from '../../core/app_instance'
 
 import {getBlueMask} from '../../shadernodes/shader_lib'
 
@@ -93,9 +94,10 @@ export function initWebGL() {
   canvas.setAttribute('id', 'webgl')
   canvas.id = 'webgl'
 
-  if (_appstate.screen !== undefined) {
-    w = _appstate.screen.size[0]
-    h = _appstate.screen.size[1]
+  const screen = peekAppState()?.screen
+  if (screen !== undefined) {
+    w = screen.size[0]
+    h = screen.size[1]
   } else {
     w = h = 512
   }
@@ -160,13 +162,14 @@ export function initWebGL() {
     (e) => {
       loadShaders(_gl!)
 
-      const datalib = (_appstate.ctx as any).datalib as Library
+      const state = getAppState()
+      const datalib = (state.ctx as any).datalib as Library
 
       for (const ob of datalib.object) {
         ob.onContextLost(e)
       }
 
-      for (const sarea of _appstate.screen!.sareas) {
+      for (const sarea of state.screen!.sareas) {
         for (const area of sarea.editors) {
           if (area instanceof View3D) {
             area.onContextLost(e as WebGLContextEvent)
@@ -1840,7 +1843,7 @@ let resetRender = 0
 let drawCount = 1
 
 const f2 = () => {
-  const screen = _appstate.screen
+  const screen = getAppState().screen
   const resetrender = resetRender
   if (window._gl === undefined) {
     return
@@ -1904,7 +1907,7 @@ const f = () => {
 
   // do not draw if screen is not listening, happens mostly during file load
   // (note: drawing inside file load can lead to race conditions).
-  if (!_appstate?.screen?.listening) {
+  if (!peekAppState()?.screen?.listening) {
     window.setTimeout(() => window.redraw_viewport(true), 200)
     return
   }

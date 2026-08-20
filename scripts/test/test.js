@@ -1,5 +1,11 @@
 import * as util from '../util/util.js'
 import {AppState} from '../core/appstate.js'
+import {
+  getAppState,
+  registerAppInstance,
+  setActiveAppInstance,
+  unregisterAppInstance,
+} from '../core/app_instance.js'
 import {FuncAction, PathSetAction, PromiseAction, RedrawAction, ToolAction, WaitAction} from './test_base.js'
 
 export class TestSet extends Array {
@@ -160,7 +166,7 @@ export class TestSet extends Array {
   pushAppState() {
     let ret = this.add(new PromiseAction(pushAppState))
     this.func(() => {
-      this.ctx = _appstate.ctx
+      this.ctx = getAppState().ctx
     })
 
     return ret
@@ -169,7 +175,7 @@ export class TestSet extends Array {
   popAppState() {
     let ret = this.add(new PromiseAction(popAppState))
     this.func(() => {
-      this.ctx = _appstate.ctx
+      this.ctx = getAppState().ctx
     })
 
     return ret
@@ -217,7 +223,7 @@ export class TestSet extends Array {
     }
   }
 
-  run(ctx = window._appstate.ctx) {
+  run(ctx = getAppState().ctx) {
     this.i = 0
     this.running = true
     this.ctx = ctx
@@ -239,22 +245,28 @@ import {contextWrangler} from '../path.ux/scripts/pathux.js'
 
 export function pushAppState() {
   return new Promise((accept, reject) => {
+    const prev = getAppState()
+
     statestack.push({
-      state : _appstate,
-      screen: _appstate.screen,
+      state : prev,
+      screen: prev.screen,
     })
 
-    _appstate.screen.purgeUpdateStack()
-    _appstate.stopEvents()
-    _appstate.screen.unlisten()
-    HTMLElement.prototype.remove.call(_appstate.screen)
+    prev.screen.purgeUpdateStack()
+    prev.stopEvents()
+    prev.screen.unlisten()
+    HTMLElement.prototype.remove.call(prev.screen)
 
-    //_appstate.screen.remove();
+    // Two instances are registered at once here -- the pushed one keeps its
+    // datalib alive for popAppState, it just stops being the active one.
+    const state = new AppState()
+    registerAppInstance(state)
+    setActiveAppInstance(state)
+    window._appstate = state
 
-    window._appstate = new AppState()
     contextWrangler.reset()
-    _appstate.start(false)
-    _genDefaultFile(_appstate, 1)
+    state.start(false)
+    _genDefaultFile(state, 1)
 
     window.setTimeout(() => {
       window.updateDataGraph(true)
@@ -267,10 +279,13 @@ export function popAppState() {
   return new Promise((accept, reject) => {
     let {state, screen} = statestack.pop()
 
-    _appstate.screen.purgeUpdateStack()
-    _appstate.screen.unlisten()
-    _appstate.screen.remove()
+    const cur = getAppState()
+    cur.screen.purgeUpdateStack()
+    cur.screen.unlisten()
+    cur.screen.remove()
 
+    unregisterAppInstance(cur)
+    setActiveAppInstance(state)
     window._appstate = state
 
     document.body.appendChild(screen)

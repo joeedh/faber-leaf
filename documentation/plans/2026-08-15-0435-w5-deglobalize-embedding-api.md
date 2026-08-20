@@ -36,6 +36,9 @@ globals — in scope only where the host reads them) and `scripts/extern/`.
 
 ### 2.1 `_appstate` — 197 references across 48 files
 
+*(2026-08-19: 183 references across 39 files by the time P20 ran — P13–P18
+deleted files that held some of them. The shape of the work is unchanged.)*
+
 Assigned once, `appstate.ts:1171`: `window._appstate = new AppState()`.
 Densest consumers: `scripts/core/app_ops.js` (16), `editor_base.ts` (14),
 `appstate.ts` (11), `addon/addon_base.ts` (11), `core/settings.ts` (8),
@@ -97,6 +100,10 @@ still reads it (nothing in-tree does as of the audit) and delete it. If the
 NW.js test harness or a `--eval` script uses it, move it under the debug
 surface instead.
 
+*(2026-08-19: the assignment moved with the constants — it was
+`select_types.ts:240`, with its `Window` interface member at `:42`. Nothing
+in-tree, in `nwjs/` or in `tests/` read it, so both are deleted.)*
+
 ### 2.5 `window.redraw_uveditors`
 
 **Already deleted by P18** (§4 constraint 4). Verify, do not re-do.
@@ -110,12 +117,24 @@ surface instead.
 - `#iconsheet` is read by `setup_pathux.js:68`. It must become a
   container-relative lookup or an injected asset, or two instances fight over
   one element.
+
+  *(2026-08-19: `setupIconsRastered` — the `config.svgIcons === false` branch —
+  looked up `#iconsheet16` … `#iconsheet64`, ids that exist in no HTML in the
+  repo, so it could only ever build an `IconManager` over seven nulls. It is
+  deleted along with the `svgIcons` switch rather than container-scoped.)*
 - `#canvas2d` / `#canvas3d` are declared in `index.html` but **no in-tree
   script looks them up by id** — the only fixed-id canvas lookups are `#webgl`
   (`editor_base.ts:1198`, `test_harness.ts:385`), which `index.html` does not
   define. Resolve that discrepancy as part of the audit: either `#webgl` is
   created at runtime, or one of those two paths is dead. Do not carry a
   hardcoded id forward without knowing which.
+
+  *(2026-08-19, resolved: `#webgl` is created at runtime by `initWebGL()`
+  (`view3d.ts:87`), which appends it to `document.body` and caches it on the
+  `window._gl` global — so both lookups are live, and the canvas plus the GL
+  context are two more per-instance things wearing a global. `#canvas2d` /
+  `#canvas3d` are dead markup and are deleted. The two live lookups are now
+  `editor_base.ts:1216` and `test_harness.ts:391`.)*
 - `onload="init()"` is a global entry hook and is exactly what
   `mountFaberLeaf` replaces.
 - Every id must become container-scoped. The rule: **no `document.getElementById`

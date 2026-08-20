@@ -50,6 +50,12 @@ export declare global {
   declare const DEBUG: any
   declare const _appstate: AppState
 
+  /**
+   * `AppState` reachable as a type without importing `core/appstate` — what
+   * lets `core/app_instance.ts` stay import-free (P20 §2.1).
+   */
+  declare type AppStateGlobal = AppState
+
   declare interface HTMLCanvasElement {
     dpi: number
   }

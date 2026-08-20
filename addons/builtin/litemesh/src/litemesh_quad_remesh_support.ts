@@ -19,6 +19,7 @@
  * as a side-effect import from `litemesh_test_scene.ts`.
  */
 
+import {getAppState} from '@framework/api'
 import {LiteMesh} from './litemesh'
 
 /** A backend-agnostic topology fingerprint of a LiteMesh (both signals exist on
@@ -90,15 +91,7 @@ function runQuadRemeshTest(): QuadRemeshTestResult {
     redone : {ngon: 0, leaf: 0},
   }
   try {
-    const app = (
-      globalThis as {
-        _appstate?: {
-          ctx: {scene?: {objects?: {active?: {data?: unknown}}}; api?: {execTool: (ctx: unknown, p: string) => void}}
-          toolstack: {undo: () => void; redo: () => void}
-        }
-      }
-    )._appstate
-    if (!app) throw new Error('no _appstate')
+    const app = getAppState()
     const ctx = app.ctx
 
     const lite = ctx.scene?.objects?.active?.data

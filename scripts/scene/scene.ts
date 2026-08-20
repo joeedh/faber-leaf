@@ -1,4 +1,5 @@
 import {DataBlock, DataRef, BlockFlags, BlockLoader, BlockLoaderAddUser} from '../core/lib_api'
+import {getAppState, peekAppState} from '../core/app_instance'
 import {registerDataAPI} from '../data_api/api_define_registry.js'
 import {ToolModes, makeToolModeEnum, ToolMode} from '../editors/view3d/view3d_toolmode.js'
 import {WidgetManager} from '../editors/view3d/widgets/widgets.js'
@@ -364,7 +365,7 @@ propIslandOnly : bool;
   #linked?: boolean
 
   // XXX hack!
-  ctx: ViewContext = _appstate.ctx as ViewContext
+  ctx: ViewContext = getAppState().ctx as ViewContext
 
   // note: we can't create the collection here, since that requires the
   // data lib
@@ -419,7 +420,7 @@ propIslandOnly : bool;
     super()
 
     //XXX hack!
-    this.widgets = new WidgetManager(window._appstate.ctx as ViewContext)
+    this.widgets = new WidgetManager(getAppState().ctx as ViewContext)
 
     this.objects = new ObjectList(undefined, this)
     this.objects.onselect = this._onselect.bind(this)
@@ -433,13 +434,13 @@ propIslandOnly : bool;
     this.toolmode_i = Scene.toolModeProp.values['object'] as number
 
     const busgetter = () => {
-      if (!window._appstate?.datalib) {
+      if (!peekAppState()?.datalib) {
         // app state is still bootstrapping
         return this
       }
 
       //check if scene is still in datalib
-      const block = window._appstate.datalib.get(this.lib_id)
+      const block = getAppState().datalib.get(this.lib_id)
       if (block !== this) {
         //  return undefined
       }
@@ -835,7 +836,7 @@ propIslandOnly : bool;
     this.objects.scene = this
     this.objects.onselect = this._onselect.bind(this)
 
-    this.widgets.ctx = window._appstate.ctx as ViewContext
+    this.widgets.ctx = getAppState().ctx as ViewContext
     this.widgets.clear()
 
     let found = 0
@@ -945,8 +946,9 @@ messageBus.subscribe(
     Scene.toolModeProp = makeToolModeEnum()
 
     //update enum property in data api
-    if (window._appstate?.api?.hasStruct(Scene)) {
-      const st = window._appstate?.api.mapStruct(Scene)
+    const api = peekAppState()?.api
+    if (api?.hasStruct(Scene)) {
+      const st = api.mapStruct(Scene)
       const prop = st.pathmap.toolmode.data as unknown as EnumProperty
       prop.updateDefinition(Scene.toolModeProp)
     }

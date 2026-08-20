@@ -36,6 +36,7 @@ import distribution from '@distribution'
 
 import addon, {startAddons} from './addon/addon.js'
 
+import {getAppState} from './core/app_instance.js'
 import {getAppArgv} from './core/app_argv.js'
 import {runTestHarness} from './core/test_harness.js'
 
@@ -47,7 +48,7 @@ export function handleNodeArguments() {
   // getAppArgv reads the NW.js user args (nw.App.argv); see
   // scripts/core/app_argv.ts.
   let args = getAppArgv()
-  _appstate.arguments = args
+  getAppState().arguments = args
   console.log('app arguments', args)
 
   addon.handleArgv(args)
@@ -106,7 +107,7 @@ export async function init() {
     if (typeof CTX === 'undefined') {
       Object.defineProperty(window, 'CTX', {
         get: () => {
-          return _appstate.ctx
+          return getAppState().ctx
         },
       })
     }

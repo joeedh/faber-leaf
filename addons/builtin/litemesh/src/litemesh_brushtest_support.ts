@@ -18,6 +18,7 @@
  * the color kernel, and the accumulate-by-default brush flags.
  */
 
+import {getAppState, peekAppState} from '@framework/api'
 import {Vector4} from '../../../../scripts/path.ux/scripts/pathux.js'
 import {BrushFlags, SculptTools} from '../../../../scripts/brush/brush_base'
 import {DefaultBrushes, type SculptBrush} from '../../../../scripts/brush/index'
@@ -418,13 +419,7 @@ function drawAutosmoothAndMeasure(
 function brushTest(): BrushTestResult {
   const result: BrushTestResult = {ok: false}
   try {
-    const g = globalThis as unknown as {
-      _appstate?: {
-        ctx?: {object?: {data?: unknown}}
-        toolstack?: {execTool: (ctx: unknown, op: unknown) => void}
-      }
-    }
-    const mesh = g._appstate?.ctx?.object?.data
+    const mesh = peekAppState()?.ctx?.object?.data
     if (!(mesh instanceof LiteMesh)) throw new Error('active object is not a LiteMesh')
     const slotMap = DefaultBrushes.slotMap
     const need = (tool: number): SculptBrush => {
@@ -669,7 +664,8 @@ function brushTest(): BrushTestResult {
     const symOp = new SymmetrizeLiteMeshOp()
     symOp.inputs.axes.setValue(1) // X
     symOp.inputs.direction.setValue(1) // POSITIVE: keep +X, mirror onto -X
-    g._appstate!.toolstack!.execTool(g._appstate!.ctx, symOp)
+    const app = getAppState()
+    app.toolstack.execTool(app.ctx, symOp)
     const missAfter = posMissFrac(dumpLiveCo(mesh), 0, cell)
     result.symmetrize = {missPristine, missBefore, missAfter}
 

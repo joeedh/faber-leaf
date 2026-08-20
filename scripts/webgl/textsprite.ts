@@ -4,6 +4,7 @@ import {CSSFont} from '../path.ux/scripts/core/cssfont'
 import {SimpleMesh, LayerTypes} from './simplemesh'
 import {loadShader, PolygonOffset} from '../shaders/shaders'
 import {Vector2, Vector2Like, Vector3, Vector4, Matrix4} from '../util/vectormath'
+import {getAppState} from '../core/app_instance'
 
 export class FontEncoding {
   map: {[k: number]: number}
@@ -483,9 +484,8 @@ export function testDraw(gl: WebGL2RenderingContext, uniforms: IUniformsBlock): 
 
   font.drawMesh(gl, mesh, uniforms)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const appstate = (window as any)._appstate
-  const co = new Vector2(appstate.screen.mpos)
+  const appstate = getAppState()
+  const co = new Vector2(appstate.screen!.mpos)
   const view3d = appstate.ctx.view3d
 
   co[0] = (co[0] - view3d.glPos[0]) / view3d.glSize[0]

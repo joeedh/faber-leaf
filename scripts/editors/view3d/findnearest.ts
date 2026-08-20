@@ -10,6 +10,7 @@
  */
 
 import type {ViewContext} from '../../core/context.js'
+import {getAppState} from '../../core/app_instance.js'
 import {Vector2, Vector3} from '../../util/vectormath.js'
 import type {SceneObject} from '../../sceneobject/sceneobject.js'
 import type {View3D} from './view3d.js'
@@ -56,7 +57,7 @@ export class FindNearestRet<D = unknown> {
 
   //avoid reference leaks in cacherings
   get object() {
-    return _appstate.datalib.get(this._object)
+    return getAppState().datalib.get(this._object)
   }
 
   set object(ob) {
@@ -69,7 +70,7 @@ export class FindNearestRet<D = unknown> {
   }
 
   get mesh() {
-    return _appstate.datalib.get(this._mesh)
+    return getAppState().datalib.get(this._mesh)
   }
 
   set mesh(ob) {
