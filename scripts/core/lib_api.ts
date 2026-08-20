@@ -887,7 +887,7 @@ Library {
 
     // make TS happy even though we programatically create getters/setters later
     this.brush = this.libmap.brush!
-    this.collection = this.libmap.brush!
+    this.collection = this.libmap.collection!
     this.object = this.libmap.object!
     this.scene = this.libmap.scene!
 
