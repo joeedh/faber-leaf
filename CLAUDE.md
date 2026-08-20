@@ -126,6 +126,23 @@ sculptcore) live under `addons/builtin/<id>/src/`. See
   registry and can't be cleanly unregistered). Sole exception:
   `nstructjs.inlineRegister(this, structSrc)` as a static-field initializer.
 
+## Embedding / boot
+
+The app mounts into a container: `mountFaberLeaf(container, options)` in
+`scripts/mount.ts`, exported from the bundle entry (`build/entry_point.js`) —
+**not** from `@framework/api`. `index.html` and `nwjs/window.html` boot through
+that same call, so the shipped app never runs a path an embedder cannot. There
+is no `_appstate` global to reach for: `getAppState()` / `peekAppState()` from
+`scripts/core/app_instance.ts` return the active instance, and more than one may
+be mounted at a time. Host code under `scripts/` must not call
+`document.getElementById` / `querySelector` (gated by
+`tests/unit/document_scope.test.ts`) — insert through `state.container` and read
+the 3D canvas as `state.glCanvas`.
+
+See [documentation/embedding.md](documentation/embedding.md) for the public
+contract: what is stable, what a distribution may override, the
+`@framework/api` semver policy, and the dated compatibility shims.
+
 ## Rendering
 
 The realtime renderer is WebGPU-only. See

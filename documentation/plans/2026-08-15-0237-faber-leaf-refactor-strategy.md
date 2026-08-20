@@ -1396,26 +1396,23 @@ covered all struct fields (§4 W1 step 5). Before an `xhigh` plan, spend the che
 tokens first on a sweep that enumerates the real call sites; `xhigh` over
 ungrounded input just argues a wrong plan more convincingly.
 
-> **⚠ Temporary machine constraint — REVERT WHEN THE REFACTOR IS COMPLETE.**
-> While this refactor is in flight, nothing may use more than **5 parallel jobs,
-> and that is a *global* cap**, not per-tool: do not build sculptcore and run
-> tests at the same time. In force:
+> **⚠ Temporary machine constraint — LIFTED 2026-08-19, with P20.** For the
+> duration of the refactor nothing could use more than **5 parallel jobs**, as a
+> *global* cap: no building sculptcore while tests ran. What that cost, and what
+> it left behind:
 >
-> - `pnpm test` runs through `tools/run-tests.mjs`, which serializes turbo
->   packages (`--concurrency=1`) and caps jest / vitest workers at 5.
-> - `tests/jest.config.ts` is at `maxWorkers: 5` (was 6).
-> - `tests/integration/jest.config.mjs` is at **`maxWorkers: 2`**, which is *not*
->   this cap: P15 measured it as the ceiling above which concurrent NW.js boots
->   start wedging each other. It stays at 2 after the cap is lifted.
-> - Sculptcore builds are capped by `BUILD_JOBS: 5` in the gitignored
->   `sculptcore/local-build-options.mjs`; pass `-j 5` explicitly on any
->   invocation that bypasses it.
+> - `pnpm test` went through `tools/run-tests.mjs` (turbo `--concurrency=1`,
+>   jest / vitest workers at 5). **Reverted** to `turbo test`; the wrapper is
+>   deleted.
+> - `tests/jest.config.ts` ran at `maxWorkers: 5`. **Restored to 6.**
+> - `sculptcore/local-build-options.mjs` pinned `BUILD_JOBS: 5`. **Deleted** —
+>   the file was otherwise identical to `local-build-options.mjs.example`, and
+>   `make.mjs`'s own defaults (`BUILD_JOBS: 0`, `WITH_VULKAN: true`) match it.
+> - `tests/integration/jest.config.mjs` **stays at `maxWorkers: 2`.** That was
+>   never this cap: P15 measured 2 as the ceiling above which concurrent NW.js
+>   boots wedge each other.
 >
-> None of this belongs in the shipped configuration. **Revert it when the
-> Faber Leaf refactor is done** — `pnpm test` back to `turbo test`, delete the
-> wrapper, restore `tests/jest.config.ts` to `maxWorkers: 6`, delete the local
-> build options; leave the integration config at 2. The CI workflow is
-> deliberately *not* capped: it runs on its own runner.
+> The CI workflow was deliberately never capped — it runs on its own runner.
 
 - [x] **P1 — [CI + layer-gate repair](./2026-08-15-0300-ci-and-layer-gate-repair.md)** — landed 2026-08-15, commit `2144aeef`. Real layer baseline is **2483**, not the 288 this doc cited. ESLint is **not** gated (untriaged ~17k backlog; deferred to P9) — see that plan's §5 step 4 correction. `master` branch protection still has to mark the jobs required.
   - Add a PR workflow: `pnpm test`, `pnpm typecheck`, `pnpm eslint`,

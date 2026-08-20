@@ -27,7 +27,7 @@ const config: Config = {
   // workers to the core count spawns far too many at once.
   // TODO: 5, not 6, is a temporary global job cap for the Faber Leaf refactor
   // (see that strategy doc's §9.3 note). Restore 6 when the refactor lands.
-  maxWorkers: 5,
+  maxWorkers: 6,
 
   testMatch: ['<rootDir>/**/*.test.ts', '<rootDir>/**/*.test.tsx'],
 
