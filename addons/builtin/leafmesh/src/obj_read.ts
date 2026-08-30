@@ -1,11 +1,11 @@
 /**
- * Wavefront OBJ reader — P11 §6. Pure: imports nothing from `scripts/`, so the
- * parser is unit-tested directly and the addon's framework-facing half
- * (`obj.ts`) only has to wire the result into a scene.
+ * Implements the Wavefront OBJ reader — P11 §6. Pure: imports nothing from
+ * `scripts/`, so the parser is unit-tested directly and the addon's
+ * framework-facing half (`obj.ts`) only has to wire the result into a scene.
  *
- * An `f` line *is* a loop list, which is the whole reason this is the cheapest
- * demonstration that faces-are-loop-lists was the right call: an n-gon imports
- * as one face instead of the fan the BREP reader produced.
+ * An `f` line maps directly to a loop list: an n-gon imports as one face
+ * instead of the fan the BREP reader produced. That is the cheapest
+ * demonstration that representing faces as loop lists was the right call.
  */
 
 import {AttrType, Domain} from './attrs.js'

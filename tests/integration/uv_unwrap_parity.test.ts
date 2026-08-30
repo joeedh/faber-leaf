@@ -1,12 +1,12 @@
 /**
- * The ported unwrapping stack, on the two real `IUVSource` implementors —
+ * Runs the ported unwrapping stack on the two real `IUVSource` implementors —
  * P19 §5 step 7, §6 ("unwrap a LiteMesh and a LeafMesh … and assert the results
  * are equivalent for the same input topology").
  *
  * How the solvers behave — convergence, pinning, seeding, packing — is settled
- * in `tests/unit/uv_editor/uv_solve.test.ts` against an in-memory grid. What is
- * settled here is the thing a unit test cannot reach: that two independently
- * written providers feed them the same way. Both are addon modules, and jest
+ * in `tests/unit/uv_editor/uv_solve.test.ts` against an in-memory grid. This
+ * suite proves what a unit test cannot reach: two independently written
+ * providers feed the solvers the same way. Both are addon modules, and jest
  * resolves no `@framework/api`, so the run happens inside one headless NW.js
  * boot and comes back through `--dump`.
  *

@@ -13,7 +13,6 @@ import {
   KeyMap,
   HotKey,
   ToolClasses,
-  ToolFlags,
   DropBox,
   DataAPI,
   Area,
@@ -26,13 +25,11 @@ import {
   Number3,
   PropertySlots,
   ToolDef,
-  IVector2,
   ColumnFrame,
   ToolProperty,
   TabContainer,
   IAreaDef,
   IToolOpConstructor,
-  ListItem,
   ModalState,
 } from '../path.ux/scripts/pathux'
 
@@ -370,17 +367,17 @@ export class DataBlockBrowser<BlockType extends DataBlock> extends Container<Vie
 
     //listenum(inpath, name, enummap, defaultval, callback, iconmap, packflag=0) {
     dropbox.on_select = (id: string | number): void => {
-      const val = this.getPathValue(ctx, path) as DataBlock | undefined
+      const innerVal = this.getPathValue(ctx, path) as DataBlock | undefined
       const meta = this.ctx.api.resolvePath(this.ctx, path)
 
       if (meta === undefined) {
         return
       }
-      if (val?.lib_id === parseInt(id as string)) {
+      if (innerVal?.lib_id === parseInt(id as string)) {
         return
       }
-      if (val !== undefined) {
-        val.lib_remUser(meta.obj)
+      if (innerVal !== undefined) {
+        innerVal.lib_remUser(meta.obj)
       }
 
       const block = ctx.datalib.get(id)!
@@ -521,7 +518,7 @@ export const getContextArea = <T>(cls: any) => {
 
 //used by datapath system
 export class EditorAccessor {
-  /* @ts-ignore */
+  /* @ts-expect-error set lazily by the image editor when it registers */
   imageEditor: ImageEditor
 
   _defined: Set<any> = new Set()
@@ -551,7 +548,7 @@ export class EditorAccessor {
       const def = cls.define()
 
       let name = def.apiname ?? def.areaname
-      name = name.replace(/[\- \t]/g, '_')
+      name = name.replace(/[- \t]/g, '_')
 
       this._namemap[name] = k
       define(name, areaclasses[k])
@@ -562,7 +559,7 @@ export class EditorAccessor {
 export const editorAccessor = new EditorAccessor()
 
 /** Characters an area name may carry that a data-API path may not. */
-const NAME_RE = /[\- \t]/g
+const NAME_RE = /[- \t]/g
 
 /** The ToolContext struct, kept so an editor registered later can still attach. */
 let _editorCtxStruct: DataStruct | undefined = undefined
@@ -824,7 +821,6 @@ export abstract class Editor extends Area<ViewContext> {
   swapParent?: HTMLElement = undefined
   container: Container<ViewContext>;
 
-  //@ts-ignore
   ['constructor']: IEditorConstructor<this> = this['constructor']
 
   static getDataPath(areaClass: IEditorConstructor) {
@@ -908,12 +904,12 @@ Editor {
 
     this.style['overflow'] = 'hidden'
 
+    /*
     const cb = () => {
       this.push_ctx_active()
       this.pop_ctx_active()
     }
 
-    /*
     this.addEventListener("dragover", cb, {passive: true});
     this.addEventListener("mouseenter", cb, {passive: true});
     this.addEventListener("mouseover", cb, {passive: true});
@@ -1010,7 +1006,7 @@ export function spawnToolSearchMenu(ctx: ViewContext) {
   const menu = document.createElement('menu-x') as Menu<ViewContext>
 
   for (const cls of ToolClasses) {
-    let ok = !(cls.tooldef().flag! & ToolFlags.PRIVATE)
+    let ok: boolean
 
     try {
       ok = cls.canRun(ctx)
@@ -1073,11 +1069,11 @@ App {
 
     st.list('sareas', 'editors', [
       //list should be main App (Screen) instance
-      function get(api: DataAPI, list: any, key: number) {
+      function get(_api: DataAPI, list: any, key: number) {
         return list[key].area
       },
 
-      function getKey(api: DataAPI, list: any, obj: any) {
+      function getKey(_api: DataAPI, list: any, obj: any) {
         for (let i = 0; i < list.length; i++) {
           if (list[i].area === obj) {
             return i
@@ -1085,11 +1081,11 @@ App {
         }
       },
 
-      function getLength(api: DataAPI, list: any) {
+      function getLength(_api: DataAPI, list: any) {
         return list.length
       },
 
-      function getIter(api: DataAPI, list: any) {
+      function getIter(_api: DataAPI, list: any) {
         return (function* () {
           for (const sarea of list) {
             yield sarea.area
@@ -1097,18 +1093,18 @@ App {
         })()
       },
 
-      function getStruct(api: DataAPI, list: any, key: number) {
+      function getStruct(listApi: DataAPI, list: any, key: number) {
         let obj = list[key]
-        if (obj === undefined) return api.getStruct(Editor)
+        if (obj === undefined) return listApi.getStruct(Editor)
         obj = obj.area
 
-        let ret = api.getStruct(obj.constructor)
-        ret = ret === undefined ? api.getStruct(Editor) : ret
+        let ret = listApi.getStruct(obj.constructor)
+        ret = ret === undefined ? listApi.getStruct(Editor) : ret
 
         return ret
       },
 
-      function getActive(api: DataAPI, list: any) {
+      function getActive(_api: DataAPI, list: any) {
         return Editor.getActiveArea()
       },
     ])
@@ -1723,13 +1719,10 @@ export class DirectionChooser extends UIBase<ViewContext, Vector3> {
   }
 
   get disabled() {
-    super.disabled
     return this._disabled
   }
 
   set disabled(v) {
-    let render
-
     if (this._disabled !== v) {
       this.render()
     }
@@ -1791,20 +1784,6 @@ export class DirectionChooser extends UIBase<ViewContext, Vector3> {
 
       this.flip = [1, 1]
 
-      const table = [-1, 1, -1, -1]
-
-      const a = this.value[0] >= 0.0 ? 1 : 0
-      const b = this.value[1] >= 0.0 ? 1 : 0
-      const m = a | (b << 1)
-
-      const r = this.getBoundingClientRect()
-      const dx2 = x - (r.x + r.width * 0.5)
-      const dy2 = y - r.y - r.height * 0.5
-      const s = dx2 * this.value[1] - dy2 * this.value[0]
-
-      //this.flip[0] = s < 0.0 ? -1.0 : 1.0;
-      //this.flip[0] = table[m];
-
       if (this.modaldata) {
         this.endModal()
       }
@@ -1817,13 +1796,9 @@ export class DirectionChooser extends UIBase<ViewContext, Vector3> {
           }
         },
         on_mousemove: (e: MouseEvent) => {
-          let mat = new Matrix4()
-
-          //mat.multiply(rmat);
-
-          const r = this.canvas.getBoundingClientRect()
-          const rx = r.x + r.width * 0.5
-          const ry = r.y + r.height * 0.5
+          const rect = this.canvas.getBoundingClientRect()
+          const rx = rect.x + rect.width * 0.5
+          const ry = rect.y + rect.height * 0.5
 
           let dx2 = e.x - rx
           let dy2 = e.y - ry
@@ -1860,7 +1835,7 @@ export class DirectionChooser extends UIBase<ViewContext, Vector3> {
           const quat = new Quat()
           quat.axisAngleToQuat(axis, th)
           quat.normalize()
-          mat = quat.toMatrix()
+          const mat = quat.toMatrix()
 
           this.value.load(this.start_value)
           this.value.multVecMatrix(mat)
@@ -1921,7 +1896,7 @@ export class DirectionChooser extends UIBase<ViewContext, Vector3> {
 
     av.abs()
 
-    if (1 || (av[0] > av[1] && av[0] > av[2])) {
+    if (av[0] > av[1] && av[0] > av[2]) {
       axis[2] = 1.0
     } else {
       axis[0] = 1.0

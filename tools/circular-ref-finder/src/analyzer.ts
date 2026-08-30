@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 import * as ts from 'typescript'
 import * as path from 'path'
-import * as fs from 'fs'
 import {DependencyGraph, CliOptions} from './types'
 
 export class DependencyAnalyzer {
@@ -49,7 +48,7 @@ export class DependencyAnalyzer {
         moduleLiterals,
         containingFile,
         redirectedReference,
-        options,
+        resolveOptions,
         containingSourceFile,
         reusedNames
       ) => {
@@ -73,7 +72,7 @@ export class DependencyAnalyzer {
           const result = ts.resolveModuleName(
             moduleName,
             containingFile,
-            options,
+            resolveOptions,
             host,
             moduleResolutionCache,
             redirectedReference
@@ -97,13 +96,6 @@ export class DependencyAnalyzer {
     program.getTypeChecker()
     this.program = program
     const result = program.emit()
-
-    const ignored = [
-      //
-      /\.*node_modules\.*/,
-    ]
-
-    const skip = (s: string) => ignored.some((r) => s.search(r) !== -1)
 
     console.log(result?.diagnostics)
 
@@ -244,37 +236,6 @@ export class DependencyAnalyzer {
     if (this.shouldIncludeFile(importPath)) {
       this.graph[fromFile].add(importPath)
     }
-  }
-
-  private resolveImportPath(fromFile: string, importPath: string): string | null {
-    const dir = path.dirname(fromFile)
-    const extensions = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.cts', '.mjs', '.cjs']
-
-    const resolved = path.resolve(dir, importPath)
-
-    if (fs.existsSync(resolved)) {
-      const stat = fs.statSync(resolved)
-      if (stat.isFile()) {
-        return path.normalize(resolved)
-      } else if (stat.isDirectory()) {
-        const indexFiles = ['index.ts', 'index.tsx', 'index.js', 'index.jsx']
-        for (const indexFile of indexFiles) {
-          const indexPath = path.join(resolved, indexFile)
-          if (fs.existsSync(indexPath)) {
-            return path.normalize(indexPath)
-          }
-        }
-      }
-    }
-
-    for (const ext of extensions) {
-      const withExt = resolved + ext
-      if (fs.existsSync(withExt)) {
-        return path.normalize(withExt)
-      }
-    }
-
-    return null
   }
 
   getGraph(): DependencyGraph {

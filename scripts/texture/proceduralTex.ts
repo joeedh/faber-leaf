@@ -16,7 +16,6 @@ import {
   DataStruct,
   IVector3,
   Container,
-  CallbackThis,
 } from '../path.ux/scripts/pathux.js'
 import {DataBlock} from '../core/lib_api'
 import {NodeFlags} from '../core/graph'
@@ -24,7 +23,6 @@ import {DependSocket} from '../core/graphsockets'
 
 import {
   ITextureShaderDef,
-  TexProperty,
   TexPropertyBlock,
   TexPropTypeBase,
   TextureShader,
@@ -68,10 +66,6 @@ export const Patterns: IPatternConstructor[] = []
 //const _dv_rets = new util.cachering(() => [new Vector3(), new Vector3(), new Vector3()], 1024)
 const _dv_cos = util.cachering.fromConstructor(Vector3, 1024)
 //const out_temps = [0, 0, 0, 0, 0]
-const eval_temps = new util.cachering(
-  () => [new Array(5), new Vector3(), new Vector3(), 0.0, new Vector4()] as const,
-  64
-)
 
 function createShaderClass(
   base: PatternGen,
@@ -230,6 +224,7 @@ export class PatternGen {
             v = new Vec4Property(v as unknown as Vector4)
             break
           default:
+            // eslint-disable-next-line no-console
             console.error('Texture uniform error', k, v)
         }
 
@@ -248,20 +243,20 @@ export class PatternGen {
     this.calcUpdateHash(digest, true)
 
     this.texShaderJSHash = digest.get()
-    console.log('SHADER:', shader)
   }
 
   checkTexShaderJS() {
     const digest = new util.HashDigest()
     this.calcUpdateHash(digest, true)
-    const hash = digest.get()
+    const hashVal = digest.get()
 
-    if (!this.texShaderJS || hash !== this.texShaderJSHash) {
+    if (!this.texShaderJS || hashVal !== this.texShaderJSHash) {
       this.genTexShader()
     }
   }
 
   genGlsl(inputP: string, outputC: string, uniforms: any): string {
+    // eslint-disable-next-line no-console
     console.error('Implement me! genGlsl!')
     return ''
   }
@@ -308,8 +303,6 @@ export class PatternGen {
     this.checkTexShaderJS()
 
     const texShaderJS = this.texShaderJS!
-
-    const args = eval_temps.next()
 
     texShaderJS.setInput(texShaderJS.inputTypes.Time.index, performance.now() / 1000.0)
 
@@ -384,7 +377,6 @@ function hash(f: number): number {
   //f = Math.fract(f*Math.sqrt(11.0)*Math.sin(f));
 
   return f
-  return Math.fract(1.0 / Math.fract(0.00001 * f + 0.00001))
 }
 
 function hash3(x: number, y: number, z: number) {
@@ -679,22 +671,6 @@ export const CombModes = {
   RAW_STEP: 5,
 }
 
-const ModeFuncs = {
-  [CombModes.SAW]     : Math.fract,
-  [CombModes.TENT]    : Math.tent,
-  [CombModes.SIN]     : (f: number) => Math.sin(f * Math.PI * 2.0) * 0.5 + 0.5,
-  [CombModes.RAW_STEP]: (f: number) => (Math.fract(f) > 0.5 ? 1.0 : 0.0),
-  [CombModes.DOME]    : (f: number) => Math.abs(Math.sin(f * Math.PI * 2.0)),
-  [CombModes.STEP]: (f: number) => {
-    f = Math.tent(f)
-    f = f * 2.0
-
-    f = Math.min(Math.max(f, 0.0), 1.0)
-
-    return f
-  },
-}
-
 export class CombPattern extends PatternGen {
   static STRUCT = nstructjs.inlineRegister(
     this,
@@ -738,7 +714,6 @@ export class CombPattern extends PatternGen {
   }
 
   static buildSettings(container: Container<ViewContext>): void {
-    // eslint-disable-next-line pathux/valid-datapath
     container.prop('mode')
     // eslint-disable-next-line pathux/valid-datapath
     container.prop('count')
@@ -1309,11 +1284,11 @@ uniform float texPower;
     digest.add(this.brightness)
     digest.add(this.contrast)
 
-    const hash = digest.get()
+    const hashVal = digest.get()
 
-    if (hash !== this._last_update_hash) {
+    if (hashVal !== this._last_update_hash) {
       this.recalcFlag |= PatternRecalcFlags.PREVIEW
-      this._last_update_hash = hash
+      this._last_update_hash = hashVal
 
       //XXX
       return true as unknown as this
@@ -1358,12 +1333,9 @@ uniform float texPower;
   }
 
   genPreview(width: number, height: number): HTMLCanvasElement {
-    console.log('generating texture preview')
-
     const image = new ImageData(width, height)
     const idata = image.data
 
-    const gen = this.generator
     const co = new Vector3()
 
     for (let i = 0; i < width * height; i++) {
@@ -1460,6 +1432,7 @@ uniform float texPower;
     super.loadSTRUCT(reader)
 
     if ((this.generator as unknown as string) === '') {
+      // eslint-disable-next-line no-console
       console.warn('failed to read active generator')
 
       if (this.generators.length > 0) {
@@ -1559,8 +1532,8 @@ export class ProceduralTexUser {
   equals(b: this): boolean {
     let r = this.texture === b.texture
 
-    function feq(a: number, b: number) {
-      return Math.abs(a - b) < 0.00001
+    function feq(a: number, bVal: number) {
+      return Math.abs(a - bVal) < 0.00001
     }
 
     r = r && feq(this.scale, b.scale)

@@ -793,7 +793,6 @@ export class GeoLayer extends Array {
     if (i >= this.dataUsed) {
       // || i + tot > this.data.length) {
       throw new Error('eek!')
-      return
     }
 
     if (isNaN(i)) {
@@ -873,7 +872,7 @@ export class GeoLayerManager {
   }
 
   reset() {
-    for (const [key, meta] of this.layer_meta) {
+    for (const [, meta] of this.layer_meta) {
       for (const l of meta.layers) {
         l.reset()
       }
@@ -1448,11 +1447,6 @@ export class SimpleIsland<OPT extends {dead?: true | false} = {dead: true}> {
           layer.data_f32 = new typedarray(layer.dataUsed) as Float32Array
         }
 
-        const a = layer.data
-        const b = layer.data_f32
-
-        const count = layer.dataUsed
-
         layer.data.length = layer.dataUsed
         ;(layer.data_f32 as unknown as Float32Array).set(layer.data)
 
@@ -1663,16 +1657,16 @@ export class SimpleIsland<OPT extends {dead?: true | false} = {dead: true}> {
         return
       } else {
         for (let i = 0; i < meta.layers.length; i++) {
-          const layer = meta.layers[i]
+          const subLayer = meta.layers[i]
           let count
           let mli = i
 
-          if (layer.dataUsed === 0) {
+          if (subLayer.dataUsed === 0) {
             continue
           }
 
           if (type === LayerTypes.CUSTOM) {
-            name = layer.name
+            name = subLayer.name
             count = 0
 
             for (let j = 0; j < meta.layers.length; j++) {
@@ -1688,20 +1682,20 @@ export class SimpleIsland<OPT extends {dead?: true | false} = {dead: true}> {
             mli = count
           }
 
-          const key = ShaderProgram.multiLayerAttrKey(name, mli)
+          const attrKey = ShaderProgram.multiLayerAttrKey(name, mli)
 
-          const vbo = this.buffer.get(gl, layer.bufferKey, layer.bufferType)
-          const buf = vbo.get(gl)
+          const vbo = this.buffer.get(gl, subLayer.bufferKey, subLayer.bufferType)
+          const vboBuf = vbo.get(gl)
 
-          li = program.attrLoc(key)
+          li = program.attrLoc(attrKey)
           if (li < 0) {
             continue
           }
 
           gl.enableVertexAttribArray(li)
-          gl.bindBuffer(btype, buf)
+          gl.bindBuffer(btype, vboBuf)
 
-          gl.vertexAttribPointer(li, layer.size, layer.glSize, layer.normalized, 0, 0)
+          gl.vertexAttribPointer(li, subLayer.size, subLayer.glSize, subLayer.normalized, 0, 0)
         }
       }
     }

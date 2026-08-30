@@ -324,6 +324,7 @@ export class WgslShaderGenerator {
       if (sa instanceof FloatSocket) return `floattoclosure(${n})`
     }
 
+    // eslint-disable-next-line no-console
     console.warn('WgslShaderGenerator: failed coercion', sa, sb)
     return '0.0'
   }

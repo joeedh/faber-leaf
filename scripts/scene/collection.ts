@@ -97,6 +97,7 @@ Collection {
       const cl = ob_or_collection
 
       if (cl.lib_id in this.child_idmap) {
+        // eslint-disable-next-line no-console
         console.warn('Tried to add same collection twice')
         return false
       }
@@ -119,6 +120,7 @@ Collection {
       }
 
       if (!ok) {
+        // eslint-disable-next-line no-console
         console.warn('Loop in collections')
         return false
       }
@@ -137,6 +139,7 @@ Collection {
       const ob = ob_or_collection
 
       if (ob.lib_id in this.object_idmap) {
+        // eslint-disable-next-line no-console
         console.warn('Tried to add same object to collection twice')
         return false
       }
@@ -176,6 +179,7 @@ Collection {
 
         return true
       } else {
+        // eslint-disable-next-line no-console
         console.warn('Child not part of collection', cl, this)
         return false
       }
@@ -192,6 +196,7 @@ Collection {
 
         return true
       } else {
+        // eslint-disable-next-line no-console
         console.warn('object not in collection:', ob, this)
         return false
       }

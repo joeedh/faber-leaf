@@ -224,8 +224,6 @@ export class SpriteFontSheet {
 
     //canvas.font = font.genCSS(this.size*2-2);
 
-    console.log(g.font, g.fillText) //font.genCSS(this.size*2-2));
-
     /*
     g.beginPath();
     for (let i=0; i<chars.length; i++) {

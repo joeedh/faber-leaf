@@ -85,7 +85,7 @@ describe('extrude region', () => {
     for (const v of faceVerts(mesh, out.faces[0])) {
       expect(was.has(v)).toBe(false)
     }
-    // The rim it left behind is still where it was.
+    // The extrusion leaves the original rim vertices at their original position.
     for (const v of was) {
       expect(mesh.v.co[v * 3 + 2]).toBeCloseTo(1, 12)
     }

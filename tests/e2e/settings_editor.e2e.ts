@@ -14,11 +14,7 @@ test('settings editor opens and binds feature flags', async ({page}) => {
 
   await page.goto('/?renderer=webgpu')
 
-  await page.waitForFunction(
-    () => !!(window as any)._appstate?.screen,
-    undefined,
-    {timeout: 60_000}
-  )
+  await page.waitForFunction(() => !!(window as any)._appstate?.screen, undefined, {timeout: 60_000})
 
   // showEditor needs a laid-out screen.
   await page.setViewportSize({width: 1280, height: 800})
@@ -34,11 +30,7 @@ test('settings editor opens and binds feature flags', async ({page}) => {
   // Editor init is deferred to the screen's update tick — wait until the tab
   // container exists, then activate each tab (only the active tab's page is
   // attached to the DOM). path.ux widgets nest shadow roots, so walk them.
-  await page.waitForFunction(
-    () => !!((window as any).__settingsEd as any)?.tabs,
-    undefined,
-    {timeout: 30_000}
-  )
+  await page.waitForFunction(() => !!((window as any).__settingsEd as any)?.tabs, undefined, {timeout: 30_000})
 
   const collectTabBindings = (tabName: string) =>
     page.evaluate(async (name) => {

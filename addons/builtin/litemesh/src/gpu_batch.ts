@@ -520,6 +520,7 @@ export class WebGPUBatchExecutor {
         const key = (cmd.shader as {name?: string}).name ?? String(i)
         if (!this.warnedShaders.has(key)) {
           this.warnedShaders.add(key)
+          // eslint-disable-next-line no-console
           console.error(`WebGPUBatchExecutor: skipping draw command for shader "${key}" after error`, e)
         }
       }

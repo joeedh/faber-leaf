@@ -1,10 +1,11 @@
 /**
- * The LeafMesh DataBlock — P11 step 2.
+ * Implements the LeafMesh DataBlock — P11 step 2.
  *
- * `topo.ts` is the geometry; this file is everything the host is allowed to ask
- * of it. The split is load-bearing: `topo.ts` and its neighbours import nothing
- * from `scripts/`, so the headless library stays testable in plain jest, and
- * every host type is confined to this module and the ones after it.
+ * `topo.ts` holds the geometry; this file exposes everything the host is
+ * allowed to ask of it. The split is load-bearing, because `topo.ts` and its
+ * neighbours import nothing from `scripts/`: the headless library stays
+ * testable in plain jest, and every host type is confined to this module and
+ * the ones after it.
  *
  * Conformance is asserted at the bottom of the file rather than described here.
  * `AssertExtends` against P7's interfaces is the point of the exercise — if a

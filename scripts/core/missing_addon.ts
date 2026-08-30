@@ -103,11 +103,13 @@ export function recoverBlockHeader(istruct: unknown, bytes: Uint8Array): Recover
     const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
     header = manager.read_object(view, BlockHeaderShell) as Partial<RecoveredBlockHeader>
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.warn('could not recover the block header of an unknown block', error)
     return undefined
   }
 
   if (!Number.isInteger(header.lib_id) || header.lib_id! < 0 || typeof header.name !== 'string') {
+    // eslint-disable-next-line no-console
     console.warn('recovered block header failed its sanity check', header)
     return undefined
   }

@@ -1,7 +1,7 @@
 import {DataBlock} from '../core/lib_api.js'
 import {registerDataAPI} from '../data_api/api_define_registry.js'
 import type {BlockLoader, BlockLoaderAddUser} from '../core/lib_api.js'
-import {Graph, INodeSocketSet, type GenericNode} from '../core/graph.js'
+import {Graph, INodeSocketSet} from '../core/graph.js'
 import {nstructjs, DataAPI, DataStruct} from '../path.ux/scripts/pathux.js'
 import type {StructReader} from '../path.ux/scripts/util/nstructjs.js'
 
@@ -158,8 +158,6 @@ ShaderNetwork {
   }
 
   calcUpdateHash() {
-    const graph = this.graph
-
     const hash = new util.HashDigest()
     for (const node of this.usedNodes) {
       hash.add(node.graph_id)

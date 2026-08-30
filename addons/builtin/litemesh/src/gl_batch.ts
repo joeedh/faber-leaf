@@ -164,6 +164,7 @@ export class WebGLBatchExecutor {
       for (const attrName of shader.attrs) {
         const attr = findAttr(attrName, cmd)
         if (attr === undefined) {
+          // eslint-disable-next-line no-console
           console.log('Could not find shader attribute', attrName)
           continue
         }

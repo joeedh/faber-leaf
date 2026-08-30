@@ -136,7 +136,7 @@ maybe('sculptcore native↔WASM parity', () => {
     expect(lm).toBeDefined()
     const bufs = lm!.gpuBuffers as Record<string, unknown> | undefined
     expect(bufs && Object.keys(bufs).length).toBeGreaterThan(0)
-    // The geometry must actually be there (not an empty/first-frame buffer).
+    // The geometry buffer must hold real data, not an empty or first-frame placeholder.
     const pos = bufs!.position as Record<string, unknown> | undefined
     expect(pos).toBeDefined()
     expect(pos!.empty).toBeUndefined()

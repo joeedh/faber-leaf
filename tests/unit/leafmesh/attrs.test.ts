@@ -177,7 +177,7 @@ describe('AttrSet', () => {
     attrs.interpCorner(dst, [a, b], [0.5, 0.5])
     expect(uv.column.data[dst * 2]).toBeCloseTo(0.5)
     expect(uv.column.data[dst * 2 + 1]).toBeCloseTo(0.5)
-    // The same-named vertex layer was not touched.
+    // interpCorner does not touch the vertex 'uv' layer, even though it shares the name with the corner layer.
     expect(vertUv.column.data[vert * 2]).toBe(0)
   })
 

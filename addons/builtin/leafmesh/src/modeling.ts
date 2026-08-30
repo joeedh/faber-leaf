@@ -78,10 +78,10 @@ interface RegionSnapshot {
 }
 
 /**
- * How a rewrite moves the duplicated vertices. `at` maps an original vertex to
- * its copy; everything else the mover closes over. Extrude slides along the
- * region normal and inset slides in the face plane — that is the whole of the
- * difference between the two tools.
+ * A move function that repositions the duplicated vertices during a rewrite.
+ * `at` maps an original vertex to its copy; everything else the mover closes
+ * over. Extrude slides along the region normal, and inset slides in the face
+ * plane; the two tools differ only in that.
  */
 type MoveFn = (at: (v: number) => number) => void
 

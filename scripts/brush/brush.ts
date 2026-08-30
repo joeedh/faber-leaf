@@ -344,13 +344,11 @@ SculptBrush {
     bst.curve1d('falloff', 'falloff', 'Falloff')
     bst.curve1d('falloff2', 'falloff2', 'Falloff', 'Inbetween Falloff')
 
-    let dst
-
     const cst = api.mapStruct(BrushDynChannel, true)
     cst.bool('useDynamics', 'useDynamics', 'Use Dynamics').icon(Icons.BRUSH_DYNAMICS)
     cst.curve1d('curve', 'curve', 'Curve')
 
-    dst = api.mapStruct(BrushDynamics, true)
+    const dst = api.mapStruct(BrushDynamics, true)
     const b = new BrushDynamics()
 
     for (const ch of b.channels) {
@@ -1172,12 +1170,12 @@ export class PaintToolSlot {
 export enum BrushSets {
   HIGH_RES = 0,
   MEDIUM_RES = 1,
-  DEFAULT = 1,
+  DEFAULT = 2,
 }
 
 export const BrushSetFactories = [makeDefaultBrushes, makeDefaultBrushes_MediumRes]
 export const DefaultBrushes = makeDefaultBrushes()
-export var brushSet = BrushSets.DEFAULT
+export let brushSet = BrushSets.DEFAULT
 
 export function setBrushSet(set: BrushSets | string) {
   const update = set !== brushSet
@@ -1202,6 +1200,7 @@ export function setBrushSet(set: BrushSets | string) {
   brushSet = set as unknown as BrushSets
 
   if (update) {
+    // eslint-disable-next-line no-console
     console.log('Loading brush set ' + set)
     Object.assign(DefaultBrushes, BrushSetFactories[set as number]())
   }
@@ -1258,9 +1257,9 @@ export function getBrushes(ctx: ToolContext, overrideDefaultBrushes = false) {
         b2.lib_flag |= BlockFlags.HIDE
         ctx.datalib.add(b2)
 
-        const tex = b2.texUser.texture
-        if (tex && tex.lib_id < 0) {
-          ctx.datalib.add(tex)
+        const tex2 = b2.texUser.texture
+        if (tex2 && tex2.lib_id < 0) {
+          ctx.datalib.add(tex2)
         }
       } else {
         b.copyTo(b2, false)

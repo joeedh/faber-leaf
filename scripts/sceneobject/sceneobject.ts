@@ -168,11 +168,11 @@ export class SceneObject<
   }
 
   get material(): Material | undefined {
-    return this.data !== undefined && this.data.usesMaterial ? this.data.material : undefined
+    return this.data?.usesMaterial ? this.data.material : undefined
   }
 
   set material(mat: Material | undefined) {
-    if (this.data !== undefined && this.data.usesMaterial) {
+    if (this.data?.usesMaterial) {
       this.data.material = mat
       window.redraw_viewport()
     }
@@ -420,6 +420,7 @@ SceneObject {
     // standing in for an unloaded addon's type. Either way this object needs
     // something drawable; the stand-in keeps the original id so the next save
     // preserves the reference instead of rewriting it to the stand-in's own.
+    // eslint-disable-next-line no-console
     console.log('failed to load scene object data! ref:', ref)
 
     const stub = new NullObject()

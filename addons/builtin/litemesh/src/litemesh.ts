@@ -950,7 +950,7 @@ export class LiteMesh extends SceneObjectData {
       // must not consume them.
       const nTemp = (this.mesh as unknown as {dropTempAttrs(): number}).dropTempAttrs()
       if (nTemp > 0) {
-          // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.log(`litemesh: dropped ${nTemp} loaded TEMP attribute layer(s)`)
       }
       // Repair any structural corruption baked into the saved file before the
@@ -1894,7 +1894,7 @@ export class LiteMesh extends SceneObjectData {
     } catch (err) {
       if (!this._tessWarned) {
         this._tessWarned = true
-          // eslint-disable-next-line no-console
+        // eslint-disable-next-line no-console
         console.error('litemesh: tessellated draw failed', err)
       }
       return false
@@ -4511,10 +4511,11 @@ export const LITEMESH_DATA_KIND: IDataKindDescriptor = {
   id          : 'litemesh',
   uiName      : 'Lite Mesh',
   usesMaterial: true,
-  // TODO: no TRIANGLES, so STL export silently skips a LiteMesh -- which is
-  // the mesh users would most want to export. It threw outright before P13
-  // re-pointed the exporter at ITriangleSource; implementing extractTriangles
-  // over the sculptcore tessellation is the fix.
+  // TODO: LiteMesh has no TRIANGLES capability, so STL export silently skips
+  // it, even though it is the mesh type users would most want to export.
+  // Before P13 re-pointed the exporter at ITriangleSource, this threw
+  // outright instead. The fix is to implement extractTriangles over the
+  // sculptcore tessellation.
   capabilities: [GeometryCapability.INVALIDATION],
   // The always-present set. Everything a material asks for beyond this is
   // built per-material by `setRequestedAttrs`, at the slot the generator

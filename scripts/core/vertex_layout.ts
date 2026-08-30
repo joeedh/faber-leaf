@@ -14,10 +14,12 @@
 import {AttrType} from './geometry_contract'
 
 /**
- * Scalar component type of a vertex attribute, in GPU terms. Deliberately not
- * {@link AttrType}: that is a *storage* vocabulary (what a layer holds), this is
- * a *vertex-fetch* vocabulary (how the rasterizer reads it). `UNORM8` is the
- * pair's one asymmetry — a byte layer is fetched normalized, not as an integer.
+ * Scalar component type of a vertex attribute, in GPU terms. This is
+ * deliberately not {@link AttrType}: that enum is a storage vocabulary
+ * describing what a layer holds, while this one is a vertex-fetch
+ * vocabulary describing how the rasterizer reads it. `UNORM8` is the pair's
+ * one asymmetry — a byte layer is fetched normalized rather than as an
+ * integer.
  */
 export enum VertexScalarType {
   FLOAT32 = 0,

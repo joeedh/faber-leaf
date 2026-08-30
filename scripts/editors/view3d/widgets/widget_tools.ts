@@ -1,5 +1,4 @@
 import {Vector3, Vector4, Matrix4} from '../../../util/vectormath.js'
-import * as util from '../../../util/util.js'
 import {SelMask} from '../../../core/select_types.js'
 
 import {WidgetBase, WidgetSphere, WidgetFlags, WidgetManager} from './widgets.js'

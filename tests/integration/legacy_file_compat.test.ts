@@ -208,9 +208,10 @@ describeMaybe('a file-version 7 .wproj still opens (P10 step 8)', () => {
   })
 
   test('the block this build has no class for is preserved, not dropped', () => {
-    // This is the assertion the pre-P13 build made in the negative (nothing
-    // missing). `mesh` is a MissingDataBlock now, and preservation is the point:
-    // blockCounts above already showed it survives the round-trip intact.
+    // The pre-P13 build made this same assertion in the negative (nothing
+    // missing). `mesh` is a MissingDataBlock now, and this test checks that it is
+    // preserved rather than dropped: blockCounts above already showed it survives
+    // the round-trip intact.
     expect(res.afterLoad!.missing).toEqual([BREP_LIB_TYPE])
   })
 

@@ -238,11 +238,15 @@ export class GpuStrokeController {
         wasm: args.wasm,
         session,
         capture,
-        log: (msg) => console.warn(`[gpu-brush] ${msg}`),
+        log: (msg) => {
+          // eslint-disable-next-line no-console
+          console.warn(`[gpu-brush] ${msg}`)
+        },
       })
       const ctl = new GpuStrokeController(args.wasm, args.mesh, session, stroke, shadowOn, debug)
       void stroke.begin().then((ok) => {
         if (!ok) {
+          // eslint-disable-next-line no-console
           console.warn('[gpu-brush] begin failed; stroke falls back to CPU-applied finish')
         }
       })
@@ -253,6 +257,7 @@ export class GpuStrokeController {
       }
       return ctl
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.warn('[gpu-brush] tryBegin failed:', e)
       return undefined
     }
@@ -283,6 +288,7 @@ export class GpuStrokeController {
    * Any miss (no executor yet, a VBO not drawn/cached yet) leaves the stroke
    * on the M2 per-dab-readback shape — never throws.
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-private-class-members -- called as ctl.tryEnableScatter() from the static tryBegin() factory above
   private tryEnableScatter(): void {
     try {
       const exec = this.mesh.drawBatchExecutorGPU
@@ -347,9 +353,11 @@ export class GpuStrokeController {
       }
       this.stroke.setScatter({mapBuf: cache.mapBuf, owners})
       if (missing > 0) {
+        // eslint-disable-next-line no-console
         console.warn(`[gpu-brush] scatter: ${missing} node VBO(s) not cached yet (will readback-render)`)
       }
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.warn('[gpu-brush] scatter setup failed; staying on readback:', e)
     }
   }
@@ -422,6 +430,7 @@ export class GpuStrokeController {
       }
       const result = {checked: true, ownerIdx: idx, cornerCount, badCorners: bad, maxErr}
       if (bad > 0) {
+        // eslint-disable-next-line no-console
         console.warn('[gpu-brush] scatter self-check FAILED:', result)
       }
       return result
@@ -482,12 +491,6 @@ export class GpuStrokeController {
     if (this.stroke.valid && this.shadow && mirrorIdx === 0) {
       this.scheduleShadowDiff()
     }
-    if (this.debug.verbose) {
-      console.log(
-        `[gpu-brush] dab ${this.stroke.stats.dabs} img ${mirrorIdx}: ${n} workgroups, ` +
-          `${this.wasm.GpuBrush_info(this.session, GpuBrushInfo.UNIQUE_COUNT)} verts`
-      )
-    }
     return this.stroke.valid
   }
 
@@ -540,12 +543,14 @@ export class GpuStrokeController {
             // step — finish from the CPU state (per-dab applies already
             // landed only finite-checked-late data; the conservative choice
             // is to keep whatever the mesh already holds).
+            // eslint-disable-next-line no-console
             console.warn('[gpu-brush] tripwire tripped — discarding final GPU readback')
             this.wasm.GpuBrush_endStroke(this.session, null, null)
           } else if (co) {
             const fixture = this.stroke.captureFixture(co)
             if (fixture) {
               this.debug.lastFixture = fixture
+              // eslint-disable-next-line no-console
               console.warn('[gpu-brush] stroke fixture captured (DEBUG.gpuBrush.lastFixture)')
             }
             this.wasm.GpuBrush_endStroke(this.session, co, null)
@@ -572,6 +577,7 @@ export class GpuStrokeController {
   /** Serialize all GPU work; errors are logged, never thrown into callers. */
   private enqueue(fn: () => Promise<void>): Promise<void> {
     this.chain = this.chain.then(fn).catch((e) => {
+      // eslint-disable-next-line no-console
       console.warn('[gpu-brush] async stage failed:', e)
     })
     return this.chain
@@ -631,6 +637,7 @@ export class GpuStrokeController {
         }
         divergent++
         if (divergent <= SHADOW_LOG_VERTS) {
+          // eslint-disable-next-line no-console
           console.warn(
             `[gpu-brush] shadow-verify divergence v${v}: cpu(${cpuCo[v * 3]}, ${cpuCo[v * 3 + 1]}, ` +
               `${cpuCo[v * 3 + 2]}) gpu(${gpuCo[v * 3]}, ${gpuCo[v * 3 + 1]}, ${gpuCo[v * 3 + 2]})`
@@ -639,6 +646,7 @@ export class GpuStrokeController {
       }
       if (divergent > 0) {
         this.debug.shadowDivergences++
+        // eslint-disable-next-line no-console
         console.warn(
           `[gpu-brush] shadow-verify: ${divergent}/${uverts.length} divergent verts at dab ` +
             `${this.stroke.stats.dabs}; re-syncing GPU from CPU`
@@ -648,8 +656,6 @@ export class GpuStrokeController {
           this.debug.lastFixture = fixture
         }
         this.stroke.resyncCo(cpuCo)
-      } else if (this.debug.verbose) {
-        console.log(`[gpu-brush] shadow-verify dab ${this.stroke.stats.dabs}: 0 divergent`)
       }
     })
   }

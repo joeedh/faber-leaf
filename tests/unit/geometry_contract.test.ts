@@ -23,10 +23,11 @@ import {
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
 /**
- * The vocabulary is declared three times — here, in the attribute layers, and in
- * the engine — because core cannot import an addon and the addon cannot import
- * the engine's headers. Numerically identical is the whole point: a layer must
- * round-trip as a column copy, not a conversion.
+ * The vocabulary is declared three times: here, in the attribute layers, and
+ * in the engine, because core cannot import an addon and the addon cannot
+ * import the engine's headers. The three declarations must stay numerically
+ * identical, so a layer round-trips as a column copy rather than a
+ * conversion.
  */
 describe('shared vocabulary', () => {
   test('element domains match the attribute-layer domains', () => {
@@ -74,9 +75,10 @@ describe('shared vocabulary', () => {
 })
 
 /**
- * `SceneObjectData.dataKindOf` delegates here, so this is the only copy of the
- * rule. Testing it without importing the base class is the point — that class
- * pulls in path.ux at module load and cannot run in a bare-node suite.
+ * `SceneObjectData.dataKindOf` delegates here, so this is the only copy of
+ * the rule. These tests exercise it without importing the base class,
+ * because that class pulls in path.ux at module load and cannot run in a
+ * bare-node suite.
  */
 describe('resolveKindId', () => {
   test('prefers dataKind, falls back to a lowercased name', () => {

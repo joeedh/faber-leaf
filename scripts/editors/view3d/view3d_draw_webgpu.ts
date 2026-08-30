@@ -134,7 +134,7 @@ async function initViewport(
   }
   gpu.device.addEventListener?.('uncapturederror', (ev) => {
     const e = ev as unknown as {error: GPUError}
-    // eslint-disable-next-line no-console
+
     // eslint-disable-next-line no-console
     console.error('[webgpu] uncapturederror:', e.error.message)
   })
@@ -559,6 +559,7 @@ function ensureMaterialPipeline(
         // eslint-disable-next-line no-console
         console.group(`[webgpu] mat-${mat.lib_id} WGSL compilation messages`)
         for (const m of bad) {
+          // eslint-disable-next-line no-console
           console[m.type === 'error' ? 'error' : 'warn'](`${m.type} at L${m.lineNum}:${m.linePos}: ${m.message}`)
         }
         // eslint-disable-next-line no-console

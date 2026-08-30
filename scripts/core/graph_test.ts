@@ -17,7 +17,7 @@ export class TestNode<InputSet = {}, OutputSet = {}> extends Node<
   TestContext
 > {
   exec(ctx: TestContext) {
-    const a = this.inputs.f.getValue()
+    this.inputs.f.getValue()
   }
 
   static nodedef(): INodeDef {

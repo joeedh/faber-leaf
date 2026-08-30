@@ -41,7 +41,7 @@ graph.Matrix4Socket{
   }
 
   static defineAPI(api: DataAPI, sockstruct: DataStruct) {
-    const def = sockstruct.struct('value', 'value', 'Value', api.mapStruct(Matrix4))
+    sockstruct.struct('value', 'value', 'Value', api.mapStruct(Matrix4))
     //def.on('change', function() { this.dataref.graphUpdate(true)});
   }
 
@@ -437,6 +437,7 @@ graph.Vec4Socket {
 
   setValue(b: Vector4): void {
     if (isNaN(this.value.dot(b))) {
+      // eslint-disable-next-line no-console
       console.warn(this, b)
       throw new Error('NaN!')
     }
@@ -614,6 +615,7 @@ graph.FloatSocket {
 
   setValue(b: number) {
     if (isNaN(b)) {
+      // eslint-disable-next-line no-console
       console.warn(this, b)
       throw new Error('NaN!')
     }
@@ -668,14 +670,13 @@ graph.EnumSocket {
     this.uimap = {} as {[k: string]: string}
     for (const k in this.items) {
       const k2 = k.split('-_ ')
-      let uiname = ''
+      let label = ''
 
-      for (const item of k2) {
-        uiname += k[0].toUpperCase() + k.slice(1, k.length).toLowerCase() + ' '
+      for (const _unusedItem of k2) {
+        label += k[0].toUpperCase() + k.slice(1, k.length).toLowerCase() + ' '
       }
 
-      const v = this.items[k]
-      this.uimap[k] = uiname.trim()
+      this.uimap[k] = label.trim()
     }
   }
 

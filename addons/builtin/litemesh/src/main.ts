@@ -3,17 +3,19 @@
  *
  * The sculptcore-dependent half of the application: the `LiteMesh` geometry
  * type, its ToolOps, the sculpt and box-modeling toolmodes, and the stroke
- * driver. `"optional": true` — absent sculptcore, this addon does not register,
- * and that is the single gate the whole engine sits behind (P15 §2).
+ * driver. This addon declares `"optional": true`, so it does not register
+ * when sculptcore is absent; that registration check is the single point
+ * that gates the whole engine (P15 §2).
  *
- * It absorbed the old `addons/builtin/sculptcore/` addon, which was a three-file
- * shim publishing a toolmode and three `litemesh.add_*` menu entries. The engine
- * *binding* is the `@sculptcore/api` workspace package, not an addon, so a split
- * would have bought only "LiteMesh with no sculpt mode" — see P15 §4.1.
+ * It absorbed the old `addons/builtin/sculptcore/` addon, which was a
+ * three-file shim publishing a toolmode and three `litemesh.add_*` menu
+ * entries. The engine binding is the `@sculptcore/api` workspace package,
+ * not an addon, so splitting this addon further would have produced only
+ * "LiteMesh with no sculpt mode" — see P15 §4.1.
  *
  * Still in-bundle wherever a distribution imports it (`bundled(...)` in
  * distributions/<id>/index.ts), so its modules still reach `scripts/` by
- * relative path. Pushing it out-of-bundle is what forces those onto
+ * relative path. Pushing it out-of-bundle would force those onto
  * `@framework/api`.
  */
 

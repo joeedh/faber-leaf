@@ -47,7 +47,7 @@ export interface LoopCutResult {
   edges: number[]
   /** The faces the chords built, two per crossed face. */
   faces: number[]
-  /** The faces that ended the walk: anything that is not a hole-free quad. */
+  /** Faces that stopped the walk because they are not hole-free quads. */
   stopped: number[]
 }
 
@@ -344,7 +344,8 @@ function quadSplit(mesh: LeafMesh, f: number, mids: ReadonlySet<number>, out: Su
 
     mesh.attrs.restoreRow(Domain.FACE, nf, faceAttrs)
 
-    // The centre is the one corner nothing was snapshotted for.
+    // The corner with no entry in `cornerAttrs` is the centre, since only the
+    // ring vertices were snapshotted.
     const known: number[] = []
     let middle = ELEM_NONE
     for (const c of mesh.loopCorners(mesh.f.l[nf])) {

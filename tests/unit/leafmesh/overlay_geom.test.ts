@@ -74,7 +74,7 @@ function liftOf(mesh: LeafMesh, co: Float32Array, i: number): number {
 function countLive(mesh: LeafMesh, domain: Domain): number {
   let n = 0
   const iter = domain === Domain.VERT ? mesh.v : domain === Domain.EDGE ? mesh.e : mesh.f
-  for (const _ of iter) {
+  for (const _unusedElem of iter) {
     n++
   }
   return n

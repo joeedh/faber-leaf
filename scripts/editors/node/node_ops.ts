@@ -495,7 +495,7 @@ export class ConnectNodeOp extends NodeGraphOp<{
     this.inputs.sock2_id.setValue(-1)
     this.inputs.node2_id.setValue(-1)
 
-    if (this.last_sock2 !== undefined && this.last_sock2.isHighlight) {
+    if (this.last_sock2?.isHighlight) {
       this.last_sock2.isHighlight = false
       this.last_sock2.setCSS()
     }

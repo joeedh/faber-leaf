@@ -219,7 +219,6 @@ export class TexturePanel extends Container<ViewContext> {
 
     panel.dataPrefix = path
 
-    console.log('Path prefix', path)
     tex.buildSettings(panel)
 
     this.flagRedraw()
@@ -488,7 +487,9 @@ PropsEditor {
 
     try {
       this.flushUpdate()
-    } catch (error) {}
+    } catch {
+      // ignore -- may run during file load, before data is ready
+    }
   }
 
   init() {
@@ -684,8 +685,11 @@ PropsEditor {
     try {
       toolmode.constructor.buildSettings(this.workspaceTab)
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error((error as Error).stack)
+      // eslint-disable-next-line no-console
       console.error((error as Error).message)
+      // eslint-disable-next-line no-console
       console.warn('failed to build toolmode settings', this.ctx?.toolmode)
       // try to build again later
       this._last_toolmode = undefined

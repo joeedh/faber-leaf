@@ -2,7 +2,7 @@ import {BlockLoader, BlockLoaderAddUser, DataBlock, IDataBlockConstructor} from 
 import {Vector2, Vector3, Matrix4, nstructjs, Container, DataAPI, DataStruct} from '../path.ux/scripts/pathux.js'
 
 import {StandardTools} from './stdtools.js'
-import {INodeDef, INodeSocketSet, Node, NodeFlags, NodeInheritFlag} from '../core/graph'
+import {INodeSocketSet, Node, NodeFlags, NodeInheritFlag} from '../core/graph'
 import {DependSocket} from '../core/graphsockets'
 import type {Material} from '../core/material'
 import {aabb_ray_isect} from '../util/isect.js'
@@ -77,6 +77,7 @@ export class SceneObjectData<
   }
 
   applyMatrix(matrix = new Matrix4()) {
+    // eslint-disable-next-line no-console
     console.error('applyMatrix: Implement me!')
     return this
   }
@@ -113,20 +114,20 @@ SceneObjectData {
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
     const mstruct = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
     mstruct.list<(Material | undefined)[], number, Material>('materials', 'materials', [
-      function getIter(api: DataAPI, list: (Material | undefined)[]) {
+      function getIter(_api: DataAPI, list: (Material | undefined)[]) {
         return list
       },
-      function getLength(api: DataAPI, list: (Material | undefined)[]) {
+      function getLength(_api: DataAPI, list: (Material | undefined)[]) {
         return list.length
       },
-      function get(api: DataAPI, list: (Material | undefined)[], key: number) {
+      function get(_api: DataAPI, list: (Material | undefined)[], key: number) {
         return list[key]
       },
-      function getKey(api: DataAPI, list: (Material | undefined)[], obj: Material) {
+      function getKey(_api: DataAPI, list: (Material | undefined)[], obj: Material) {
         return list.indexOf(obj)
       },
-      function getStruct(api: DataAPI, list: (Material | undefined)[], key: number) {
-        return api.mapStruct(_MaterialClass!)
+      function getStruct(dapi: DataAPI, list: (Material | undefined)[], key: number) {
+        return dapi.mapStruct(_MaterialClass!)
       },
     ])
     mstruct.bool('usesMaterial', 'usesMaterial', 'Uses Material').readOnly()
@@ -155,6 +156,7 @@ SceneObjectData {
       }
     }
 
+    // eslint-disable-next-line no-console
     console.warn('Orphaned sceneobjectdata!')
   }
 
@@ -165,6 +167,7 @@ SceneObjectData {
   getBoundingBox(): [Vector3, Vector3] {
     const d = 5
 
+    // eslint-disable-next-line no-console
     console.warn('getBoundingBox: implement me!')
 
     return [new Vector3([d, d, d]), new Vector3([d, d, d])]
@@ -394,13 +397,13 @@ SceneObjectData {
   // parent classes with unrelated behavior
   // XXX: temporary hack, TODO: rename this to objectDataRegister
   static register(cls: IDataBlockConstructor<any, {}, {}>) {
-    if (!cls.hasOwnProperty('dataDefine')) {
+    if (!Object.prototype.hasOwnProperty.call(cls, 'dataDefine')) {
       throw new Error('missing .dataDefine static method')
     }
 
     const def = (cls as unknown as IObjectDataConstructor).dataDefine()
 
-    if (!def.hasOwnProperty('selectMask')) {
+    if (!Object.prototype.hasOwnProperty.call(def, 'selectMask')) {
       throw new Error('dataDefine() is missing selectMask field')
     }
 

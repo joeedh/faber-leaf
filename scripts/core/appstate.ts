@@ -1109,11 +1109,12 @@ export class AppState {
   }
 
   /**
-   * Host-owned file migrations: the ones about the *file* rather than about a
-   * subsystem's data. Anything that has to read a datablock an addon owns is
-   * contributed through `registerFileMigrator` and leaves with that addon —
-   * which is what happened to the BREP's three grid migrations when P13 deleted
-   * it (P10 plan §4.4a).
+   * Runs the file migrations the host itself owns — the ones about the file
+   * format rather than about a subsystem's data. A migration that has to
+   * read a datablock an addon owns is contributed through
+   * `registerFileMigrator` instead, and leaves with that addon; that is
+   * what happened to the BREP's three grid migrations when P13 deleted it
+   * (P10 plan §4.4a).
    */
   do_versions(version: number, datalib: Library): void {
     runFileMigrations({fromVersion: version, toVersion: APP_VERSION, datalib})
@@ -1318,9 +1319,6 @@ export function initProcessGlobals(): void {
     if (e.keyCode === keymap['C']) {
       e.preventDefault()
       e.stopPropagation()
-
-      const screen = getAppState().screen
-      const mpos = screen.mpos
     }
 
     if (e.keyCode === keymap['R'] && e.ctrlKey) {

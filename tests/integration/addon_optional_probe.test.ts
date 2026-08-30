@@ -201,7 +201,7 @@ maybe('optional addon dependencies + force-disable (headless)', () => {
       expect(noProbe.order).not.toContain('optional_probe')
       expect(unloadedReason(noProbe, 'optional_probe')).toBe('force-disabled')
       expect(noProbe.probe).toBeNull()
-      // The dependency is nobody else's business — it loads exactly as before.
+      // Disabling the dependent does not affect its dependency: the dependency still loads exactly as before.
       expect(noProbe.order).toContain('optional_probe_dep')
       expect(noProbe.enabled).toContain('optional_probe_dep')
     })

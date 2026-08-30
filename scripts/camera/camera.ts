@@ -192,7 +192,6 @@ export class CameraData extends SceneObjectData {
         this.inputs.depend.connect(curve.outputs.depend)
       }
 
-      console.log('camera path curve update')
       let time = (scene.time * this.speed) / scene.fps
 
       time = time % curve.length

@@ -38,7 +38,9 @@ export function setMissingDataBlockType(cls: IDataBlockConstructor): void {
   MissingDataBlockType = cls
 }
 
+// eslint-disable-next-line prefer-const -- assigned once below, after the type it references is declared (forward reference)
 let DATAREFType: number | undefined
+// eslint-disable-next-line prefer-const -- assigned once below, after the type it references is declared (forward reference)
 let DATAREFLISTType: number | undefined
 
 export interface IBlockRef {
@@ -296,7 +298,6 @@ DataBlock {
 
       for (const block of this.lib_userlist) {
         if (block.lib_id < 0) {
-          // eslint-disable-next-line no-console
           // eslint-disable-next-line no-console
           console.log('Dead block in user list')
           this.lib_users--
@@ -794,7 +795,7 @@ export function defineLibrarySet(
   //let lstruct = api.mapStruct(BlockSet, true);
   //parent.struct(path, apiname, uiname, lstruct);
   parent.list(path, apiname, [
-    function get(api: DataAPI, list: any, key: number | string) {
+    function get(listApi: DataAPI, list: any, key: number | string) {
       if (typeof key === 'number') {
         return list.idmap[key]
       } else {
@@ -802,19 +803,19 @@ export function defineLibrarySet(
       }
     },
 
-    function getIter(api: DataAPI, list: any) {
+    function getIter(listApi: DataAPI, list: any) {
       return list
     },
 
-    function getLength(api: DataAPI, list: any) {
+    function getLength(listApi: DataAPI, list: any) {
       return list.length
     },
 
-    function getActive(api: DataAPI, list: any) {
+    function getActive(listApi: DataAPI, list: any) {
       return list.active
     },
 
-    function setActive(api: DataAPI, list: any, key: number | undefined) {
+    function setActive(listApi: DataAPI, list: any, key: number | undefined) {
       if (key === undefined || key === -1) {
         list.active = undefined
         return
@@ -827,20 +828,20 @@ export function defineLibrarySet(
 
       list.obj = obj
     },
-    function getKey(api: DataAPI, list: any, obj: any) {
+    function getKey(listApi: DataAPI, list: any, obj: any) {
       return obj.lib_id
     },
-    function getStruct(api: DataAPI, list: any, key: number | string) {
+    function getStruct(listApi: DataAPI, list: any, key: number | string) {
       const obj = typeof key === 'string' ? list.namemap[key] : list.idmap[key]
 
       if (obj === undefined) {
-        return api.getStruct(DataBlock)
+        return listApi.getStruct(DataBlock)
       }
 
-      const ret = api.getStruct(obj.constructor)
+      const ret = listApi.getStruct(obj.constructor)
 
       if (ret === undefined) {
-        return api.getStruct(DataBlock)
+        return listApi.getStruct(DataBlock)
       }
 
       return ret
@@ -990,7 +991,7 @@ Library {
     }
   }
 
-  has<BlockType = DataBlock>(id_or_dataref_or_block_or_name: any): boolean {
+  has(id_or_dataref_or_block_or_name: any): boolean {
     const f = id_or_dataref_or_block_or_name
 
     if (f === undefined || f === null) {
@@ -1189,7 +1190,7 @@ DataRefProperty {
       this.data.set(val)
     } else {
       // eslint-disable-next-line no-console
-      console.warn('failed to set DataRefProperty; arguments:', arguments)
+      console.warn('failed to set DataRefProperty; arguments:', val)
     }
 
     return this
@@ -1405,11 +1406,10 @@ DataRefList {
 
     let lib_id: number
 
-    if (typeof item === 'number') {
-      lib_id = item
-    }
     if (item instanceof DataBlock || item instanceof DataRef) {
       lib_id = item.lib_id
+    } else if (typeof item === 'number') {
+      lib_id = item
     } else {
       throw new Error('Non-datablock passed to DataRefList: ' + item)
     }

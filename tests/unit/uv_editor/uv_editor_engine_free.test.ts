@@ -1,13 +1,13 @@
 /* eslint-disable no-console */
 /**
- * The UV editor's headless suite runs with the engine absent — P18 §6, §8.
+ * Runs the UV editor's headless suite with the engine absent (P18 §6, §8).
  *
  * CI's `no-sculptcore` lane deinits the submodule, so "this suite must pass
  * there" is really a claim about a module graph: if nothing the headless UV
  * suites load at runtime lives under `sculptcore/` or a geometry addon,
- * deleting those cannot change the answer. Walking the graph proves that here,
- * on every run, instead of only in the lane — and it fails on the import that
- * breaks it rather than three months later in CI.
+ * deleting those cannot change the answer. Walking the graph proves that
+ * claim here, on every run, instead of only in the lane, and it fails on the
+ * import that breaks it rather than three months later in CI.
  *
  * Type-only imports are followed but not counted: they are erased before
  * anything runs, which is exactly why the editor core is allowed its

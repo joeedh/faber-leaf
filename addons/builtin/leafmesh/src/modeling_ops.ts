@@ -269,7 +269,8 @@ export class LeafMeshSplitOffOp extends LeafMeshTopoOpBase<TransformIn, NormalSp
 
   static invoke(ctx: ViewContext, args: Record<string, unknown>): ToolOp {
     const tool = super.invoke(ctx, args) as unknown as LeafMeshSplitOffOp
-    // A detached piece goes anywhere, so the grab behind it is unconstrained.
+    // The split-off piece is no longer attached to anything, so nothing
+    // constrains where the grab can move it.
     return args['transform'] ? (makeTransformMacro(tool, false) as unknown as ToolOp) : (tool as unknown as ToolOp)
   }
 

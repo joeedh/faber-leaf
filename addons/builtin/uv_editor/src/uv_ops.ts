@@ -993,8 +993,9 @@ export class UVRelaxOp extends UVLayoutOpBase<{
       relaxUVGraph(graph, {boundaryWeight: this.inputs.boundaryWeight.getValue(), selectedOnly})
     }
 
-    // Relax never re-flows an island, so the solver runs in preserve mode: it
-    // is here to take out the shear smoothing introduces, not to unwrap again.
+    // Relax never re-flows an island, so the solver runs in preserve mode. It
+    // only removes the shear that smoothing introduces; it does not unwrap
+    // again.
     if (this.inputs.doSolve.getValue() && source.getUVElementPositions !== undefined) {
       const solver = new UVSolver(graph, {preserveIslands: true, selectedIslandsOnly: selectedOnly})
 

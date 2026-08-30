@@ -307,7 +307,7 @@ describe('LeafMesh holes and winding', () => {
       expect(normal[2]).toBeCloseTo(1)
 
       const [outerLoop, holeLoop] = [...mesh.faceLoops(f)]
-      // The outer ring is CCW by definition — Newell over it *is* the normal.
+      // The outer ring is CCW by definition, so Newell's method over it produces the face normal.
       expect(mesh.loopVerts(outerLoop)).toEqual(outer)
       expect(mesh.ringSignedArea(mesh.loopVerts(outerLoop), normal)).toBeGreaterThan(0)
       expect(mesh.ringSignedArea(mesh.loopVerts(holeLoop), normal)).toBeLessThan(0)
@@ -650,7 +650,7 @@ describe('LeafMesh derived-state invariant', () => {
     for (let seed = 1; seed <= 12; seed++) {
       const mesh = randomMesh(seed, 160)
 
-      // The sequence has to actually build something, or this proves nothing.
+      // Guard against a random sequence that built no faces, which would make the rest of the test meaningless.
       expect(mesh.f.count).toBeGreaterThan(0)
       expectCanonicalCycles(mesh)
 

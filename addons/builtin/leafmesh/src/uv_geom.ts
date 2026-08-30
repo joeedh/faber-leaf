@@ -1,13 +1,14 @@
 /**
- * UV data on a LeafMesh — P18 §5 step 2. Pure: imports nothing from `scripts/`,
- * so the traversals are unit-tested directly and `uv_source.ts` stays a shell
- * that only converts vocabulary.
+ * Implements UV data on a LeafMesh — P18 §5 step 2. Pure: imports nothing
+ * from `scripts/`, so the traversals are unit-tested directly and
+ * `uv_source.ts` stays a shell that only converts vocabulary.
  *
- * UVs live on the corner domain (see `attrs.ts`), so a UV element handle *is* a
- * corner handle and a seam is two corners of one vertex disagreeing. A UV layer
- * is any `Float2` corner layer whose name is not internal; per-element select
- * and pin flags live in a sibling `Byte` layer, created on first write, so that
- * they persist and interpolate with everything else.
+ * UVs live on the corner domain (see `attrs.ts`), so a UV element handle
+ * equals a corner handle, and a seam occurs where two corners of one vertex
+ * disagree. A UV layer is any `Float2` corner layer whose name is not
+ * internal. Per-element select and pin flags live in a sibling `Byte` layer,
+ * created on first write, so that they persist and interpolate with
+ * everything else.
  */
 
 import {AttrFlags, AttrType, Domain} from './attrs.js'

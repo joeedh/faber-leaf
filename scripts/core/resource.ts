@@ -57,6 +57,7 @@ export class ResourceType extends EventBase {
 
     if (this.users <= 0) {
       if (this.users < 0) {
+        // eslint-disable-next-line no-console
         console.warn('Negative users detected', this)
         this.users = 0
       }

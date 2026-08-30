@@ -2269,6 +2269,7 @@
       "enumItems": [
         "0",
         "1",
+        "2",
         "HIGH_RES",
         "MEDIUM_RES",
         "DEFAULT"

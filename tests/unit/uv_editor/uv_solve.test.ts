@@ -1,10 +1,10 @@
 /**
- * The ported unwrapping solvers, driven headlessly — P19 §5 step 6.
+ * This suite runs the ported unwrapping solvers headlessly. See P19 §5 step 6.
  *
- * Everything here runs against `UVGridSurface`: a grid of quads with 3D
- * positions and no mesh, no engine and no editor behind it. That is the whole
- * claim the port has to make good on — the solvers were lifted off `Mesh` and
- * onto `IUVSource`, so a source that is not a mesh must be able to unwrap.
+ * Everything here runs against `UVGridSurface`, a grid of quads with 3D
+ * positions and no mesh, no engine, and no editor behind it. The solvers
+ * were lifted off `Mesh` and onto `IUVSource`, so the port has to prove that
+ * a source which is not a mesh can still unwrap.
  *
  * `@framework/pathux` reaches the real path.ux solver through
  * `tests/lib/pathux_shim.ts`; nothing here stubs the math.
@@ -94,8 +94,9 @@ describe('unwrapping a source that is not a mesh', () => {
     }
     const after = angleError(graph)
 
-    // A dome is not developable, so the error has a floor well above zero —
-    // the assertion is that the solver walks downhill, not that it wins.
+    // A dome is not developable, so the error has a floor well above zero.
+    // This test checks only that the solver reduces the error from its
+    // starting value.
     expect(before).toBeGreaterThan(0)
     expect(after).toBeLessThan(before)
   })
@@ -110,9 +111,10 @@ describe('unwrapping a source that is not a mesh', () => {
       solver.step(0.4)
     }
 
-    // Not zero: each step smooths before it solves, and the solver only pulls
-    // most of that back. 54 corners share this, so it is well under a degree
-    // each — the plane fit is exact and stays that way.
+    // The error is not zero, because each step smooths before it solves and
+    // the solver only pulls most of that back. That total is spread over 54
+    // corners, so each is well under a degree; the plane fit is exact and
+    // stays that way.
     expect(angleError(graph)).toBeLessThan(0.05)
   })
 
@@ -164,9 +166,9 @@ describe('unwrapping a source that is not a mesh', () => {
     const before = Array.from(allUVs(source))
     unwrap(source, 10)
 
-    // A pin freezes its own vertex and takes the island out of the packer's
-    // hands; it does not freeze the island, which still smooths and solves
-    // around the anchor.
+    // A pin freezes only its own vertex, taking the island out of the
+    // packer's hands. The rest of the island still smooths and solves
+    // around that anchor.
     expect(Array.from(source.getUVs(LAYER, pin))).toEqual(at)
     expect(Array.from(allUVs(source))).not.toEqual(before)
   })
@@ -201,9 +203,9 @@ describe('relax', () => {
       relaxUVGraph(graph, {boundaryWeight: 4000})
     }
 
-    // Not exactly still: a pin is a weight here, not a constraint. It is two
-    // orders of magnitude heavier than an ordinary vertex, and that is the
-    // property worth pinning down.
+    // The pinned vertex does not stay exactly still, because a pin is a
+    // weight here, not a constraint. It is two orders of magnitude heavier
+    // than an ordinary vertex, and the test checks that weight difference.
     expect(Math.abs(pinned!.co[0] - at[0])).toBeLessThan(1e-3)
     expect(Math.abs(pinned!.co[1] - at[1])).toBeLessThan(1e-3)
   })

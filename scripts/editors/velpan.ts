@@ -101,7 +101,6 @@ export class VelPan {
    */
   doVelocity(): void {
     if (this.vel.dot(this.vel) < 0.001) {
-      console.log('removing velpan timer')
       window.clearInterval(this.timer)
       this.timer = undefined
       return

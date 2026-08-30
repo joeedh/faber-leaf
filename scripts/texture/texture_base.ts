@@ -99,6 +99,7 @@ export class TextureShader {
         if (finalV !== undefined) {
           list2[k] = finalV
         } else {
+          // eslint-disable-next-line no-console
           console.warn('Unreachable code in tex copyTo', this, b)
         }
       }

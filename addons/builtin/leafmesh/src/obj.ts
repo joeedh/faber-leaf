@@ -72,6 +72,7 @@ export function importOBJIntoScene(ctx: ToolContext, bytes: Uint8Array, filename
   data.graphUpdate()
 
   if (stats.warnings.length > 0) {
+    // eslint-disable-next-line no-console
     console.warn(`OBJ import: ${stats.warnings.length} problem(s)`, stats.warnings)
   }
   ctx.message?.(`Imported ${stats.verts} vertices, ${stats.faces} faces`)

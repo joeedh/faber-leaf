@@ -137,6 +137,7 @@ export class AutosaveManager {
         await this.runAutosave('auto')
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn('autosave: tick failed', err)
     } finally {
       this.scheduleNext()
@@ -177,6 +178,7 @@ export class AutosaveManager {
       this.status(`Autosaved ${formatTime(latest.timestamp)}`)
       return latest
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn('autosave: save failed', err)
       this.status('Autosave failed')
       if (reason === 'manual') throw err
@@ -257,6 +259,7 @@ export class AutosaveManager {
 
     const bytes = await this.backend.readBackup(latest.backupKey)
     if (!bytes) {
+      // eslint-disable-next-line no-console
       console.warn('autosave: recovery backup vanished', latest.backupKey)
       return false
     }

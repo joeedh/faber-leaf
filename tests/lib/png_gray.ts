@@ -24,7 +24,7 @@ export function decodePngGray(png: Uint8Array): GrayImage {
 
   let width = 0
   let height = 0
-  let bitDepth = 0
+  let bitDepth: number
   let colorType = 0
   const idat: Uint8Array[] = []
 

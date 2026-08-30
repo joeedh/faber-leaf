@@ -5,9 +5,9 @@
  * The element model is sculptcore's, not BREP's. Five domains — vert, edge,
  * corner, loop, face. A **corner** is one vertex-in-one-loop incidence (what
  * BREP calls a "Loop"); a **loop** is the closed ring a face is bounded by. A
- * face owns a list of loops, so **faces have holes** at the storage level: it
- * is not a decoration bolted on later, and every op below is written knowing a
- * face may have more than one ring.
+ * face owns a list of loops, so **faces have holes** at the storage level.
+ * That support is not a decoration bolted on later; every op below is written
+ * knowing a face may have more than one ring.
  *
  * Authoritative state, the part that is serialized: `v.co`, `e.v1/v2`, `c.v`,
  * `c.next`, `l.c`, `l.next`, `f.l`, and the attribute layers. Everything else
@@ -17,9 +17,10 @@
  *
  * Cycles are kept in **canonical ascending index order**: a vertex's disk runs
  * over its edges sorted by edge index, an edge's radial over its corners
- * sorted by corner index, and the head is the smallest. That is what makes
- * `rebuildDerivedTopo()` a genuine no-op on a healthy mesh — the live links do
- * not depend on the order the ops ran, only on which elements exist. Insertion
+ * sorted by corner index, and the head is the smallest. Keeping cycles in this
+ * canonical order makes `rebuildDerivedTopo()` a genuine no-op on a healthy
+ * mesh: the live links do not depend on the order the ops ran, only on which
+ * elements exist. Insertion
  * is O(valence), which is a rounding error at real valences.
  *
  * Non-manifold is legal. A radial cycle is a list, not a pair; an edge may
@@ -506,10 +507,10 @@ export class LeafMesh {
   }
 
   /**
-   * The edge between `v1` and `v2`, created if it does not exist. Reuse is the
-   * default because face construction must share perimeter edges — two faces
-   * meeting along an edge have to agree on which edge that is, or seam and
-   * sharp flags land on a duplicate nobody reads.
+   * Returns the edge between `v1` and `v2`, creating it if it does not exist.
+   * Reuse happens by default because face construction must share perimeter
+   * edges: two faces meeting along an edge have to agree on which edge that
+   * is, or seam and sharp flags land on a duplicate that nothing reads.
    */
   makeEdge(v1: number, v2: number, hint = ELEM_NONE): number {
     if (v1 === v2 || !this.v.has(v1) || !this.v.has(v2)) {

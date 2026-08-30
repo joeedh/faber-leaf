@@ -72,9 +72,10 @@ export interface IAddonBuildAssets {
 }
 
 /**
- * Every field the schema knows. An unrecognised key is an error: `optional`
- * spent this project's whole history being silently dropped, and a validator
- * that ignores what it does not understand is how that happens.
+ * Lists every field the schema knows about. An unrecognised key is an
+ * error, because `optional` spent this project's whole history being
+ * silently dropped: a validator that ignores what it does not understand
+ * lets exactly that kind of bug happen.
  */
 const KNOWN_FIELDS = new Set([
   'id',

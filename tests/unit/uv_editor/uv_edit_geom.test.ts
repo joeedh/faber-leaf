@@ -46,9 +46,9 @@ function uvOf(source: UVGridSource, handle: number): [number, number] {
 }
 
 describe('the contract constants', () => {
-  // The core cannot import UVFlags — it is a value, and a value import would
-  // make the whole editor unrunnable here. So it restates the bits, and this
-  // is what stops the two copies drifting.
+  // The core cannot import UVFlags, because it is a value, and a value
+  // import would make the whole editor unrunnable here. The core restates
+  // the bits instead, and this test is what stops the two copies drifting.
   test('mirror the host enum exactly', () => {
     expect(UV_SELECT).toBe(UVFlags.SELECT)
     expect(UV_PIN).toBe(UVFlags.PIN)
@@ -519,9 +519,9 @@ describe('transform', () => {
 })
 
 describe('the selectedFacesOnly scope', () => {
-  // Step 6's point: the flag is an op input, so every entry point has to honour
-  // it, not just the one that draws. A partial selection is what tells a scope
-  // that works from one that is quietly a no-op.
+  // The flag is an op input (step 6's point), so every entry point has to
+  // honour it, not just the one that draws. A partial selection distinguishes
+  // a scope that works from one that is quietly a no-op.
   const partial = (): UVGridSource => {
     const source = grid()
     source.setSelectedFaces([0, 3])
@@ -548,8 +548,9 @@ describe('the selectedFacesOnly scope', () => {
     selectAllUVs(source, 0, 'sub', {selectedFacesOnly: true})
     expect(listSelectedUVs(source, 0).length).toBe(8)
 
-    // Eight elements are still selected, all of them out of scope. Auto has to
-    // read that as "nothing selected here" and select, not deselect.
+    // Eight elements are still selected, all of them outside the scope. Auto
+    // reads that as nothing selected within scope, so it selects instead of
+    // deselecting.
     selectAllUVs(source, 0, 'auto', {selectedFacesOnly: true})
     expect(listSelectedUVs(source, 0).length).toBe(16)
   })

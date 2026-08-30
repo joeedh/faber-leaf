@@ -1,10 +1,10 @@
 /**
- * `selectedFacesOnly` is a tool input that reaches the source — P18 §5 step 6,
- * and §6's "`selectedFacesOnly` false actually differs from true".
+ * Confirms that `selectedFacesOnly`, a tool input, actually reaches the source —
+ * P18 §5 step 6, and §6's "`selectedFacesOnly` false actually differs from true".
  *
  * The archived UV ops hardcoded that filter, so nothing could tell whether it
  * was wired. Here it is set the way any caller sets it, on the op, and the
- * answer is read back off `IUVSource`: `listUVFaces(layer, selectedOnly)` is
+ * answer is read back off `IUVSource`. `listUVFaces(layer, selectedOnly)` carries
  * the entire meaning of the flag, and the op is the only thing between the two.
  *
  * Headless rather than a unit test for the usual reason — the ops ship in the

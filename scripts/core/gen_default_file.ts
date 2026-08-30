@@ -1,7 +1,7 @@
 import * as constants from './const'
 import type {AppState} from './appstate'
 import * as util from '../util/util'
-import {ArrayBufferProperty, StringProperty, ToolOp, UndoFlags} from '../path.ux/pathux'
+import {ArrayBufferProperty, ToolOp, UndoFlags} from '../path.ux/pathux'
 import {SelMask} from './select_types'
 import {ScreenBlock} from '../editors/editor_base'
 import {Collection} from '../scene/collection'
@@ -134,6 +134,7 @@ export function genDefaultFile(appstate: AppState, dont_load_startup = 0) {
       return
     } catch (error) {
       util.print_stack(error as Error)
+      // eslint-disable-next-line no-console
       console.warn('Failed to load startup file')
     }
   }

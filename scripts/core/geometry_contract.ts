@@ -1,28 +1,32 @@
 /**
- * The host geometry contract — everything the host is permitted to ask of
- * geometry, and nothing else.
+ * This module defines the host geometry contract, covering everything the
+ * host is permitted to ask of geometry, and nothing else.
  *
- * Normative prose: `documentation/geometry-contract.md`. Read it first; this
- * file is the machine-checkable half and assumes you know why each group exists.
+ * The normative prose lives in `documentation/geometry-contract.md`; read it
+ * first. This file is the machine-checkable half and assumes you know why
+ * each group exists.
  *
- * Three rules govern edits here:
+ * This file enforces three rules on edits.
  *  - **No concrete geometry type may be named.** Not in a type, not in a doc
  *    comment except in §12-style "who implements this" notes, and never as an
  *    import. If you cannot describe a capability without naming one, it is not
  *    yet a contract.
  *  - **Optional capabilities are declared, then queried.** A provider opts in by
- *    listing the capability on its kind descriptor *and* implementing the
- *    interface. Duck-typing is not opting in — see {@link asElementSource}.
+ *    listing the capability on its kind descriptor and implementing the
+ *    interface. Duck-typing alone does not count as opting in — see
+ *    {@link asElementSource}.
  *  - **Bulk in, bulk out.** No accessor takes or returns a single element. A
  *    provider whose geometry lives behind a WASM or worker boundary must not pay
  *    a round trip per element, and the only way to guarantee that is to make the
  *    per-element call unspellable.
  *
- * This module imports nothing but `path.ux` vector types, and that is a rule
- * too: a contract that reaches into the host it constrains is not a contract.
- * The required surface (§2) is therefore declared where it is implemented, in
- * `sceneobject/sceneobject_base.ts`, whose imports it already needs; the
- * optional, host-independent half lives here.
+ * This module imports nothing but `path.ux` vector types, and that
+ * restriction is itself a rule. A module that reaches into the host it
+ * constrains cannot serve as a contract.
+ * The required surface (§2) is therefore declared in
+ * `sceneobject/sceneobject_base.ts`, where it is implemented and whose
+ * imports it already needs. The optional, host-independent half lives here
+ * instead.
  */
 
 import type {Vector3} from '../path.ux/scripts/pathux.js'

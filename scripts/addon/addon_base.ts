@@ -310,14 +310,16 @@ export class AddonAPI<T> {
   }
 
   /**
-   * Is the addon with this manifest id loaded *and enabled* — are its
-   * registrations live? An addon that needs an optional subsystem can
-   * hard-depend on it, crash at first use, or ask and degrade; only the third
-   * lets a distribution ship without the subsystem, which is the point of the
-   * layered architecture. See geometry-contract.md §9 and documentation/addons.md.
+   * Reports whether the addon with this manifest id is both loaded and
+   * enabled, meaning its registrations are live. An addon that needs an
+   * optional subsystem can hard-depend on it, crash at first use, or ask and
+   * degrade; only the third option lets a distribution ship without the
+   * subsystem, which is the point of the layered architecture. See
+   * geometry-contract.md §9 and documentation/addons.md.
    *
-   * Enabled, not merely loaded: a disabled addon has had its classes, ops and
-   * menu entries unregistered, so it is no more usable than an absent one.
+   * This checks enabled state, not merely loaded state: a disabled addon has
+   * had its classes, ops, and menu entries unregistered, so it is no more
+   * usable than an addon that was never loaded.
    */
   has(id: string): boolean {
     return window._addons?.isEnabled(id)
@@ -603,12 +605,14 @@ export class AddonAPI<T> {
     const graph = this.ctx.graph
 
     if (src.graph_id < 0) {
+      // eslint-disable-next-line no-console
       console.warn('Auto-adding node to dependency graph')
       graph.add(src)
       this._graphNodes.add(src.graph_id)
     }
 
     if (dst.graph_id < 0) {
+      // eslint-disable-next-line no-console
       console.warn('Auto-adding node to dependency graph')
       graph.add(dst)
       this._graphNodes.add(dst.graph_id)
@@ -639,6 +643,7 @@ export class AddonAPI<T> {
 
   unregister(cls: unknown) {
     if (typeof cls !== 'function') {
+      // eslint-disable-next-line no-console
       console.error('unregister called with no arguments')
       return
     }
@@ -697,8 +702,11 @@ export class AddonAPI<T> {
           graph.remove(n)
         }
       } catch (error: any) {
+        // eslint-disable-next-line no-console
         console.error(error.stack)
+        // eslint-disable-next-line no-console
         console.error(error.message)
+        // eslint-disable-next-line no-console
         console.error('Failed to remove a graph node!', id, n)
       }
     }
@@ -717,6 +725,7 @@ export class AddonAPI<T> {
         try {
           this.unregister(cls)
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.error('Failed to unregister an addon class', cls, error)
         }
       }
@@ -728,6 +737,7 @@ export class AddonAPI<T> {
       try {
         undo()
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Failed to unregister an addon contribution', error)
       }
     }

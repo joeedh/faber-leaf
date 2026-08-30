@@ -1,7 +1,7 @@
 import {DataPathError, haveModal} from '../../path.ux/scripts/pathux.js'
 import {UIBase, PackFlags, color2css} from '../../path.ux/scripts/core/ui_base.js'
 import {RowFrame} from '../../path.ux/scripts/core/ui.js'
-import {Matrix4, Vector2} from '../../util/vectormath.js'
+import {Vector2} from '../../util/vectormath.js'
 import {SocketTypes} from '../../core/graph.js'
 import type {ViewContext} from '../../core/context'
 import type {NodeEditorBase} from './NodeEditor.js'
@@ -67,6 +67,7 @@ export class NodeSocketElem extends RowFrame<ViewContext> {
     }
 
     if (this.socket === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('socket ui error')
       return
     }
@@ -75,13 +76,12 @@ export class NodeSocketElem extends RowFrame<ViewContext> {
     const sock = this.socket
 
     if (sock === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('Error in node editor ui socket', this, this.uinode)
       return
     }
 
     let cmd
-
-    console.log(sock, sock.socketType === SocketTypes.INPUT, sock.edges.length)
 
     if (sock.socketType === SocketTypes.INPUT && sock.edges.length === 1) {
       const srcSock = sock.edges[0]
@@ -132,6 +132,7 @@ export class NodeSocketElem extends RowFrame<ViewContext> {
     }
 
     if (this.socket === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('Bad socket reference')
     }
   }
@@ -183,6 +184,7 @@ export class NodeSocketElem extends RowFrame<ViewContext> {
     }
 
     if (this.socket === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('bad socket', this.getAttribute('datapath'))
       return
     }
@@ -217,8 +219,6 @@ export class NodeSocketElem extends RowFrame<ViewContext> {
 
     if (dpi !== this._last_dpi) {
       this._last_dpi = dpi
-
-      console.log('dpi update')
 
       this.setCSS()
       this._redraw()
@@ -259,11 +259,11 @@ export class NodeSocketElem extends RowFrame<ViewContext> {
     this.saneStyle['white-space'] = 'nowrap'
 
     if (this.ned === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('no node editor in setCSS()')
       return
     }
 
-    const ned = this.ned
     const pos = new Vector2(this.pos)
     pos.add(this.uinode!.pos)
 

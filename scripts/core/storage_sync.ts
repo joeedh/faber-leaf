@@ -54,6 +54,7 @@ export function startStorageSync(): void {
       try {
         t.reload()
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.warn('storage_sync: reload failed for', t.key, err)
       }
     }

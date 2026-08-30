@@ -530,6 +530,7 @@ export class SculptPaintOp extends StrokeDriverOp<{}, {}> {
     if (brushType === undefined) {
       // TS tool with no sculptcore equivalent (e.g. Grab, Snake, Paint).
       // Skip the dab rather than silently running a Draw.
+      // eslint-disable-next-line no-console
       console.warn(`sculptcore: no kernel for tool ${SculptTools[brush.tool] ?? brush.tool}; skipping dab`)
     } else if (mesh.hasVdm && brush.tool === SculptTools.DRAW && SculptPaintOp.meshLog) {
       // VDM carrier routing (X3 stage 4): with a store attached, Draw dabs

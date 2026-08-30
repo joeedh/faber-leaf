@@ -43,8 +43,9 @@ function run() {
       maxBuffer: 64 * 1024 * 1024,
     })
   } catch (err) {
-    // The finder exits 1 whenever it finds anything at all; that is this
-    // script's input, not its verdict. A crash writes nothing to stdout.
+    // The finder exits 1 whenever it finds anything at all. This script
+    // treats that exit code as input to parse, not as the verdict to report.
+    // A crash writes nothing to stdout.
     if (err.stdout) {
       return err.stdout
     }

@@ -20,7 +20,7 @@ class ImageResource extends ResourceType {
   }
 
   static handlesURL(url: string) {
-    if (url.search(/data\:image/) >= 0) return true
+    if (url.search(/data:image/) >= 0) return true
 
     url = url.toLowerCase()
     for (let k in ImageExtensions) {

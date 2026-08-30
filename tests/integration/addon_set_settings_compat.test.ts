@@ -219,8 +219,8 @@ describeMaybe('settings + startup file across an addon-set change (P10, criterio
   })
 
   test('set B honors the persisted disable, so its live addon set really differs', () => {
-    // leafmesh is default-off, so set A had to turn it on and the edited blob
-    // turns it back off: the disable is the user's, not the manifest's.
+    // leafmesh is default-off, so set A had to turn it on, and the edited blob
+    // turns it back off. The user disabled it here, not the manifest.
     expect(reader.live!.leafmesh).toBe(false)
     expect(reader.live![DEFAULT_ON_ADDON]).toBe(true)
   })

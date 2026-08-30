@@ -59,6 +59,7 @@ export function resolveDefaultScene(): DefaultSceneEntry | null {
     const entry = _scenes.get(want)
     if (!entry && _warnedMissing !== want) {
       _warnedMissing = want
+      // eslint-disable-next-line no-console
       console.warn(`default scene "${want}" is not registered; starting with an empty scene`)
     }
     return entry ?? null

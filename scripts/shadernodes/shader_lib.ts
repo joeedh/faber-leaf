@@ -91,14 +91,11 @@ export class LightGen {
 
         if (use_jitter) {
           switch (light.data.type) {
-            case LightTypes.AREA_DISK:
-            //break;
-            case LightTypes.AREA_RECT:
-            //break;
             case LightTypes.SUN:
-              //break;
               uniforms[uname + '.dir'] = dir
-            //yes, the pass through is deliberate
+            // falls through
+            case LightTypes.AREA_DISK:
+            case LightTypes.AREA_RECT:
             case LightTypes.POINT:
             default:
               r[0] = (util.random() - 0.5) * 2.0
@@ -517,15 +514,12 @@ export function getBlueMask(gl: WebGL2RenderingContext): IBlueMask {
   bluemask.tex = btex
   btex.texture = gl.createTexture()
 
-  console.log('creating blue noise mask')
-
   //convert to float data
   //
   const mask = bluenoise.cmyk
   const data = mask.mask
   const size = mask.dimen
   const comps = mask.components
-  const tot = comps * size * size
 
   const tex = new Float32Array(size * size * 4)
 

@@ -1477,8 +1477,8 @@ export abstract class MarkEdgePathBaseOp extends LiteMeshAttrOp {
     if (anchor >= 0 && ctx?.object && mesh) {
       // Snapshot each path edge's prior feature bit (first sighting only) before
       // marking live, so undo can restore the exact pre-chain state.
-      for (const e of mesh.edgePathEdges(anchor, v)) {
-        if (!this._priorByEdge.has(e)) this._priorByEdge.set(e, mesh.edgeFlagKind(e, kind))
+      for (const edge of mesh.edgePathEdges(anchor, v)) {
+        if (!this._priorByEdge.has(edge)) this._priorByEdge.set(edge, mesh.edgeFlagKind(edge, kind))
       }
       // mark live for immediate feedback; exec() re-marks the whole chain on redo
       mesh.markEdgePath(anchor, v, kind, 1)

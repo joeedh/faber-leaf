@@ -61,12 +61,14 @@ class AutosaveWorkerHost {
       }
       worker.onerror = (e) => {
         // Fail every in-flight job; future calls fall back to inline.
+        // eslint-disable-next-line no-console
         console.warn('autosave worker error; falling back to inline compression', e.message)
         this.failWorker(e.message ?? 'worker error')
       }
       this.worker = worker
       return worker
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn('autosave worker spawn failed; using inline compression', err)
       this.failed = true
       return undefined
@@ -114,6 +116,7 @@ class AutosaveWorkerHost {
         worker.postMessage({id, buffers}, transfer)
       })
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn('autosave worker compress failed; retrying inline', err)
       // The raw buffers were transferred (detached); recompute would need them.
       // The caller still holds undetached copies only when transfer was skipped,

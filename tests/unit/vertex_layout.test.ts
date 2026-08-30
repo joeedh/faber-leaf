@@ -1,7 +1,7 @@
 /**
- * The vertex-layout half of the host geometry contract —
- * documentation/geometry-contract.md §10. What is pinned here is that one
- * builder serves both draw paths, and that the slots a material reserves stay
+ * Tests the vertex-layout half of the host geometry contract
+ * (documentation/geometry-contract.md §10). Pins down that one builder
+ * serves both draw paths, and that the slots a material reserves stay
  * reserved.
  */
 

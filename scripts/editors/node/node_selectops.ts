@@ -11,7 +11,6 @@ import {NodeGraphOp} from './node_ops.js'
 import {SelToolModes, SelOneToolModes} from '../../core/select_types.js'
 import type {ToolContext, ViewContext} from '../../core/context'
 import {NodeEditorBase} from './NodeEditor.js'
-import {Editor} from '../editor_base.js'
 
 /**
  * Base for node selection ops. Its undo snapshots both the per-node selection

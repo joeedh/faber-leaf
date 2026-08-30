@@ -292,6 +292,7 @@ export class ObjectList extends Array {
       const ob2 = getblock_addUser(ob, scene)
 
       if (ob2 === undefined) {
+        // eslint-disable-next-line no-console
         console.warn('Warning: missing SceneObject in scene')
         continue
       }
@@ -578,6 +579,7 @@ propIslandOnly : bool;
     this.recalc &= ~SceneRecalcFlags.OBJECTS
 
     if (this.collection === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('No collection in scene!!!')
       return
     }
@@ -650,9 +652,9 @@ propIslandOnly : bool;
       }
     }
 
-    for (const mode of this.toolmodes) {
-      if (mode.constructor === cls) {
-        ret = mode
+    for (const tm of this.toolmodes) {
+      if (tm.constructor === cls) {
+        ret = tm
         break
       }
     }
@@ -705,6 +707,7 @@ propIslandOnly : bool;
 
   remove(ob: SceneObject) {
     if (ob === undefined || !this.objects.includes(ob)) {
+      // eslint-disable-next-line no-console
       console.warn('object not in scene', ob)
       return
     }
@@ -718,6 +721,7 @@ propIslandOnly : bool;
       this.destroyIntern()
     } catch (error) {
       util.print_stack(error as Error)
+      // eslint-disable-next-line no-console
       console.warn('got error in Scene.prototype.destroy')
     }
   }
@@ -872,7 +876,6 @@ propIslandOnly : bool;
     }
 
     if (!found) {
-      const i = this.toolmode_i
       this.toolmode_i = -1
 
       this.switchToolMode(0, true)
@@ -885,6 +888,7 @@ propIslandOnly : bool;
     this.collection = getblock_addUser(this.collection as unknown as number, this) as Collection
 
     if (this.#linked) {
+      // eslint-disable-next-line no-console
       console.log('DOUBLE CALL TO dataLink')
       return
     }
@@ -918,6 +922,7 @@ propIslandOnly : bool;
       this.updateWidgets_intern()
     } catch (error) {
       util.print_stack(error as Error)
+      // eslint-disable-next-line no-console
       console.warn('updateWidgets() failed')
     }
   }

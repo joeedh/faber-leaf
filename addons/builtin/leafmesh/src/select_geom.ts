@@ -27,7 +27,7 @@ export function selectFlags(mesh: LeafMesh, domain: Domain): Uint8Array | undefi
   return layer === undefined ? undefined : (layer.column.data as Uint8Array)
 }
 
-/** The layer's flags, creating the layer if this is the first write. */
+/** Returns the layer's flags, creating the layer first if this is the first write. */
 export function ensureSelectFlags(mesh: LeafMesh, domain: Domain): Uint8Array {
   return mesh.attrs.add(domain, SELECT_ATTR, AttrType.Byte, AttrFlags.NONE, 0).column.data as Uint8Array
 }
@@ -298,7 +298,7 @@ export function faceSides(mesh: LeafMesh, f: number): number {
 /** Ring count past the outer one. */
 export function faceHoleCount(mesh: LeafMesh, f: number): number {
   let n = 0
-  for (const _l of mesh.faceLoops(f)) {
+  for (const _unusedL of mesh.faceLoops(f)) {
     n++
   }
   return Math.max(0, n - 1)
@@ -388,8 +388,9 @@ export function similarTo(
         case 'FACE_COPLANAR': {
           const n = mesh.faceNormal(f)
           if (Math.abs(dot3(n, seedNormal)) >= cos) {
-            // Same plane, not merely the same orientation: the seed's first
-            // vertex has to lie in this face's plane as well.
+            // Requires the seed's first vertex to lie in this face's plane as
+            // well, so this checks for the same plane rather than merely the
+            // same orientation.
             const co = mesh.v.co
             const a = faceVerts(mesh, f)[0] * 3
             const b = seedVert * 3

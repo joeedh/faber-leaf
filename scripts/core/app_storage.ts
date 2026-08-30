@@ -235,13 +235,15 @@ function buildStorage(): AppStorage {
       const fs = req('fs') as NodeFsSync
       const pathlib = req('path') as NodePath
       const proc = (globalThis as {process?: {cwd(): string}}).process
-      // `--app-storage-dir <path>` moves all app state somewhere else, so a test
-      // boot never writes into the developer's own `.sculptcore` (cwd is the app
-      // dir under NW.js, so a spawned process cannot isolate itself otherwise).
+      // `--app-storage-dir <path>` moves all app state somewhere else, so a
+      // test boot never writes into the developer's own `.sculptcore`. Under
+      // NW.js, cwd is the app directory, so without this flag a spawned
+      // process has no way to isolate its storage.
       const override = getArg('app-storage-dir')
       const baseDir = override ? pathlib.resolve(override) : pathlib.join(proc!.cwd(), '.sculptcore')
       return new NwjsAppStorage(baseDir, fs, pathlib)
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn('app_storage: NW.js fs backend unavailable, using localStorage', err)
     }
   }

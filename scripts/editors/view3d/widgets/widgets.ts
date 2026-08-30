@@ -199,7 +199,7 @@ export class WidgetShape<OPT extends {dead?: true | false | undefined} = {}> {
     /* Use w component of projected vector. */
     co[3] = 1.0
     co.multVecMatrix(camera.rendermat)
-  
+
     const smat = this._tempmat
     smat.makeIdentity()
 

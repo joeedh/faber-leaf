@@ -48,7 +48,7 @@ function holedQuad(): {mesh: LeafMesh; face: number; outer: number[]; hole: numb
   return {mesh, face: mesh.makeFace([outer, hole]), outer, hole}
 }
 
-/** Two quads meeting at exactly one vertex — connected visually, not topologically. */
+/** Two quads that meet at exactly one vertex. They touch visually but share no edge. */
 function bowtie(): {mesh: LeafMesh; a: number; b: number; pivot: number} {
   const mesh = new LeafMesh()
   const pivot = mesh.makeVert([0, 0, 0])
@@ -233,8 +233,9 @@ describe('linkedFrom', () => {
 
     expect(linkedFrom(mesh, Domain.FACE, [a])).toEqual([a])
     expect(linkedFrom(mesh, Domain.FACE, [b])).toEqual([b])
-    // The vertex domain does see them as one island — that is the correct
-    // difference, not an inconsistency.
+    // The vertex domain does count the two faces as one island, because they
+    // share the pivot vertex. That difference between domains is expected,
+    // not a bug.
     expect(linkedFrom(mesh, Domain.VERT, [pivot])).toHaveLength(7)
   })
 

@@ -85,13 +85,13 @@ function makeCubeSource(): IUVSource {
 }
 
 /**
- * Rebuild `from` as a LeafMesh: same faces, same rings, same positions, same
- * UVs. That is what lets the parity check compare two providers' unwraps
- * directly — LiteMesh is triangles-only and LeafMesh is not, so the only way to
- * hand both the same topology is to copy one into the other.
+ * Rebuilds `from` as a LeafMesh with the same faces, rings, positions, and
+ * UVs. The parity check can then compare two providers' unwraps directly,
+ * because LiteMesh is triangles-only and LeafMesh is not, so copying one mesh
+ * into the other is the only way to give both the same topology.
  *
- * Everything is read through `IUVSource`, so this stays a mirror of the
- * contract rather than of sculptcore.
+ * Everything is read through `IUVSource`, so this function mirrors the
+ * contract rather than mirroring sculptcore.
  */
 function mirrorSource(from: IUVSource): IUVSource {
   const layer = from.activeUVLayer

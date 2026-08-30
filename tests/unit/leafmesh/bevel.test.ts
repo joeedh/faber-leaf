@@ -140,8 +140,9 @@ describe('edge bevel', () => {
 
     expect(out.skipped).toEqual([])
     expect(out.verts.length).toBe(4)
-    // Valence three at each end leaves a two-point arc, which the one face
-    // between those points already spans — so the quad is the only new face.
+    // Valence three at each end leaves a two-point arc. The one existing face
+    // between those two points already spans that arc, so the new quad is the
+    // only new face produced by the bevel.
     expect(out.faces.length).toBe(1)
     expect(faceVerts(mesh, out.faces[0]).length).toBe(4)
     expect(counts(mesh)).toEqual({verts: before.verts + 2, edges: before.edges + 3, faces: before.faces + 1})

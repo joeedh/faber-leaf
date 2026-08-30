@@ -191,9 +191,9 @@ maybe('sculptcore VDM fragment render (screenshot A/B)', () => {
         `(${((dVdmRef / dRefFlat) * 100).toFixed(1)}% of ref response), ncc = ${corr.toFixed(4)}`
     )
     // The fragment path shades but doesn't move silhouettes, so vdm-ref can't
-    // be pixel-tight; it must be well under the ref response itself...
+    // be pixel-tight; it must stay well under the ref response itself.
     expect(dVdmRef).toBeLessThan(0.65 * dRefFlat) // measured ratio ~0.36
-    // ...and the two shading responses must strongly correlate.
+    // The vdm and ref shading responses must also strongly correlate.
     expect(corr).toBeGreaterThan(0.6) // measured ~0.87
   })
 
@@ -204,7 +204,7 @@ maybe('sculptcore VDM fragment render (screenshot A/B)', () => {
       const native = runRender(nwExe!, 'native', 'vdm')
       const wasm = runs.get('vdm')!
       expect(native.result.ok).toBe(true)
-      // The splat itself is the same C++ on both backends.
+      // The splat runs the same C++ code on both backends, so these metrics must match exactly.
       expect(native.result.charts).toBe(wasm.result.charts)
       expect(native.result.texelsTouched).toBe(wasm.result.texelsTouched)
       expect(native.result.tileCount).toBe(wasm.result.tileCount)

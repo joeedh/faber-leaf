@@ -1,17 +1,17 @@
 /**
- * Typed, named attribute layers over the five LeafMesh domains.
+ * Defines typed, named attribute layers over the five LeafMesh domains.
  *
- * A layer is one `ElemArray` column plus the metadata needed to serialize it
- * and to interpolate it when geometry is created. The vocabulary is
- * deliberately the same as sculptcore's, so a layer round-trips to the engine
- * as a column copy rather than a conversion.
+ * A layer packages one `ElemArray` column with the metadata needed to
+ * serialize it and to interpolate it when geometry is created. The vocabulary
+ * deliberately matches sculptcore's, so a layer round-trips to the engine as
+ * a column copy rather than a conversion.
  *
- * Two conventions worth knowing before adding a layer:
- *  - UVs live on the **corner** domain, not the vertex domain. A seam is two
- *    corners of one vertex disagreeing, which is the only representation that
- *    does not force a vertex split.
- *  - `select` and `hide` are ordinary `Bool` layers, not bitfields on the
- *    element. Nothing gets to add a sixth flag bit and quietly break undo.
+ * Two conventions are worth knowing before adding a layer. UVs live on the
+ * **corner** domain, not the vertex domain: a seam occurs where two corners
+ * of one vertex disagree, the only representation that does not force a
+ * vertex split. And `select` and `hide` are ordinary `Bool` layers, not
+ * bitfields on the element, so no code may add a sixth flag bit and quietly
+ * break undo.
  */
 
 import type {Column, ElemArray, TypedArrayCtor} from './elem_array.js'

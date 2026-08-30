@@ -36,9 +36,10 @@ interface AddonSource {
 }
 
 /**
- * An addon that is known but not loaded, and why. Force-disabled addons and
- * ones the resolver rejected both land here, so the UI can say what happened
- * instead of the addon simply not appearing.
+ * Represents an addon that is known but not loaded, and records why.
+ * Force-disabled addons and ones the resolver rejected both land here, so
+ * the UI can report what happened instead of leaving the addon simply
+ * absent.
  */
 export interface UnloadedAddon {
   id: string

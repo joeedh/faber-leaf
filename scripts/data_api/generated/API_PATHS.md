@@ -330,7 +330,7 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `settings.autosaveIntervalMinutes` | prop | FloatProperty | Autosave Interval | range 0.5..120 |
 | `settings.autosaveMaxBackups` | prop | IntProperty | Max Backups | range 1..50 |
 | `settings.autosaveToProjectDir` | prop | BoolProperty | Autosave Next To Project |  |
-| `settings.brushSet` | prop | EnumProperty | Brush Set | enum {0, 1, HIGH_RES, MEDIUM_RES, DEFAULT} |
+| `settings.brushSet` | prop | EnumProperty | Brush Set | enum {0, 1, 2, HIGH_RES, MEDIUM_RES, DEFAULT} |
 | `settings.featureFlags` | struct |  |  |  |
 | `settings.limitUndoMem` | prop | BoolProperty | Limit Undo Memory |  |
 | `settings.undoMemLimit` | prop | IntProperty | Mem Limit |  |

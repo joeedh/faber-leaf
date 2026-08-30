@@ -316,14 +316,6 @@ node.NodeViewer {
     const p3 = new Vector2()
     const s = new Vector2()
 
-    function find_sock_key(node: AnyNode, sock: unknown): string | undefined {
-      for (const k in node.inputs) {
-        if (node.inputs[k] === sock) {
-          return k
-        }
-      }
-    }
-
     g.beginPath()
 
     const graph = this.getGraph()
@@ -487,8 +479,6 @@ node.NodeViewer {
     }
   }
 }
-
-type AnyNode = Node
 
 Editor.register(NodeViewer)
 

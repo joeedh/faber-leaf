@@ -79,9 +79,8 @@ export class ToolMode<NodeInputs extends INodeSocketSet = {}, NodeOutputs extend
     this._uniqueWidgets = {}
     this.transWidget = undefined
 
-    //@ts-ignore
+    //@ts-expect-error constructor is typed as Function; toolModeDefine is a static on the subclass
     this.selectMask = this.constructor.toolModeDefine().selectMode
-    //@ts-ignore
     this._transProp = this.constructor.getTransformProp()
 
     this.storedSelectMask = -1 //used by scene
@@ -309,8 +308,6 @@ export class ToolMode<NodeInputs extends INodeSocketSet = {}, NodeOutputs extend
 
       return
     } else if (valid && !(def.name in this._uniqueWidgets)) {
-      console.log('adding new widget', def.name)
-
       const widget = new widgetclass()
       manager.add(widget)
 
@@ -344,11 +341,11 @@ export class ToolMode<NodeInputs extends INodeSocketSet = {}, NodeOutputs extend
     this.ctx.scene.widgets.remove(widget)
   }
 
-  hasUniqueWidget<T extends WidgetBase>(cls: IWidgetConstructor) {
+  hasUniqueWidget(cls: IWidgetConstructor) {
     return this.getUniqueWidget(cls) !== undefined
   }
 
-  getUniqueWidget<T extends WidgetBase>(cls: IWidgetConstructor) {
+  getUniqueWidget(cls: IWidgetConstructor) {
     const def = cls.widgetDefine()
     return this._uniqueWidgets[def.name]
   }
@@ -387,6 +384,7 @@ export class ToolMode<NodeInputs extends INodeSocketSet = {}, NodeOutputs extend
 
     const cls = this.constructor.getContextOverlayClass()
     if (cls !== undefined && !(this.ctx instanceof cls)) {
+      // eslint-disable-next-line no-console
       console.warn('reimplement toolmode ctx overlays!')
       this.ctx = new cls((this.ctx as any).state, this)
     }
@@ -412,14 +410,12 @@ export class ToolMode<NodeInputs extends INodeSocketSet = {}, NodeOutputs extend
     }
 
     if (this.transWidget && tcls !== this.transWidget.constructor) {
-      console.log('removing transform widget')
       this.removeUniqueWidget(this.transWidget)
       this.transWidget = undefined
     }
 
     if (!this.transWidget && tcls) {
       this.transWidget = this.ensureUniqueWidget(tcls)
-      console.log('making transform widget', tcls.name, this.transformWidget, this.transWidget)
     }
 
     // Scene 3D-cursor widget: alive whenever the active view shows the cursor
@@ -458,8 +454,6 @@ export class ToolMode<NodeInputs extends INodeSocketSet = {}, NodeOutputs extend
   }
 
   onInactive() {
-    const cls = this.constructor.getContextOverlayClass()
-
     //if (this.ctx && cls && this.ctx.hasOverlay(cls)) {
     //  this.ctx.removeOverlay(this.ctx.getOverlay(cls))
     //}

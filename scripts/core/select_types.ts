@@ -207,6 +207,7 @@ export function selMaskFromNames(names: string): number {
     if (bit !== undefined) {
       mask |= bit
     } else {
+      // eslint-disable-next-line no-console
       console.warn(`select_types: unknown selection mode "${part}"`)
     }
   }

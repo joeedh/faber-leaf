@@ -1,16 +1,18 @@
 /**
- * An `IUVSource` with no geometry behind it — P18 §5 step 2, implementor #3.
+ * This class implements `IUVSource` with no geometry behind it (P18 §5 step
+ * 2, implementor #3). `UVGridSurface` below adds 3D positions on top of the
+ * same grid.
  *
- * A W×H grid of quads whose UV elements are corners and whose owners are grid
- * *vertices*, so `getUVOwners` is many-to-one here and the identity on LeafMesh.
- * That difference is the point: the double exists to catch an interface that
- * has quietly assumed one mesh's storage. It also carries no `IElementSource`,
- * no draw path and no engine, which is what lets the UV editor be driven
- * headlessly (§6 criterion 3).
+ * It represents a W×H grid of quads whose UV elements are corners, and whose
+ * owners are grid *vertices*. `getUVOwners` is therefore many-to-one here,
+ * unlike the identity mapping on LeafMesh. This double exists to catch an
+ * interface that has quietly assumed one mesh's storage. It also carries no
+ * `IElementSource`, no draw path, and no engine, so the UV editor can be
+ * driven headlessly with it (§6 criterion 3).
  *
- * Not a mesh: there is no topology to edit, and `bumpTopoStamp` is the only way
- * handles ever go stale. Anything a test needs beyond a fixed grid belongs in a
- * real source, not here.
+ * It has no topology to edit. `bumpTopoStamp` is the only way handles ever
+ * go stale here. Anything a test needs beyond a fixed grid belongs in a real
+ * source, not in this class.
  */
 
 import {ElementDomain, UVFlags} from '../../scripts/core/geometry_contract'
@@ -292,12 +294,12 @@ export interface UVGridSurfaceOptions extends UVGridOptions {
 }
 
 /**
- * The same grid, with 3D positions behind it — P19 §5 step 6.
+ * Extends `UVGridSource` with 3D positions behind the same grid (P19 §5 step 6).
  *
- * `getUVElementPositions` is optional on the contract, and the base class omits
- * it on purpose: the solver and the projection both feature-detect, and a
- * source without positions must stay a supported one. This subclass is what
- * the other half of that branch is tested against.
+ * `getUVElementPositions` is optional on the contract, and the base class
+ * omits it on purpose, because the solver and the projection both
+ * feature-detect, and a source without positions must stay a supported one.
+ * This subclass is what the other half of that branch is tested against.
  */
 export class UVGridSurface extends UVGridSource {
   readonly bend: number

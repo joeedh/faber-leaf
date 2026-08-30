@@ -438,7 +438,7 @@ export class NodeFsAddonStorage implements AddonStorage {
     try {
       return await this.fs.readFile(fullPath)
     } catch (err) {
-      throw new Error(`addon "${addonId}": file "${relPath}" not found: ${(err as Error).message}`)
+      throw new Error(`addon "${addonId}": file "${relPath}" not found: ${(err as Error).message}`, {cause: err})
     }
   }
 

@@ -195,7 +195,8 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
       // addon that contributed the type can be disabled between runs (§8).
       const type = TransDataType.getClass(name)
 
-      if (!type?.isValid(ctx, this)) {
+      // eslint-disable-next-line @typescript-eslint/prefer-optional-chain -- kept explicit; see unit/transform_registry.test.ts
+      if (!type || !type.isValid(ctx, this)) {
         continue
       }
       this._types.push(type)
@@ -306,12 +307,11 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
     this.numericVal = undefined
     this.tdata = this.genTransData(ctx)
 
-    for (const t of this.getTransTypes(ctx)) {
+    for (const _unusedT of this.getTransTypes(ctx)) {
       const mctx = this.modal_ctx! as ViewContext
       const ret = calcTransCenter(mctx, this.inputs.selmask.getValue(), mctx.view3d.transformSpace)
 
       if (!this.inputs.constraint_space.wasSet) {
-        console.log('setting constraint space', ret.spaceMatrix.$matrix)
         this.inputs.constraint_space.setValue(ret.spaceMatrix)
       }
     }
@@ -373,8 +373,6 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
   }
 
   on_pointerup(e: PointerEvent) {
-    console.log('mouseup!')
-
     if (e.button !== 0) {
       this.cancel()
     } else {
@@ -385,8 +383,6 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
   }
 
   on_mousewheel(e: WheelEvent & {x: number; y: number}) {
-    console.log('wheel!', e, e.x, e.y)
-
     let dy = 1.0 + e.deltaY * 0.001
     dy = Math.max(dy, 0.001)
 
@@ -401,8 +397,6 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
 
     if (e.x !== undefined && e.y !== undefined) {
       mpos.load(view3d.getLocalMouse(e.x, e.y))
-    } else if (e.x !== undefined && e.y !== undefined) {
-      mpos.load(view3d.getLocalMouse(e.x, e.y))
     } else if (!this._first) {
       mpos.load(this._mpos)
     } else {
@@ -410,8 +404,6 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
     }
 
     this.updatePropRadius(r, mpos)
-
-    console.log('dy', dy, r)
   }
 
   updatePropRadius(r: number, mpos: Vector2) {
@@ -561,6 +553,7 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
     }
 
     if (isNaN(parseFloat(f))) {
+      // eslint-disable-next-line no-console
       console.error('Numeric input error! ' + f)
       return
     }
@@ -573,8 +566,6 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
   }
 
   on_keydown(e: KeyboardEvent) {
-    console.log(e.keyCode)
-
     let doprop = false
     let sign = undefined
 
@@ -621,7 +612,7 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
         break
       case keymap['X']:
       case keymap['Y']:
-      case keymap['Z']:
+      case keymap['Z']: {
         const axis = e.keyCode - keymap['X']
 
         const c = new Vector3()
@@ -634,6 +625,7 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
         this.inputs.constraint.setValue(c)
         this.exec(this.modal_ctx! as ViewContext)
         break
+      }
     }
 
     window.redraw_viewport()
@@ -753,19 +745,12 @@ export class TranslateOp extends TransformOp {
     scent.load(scent2)
 
     const off = new Vector3(scent).sub(cent)
-    const mat = this.inputs.space.getValue()
-
-    //let imat = new Matrix4(mat);
-    //imat.invert();
-    //off.multVecMatrix(imat);
 
     let con = this.inputs.constraint.getValue()
     const is_plane = con.dot(con) != 0.0 && con.dot(con) != 1.0 && con.dot(con) != 3.0
 
     if (is_plane) {
       //are we constraining to a plane?
-      //console.log("plane constraint!");
-
       con = new Vector3(con)
       for (let i = 0; i < con.length; i++) {
         con[i] = con[i] == 0.0 ? 1.0 : 0.0
@@ -791,15 +776,6 @@ export class TranslateOp extends TransformOp {
       //isect_ray_plane
     } else if (con.dot(con) != 3.0) {
       //project to line
-      let axis = 0
-
-      for (let i = 0; i < 3; i++) {
-        if (Math.abs(con[i]!) > 0.5) {
-          axis = i
-          break
-        }
-      }
-
       const p1 = new Vector3(cent)
       const p2 = new Vector3(scent)
 
@@ -990,11 +966,6 @@ export class ScaleOp extends TransformOp {
     view3d.unproject(scent)
 
     const off = new Vector3(scent).sub(cent)
-    const mat = this.inputs.space.getValue()
-
-    //let imat = new Matrix4(mat);
-    //imat.invert();
-    //off.multVecMatrix(imat);
 
     let con = this.inputs.constraint.getValue()
     const is_plane = con.dot(con) != 0.0 && con.dot(con) != 1.0 && con.dot(con) != 3.0
@@ -1026,15 +997,6 @@ export class ScaleOp extends TransformOp {
       //isect_ray_plane
     } else if (Math.abs(con.dot(con) - 3.0) > 0.001) {
       //project to line
-      let axis = 0
-
-      for (let i = 0; i < 3; i++) {
-        if (Math.abs(con[i]!) > 0.5) {
-          axis = i
-          break
-        }
-      }
-
       const p1 = new Vector3(cent)
       const p2 = new Vector3(scent)
 
@@ -1267,15 +1229,15 @@ export class RotateOp<Inputs extends PropertySlots = {}, Outputs extends Propert
       const near = -view3d.activeCamera.near - 0.000001
       //near *= -1.0 / (view3d.activeCamera.far - view3d.activeCamera.near);
 
-      let rco = new Vector3([this.mpos[0], this.mpos[1], near])
+      let rayOrigin = new Vector3([this.mpos[0], this.mpos[1], near])
       const lastco = new Vector3([this.last_mpos[0], this.last_mpos[1], near])
 
-      view3d.unproject(rco)
+      view3d.unproject(rayOrigin)
       view3d.unproject(lastco)
 
-      rco = view3d.activeCamera.pos
+      rayOrigin = view3d.activeCamera.pos
 
-      const isect1 = isect_ray_plane(origin, plane, rco, view1)
+      const isect1 = isect_ray_plane(origin, plane, rayOrigin, view1)
       const isect2 = isect_ray_plane(origin, plane, lastco, view2)
 
       this.makeTempLine(isect1, this.center, 'green')
@@ -1482,8 +1444,6 @@ export class RotateOp<Inputs extends PropertySlots = {}, Outputs extends Propert
       return
     }
 
-    const dx = x - this.last_mpos[0]
-    const dy = y - this.last_mpos[1]
     const rx = x - this.mpos[0]
     const ry = y - this.mpos[1]
 
@@ -1520,8 +1480,6 @@ export class RotateOp<Inputs extends PropertySlots = {}, Outputs extends Propert
     super.exec(ctx)
     const mat = new Matrix4()
 
-    const off = new Vector3(this.inputs.value.getValue())
-    //off.mul(this.inputs.constraint.getValue());
     const cent = this.center
 
     const con = this.inputs.constraint.getValue()

@@ -163,7 +163,6 @@ graph.NodeSocketType {
   edges: this[]
   node: GenericNode<any>;
 
-  // @ts-ignore
   ['constructor']?: ISocketConstructor
 
   constructor(uiname?: string, flag = 0) {
@@ -539,7 +538,6 @@ graph.Node {
 `
   );
 
-  /* @ts-ignore */
   ['constructor']: INodeConstructor<this, InputSet, OutputSet> | undefined
 
   static inheritFlag(flag: number) {
@@ -595,25 +593,22 @@ graph.Node {
 
       //walk up class hiearchy andd see if NodeFlags.FORCE_SOCKET_INHERIT
       //is nodedef().flag of any ancestor
-      const p = this.constructor as any
-      let def2 = def
-
       if (inherit) {
-        let flag = def.flag !== undefined ? def.flag : 0
+        let mergedFlag = def.flag !== undefined ? def.flag : 0
 
         let p = this.constructor as any
         while (p !== null && p !== undefined && p !== Object && p !== Node) {
           if (p.nodedef) {
-            def2 = p.nodedef()
+            const def2 = p.nodedef()
 
             if (def2.flag) {
-              flag |= def2.flag
+              mergedFlag |= def2.flag
             }
           }
           p = p.prototype.__proto__.constructor
         }
 
-        return flag
+        return mergedFlag
       } else {
         return def.flag === undefined ? 0 : def.flag
       }
@@ -633,15 +628,15 @@ graph.Node {
       let p = this.constructor as any
       while (p !== null && p !== undefined && p !== Object && p !== Node) {
         if (p.nodedef) {
-          const def = p.nodedef()
+          const pdef = p.nodedef()
 
-          inherit = inherit || (def.flag & NodeFlags.FORCE_SOCKET_INHERIT) !== 0
+          inherit = inherit || (pdef.flag & NodeFlags.FORCE_SOCKET_INHERIT) !== 0
         }
         p = p.prototype.__proto__.constructor
       }
 
       if (inherit) {
-        let p = this.constructor as any
+        p = this.constructor as any
 
         while (p !== null && p !== undefined && p !== Object && p !== Node) {
           if (p.nodedef === undefined) continue
@@ -729,43 +724,43 @@ graph.Node {
 
     function defineSockets(inorouts: 'inputs' | 'outputs'): void {
       nstruct.list('', inorouts, [
-        function getIter(api: DataAPI, list: any) {
+        function getIter(sockApi: DataAPI, list: any) {
           return (function* () {
             for (const k in list[inorouts]) {
               yield list[inorouts][k]
             }
           })()
         },
-        function getLength(api: DataAPI, list: any) {
+        function getLength(sockApi: DataAPI, list: any) {
           return Object.keys(list[inorouts]).length
         },
-        function get(api: DataAPI, list: any, key: string) {
+        function get(sockApi: DataAPI, list: any, key: string) {
           return list[inorouts][key]
         },
-        function getKey(api: DataAPI, list: any, obj: any) {
+        function getKey(sockApi: DataAPI, list: any, obj: any) {
           for (const k in list[inorouts]) {
             if (list[inorouts][k] === obj) return k
           }
         },
-        function getStruct(api: DataAPI, list: any, key: string) {
+        function getStruct(sockApi: DataAPI, list: any, key: string) {
           const obj = list[inorouts][key]
 
-          if (obj === undefined) return api.getStruct(NodeSocketType)
+          if (obj === undefined) return sockApi.getStruct(NodeSocketType)
 
           let ret
 
           if (obj.graph_flag & SocketFlags.INSTANCE_API_DEFINE) {
-            if (!api.hasStruct(obj)) {
-              ret = api.mapStruct(obj, true)
-              obj.defineInstanceAPI(api, ret)
+            if (!sockApi.hasStruct(obj)) {
+              ret = sockApi.mapStruct(obj, true)
+              obj.defineInstanceAPI(sockApi, ret)
             } else {
-              ret = api.getStruct(obj)
+              ret = sockApi.getStruct(obj)
             }
           } else {
-            ret = api.getStruct(obj.constructor)
+            ret = sockApi.getStruct(obj.constructor)
           }
 
-          return ret === undefined ? api.getStruct(NodeSocketType) : ret
+          return ret === undefined ? sockApi.getStruct(NodeSocketType) : ret
         },
       ])
     }
@@ -792,7 +787,6 @@ graph.Node {
     }
 
     const getsocks = (key: 'inputs' | 'outputs') => {
-      const obj = def[key]
       const ret = {} as INodeSocketSet
 
       let p = this as unknown as NodeProto
@@ -1936,7 +1930,7 @@ graph.Graph {
           try {
             //attempt to copy old value
             s1.setValue(s2.getValue())
-          } catch (error) {
+          } catch {
             // eslint-disable-next-line no-console
             console.warn('Failed to load data from old file ' + s2.constructor!.name + ' to ' + s1.constructor!.name)
           }

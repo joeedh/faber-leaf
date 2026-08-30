@@ -64,8 +64,6 @@ export class FBO {
 
     ret.create(this.gl)
 
-    const gl = this.gl
-
     //ret.texColor = this.texColor.copy(gl, true);
     //ret.texDepth = this.texDepth.copy(gl, true);
 
@@ -102,16 +100,16 @@ export class FBO {
     const target = this.target
     const layer = this.layer
 
-    function texParams(target: number, tex: Texture) {
-      gl!.bindTexture(target, tex.texture!)
+    function texParams(targetVal: number, tex: Texture) {
+      gl!.bindTexture(targetVal, tex.texture!)
 
-      tex.texParameteri(gl!, target, gl!.TEXTURE_MAG_FILTER, gl!.NEAREST)
-      tex.texParameteri(gl!, target, gl!.TEXTURE_MIN_FILTER, gl!.NEAREST)
-      tex.texParameteri(gl!, target, gl!.TEXTURE_WRAP_S, gl!.CLAMP_TO_EDGE)
-      tex.texParameteri(gl!, target, gl!.TEXTURE_WRAP_T, gl!.CLAMP_TO_EDGE)
+      tex.texParameteri(gl!, targetVal, gl!.TEXTURE_MAG_FILTER, gl!.NEAREST)
+      tex.texParameteri(gl!, targetVal, gl!.TEXTURE_MIN_FILTER, gl!.NEAREST)
+      tex.texParameteri(gl!, targetVal, gl!.TEXTURE_WRAP_S, gl!.CLAMP_TO_EDGE)
+      tex.texParameteri(gl!, targetVal, gl!.TEXTURE_WRAP_T, gl!.CLAMP_TO_EDGE)
 
-      if (target !== gl!.TEXTURE_2D) {
-        tex.texParameteri(gl!, target, gl!.TEXTURE_WRAP_R, gl!.CLAMP_TO_EDGE)
+      if (targetVal !== gl!.TEXTURE_2D) {
+        tex.texParameteri(gl!, targetVal, gl!.TEXTURE_WRAP_R, gl!.CLAMP_TO_EDGE)
       }
     }
 
@@ -410,7 +408,7 @@ export class FrameStage extends FBO {
   update(gl: WebGL2RenderingContext, width: number, height: number): void {
     if (gl === undefined || width === undefined || height === undefined) {
       // eslint-disable-next-line no-console
-      console.log('bad arguments to fbo.FrameStage.update()', arguments)
+      console.log('bad arguments to fbo.FrameStage.update()', [gl, width, height])
       throw new Error('bad arguments to fbo.FrameStage.update()')
     }
 
@@ -595,24 +593,24 @@ export class FramePipeline {
     gl.disable(gl.DEPTH_TEST)
 
     for (let i = 1; i < this.stages.length; i++) {
-      const stage = this.stages[i]
+      const curStage = this.stages[i]
 
-      stage.update(gl, width, height)
+      curStage.update(gl, width, height)
 
       this._texs[0].texture = laststage.texColor!.texture
-      stage.shader.uniforms.rgba = this._texs[0]
+      curStage.shader.uniforms.rgba = this._texs[0]
 
       this._texs[1].texture = laststage.texDepth!.texture
-      stage.shader.uniforms.depth = this._texs[1]
+      curStage.shader.uniforms.depth = this._texs[1]
 
-      stage.shader.uniforms.size = this.size
+      curStage.shader.uniforms.size = this.size
 
-      this.smesh!.program = stage.shader
-      stage.bind(gl)
+      this.smesh!.program = curStage.shader
+      curStage.bind(gl)
 
       this.smesh!.draw(gl)
 
-      laststage = stage
+      laststage = curStage
     }
   }
 

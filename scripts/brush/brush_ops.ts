@@ -43,6 +43,7 @@ export class BrushOp<InputSlots extends PropertySlots = {}, OutputSlots extends 
     const brush = ctx.api.getValue(ctx, this.inputs.dataPath.getValue()) as SculptBrush | undefined
 
     if (!brush) {
+      // eslint-disable-next-line no-console
       console.warn('No brush at datapath ' + this.inputs.dataPath.getValue())
     }
 
@@ -74,6 +75,7 @@ export class BrushOp<InputSlots extends PropertySlots = {}, OutputSlots extends 
 
     const dview = this._undo!.dview
     if (!dview) {
+      // eslint-disable-next-line no-console
       console.warn('Warning, brush existed but not undo data')
       return
     }
@@ -147,6 +149,7 @@ export class LoadDefaultBrush<
     }
 
     if (!brush2) {
+      // eslint-disable-next-line no-console
       console.warn('No default brush found for tool:', brush.tool)
       return
     }

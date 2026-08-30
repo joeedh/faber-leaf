@@ -178,7 +178,7 @@ describe('vertCorners and fans', () => {
     const fan = uvFans(mesh, 'UVMap', [around[0]])
     expect(Array.from(fan.values).sort((a, b) => a - b)).toEqual(around)
 
-    // A seam is one corner disagreeing — no topology changes.
+    // Splitting a seam changes only which UV value a corner reports; it does not change the topology.
     const uv = uvCoords(mesh, 'UVMap')!
     uv[around[0] * 2] += 0.25
 

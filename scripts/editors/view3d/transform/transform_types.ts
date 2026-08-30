@@ -2,7 +2,6 @@ import {Vector3, Matrix4} from '../../../util/vectormath.js'
 import {SelMask} from '../../../core/select_types.js'
 import {SceneObject, ObjectFlags} from '../../../sceneobject/sceneobject.js'
 import {TransDataType, TransDataElem, TransDataList, ITransDataType} from './transform_base.js'
-import * as util from '../../../util/util.js'
 import {aabb_union} from '../../../util/math.js'
 import {ToolContext} from '../../../core/context.js'
 import type {TransformOp} from './transform_ops.js'
@@ -95,6 +94,7 @@ export const ObjectTransType: ITransDataType<
         continue
       }
 
+      // eslint-disable-next-line no-console
       console.warn('processing transform sceneobject', ob.name, ob)
 
       const td = new TransDataElem<SceneObject, ObjectTransform>()
@@ -135,7 +135,7 @@ export const ObjectTransType: ITransDataType<
   calcUndoMem(ctx: ToolContext, undodata: ObjectUndoData): number {
     let tot = 0
 
-    for (const k in undodata) {
+    for (const _unusedK in undodata) {
       tot += 16 * 8 + 32 //matrix4
     }
 
@@ -162,6 +162,7 @@ export const ObjectTransType: ITransDataType<
       const transform = undodata[k]!
 
       if (ob === undefined) {
+        // eslint-disable-next-line no-console
         console.warn('error in transform', numK, typeof numK)
         continue
       }

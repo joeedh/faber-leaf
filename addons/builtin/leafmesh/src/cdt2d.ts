@@ -2,16 +2,17 @@
  * Constrained Delaunay triangulation in 2D — a direct port of sculptcore's
  * `constrainedDelaunay2D` (`source/mesh/utils/delaunay.h`).
  *
- * It is a port rather than a reuse of an existing JS triangulator for one
- * reason: **backend parity**. The same face has to come out as the same
- * triangles whether it was triangulated here or in the engine, or a mesh
- * changes shape when it crosses the seam. The C++ function names are kept as
- * the TS names so the two files stay diffable line by line.
+ * This is a port rather than a reuse of an existing JS triangulator, for
+ * backend parity: the same face must come out as the same triangles whether
+ * it is triangulated here or in the engine, or a mesh changes shape when it
+ * crosses the seam. The C++ function names are kept as the TS names so the
+ * two files stay diffable line by line.
  *
  * Holes are not a special case. Every ring — outer and hole alike — goes in as
- * a closed run of constraint edges, and interior classification is a parity
+ * a closed run of constraint edges, and interior classification runs a parity
  * flood fill seeded from outside the super-triangle: crossing a constraint
- * toggles inside/outside. That single mechanism is the entire hole support.
+ * toggles inside/outside. That single mechanism provides all of the hole
+ * support.
  *
  * Known limits, carried over deliberately:
  *  - **No Steiner points.** A constraint that cannot be recovered by flipping
@@ -403,6 +404,7 @@ export function cdt2d(points: Float64Array, constraints: Int32Array, opts: Cdt2d
   }
   if (rawN > WARN_POINTS && !warned) {
     warned = true
+    // eslint-disable-next-line no-console
     console.warn(
       `cdt2d: ${rawN} points — the constraint-recovery scans are quadratic, ` +
         'this is a face triangulator, not a point-cloud triangulator.'
@@ -500,8 +502,8 @@ export function cdt2d(points: Float64Array, constraints: Int32Array, opts: Cdt2d
   px.push(cenx - 2 * r, cenx + 2 * r, cenx)
   py.push(ceny - r, ceny - r, ceny + 2 * r)
 
-  // Bowyer-Watson over the real points. The super-triangle stays alive: it is
-  // what seeds the interior flood fill.
+  // Runs Bowyer-Watson over the real points. The super-triangle stays alive
+  // because it seeds the interior flood fill.
   const tris = new TriSoup()
   tris.add(n, n + 1, n + 2)
 

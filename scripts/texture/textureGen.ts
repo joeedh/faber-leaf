@@ -23,7 +23,9 @@ export function compileTexShaderJS(shader: TextureShader): mathl.CompiledJS {
     const type = proptypemap[prop.type as keyof typeof proptypemap]
 
     if (!type) {
+      // eslint-disable-next-line no-console
       console.log(shader, k, prop)
+      // eslint-disable-next-line no-console
       console.warn('Failed to set up uniform ' + k + ' from ToolProperty class ' + prop.constructor.name)
       continue
     }
@@ -52,8 +54,6 @@ void main() {
 }
 `
 
-  console.log(code)
-
   if (compileCache.has(code)) {
     return compileCache.get(code)!
   }
@@ -75,6 +75,5 @@ window._testTexShaders = function () {
   const tex = new texCls()
   const result = compileTexShaderJS(tex)
 
-  console.log(result)
   return result
 }

@@ -64,7 +64,7 @@ function boundaryEdges(mesh: LeafMesh): number {
   let n = 0
   for (const e of mesh.e) {
     let corners = 0
-    for (const _c of mesh.edgeCorners(e)) {
+    for (const _unusedC of mesh.edgeCorners(e)) {
       corners++
     }
     if (corners === 1) {

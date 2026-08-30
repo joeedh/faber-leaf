@@ -1,10 +1,10 @@
 /**
  * `addons/builtin/leafmesh/src/leafmesh.ts` casts between the leafmesh and host
  * vocabularies rather than converting: `Domain` and `ElementDomain` are the
- * same numbers, and so are the two `AttrType`s. TS enums are nominal, so that
- * agreement cannot be asserted at compile time — this suite is where it is
- * pinned instead. A renumbering on either side lands here, not in a silently
- * mis-addressed attribute column.
+ * same numbers, and so are the two `AttrType`s. TS enums are nominal, so the
+ * compiler cannot check that agreement. This suite checks it instead: a
+ * renumbering on either side fails a test here instead of silently
+ * mis-addressing an attribute column.
  */
 
 import {AttrType, DOMAIN_COUNT, Domain} from '../../../addons/builtin/leafmesh/src/attrs'

@@ -1,14 +1,14 @@
 /**
- * LeafMesh as an `IUVSource` — P18 §5 step 2, implementor #1.
+ * Implements `IUVSource` for LeafMesh — P18 §5 step 2, implementor #1.
  *
- * A shell over `uv_geom.ts`: everything with a traversal in it is pure and
- * unit-tested there, and this file only converts vocabulary and reports the
- * writes. That split is why the source can be trusted without booting the app.
+ * This file is a shell over `uv_geom.ts`: every traversal is pure and
+ * unit-tested there, so this file only converts vocabulary and reports the
+ * writes. That split lets the source be trusted without booting the app.
  *
- * A UV element here *is* a corner, so {@link LeafMeshUVSource.getUVOwners} is
- * the identity. That is the honest answer for a mesh that stores UVs on the
- * domain it addresses them by, not a stub — a source that caches an unwrap
- * would answer differently, which is why the method exists at all.
+ * A UV element here equals a corner, so {@link LeafMeshUVSource.getUVOwners}
+ * is the identity function. That is the honest answer for a mesh that stores
+ * UVs on the domain it addresses them by, not a stub. A source that caches an
+ * unwrap would answer differently, which is why the method exists at all.
  */
 
 import {ElementDomain, InvalidationKind} from '@framework/api'

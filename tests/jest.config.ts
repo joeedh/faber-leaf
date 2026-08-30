@@ -79,7 +79,7 @@ const config: Config = {
   // @framework/pathux is an esbuild alias for the toolkit barrel, which jest
   // cannot resolve and would not want to: see lib/pathux_shim.ts.
   moduleNameMapper: {
-    '^@framework/pathux$': '<rootDir>/lib/pathux_shim.ts',
+    '^@framework/pathux$' : '<rootDir>/lib/pathux_shim.ts',
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
 

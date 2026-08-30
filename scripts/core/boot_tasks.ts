@@ -35,6 +35,7 @@ export async function runBootTasks(): Promise<void> {
     try {
       await fn()
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error(`boot task "${label}" failed:`, err)
     }
   })

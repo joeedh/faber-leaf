@@ -8,7 +8,6 @@ import {SculptBrushes} from '@sculptcore/api/sculptcore/brush/SculptBrushes'
 import {SculptTools, BrushFlags, StrokeMethod, isPlaneFamilyTool} from '../../../../scripts/brush/brush_base'
 import {PaintSample} from './stroke_base.js'
 import {FalloffKind} from '@sculptcore/api/sculptcore/gpu/FalloffKind'
-import {FeatureFlags} from '@framework/api'
 
 /** Mirror of C++ enum DeviceType (prop_dynamics.h). */
 const DeviceType = {
@@ -379,8 +378,9 @@ export function configureToolUniforms(wasmBrush: WasmBrush, brush: SculptBrush):
       // Half-angle of the two stroke-following wing planes (brush prop is in
       // degrees, the kernel's Rodrigues rotation wants radians).
       wasmBrush.wingAngle = brush.wingAngle * (Math.PI / 180.0)
-      // The wings' shared apex line sinks below the surface exactly like
-      // Scrape's plane — without it nothing on a flat face is above a wing.
+      // Sinks the wings' shared apex line below the surface, exactly like
+      // Scrape's plane, so a flat face still ends up above the wing instead
+      // of coplanar with it.
       wasmBrush.planeoff = wingApexOffset(brush)
       wasmBrush.planeSide = -1.0
       break

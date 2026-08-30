@@ -112,14 +112,11 @@ export class CenterViewOp extends ToolOp {
       },
       Shaders.WidgetMeshShader
     )
-
-    console.log('draw!')
   }
 
   on_pointerup(e: PointerEvent) {
     this.on_pointermove(e)
 
-    console.log('mouse up!')
     const ctx = this.modal_ctx as ViewContext
     const view3d = ctx.view3d
     const cam = view3d.camera
@@ -167,7 +164,6 @@ export class CenterViewOp extends ToolOp {
     //castViewRay(ctx, selectMask, mpos, view3d, mode=CastModes.FRAMEBUFFER) {
     const mpos3 = new Vector3([mpos[0], mpos[1], 0])
     const ret = castViewRay(ctx, SelMask.OBJECT | SelMask.GEOM, mpos3, view3d, CastModes.FRAMEBUFFER)
-    console.log(ret)
 
     if (ret.length > 0) {
       this.p = new Vector3(ret[0].p3d)
@@ -332,7 +328,6 @@ export class OrbitTool extends ToolOp {
 
   on_pointerup(e: PointerEvent) {
     e.stopPropagation()
-    console.log('orbit Mouse Up')
 
     this.modalEnd(false)
   }
@@ -417,6 +412,7 @@ export class TouchViewTool extends ToolOp {
     const view3d = (this.modal_ctx as ViewContext).view3d
     const camera = view3d.camera
 
+    // eslint-disable-next-line no-console
     console.warn('TOUCH', e.pointerId, e.which)
 
     if (this.first) {
@@ -471,7 +467,6 @@ export class TouchViewTool extends ToolOp {
     } else if (tottouch > 1) {
       const touches = this.touches
       const off = new Vector2()
-      const cent = new Vector2()
 
       for (let i = 0; i < tottouch; i++) {
         if (touches[i]) {
@@ -737,11 +732,9 @@ export class ZoomTool extends ToolOp {
       return
     }
 
-    const dx = x - this.start_mpos[0]
     const dy = y - this.start_mpos[1]
 
     let len = this.start_camera!.pos.vectorDistance(this.start_camera!.target)
-    const len2 = camera.pos.vectorDistance(camera.target)
 
     len = Math.log(len) / Math.log(2)
 

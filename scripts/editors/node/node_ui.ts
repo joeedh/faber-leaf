@@ -1,12 +1,10 @@
 import {DataPathError} from '../../path.ux/scripts/pathux.js'
 import {UIBase} from '../../path.ux/scripts/core/ui_base.js'
 import {Container} from '../../path.ux/scripts/core/ui.js'
-import {Matrix4, Vector2} from '../../util/vectormath.js'
+import {Vector2} from '../../util/vectormath.js'
 import {Node, NodeFlags} from '../../core/graph.js'
-import {Overdraw} from '../../path.ux/scripts/util/ScreenOverdraw.js'
 import {layoutNode} from '../../core/graph_spatial.js'
 import type {ViewContext} from '../../core/context'
-import type {Screen} from '../../path.ux/scripts/screen/FrameManager'
 import type {NodeSocketElem} from './node_socket_ui.js'
 import type {NodeEditorBase} from './NodeEditor.js'
 import {NodeLayout, SocketType, UINode} from './node_base.js'
@@ -91,6 +89,7 @@ export class NodeUI extends Container<ViewContext> {
       node = this.ctx.api.getValue<Node>(this.ctx, path)!
     } catch (error) {
       if (error instanceof DataPathError) {
+        // eslint-disable-next-line no-console
         console.warn('Invalid node path ' + path)
         return
       } else {
@@ -219,6 +218,7 @@ export class NodeUI extends Container<ViewContext> {
         node = this.ctx.api.getValue<Node>(this.ctx, path)!
       } catch (error) {
         if (error instanceof DataPathError) {
+          // eslint-disable-next-line no-console
           console.warn('error in ui wrapper node; path to real node was:', path)
           return
         } else {

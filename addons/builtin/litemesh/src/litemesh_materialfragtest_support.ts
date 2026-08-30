@@ -26,7 +26,6 @@
 
 import {getAppState} from '@framework/api'
 import {LiteMesh} from './litemesh'
-import type {ViewContext} from '../../../../scripts/core/context'
 
 interface Hist {
   /** Entries measured (leaves, or GPU nodes == today's draw commands). */
@@ -138,7 +137,7 @@ async function materialFragTest(opts?: {only?: string}): Promise<MaterialFragTes
               '',
               batch.commands as never
             ).length
-    } catch (e) {
+    } catch (_e) {
       r.drawCommands = -1
     }
 

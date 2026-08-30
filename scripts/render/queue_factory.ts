@@ -47,6 +47,7 @@ export function createDrawQueue(frame: FrameContext): DrawQueue {
   const ctx = activeCtx
   if (!ctx?.encoder) {
     if (!warnedNoCtx) {
+      // eslint-disable-next-line no-console
       console.warn(
         'createDrawQueue: WebGPU selected but no active WebGpuRenderContext is open — ' +
           'falling back to WebGL. Did the render engine forget to call setActiveWebGpuContext + ctx.beginFrame?'
@@ -62,6 +63,7 @@ export function createDrawQueue(frame: FrameContext): DrawQueue {
   const passEncoder = (ctx as unknown as {currentPass?: GPURenderPassEncoder}).currentPass
   if (!passEncoder) {
     if (!warnedNoCtx) {
+      // eslint-disable-next-line no-console
       console.warn(
         'createDrawQueue: WebGpuRenderContext has no open pass — falling back to WebGL. ' +
           'Wrap draw dispatch in ctx.renderStage(...) so currentPass is set.'

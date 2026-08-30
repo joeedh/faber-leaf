@@ -60,6 +60,7 @@ export function runFileMigrations(ctx: IFileMigrationContext): void {
     try {
       m.apply(ctx)
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(`file migrator "${m.id}" threw:`, e)
     }
   }

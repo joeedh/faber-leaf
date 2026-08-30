@@ -316,6 +316,7 @@ export function getAutosaveBackend(): AutosaveBackend | null {
       _backend = new NwjsAutosaveBackend(fsp, path, storage.baseDir)
       return _backend
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn('autosave: NW.js fs backend unavailable', err)
     }
   }

@@ -16,7 +16,7 @@
  * own position snapshot — the MeshLog-bracketed single-step undo for "T" tools
  * comes from the *modeling op* holding its step open across the modal (§3d).
  */
-import {Vector3, Matrix4} from '../../../../scripts/path.ux/scripts/pathux'
+import {Vector3} from '../../../../scripts/path.ux/scripts/pathux'
 import {
   ITransDataType,
   TransDataType,
@@ -27,7 +27,6 @@ import {SelMask} from '../../../../scripts/core/select_types'
 import {LiteMesh} from './litemesh'
 import type {ToolContext} from '../../../../scripts/core/context'
 import type {SceneObject} from '../../../../scripts/sceneobject/sceneobject'
-import type {TransformOp} from '../../../../scripts/editors/view3d/transform/transform_ops'
 
 /** Resolve the active LiteMesh object (the type is gated to it via isValid). */
 function activeLiteMesh(ctx: ToolContext): {ob: SceneObject; mesh: LiteMesh} | undefined {

@@ -284,7 +284,6 @@ export class RealtimeEngine extends RenderEngine {
   // Live for the duration of the `webgpuGraph.exec` call — the
   // `hooks.encodeOverlays` callback reads these to re-open a pass
   // against the same canvas attachment OutputPass just wrote.
-  private _overlayCtx?: WebGpuRenderContext
   private _overlaySurfaceView?: GPUTextureView
   private _overlayDepthView?: GPUTextureView
   private _overlayViewport?: {x: number; y: number; w: number; h: number}
@@ -552,7 +551,6 @@ export class RealtimeEngine extends RenderEngine {
     // same view OutputPass writes to. The actual encoding happens via
     // `encodeOverlaysCB`, which the View3D caller installs.
     const overlayProjmat = this._jitteredProjMatrix(camera, [w, h])
-    this._overlayCtx = ctx
     this._overlaySurfaceView = outputNode?.surface?.view
     this._overlayDepthView = outputNode?.surface?.depthView
     this._overlayViewport = outputNode?.surface?.viewport
@@ -578,7 +576,6 @@ export class RealtimeEngine extends RenderEngine {
       this.webgpuGraph.exec(this.webgpuNodes, hooks)
     } finally {
       ctx.endFrame()
-      this._overlayCtx = undefined
       this._overlaySurfaceView = undefined
       this._overlayDepthView = undefined
       this._overlayViewport = undefined
@@ -628,6 +625,7 @@ export class RealtimeEngine extends RenderEngine {
       try {
         this.encodeOverlaysCB!(rctx, pass, projmat)
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error('[renderengine.webgpu] encodeOverlaysCB threw:', err)
       }
     })
@@ -707,6 +705,7 @@ export class RealtimeEngine extends RenderEngine {
         }
       ).generateWgsl(scene, rlights, matDefines)
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error(`[renderengine.webgpu] mat-${mat.lib_id} generateWgsl failed:`, err)
       return undefined
     }
@@ -744,9 +743,11 @@ export class RealtimeEngine extends RenderEngine {
       ctx.device.pushErrorScope('validation')
       pipeline = ctx.pipelineCache.get(desc)
       void ctx.device.popErrorScope().then((err) => {
+        // eslint-disable-next-line no-console
         if (err) console.error(`[renderengine.webgpu] mat-${mat.lib_id} validation:`, err.message)
       })
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error(`[renderengine.webgpu] mat-${mat.lib_id} pipeline compile threw:`, err)
       return undefined
     }
@@ -1295,6 +1296,7 @@ export class RealtimeEngine extends RenderEngine {
             const missing = treeProvider.getMissingAttrSlots?.() ?? []
             if (missing.length > 0) {
               const names = state.requestedAttrs.filter((r) => missing.includes(r.slot)).map((r) => r.name)
+              // eslint-disable-next-line no-console
               console.warn(
                 `[renderengine.webgpu] mat-${mat.lib_id}: ${missing.length} requested attribute(s) ` +
                   `absent on the mesh, rendering with defaults: ${names.join(', ')}`
@@ -1304,6 +1306,7 @@ export class RealtimeEngine extends RenderEngine {
           treeProvider._engineDrawShaderHash = effHash
           treeProvider._engineAttrLayersSig = layerSig
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error(`[renderengine.webgpu] tree attr push failed for mat-${mat.lib_id}:`, err)
         }
       } else if (matChanged || layersChanged) {
@@ -1318,6 +1321,7 @@ export class RealtimeEngine extends RenderEngine {
             treeProvider._engineDrawShaderHash = effHash
             treeProvider._engineAttrLayersSig = layerSig
           } catch (err) {
+            // eslint-disable-next-line no-console
             console.error(`[renderengine.webgpu] attr push failed for mat-${mat.lib_id}:`, err)
           }
         }
@@ -1350,6 +1354,7 @@ export class RealtimeEngine extends RenderEngine {
             tessMesh.setTessDrawWgsl(tdef.wgsl)
             tessMesh._engineTessHash = state.hash
           } catch (err) {
+            // eslint-disable-next-line no-console
             console.error(`[renderengine.webgpu] mat-${mat.lib_id} tess variant failed:`, err)
           }
         }
@@ -1365,6 +1370,7 @@ export class RealtimeEngine extends RenderEngine {
       try {
         ob.draw(view3d, this.gl, uniforms, state.program as unknown as ShaderProgram)
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error(`[renderengine.webgpu] BasePass ob-${ob.lib_id} draw threw:`, err)
       }
     }
@@ -1405,6 +1411,7 @@ export class RealtimeEngine extends RenderEngine {
       try {
         ob.draw(view3d, this.gl, uniforms, program as unknown as ShaderProgram)
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error(`[renderengine.webgpu] NormalPass ob-${ob.lib_id} draw threw:`, err)
       }
     }

@@ -206,6 +206,7 @@ ImageBlock {
 
   downloadFromGL = function (this: ImageBlock<OPT & {dead: false}>): void {
     if (!this.glTex) {
+      // eslint-disable-next-line no-console
       console.error('No gl texture data')
       return
     }
@@ -265,8 +266,6 @@ ImageBlock {
     gl.readBuffer(gl.COLOR_ATTACHMENT0)
     gl.readPixels(0, 0, this.width, this.height, gl.RGBA, this.glType, buf)
 
-    console.log('buf:', buf, this.glType, buf.length, this.width * this.height * 4)
-
     fbo.unbind(gl)
     fbo.destroy()
     //copyTexImage2D
@@ -292,7 +291,6 @@ ImageBlock {
       return
     }
 
-    console.log('byte buffer:', this.byteBuffer, this.width, this.height)
     this._convertToByte()
     const buf = this.byteBuffer
 
@@ -307,8 +305,6 @@ ImageBlock {
 
     const fbuf = new Float32Array(this.width * this.height * 4)
     const mul = 1.0 / 255.0
-
-    console.log(buf)
 
     for (let i = 0; i < buf.length; i++) {
       fbuf[i] = buf[i] * mul
@@ -556,6 +552,7 @@ ImageBlock {
 
     if (doupdate) {
       this._last_update_key = key
+      // eslint-disable-next-line no-console
       console.warn('regenerating image data for block', this)
       this._regen()
     }
@@ -650,6 +647,7 @@ ImageBlock {
       const buf = this.floatBuffer
 
       if (buf === undefined) {
+        // eslint-disable-next-line no-console
         console.warn('Missing float buffer')
         return
       }
@@ -666,6 +664,7 @@ ImageBlock {
       const b = idata.data
 
       if (a === undefined) {
+        // eslint-disable-next-line no-console
         console.warn('missing byte buffer')
         return
       }

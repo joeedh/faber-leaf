@@ -296,7 +296,12 @@ export class GpuBrushStroke {
     this.device = opts.device
     this.wasm = opts.wasm
     this.session = opts.session
-    this.log = opts.log ?? ((msg) => console.warn(`[gpu-brush] ${msg}`))
+    this.log =
+      opts.log ??
+      ((msg) => {
+        // eslint-disable-next-line no-console
+        console.warn(`[gpu-brush] ${msg}`)
+      })
     this.captureEnabled = !!opts.capture
     this.kernel = opts.wasm.GpuBrush_kernelName(opts.session)
     this.elemCount = opts.wasm.GpuBrush_info(opts.session, GpuBrushInfo.ELEM_COUNT)

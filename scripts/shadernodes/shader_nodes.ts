@@ -190,6 +190,7 @@ shader.ShaderNode {
     const name = this.constructor?.name ?? '<unknown>'
     if (!_warnedNoEmitter.has(name)) {
       _warnedNoEmitter.add(name)
+      // eslint-disable-next-line no-console
       console.warn(`ShaderNode: no genWgsl override for ${name} — emitting defaults`)
     }
     for (const k in this.outputs) {

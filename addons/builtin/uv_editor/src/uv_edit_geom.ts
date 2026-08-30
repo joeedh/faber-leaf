@@ -1,24 +1,25 @@
 /**
- * The UV editor's whole brain — P18 §5 step 3. Draw geometry, picking,
- * selection, flags and transform, expressed against `IUVSource` and nothing
- * else.
+ * Implements the UV editor's geometry logic — P18 §5 step 3. It covers
+ * drawing, picking, selection, flags, and transform, expressed entirely
+ * against `IUVSource`.
  *
- * Two properties are deliberate and load-bearing:
+ * Two properties here are deliberate and load-bearing.
  *
- * *It names no geometry type.* Everything here reaches its data through the
- * contract, which is exit criterion 11: the editor works on any source, and a
- * grep for a concrete type in this addon has to come back empty.
+ * This module names no geometry type. Everything here reaches its data
+ * through the contract, which is exit criterion 11: the editor works on any
+ * source, and a grep for a concrete type in this addon has to come back
+ * empty.
  *
- * *It is runnable under jest.* The only host import is `import type`, which the
- * transform erases, so nothing resolves `@framework/api` at runtime. That is
- * what lets the whole editor be driven headlessly by the in-memory double —
- * `tests/lib/uv_grid_source.ts`, which has no geometry behind it at all — and
- * it is why every rule that could hide in a UI callback lives in this file
- * instead.
+ * This module runs under jest. The only host import is `import type`,
+ * which the transform erases, so nothing resolves `@framework/api` at
+ * runtime. Because of that, the whole editor can be driven headlessly by
+ * the in-memory double — `tests/lib/uv_grid_source.ts`, which has no
+ * geometry behind it at all. Every rule that could hide in a UI callback
+ * lives in this file for the same reason.
  *
- * Handles are valid only until {@link IUVSource.topoStamp} moves, so anything
- * here that hands handles back to a caller who will hold them (a transform, a
- * flag snapshot) carries the stamp it read them at.
+ * Handles are valid only until {@link IUVSource.topoStamp} moves. Anything
+ * here that hands handles back to a caller who will hold them — a
+ * transform, a flag snapshot — carries the stamp it read them at.
  */
 
 import type {ElementHandles, IUVSource} from '@framework/api'
@@ -30,7 +31,7 @@ export const UV_PIN = 2
 /** How far apart two UVs may be and still count as the same point. */
 export const UV_SNAP_LIMIT = 0.00025
 
-/** Which faces an operation reads. `false` is the whole layer. */
+/** Controls which faces an operation reads; `false` reads the whole layer. */
 export interface UVScope {
   selectedFacesOnly?: boolean
 }
@@ -270,8 +271,9 @@ export interface UVCoordSnapshot {
 }
 
 /**
- * Snapshot the UVs of `handles` only. Deliberately not scope-wide: a transform
- * undo has to be proportional to what moved, not to the layer.
+ * Snapshots the UVs of `handles` only, not the whole scope, because a
+ * transform undo has to be proportional to what moved rather than to the
+ * layer.
  */
 export function snapshotUVCoords(source: IUVSource, layer: number, handles: ElementHandles): UVCoordSnapshot {
   const copy = Int32Array.from(handles as ArrayLike<number>)

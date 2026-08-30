@@ -1,7 +1,7 @@
 /**
- * The OBJ reader (P11 §6). `obj.ts` is not reachable here — it imports
- * `@framework/api` — so what is under test is the parse, which is the half that
- * has to prove an n-gon stays one face instead of becoming a fan.
+ * Tests the OBJ reader (P11 §6). `obj.ts` is not reachable here because it
+ * imports `@framework/api`, so these tests exercise the parser directly. The
+ * parser must prove that an n-gon stays one face instead of becoming a fan.
  */
 
 import {AttrType, Domain} from '../../../addons/builtin/leafmesh/src/attrs'

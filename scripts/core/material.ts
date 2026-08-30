@@ -114,7 +114,7 @@ ToolOp.register(UnlinkMaterialOp)
 
 export class MaterialFlags {}
 
-export var DefaultMat: Material
+export let DefaultMat: Material // eslint-disable-line prefer-const -- assigned once class Material is defined, below
 
 export class Material extends ShaderNetwork {
   static STRUCT = nstructjs.inlineRegister(

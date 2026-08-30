@@ -1,12 +1,12 @@
 /**
- * The host-facing half of LeafMesh drawing — P11 step 4.
+ * Implements the host-facing half of LeafMesh drawing — P11 step 4.
  *
  * LeafMesh brings its own {@link Drawable} rather than filling a `SimpleMesh`,
- * for one reason: `SimpleIsland` binds a fixed buffer per layer *type* (uv at
- * slot 2, colour at 3), and a material's `AttributeNode` reads start at slot 2
- * as well. That collision is the first entry under
- * documentation/geometry-contract.md §11, and binding requested attributes by
- * name at the slot the shader generator assigned is the whole of the fix.
+ * because `SimpleIsland` binds a fixed buffer per layer type (uv at slot 2,
+ * colour at 3), and a material's `AttributeNode` reads start at slot 2 as
+ * well. That collision is the first entry under
+ * documentation/geometry-contract.md §11; the fix binds requested attributes
+ * by name at the slot the shader generator assigned.
  *
  * Geometry is unshared triangle corners (see `draw_buffers.ts`) uploaded once
  * per invalidation; a static mesh uploads on its first frame and never again.
@@ -193,6 +193,7 @@ export class LeafMeshDrawable implements Drawable {
     // storm on every object of every frame.
     if (!this.warnedWebGL) {
       this.warnedWebGL = true
+      // eslint-disable-next-line no-console
       console.warn('leafmesh: the WebGL draw path is not implemented — LeafMesh renders on WebGPU only.')
     }
   }

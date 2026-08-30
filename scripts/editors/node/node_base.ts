@@ -1,5 +1,5 @@
 import {Vector2} from '../../util/vectormath.js'
-import {Node, NodeFlags, SocketTypes, Graph, type NodeSocketType, INodeUI} from '../../core/graph.js'
+import {Node, Graph, type NodeSocketType, INodeUI} from '../../core/graph.js'
 
 export type AnyGraph = Graph<unknown>
 export type SocketType = NodeSocketType

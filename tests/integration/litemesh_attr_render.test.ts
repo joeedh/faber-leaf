@@ -304,8 +304,8 @@ maybe('renderengine ↔ sculptcore dynamic attributes', () => {
     const missingReq = dump.attrtest!.requested.find((r) => r.name === 'nonexistent')
     expect(missingReq).toBeDefined()
     expect(dump.attrtest!.missing).toContain(missingReq!.slot)
-    // Crucially: the frame still has geometry + a buffer for the missing attr
-    // (default-filled, not absent/half-sized — the never-blank-frame guarantee).
+    // The frame still has geometry and a buffer for the missing attr, default-filled
+    // rather than absent or half-sized — the never-blank-frame guarantee.
     const bufs = liteMeshOf(dump).gpuBuffers!
     expect(bufs.position.empty).toBeUndefined()
     const missingBuf = bufs.nonexistent

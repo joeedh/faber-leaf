@@ -94,9 +94,8 @@ view3d.ObjectEditor {
     super.buildHeader(header, addHeaderRow)
 
     const row: any = header //addHeaderRow();
-    let strip: any
 
-    strip = row.strip()
+    const strip: any = row.strip()
     strip.prop('scene.tool.transformWidget[NONE]')
     strip.prop('scene.tool.transformWidget[translate]')
     strip.prop('scene.tool.transformWidget[scale]')
@@ -108,8 +107,6 @@ view3d.ObjectEditor {
 
     this.start_mpos[0] = x
     this.start_mpos[1] = y
-
-    console.log(this.hasWidgetHighlight())
 
     if (this.hasWidgetHighlight()) {
       return false

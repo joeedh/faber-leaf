@@ -1059,7 +1059,6 @@ View3D {
     this.overdraw.style['left'] = '0px'
     this.overdraw.style['top'] = '0px'
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const eventdom = this //this.overdraw;
 
     this.busSubscribe()

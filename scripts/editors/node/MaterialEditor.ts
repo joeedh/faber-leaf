@@ -111,7 +111,6 @@ export class MaterialEditor extends NodeEditorBase {
 
     const col = row.col()
     const row1 = col.row()
-    const row2 = col.row()
 
     const path = this.graphPath
     const graph = path !== '' ? this.ctx.api.resolvePath(this.ctx, path) : undefined
@@ -154,7 +153,7 @@ export class MaterialEditor extends NodeEditorBase {
 
     // Material slots are a SceneObjectData concern, not a mesh one: any data kind
     // that declares usesMaterial carries the host-owned `materials` array.
-    if (ob.data !== undefined && ob.data.usesMaterial) {
+    if (ob.data?.usesMaterial) {
       updateKey += ':' + ob.data.lib_id + ':' + ob.data.name
       for (const mat of ob.data.materials) {
         updateKey += ':' + mat?.lib_id

@@ -55,6 +55,7 @@ export class SetImageTypeOp extends ToolOp<SetImageTypeInputs, {}, ToolContext, 
     const image = ctx.datalib.get<ImageBlock>(this._undoRef)
 
     if (!image) {
+      // eslint-disable-next-line no-console
       console.warn('Missing image in undo handler')
       return
     }
@@ -69,6 +70,7 @@ export class SetImageTypeOp extends ToolOp<SetImageTypeInputs, {}, ToolContext, 
     const image = ctx.datalib.get<ImageBlock>(this.inputs.image.getValue())
 
     if (!image) {
+      // eslint-disable-next-line no-console
       console.warn('Missing image', this.inputs.image.getValue())
       return
     }

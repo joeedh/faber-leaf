@@ -60,6 +60,7 @@ function saveProperty_intern(ctx: any, val: any, owning_key: string | symbol | n
     return ret
   }
 
+  // eslint-disable-next-line no-console
   console.warn('Warning, unknown data in ToolContext.prototype.savePropertyIntern()', owning_key)
   return val
 }
@@ -131,6 +132,7 @@ export class ToolContext extends ContextExtraAPI {
 
   reset() {
     // do nothing
+    // eslint-disable-next-line no-console
     console.warn('ctx.reset called')
   }
 
@@ -272,6 +274,7 @@ export class ToolContext extends ContextExtraAPI {
     const ret = this.datalib.scene.active
 
     if (ret === undefined && this.datalib.scene.length > 0) {
+      // eslint-disable-next-line no-console
       console.warn('Something happened to active scene; fixing...')
       this.datalib.scene.active = this.datalib.scene[0]
     }
@@ -467,7 +470,6 @@ class DebugEditorAPI {
       return {editor: editorType, action: 'already exists'}
     }
     if (editorType instanceof Editor) {
-      console.log('finding another editor, the one you passed in does not meet visibility requirements')
       editorType = editorType.constructor
     }
 
@@ -546,6 +548,7 @@ class DebugEditorAPI {
       }
     }
 
+    // eslint-disable-next-line no-console
     console.log('offending cls paramater:', editorType)
     throw new Error('could not resolve editor')
   }
@@ -575,6 +578,7 @@ export class ViewContext extends ToolContext {
         })
         toolstack.cur = 0 // replay will start at cur + 1
       } else {
+        // eslint-disable-next-line no-console
         console.log('failed to find root file load op; rewinding via undo')
         toolstack.rewind()
       }

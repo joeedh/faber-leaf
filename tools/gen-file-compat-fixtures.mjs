@@ -7,16 +7,17 @@
  *
  *   node tools/gen-file-compat-fixtures.mjs
  *
- * The bytes it writes are committed. The tests never regenerate them — a fixture
- * produced by the build under test proves nothing about cross-build compat.
+ * The bytes it writes are committed. The tests never regenerate them, because a
+ * fixture produced by the build under test would prove nothing about
+ * cross-build compat.
  *
  * `curve` is the only geometry DataBlock type in the tree that an addon owns
  * (`addons/builtin/curve/src/curve.ts` — `TetMesh` and `strands` live in core,
- * see §5a of the plan), so it is what "written by a build whose addon the
- * reader does not have" has to be built from. The curve addon ships
- * `defaultEnabled: false`, which is exactly the asymmetry the fixture needs:
- * the authoring build turns it on, the default build reading it back does not
- * have it.
+ * see §5a of the plan), so the fixture that must be readable without its
+ * writing addon is built from a curve. The curve addon ships
+ * `defaultEnabled: false`, which gives the fixture exactly the asymmetry it
+ * needs: the authoring build turns the addon on, and the default build
+ * reading the fixture back does not have it.
  */
 
 import {execFileSync} from 'node:child_process'

@@ -26,11 +26,7 @@ test('loads a .wproj project and renders it', async ({page}) => {
   await page.goto('/?renderer=webgpu')
 
   // App booted and built its UI screen.
-  await page.waitForFunction(
-    () => !!(window as any)._appstate?.screen,
-    undefined,
-    {timeout: 60_000}
-  )
+  await page.waitForFunction(() => !!(window as any)._appstate?.screen, undefined, {timeout: 60_000})
 
   // WebGPU actually initialized in this browser.
   expect(await page.evaluate(() => !!navigator.gpu)).toBe(true)
@@ -51,12 +47,13 @@ test('loads a .wproj project and renders it', async ({page}) => {
     // datalib.mesh is aliased to brush (known bug), so count every block set.
     let total = 0
     for (const lib of appstate.datalib.libs) {
-      for (const _block of lib) total++
+      for (const _unusedBlock of lib) total++
     }
     return total
   }, WPROJ_URL)
 
   if (failedRequests.length) {
+    // eslint-disable-next-line no-console
     console.warn(`[e2e] non-fatal failed requests during boot/load:\n${failedRequests.join('\n')}`)
   }
   expect(pageErrors, `uncaught page errors during load:\n${pageErrors.join('\n')}`).toEqual([])
@@ -73,7 +70,6 @@ test('loads a .wproj project and renders it', async ({page}) => {
   // areas otherwise stay unsized → glSize [0,0] → nothing renders).
   await page.setViewportSize({width: 1280, height: 800})
   await page.evaluate(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = window as any
     const screen = w._appstate.screen
     // path.ux's screen.update() is a deferred generator — completeUpdate()
@@ -85,7 +81,7 @@ test('loads a .wproj project and renders it', async ({page}) => {
     screen.completeUpdate()
 
     const app = w._appstate
-    const view3d = screen.sareas.map((sa: any) => sa.area).find((a: any) => a && a.constructor.define?.().has3D)
+    const view3d = screen.sareas.map((sa: any) => sa.area).find((a: any) => a?.constructor.define?.().has3D)
     const scene = app.ctx.scene
 
     // SHOW_RENDER (=2) drives the full RealtimeEngine render of the scene's

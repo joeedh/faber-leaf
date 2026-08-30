@@ -1027,6 +1027,7 @@ NodeEditor {
     //why does this happen? sometimes sockets get duplicated
     //in weird ways
     if (totsock !== this.sockets.length) {
+      // eslint-disable-next-line no-console
       console.log('Socket length mismatch!')
       this.recalcFlags |= NodeRecalcFlags.REBUILD
       return

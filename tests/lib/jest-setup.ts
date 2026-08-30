@@ -13,7 +13,6 @@
 
 import {TextDecoder as NodeTextDecoder, TextEncoder as NodeTextEncoder} from 'node:util'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const g = globalThis as any
 if (typeof g.TextEncoder !== 'function') g.TextEncoder = NodeTextEncoder
 if (typeof g.TextDecoder !== 'function') g.TextDecoder = NodeTextDecoder
@@ -34,7 +33,7 @@ if (typeof g.structuredClone !== 'function') {
       const view = v as ArrayBufferView
       // Copy via the source's constructor so Uint8Array stays Uint8Array,
       // Float32Array stays Float32Array, etc.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const Ctor = (view as any).constructor as new (b: ArrayBuffer) => unknown
       return new Ctor(view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength))
     }

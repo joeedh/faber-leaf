@@ -40,6 +40,7 @@ function markerKey(destination: string): string {
 }
 
 function warn(what: string, err: unknown): void {
+  // eslint-disable-next-line no-console
   console.warn(`identity migration: ${what} failed; continuing with a fresh profile`, err)
 }
 

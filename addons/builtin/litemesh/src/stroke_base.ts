@@ -379,8 +379,9 @@ export const SymAxisMap: Vector3[][] = [
     [-1, 1, -1],
     [1, -1, -1],
   ], //x+y+z
-].map((v) => v.map((v) => new Vector3(v)))
+].map((v) => v.map((n) => new Vector3(n)))
 
+// eslint-disable-next-line prefer-const -- assigned once below, after BrushProperty is declared (forward reference)
 export let BRUSH_PROP_TYPE: any
 
 export const BrushPropTypes = {
@@ -441,7 +442,6 @@ BrushProperty {
 
     const structThis = this as typeof this & {hasTex?: boolean}
 
-    const texuser = this.brush.texUser
     if (structThis.hasTex) {
       delete structThis.hasTex
       this.brush.texUser.texture = this._texture
@@ -453,6 +453,7 @@ BrushProperty {
 
 BRUSH_PROP_TYPE = ToolProperty.register(BrushProperty)
 
+// eslint-disable-next-line prefer-const -- assigned once below, after PaintSampleProperty is declared (forward reference)
 export let PAINT_SAMPLE_TYPE: any
 
 export class PaintSampleProperty extends ToolProperty<PaintSample[] | Iterable<PaintSample>> {
@@ -854,9 +855,9 @@ export class SetBrushRadius extends ToolOp<
     window.redraw_viewport_p(false).then(() => {
       // XXX find less hackish way of getting brush to draw
       // since drawBrush by default hides it in modal toolops
-      const toolmode = ctx.toolmode
-      if (ctx.view3d && toolmode instanceof PaintToolModeBase) {
-        toolmode.drawBrush(ctx.view3d, true)
+      const drawToolmode = ctx.toolmode
+      if (ctx.view3d && drawToolmode instanceof PaintToolModeBase) {
+        drawToolmode.drawBrush(ctx.view3d, true)
       }
     })
   }

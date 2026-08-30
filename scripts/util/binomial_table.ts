@@ -6,8 +6,6 @@ function gen(): number[][] {
     let n = i
     let prod = 1.0
 
-    const k = 1.0
-
     for (let j = 0; j < i; j++) {
       prod *= n
       n--
@@ -60,7 +58,6 @@ export function printTable(): void {
     for (let j = 0; j < n; j++) {
       row = ' ' + row
     }
-    console.log(row)
     i++
   }
 }

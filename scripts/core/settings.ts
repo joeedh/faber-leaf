@@ -131,6 +131,7 @@ AddonSettings {
     try {
       this.settings = JSON.parse(this.settings as string)
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error((error as Error).message, '\n' + (error as Error).stack)
       this.settings = {}
     }
@@ -363,6 +364,7 @@ AppSettings {
   }
 
   save(): void {
+    // eslint-disable-next-line no-console
     console.log(util.termColor('Saving settings', 'green'))
     const mine = this.toJSON()
     getAppStorage().updateText(SETTINGS_KEY, (existing) => {
@@ -475,7 +477,8 @@ AppSettings {
 
     try {
       json = JSON.parse(raw)
-    } catch (error) {
+    } catch (_error) {
+      // eslint-disable-next-line no-console
       console.warn('Failed to load user settings')
       return
     }
@@ -524,6 +527,7 @@ AppSettings {
 
     const addonSettings = this.addonSettings as any
 
+    // eslint-disable-next-line no-console
     console.error('addonSettings', addonSettings)
 
     if (!(addonSettings instanceof Array)) {
