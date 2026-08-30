@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* Probe the in-page LiteMesh/sculptcore mesh object to find an accessor for
  * raw vertex co (mesh truth, independent of GPU buffers). */
 import {chromium} from '@playwright/test'

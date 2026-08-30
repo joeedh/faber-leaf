@@ -35,7 +35,7 @@ import '../editors/resbrowser/resbrowser_types'
 // side-effect imports in `editors/view3d/tools/tools`, the rest arrive through
 // their addon's `register(api)` hook. core itself only depends on the ToolMode
 // base + the toolmode enum builder.
-import {App} from '../editors/editor_base'
+import '../editors/editor_base'
 import {Library, DataBlock, DataRef, BlockFlags, BlockLoader} from './lib_api'
 import * as util from '../util/util'
 import {getDataAPI} from '../data_api/api_define'
@@ -213,6 +213,7 @@ export class AppState {
     const screen = this.screen
 
     if ((screen as unknown as {_swapScreen?: Screen})._swapScreen === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('Bad call to appstate.unswapScreen()')
       return
     }
@@ -268,7 +269,6 @@ export class AppState {
       }
 
       const elem = screen.pickElement(e.x, e.y)
-      console.log(elem, elem?.tagName, '|')
 
       if (elem && elem.tagName !== 'TEXTBOX-X') {
         e.preventDefault()
@@ -386,6 +386,7 @@ export class AppState {
           // unresolvable. Nothing can fix it without parsing bytes we preserved
           // precisely so we would not have to. See plan §4.3.
           if (block._legacyStructIds) {
+            // eslint-disable-next-line no-console
             console.warn(
               `preserved block "${block.name}" (${block._origClsname}) came from a pre-v${STABLE_STRUCT_ID_VERSION} ` +
                 'file; its struct ids are not portable into this one'
@@ -506,10 +507,16 @@ export class AppState {
 
   _execEditorOnFileLoad(): void {
     window.setTimeout(() => {
+      if (!this.screen.ctx) {
+        this.screen.ctx = this.ctx
+      }
       for (const sarea of this.screen.sareas) {
         sarea._init()
 
         for (const area of sarea.editors) {
+          if (!area.ctx) {
+            area.ctx = this.ctx
+          }
           area._init()
         }
       }
@@ -556,6 +563,7 @@ export class AppState {
       let step = 0.0
 
       const log = function (...args2: unknown[]): void {
+        // eslint-disable-next-line no-console
         console.log.apply(console, args2 as Parameters<typeof console.log>)
       }
 
@@ -629,6 +637,7 @@ export class AppState {
         pcirc.value = perc
 
         const percStr = (perc * 100).toFixed(1) + '%'
+        // eslint-disable-next-line no-console
         console.log(util.termColor(percStr, 'green'))
 
         let item
@@ -649,6 +658,7 @@ export class AppState {
   }
 
   loadFile(buf: ArrayBuffer | DataView, args?: LoadFileArgs): void {
+    // eslint-disable-next-line no-console
     console.warn('Load File')
     let ret
     try {
@@ -697,6 +707,7 @@ export class AppState {
       throw new FileLoadError(`${head} It cannot be opened here — please update.`)
     }
 
+    // eslint-disable-next-line no-console
     console.warn(`${head} Reading it anyway; anything this build does not understand is preserved, not merged.`)
 
     try {
@@ -786,15 +797,16 @@ export class AppState {
     const type = file.string(4)
     const len = file.int32()
 
-    console.log('len', len)
     const data = file.bytes(len)
     const dataView = new DataView(new Uint8Array(data).buffer)
 
     if (type === BlockTypes.TOOLSTACK) {
+      // eslint-disable-next-line no-console
       console.warn('File had a toolstack')
       filectx.found_toolstack = true
       filectx.toolstack = istruct.readObject(dataView, AppToolStack)
     } else if (args.load_screen && type === BlockTypes.SCREEN) {
+      // eslint-disable-next-line no-console
       console.warn('Old screen block detected')
 
       filectx.found_screen = true
@@ -822,6 +834,7 @@ export class AppState {
         // The addon that owns clsname isn't loaded. Preserve the bytes in a
         // MissingDataBlock placeholder so the next save round-trips the data.
         // See plan §4 and scripts/core/missing_addon.ts.
+        // eslint-disable-next-line no-console
         console.warn(`unknown block type "${clsname}" — preserving as MissingDataBlock`)
         preserveMissingBlockSchemas(istruct)
         const bytes = new Uint8Array(data2)
@@ -945,7 +958,7 @@ export class AppState {
   }
 
   loadFile_loadScreen(filectx: FileContext): void {
-    let {screen, found_screen} = filectx
+    let {screen} = filectx
     const {getblock, getblock_addUser, datalib, args} = filectx
 
     if (!datalib) {
@@ -1073,6 +1086,7 @@ export class AppState {
   }
 
   clearStartupFile(): void {
+    // eslint-disable-next-line no-console
     console.log('clearing startup file')
     getAppStorage().remove(cconst.APP_KEY_NAME)
   }
@@ -1082,10 +1096,13 @@ export class AppState {
 
     try {
       getAppStorage().setBlob(cconst.APP_KEY_NAME, buf)
+      // eslint-disable-next-line no-console
       console.log(`saved startup file; ${(buf.byteLength / 1024).toFixed(2)}kb`)
       this.ctx.message('Saved startup file')
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.warn((error as Error).stack)
+      // eslint-disable-next-line no-console
       console.warn((error as Error).message)
       this.ctx.error('Failed to save startup file')
     }
@@ -1131,9 +1148,12 @@ export class AppState {
       }
 
       if (b1.equals(b2Block, false, true) && !b1.equals(DefaultBrushes.brushes[k], false, true)) {
+        // eslint-disable-next-line no-console
         console.log('Found unmodified default brush ' + b1.name)
+        // eslint-disable-next-line no-console
         console.log(b1, b2Block)
         const defaultBrush = DefaultBrushes.brushes[k]
+        // eslint-disable-next-line no-console
         console.log(
           'hashes (b1, b2, default):',
           b1.calcHashKey(),
@@ -1141,6 +1161,7 @@ export class AppState {
           defaultBrush.calcHashKey(),
           defaultBrush.equals(b1)
         )
+        // eslint-disable-next-line no-console
         console.log('-->', defaultBrush.calcHashKey(), defaultBrush.copy().calcHashKey())
 
         const radius = b1.radius
@@ -1149,6 +1170,7 @@ export class AppState {
         DefaultBrushes.brushes[k].copyTo(b1, false)
         DefaultBrushes.brushes[k].copyTo(b2Block, false)
 
+        // eslint-disable-next-line no-console
         console.log('hash4', b1.calcHashKey(), b2Block.calcHashKey())
 
         b1.strength = strength
@@ -1158,7 +1180,8 @@ export class AppState {
   }
 
   do_versions_post(version: number, datalib: Library): void {
-    console.log('VERSION', version)
+    // eslint-disable-next-line no-console
+    console.log('do_versions_post: version =', version)
 
     if (version < 1) {
       for (const scene of datalib.scene) {
@@ -1211,6 +1234,7 @@ export class AppState {
       this.loadSettings_intern()
     } catch (error) {
       util.print_stack(error as Error)
+      // eslint-disable-next-line no-console
       console.log('Failed to load settings')
     }
   }
@@ -1297,9 +1321,6 @@ export function initProcessGlobals(): void {
 
       const screen = getAppState().screen
       const mpos = screen.mpos
-      const elem = screen.pickElement(mpos[0], mpos[1])
-
-      console.log(elem ? elem.tagName : elem, mpos)
     }
 
     if (e.keyCode === keymap['R'] && e.ctrlKey) {

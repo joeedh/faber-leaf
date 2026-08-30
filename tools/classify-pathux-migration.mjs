@@ -1,5 +1,5 @@
-/* eslint-disable no-console */
 #!/usr/bin/env node
+/* eslint-disable no-console */
 /**
  * Computes the set of symbols that an addon importing from `@framework/api`
  * is *actually* getting from pathux (via the `export * from

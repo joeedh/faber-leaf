@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Build-time duplication guard. Mechanically enforces the "no code
  * duplication" rule for addons that have been flipped to *external* (loaded as

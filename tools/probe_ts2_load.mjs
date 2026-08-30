@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* Probe: load ts2.wproj and render WITHOUT replay, then optionally replay.
  * Distinguishes a pre-existing load/render crash from a replay-path crash. */
 import {chromium} from '@playwright/test'

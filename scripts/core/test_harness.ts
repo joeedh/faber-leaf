@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Headless / scripted test harness for the NW.js shell.
  *

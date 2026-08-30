@@ -82,7 +82,9 @@ export class NodeContainer extends Container<ViewContext> {
       // disable the SVG clip too — the editor's own overflow:hidden still bounds it.
       this.overdraw.svg.style.overflow = 'visible'
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error((error as Error).stack)
+      // eslint-disable-next-line no-console
       console.error((error as Error).message)
       this.overdraw = undefined
     }
@@ -264,7 +266,6 @@ NodeEditor {
 
   /** Tear down and recreate a NodeUI for every node in the current graph. */
   rebuildAll(): void {
-    console.warn('rebuildAll')
     if (this.ctx === undefined) return
 
     this.recalcFlags &= ~NodeRecalcFlags.REBUILD
@@ -279,14 +280,13 @@ NodeEditor {
       return
     }
 
-    console.warn('regenerating node editor')
-
     const api = this.ctx.api
 
     for (const node of graph.nodes) {
       const cls = node.constructor!
 
       if (!api.hasStruct(cls)) {
+        // eslint-disable-next-line no-console
         console.warn('Auto-making data api for ' + cls.name)
         // Chain Node.defineAPI onto the new node class's struct, declaring Node's
         // members directly on it.
@@ -328,6 +328,7 @@ NodeEditor {
       }
 
       if (isNaN(fac) || fac === 0.0) {
+        // eslint-disable-next-line no-console
         console.log('Bad scroll factor', fac)
         return
       }
@@ -439,7 +440,6 @@ NodeEditor {
     const this2 = this
     button._build_menu = function (this: {_menu: Menu<ViewContext>}) {
       this._menu = this2.makeAddNodeMenu()
-      console.warn('Create Menu ' + this._menu._id)
     }
 
     menustrip.menu('View', [['Reset View', () => this.resetView()]])
@@ -481,7 +481,6 @@ NodeEditor {
     let elem = this.ctx.screen.pickElement<UIBase<ViewContext>>(e.pageX, e.pageY)
 
     if (!elem) {
-      console.log('elem', elem, e.pageX, e.pageY)
       return
     }
 
@@ -515,8 +514,6 @@ NodeEditor {
       let cmd = `node.selectone(graphPath='${gp}' graphClass='${gc}' mode=${mode}`
       cmd += ` nodeId=${node.graph_id})`
 
-      console.log(cmd)
-
       this.ctx.api.execTool(this.ctx, cmd)
 
       if (mode === SelOneToolModes.UNIQUE) {
@@ -527,7 +524,6 @@ NodeEditor {
         elem.setCSS()
       }
 
-      console.log('translate')
       this.ctx.api.execTool(this.ctx, 'node.translate(useNodeEditorGraph=1)')
     }
   }
@@ -659,7 +655,6 @@ NodeEditor {
     if (dpi !== this._last_dpi) {
       this._last_dpi = dpi
 
-      console.log('dpi update')
       this.flagRebuild()
       this.flagUIUpdate()
     }
@@ -701,7 +696,6 @@ NodeEditor {
     const script = mat.generateWgsl(this.ctx.scene, {}).wgsl
 
     if (script !== this._last_script) {
-      console.log('Shader compile update!')
       this._last_script = script
       mat._regen = true
       window.redraw_viewport()
@@ -793,6 +787,7 @@ NodeEditor {
       graph = this.ctx.api.getValue<AnyGraph>(this.ctx, this.graphPath)
     } catch (error) {
       if (error instanceof DataPathError) {
+        // eslint-disable-next-line no-console
         if (DEBUG.verboseDataPath) console.warn('bad graph path for node editor:' + this.graphPath)
         return undefined
       } else {
@@ -866,15 +861,12 @@ NodeEditor {
     menu.on_select = (id: string | number) => {
       this.push_ctx_active()
       try {
-        console.log('node add menu select', id)
-
         let cmd = `node.add_node(useNodeEditorGraph=1 nodeClass='${id}'`
         const p = new Vector2(this.last_mpos)
 
         this.unproject(p, true)
         cmd += ` x=${~~p[0]} y=${~~p[1]})`
 
-        console.log(cmd)
         this.ctx.api.execTool(this.ctx, cmd)
       } finally {
         this.pop_ctx_active()
@@ -887,7 +879,6 @@ NodeEditor {
   defineKeyMap(): KeyMap {
     this.keymap = new KeyMap([
       new HotKey('A', ['shift'], () => {
-        console.log('Add Node!')
         this.startAddNodeMenu()
       }),
       new HotKey('G', [], 'node.translate(useNodeEditorGraph=1)'),
@@ -993,6 +984,7 @@ NodeEditor {
           const uisock2 = this.getUISocket(sock2)
 
           if (uisock2 === undefined) {
+            // eslint-disable-next-line no-console
             console.warn('could not find uisocket for ', sock2)
             continue
           }

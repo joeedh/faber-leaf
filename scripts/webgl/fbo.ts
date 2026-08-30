@@ -88,8 +88,6 @@ export class FBO {
     this.size[0] = ~~this.size[0]
     this.size[1] = ~~this.size[1]
 
-    //console.trace("framebuffer creation");
-
     this.fbo = gl.createFramebuffer()!
 
     this.texColor = texColor
@@ -178,6 +176,7 @@ export class FBO {
       }
 
       if (DEBUG.fbo) {
+        // eslint-disable-next-line no-console
         console.log('TARGET2', target2)
       }
 
@@ -193,6 +192,7 @@ export class FBO {
     const errret = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
 
     if (DEBUG.fbo) {
+      // eslint-disable-next-line no-console
       console.log('FBO STATUS:', errret, webgl.constmap[errret])
     }
 
@@ -211,6 +211,7 @@ export class FBO {
     const errret = gl.checkFramebufferStatus(gl.FRAMEBUFFER)
 
     if (DEBUG.fbo) {
+      // eslint-disable-next-line no-console
       console.log('FBO STATUS:', errret, webgl.constmap[errret])
     }
 
@@ -382,6 +383,7 @@ export class FBO {
     gl = this.gl = gl === undefined ? this.gl! : gl
 
     if (width !== this.size[0] || height !== this.size[1] || gl !== this.gl) {
+      // eslint-disable-next-line no-console
       console.log('fbo update', width, height)
       this.size[0] = width
       this.size[1] = height
@@ -407,6 +409,7 @@ export class FrameStage extends FBO {
 
   update(gl: WebGL2RenderingContext, width: number, height: number): void {
     if (gl === undefined || width === undefined || height === undefined) {
+      // eslint-disable-next-line no-console
       console.log('bad arguments to fbo.FrameStage.update()', arguments)
       throw new Error('bad arguments to fbo.FrameStage.update()')
     }
@@ -557,6 +560,7 @@ export class FramePipeline {
       this.size[0] = width
       this.size[1] = height
 
+      // eslint-disable-next-line no-console
       console.log('updateing framebuffer pipeline for new width/height')
 
       const lf = simplemesh.LayerTypes

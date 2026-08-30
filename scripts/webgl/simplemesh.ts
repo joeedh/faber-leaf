@@ -471,6 +471,7 @@ function debugproxy(data: any, min = -1e17, max = 1e17, isint?: boolean) {
     bad = bad || num < 0 || num >= data.length
 
     if (bad) {
+      // eslint-disable-next-line no-console
       console.log(target, num)
       throw new Error('bad prop ' + num)
     }
@@ -499,6 +500,7 @@ function debugproxy(data: any, min = -1e17, max = 1e17, isint?: boolean) {
       bad = bad || val !== ~~val
 
       if (bad) {
+        // eslint-disable-next-line no-console
         console.log(val, target, num, debug.min, debug.max)
         throw new Error('bad value ' + val)
       }
@@ -619,6 +621,7 @@ export class GeoLayer extends Array {
   private extendIntern(data: OpenVector, dataStart: number) {
     if (this._useTypedData && this.dataUsed >= this.data_f32.length) {
       if (window.DEBUG?.simplemesh) {
+        // eslint-disable-next-line no-console
         console.warn('Resizing simplemesh attribute after conversion to a typed array')
       }
 
@@ -691,6 +694,7 @@ export class GeoLayer extends Array {
         this.f32Ready = false
       } else {
         if (window.DEBUG?.simplemesh) {
+          // eslint-disable-next-line no-console
           console.log('simpleisland is converting back to simple array', count, this.data_f32.length, this.dataUsed)
         }
 
@@ -1405,6 +1409,7 @@ export class SimpleIsland<OPT extends {dead?: true | false} = {dead: true}> {
 
   destroy(gl = this.gl): void {
     if (gl === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('failed to destroy a mesh')
     } else {
       this.buffer.destroy(gl)
@@ -1436,6 +1441,7 @@ export class SimpleIsland<OPT extends {dead?: true | false} = {dead: true}> {
 
         if (layer.data_f32?.length !== layer.dataUsed) {
           if (window.DEBUG?.simplemesh) {
+            // eslint-disable-next-line no-console
             console.warn('new layer data', layer.data_f32, layer)
           }
 
@@ -1473,8 +1479,6 @@ export class SimpleIsland<OPT extends {dead?: true | false} = {dead: true}> {
       if (layer.type !== LayerTypes.CUSTOM) {
         this._glAttrs[LayerTypeNames[layer.type as keyof typeof LayerTypeNames]] = 1
       }
-
-      //console.log(layer.bufferKey, layer.dataUsed, layer.data_f32.length, layer.bufferType, layer.data_f32);
 
       const vbo = this.buffer.get(gl, layer.bufferKey, layer.bufferType)
       vbo.uploadData(gl, layer.data_f32 as Float32Array, layer.bufferType, layer.bufferHint)
@@ -1521,6 +1525,7 @@ export class SimpleIsland<OPT extends {dead?: true | false} = {dead: true}> {
         const idx = this.getIndexBuffer(PrimitiveTypes.TRIS)
 
         if (!idx) {
+          // eslint-disable-next-line no-console
           console.warn('Missing index layer', this)
           return
         }
@@ -1581,21 +1586,13 @@ export class SimpleIsland<OPT extends {dead?: true | false} = {dead: true}> {
 
         _smoothline = loadShader(gl, sdef)
         setSmoothLineProgram(program, _smoothline)
-        //console.warn("Auto-generating smooth line shader");
-        //let sdef = {
-        //vertexProgram :
-        //}
-        //program._smoothline = loadShader(gl, sdef);
       }
 
-      //program = Shaders.LineTriStripShader;
       program = (program as unknown as any)._smoothline as ShaderProgram
       program.bind(gl, uniforms, attrs)
 
       this.bindArrays(gl, uniforms, program, 'line2', PrimitiveTypes.ADVANCED_LINES)
       gl.drawArrays(gl.TRIANGLES, 0, this.totline_tristrip * 6)
-
-      //gl.drawArrays(gl.LINES, 0, this.totline_tristrip*2);
     }
   }
 
@@ -1744,6 +1741,7 @@ export class SimpleIsland<OPT extends {dead?: true | false} = {dead: true}> {
       this.bindArrays(gl, uniforms, program, 'point', PrimitiveTypes.POINTS)
       gl.drawArrays(gl.POINTS, 0, this.totpoint)
     } else {
+      // eslint-disable-next-line no-console
       console.log('no geometry')
     }
   }
@@ -1759,6 +1757,7 @@ export class SimpleIsland<OPT extends {dead?: true | false} = {dead: true}> {
       this.bindArrays(gl, uniforms, program, 'tris', PrimitiveTypes.TRIS)
 
       if (!idx) {
+        // eslint-disable-next-line no-console
         console.warn('Missing index layer', this)
         return
       }
@@ -2433,6 +2432,7 @@ export class ChunkedSimpleMesh extends SimpleMesh {
       cos[i++] = v3[2]
 
       if (i > cos.length) {
+        // eslint-disable-next-line no-console
         console.log(i, cos.length, cos)
         throw new Error('range error')
       }
@@ -2513,6 +2513,7 @@ export class ChunkedSimpleMesh extends SimpleMesh {
       cos[i++] = v2[2]
 
       if (i > cos.length) {
+        // eslint-disable-next-line no-console
         console.log(i, cos.length, cos)
         throw new Error('range error')
       }
@@ -2549,6 +2550,7 @@ export class ChunkedSimpleMesh extends SimpleMesh {
       cos[i++] = v2[2]
 
       if (i > cos.length) {
+        // eslint-disable-next-line no-console
         console.log(i, cos.length, cos)
         throw new Error('range error')
       }
@@ -2580,6 +2582,7 @@ export class ChunkedSimpleMesh extends SimpleMesh {
       cos[i++] = v1[2]
 
       if (i > cos.length) {
+        // eslint-disable-next-line no-console
         console.log(i, cos.length, cos)
         throw new Error('range error')
       }

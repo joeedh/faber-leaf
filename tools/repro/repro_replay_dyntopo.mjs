@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* Standalone repro: load `dyntopo test.wproj`, capture the loaded mesh state,
  * run ViewContext.replay (reload serialized base + re-exec toolops), and diff.
  * Replay is how "undo after a dyntopo stroke" actually works for a loaded file.

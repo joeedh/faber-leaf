@@ -933,6 +933,7 @@ export class LiteMesh extends SceneObjectData {
       if (blobId >= 0) {
         const resolved = getDeferredBlobResolver()?.(blobId)
         if (!resolved) {
+          // eslint-disable-next-line no-console
           console.warn('litemesh: autosave blob', blobId, 'missing; loading default cube')
           this.mesh = this.wasm.Mesh_createCube(120, 1.0, 1.0)
           this._initSpatial()
@@ -949,6 +950,7 @@ export class LiteMesh extends SceneObjectData {
       // must not consume them.
       const nTemp = (this.mesh as unknown as {dropTempAttrs(): number}).dropTempAttrs()
       if (nTemp > 0) {
+          // eslint-disable-next-line no-console
         console.log(`litemesh: dropped ${nTemp} loaded TEMP attribute layer(s)`)
       }
       // Repair any structural corruption baked into the saved file before the
@@ -1752,6 +1754,7 @@ export class LiteMesh extends SceneObjectData {
         this._tessLastError = String(err instanceof Error ? err.stack ?? err.message : err)
         if (!this._tessWarned) {
           this._tessWarned = true
+          // eslint-disable-next-line no-console
           console.error('litemesh: tessellated-display build failed', err)
         }
       } finally {
@@ -1829,6 +1832,7 @@ export class LiteMesh extends SceneObjectData {
         this._tessLastError = String(err instanceof Error ? err.stack ?? err.message : err)
         if (!this._tessWarned) {
           this._tessWarned = true
+          // eslint-disable-next-line no-console
           console.error('litemesh: tessellated re-finalize failed', err)
         }
       } finally {
@@ -1890,6 +1894,7 @@ export class LiteMesh extends SceneObjectData {
     } catch (err) {
       if (!this._tessWarned) {
         this._tessWarned = true
+          // eslint-disable-next-line no-console
         console.error('litemesh: tessellated draw failed', err)
       }
       return false
@@ -4352,6 +4357,7 @@ export class LiteMesh extends SceneObjectData {
       } catch (err) {
         if (!this._vdmWarnedSync) {
           this._vdmWarnedSync = true
+          // eslint-disable-next-line no-console
           console.error('litemesh: VDM GPU sync failed', err)
         }
       }
@@ -4452,6 +4458,7 @@ export class LiteMesh extends SceneObjectData {
         // reject a missing intermediate group).
         const groups: CommandBindGroup[] = bindings.bindGroupList(pipeline.handle, uniforms)
         if (groups.length === 0) {
+          // eslint-disable-next-line no-console
           console.error('litemesh: spatial pipeline declares no uniform bind groups')
           return null
         }

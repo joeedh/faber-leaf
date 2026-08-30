@@ -239,6 +239,7 @@ export function remapLegacyStructSchema(structsText: string): string {
     // risk any cosmetic round-trip difference from the re-emit.
     return changed ? out : structsText
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.warn('legacy struct-schema migration failed; loading file as-is', error)
     return structsText
   }

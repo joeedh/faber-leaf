@@ -78,6 +78,7 @@ export class AddonRecord<T extends IAddon> {
 
     if (addon.addonDefine) {
       if (typeof addon.addonDefine == 'function') {
+        // eslint-disable-next-line no-console
         console.error(url + ': addonDefine should not be a function')
         this.name = this.key
       } else {
@@ -212,6 +213,7 @@ export class AddonManager {
     try {
       m = validateManifest(rawManifest, `builtin:${(rawManifest as {id?: string})?.id}`)
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('registerBuiltin: invalid manifest:', err)
       return
     }
@@ -256,11 +258,13 @@ export class AddonManager {
       const res = await fetch(indexUrl)
       json = await res.json()
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn(`no addon index at ${indexUrl}:`, err)
       return
     }
 
     if (!Array.isArray(json)) {
+      // eslint-disable-next-line no-console
       console.error(`addon index ${indexUrl} must be a JSON array`)
       return
     }
@@ -272,6 +276,7 @@ export class AddonManager {
       try {
         m = validateManifest((raw as {manifest?: unknown}).manifest ?? raw)
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error('invalid entry in addon index:', err)
         continue
       }
@@ -316,6 +321,7 @@ export class AddonManager {
     try {
       ids = await storage.list()
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn('addon storage list failed:', err)
       return
     }
@@ -327,14 +333,17 @@ export class AddonManager {
         const raw = await storage.readJSON(id, 'manifest.json')
         m = validateManifest(raw, `${id}/manifest.json`)
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error(`failed to read manifest for installed addon "${id}":`, err)
         continue
       }
       if (m.id !== id) {
+        // eslint-disable-next-line no-console
         console.error(`storage entry "${id}" has manifest.id "${m.id}" — skipping`)
         continue
       }
       if (this.pendingSources.has(m.id) || this.idmap.has(m.id)) {
+        // eslint-disable-next-line no-console
         console.warn(`installed addon "${m.id}" collides with an already-loaded id; skipping`)
         continue
       }
@@ -397,10 +406,12 @@ export class AddonManager {
           reason : d.reason,
           message: d.message,
         })
+        // eslint-disable-next-line no-console
         console.warn(d.message)
       }
     } catch (err) {
       // Only a cycle or a duplicate id reaches here — both programming errors.
+      // eslint-disable-next-line no-console
       console.error('addon dependency sort failed:', err)
       // Fall back to unsorted pending order so we at least try to load.
       sorted = manifests
@@ -414,6 +425,7 @@ export class AddonManager {
       try {
         module = await src.loadModule()
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error(`failed to load addon "${m.id}":`, err)
         this.pendingSources.delete(m.id)
         continue
@@ -427,6 +439,7 @@ export class AddonManager {
         if (depApi !== undefined) {
           api.deps[depId] = depApi
         } else {
+          // eslint-disable-next-line no-console
           console.warn(`addon "${m.id}": dep "${depId}" not yet loaded`)
         }
       }
@@ -569,6 +582,7 @@ export class AddonManager {
     }
     const rec = this.idmap.get(id)
     if (!rec) {
+      // eslint-disable-next-line no-console
       console.error(`enable: unknown addon "${id}"`)
       return {ok: false, reason: 'unknown', message: `unknown addon "${id}"`}
     }
@@ -581,6 +595,7 @@ export class AddonManager {
       const depRec = this.idmap.get(depId)
       if (!depRec) {
         const message = `addon "${id}": missing dependency "${depId}"`
+        // eslint-disable-next-line no-console
         console.error(message)
         return {ok: false, reason: 'missing-dep', message}
       }
@@ -593,6 +608,7 @@ export class AddonManager {
       rec.enabled = true
     } catch (error) {
       util.print_stack(error as Error)
+      // eslint-disable-next-line no-console
       console.error(`addon "${id}" register() failed:`, error)
       rec.addonAPI.unregisterAll()
       rec._enabled = false
@@ -624,6 +640,7 @@ export class AddonManager {
     if (dependents.length > 0) {
       const names = dependents.map((r) => r.manifest?.name ?? r.name).join(', ')
       const message = `Cannot disable "${rec.manifest?.name ?? rec.name}": still required by ${names}. Disable those first.`
+      // eslint-disable-next-line no-console
       console.warn(message)
       return {ok: false, reason: 'has-dependents', dependents, message}
     }
@@ -660,12 +677,14 @@ export class AddonManager {
   async uninstall(id: string): Promise<boolean> {
     const rec = this.idmap.get(id)
     if (rec?.builtin) {
+      // eslint-disable-next-line no-console
       console.warn(`refusing to uninstall builtin addon "${id}"`)
       return false
     }
     if (rec) {
       const res = this.disable(id)
       if (!res.ok && res.reason === 'has-dependents') {
+        // eslint-disable-next-line no-console
         console.warn(res.message)
         return false
       }
@@ -699,6 +718,7 @@ export class AddonManager {
 
     const res = this.disable(rec.manifest.id)
     if (!res.ok) {
+      // eslint-disable-next-line no-console
       if (res.message) console.warn(res.message)
       return false
     }
@@ -742,6 +762,7 @@ export async function startAddons(autoEnable: boolean = true): Promise<void> {
   try {
     await manager.start(autoEnable)
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.warn('addon start failed:', err)
   }
 }
@@ -758,6 +779,7 @@ async function initAddonStorage(): Promise<AddonStorage | undefined> {
       const {createNwjsAddonStorage} = await import('./storage_nwjs.js')
       return await createNwjsAddonStorage()
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.warn('NW.js addon storage init failed:', err)
       return undefined
     }

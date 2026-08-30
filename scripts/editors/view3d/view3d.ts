@@ -2,8 +2,6 @@ import {
   Area,
   DataAPI,
   IAreaDef,
-  IVector4,
-  IVectorOrHigher,
   LastToolPanel,
   nstructjs,
   Number3,
@@ -70,6 +68,7 @@ import {
 const curtemps = util.cachering.fromConstructor(Vector3, 32)
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   interface Window {
     _getShaderSource: (shader: string) => string
@@ -172,14 +171,14 @@ export function initWebGL(state = peekAppState()) {
     (e) => {
       loadShaders(_gl!)
 
-      const state = getAppState()
-      const datalib = (state.ctx as any).datalib as Library
+      const state2 = getAppState()
+      const datalib = (state2.ctx as any).datalib as Library
 
       for (const ob of datalib.object) {
         ob.onContextLost(e)
       }
 
-      for (const sarea of state.screen!.sareas) {
+      for (const sarea of state2.screen!.sareas) {
         for (const area of sarea.editors) {
           if (area instanceof View3D) {
             area.onContextLost(e as WebGLContextEvent)
@@ -453,13 +452,12 @@ View3D {
     const clipend = Math.max(size * 15, 5000)
     const clipstart = clipend * 0.0001 + 0.001
 
-    console.log(clipstart, clipend)
-
     this.camera.near = clipstart
     this.camera.far = clipend
   }
 
   set selectmode(val) {
+    // eslint-disable-next-line no-console
     console.warn('setting selectmode', val)
     this.ctx.scene.selectMask = val
   }
@@ -550,6 +548,7 @@ View3D {
         }
       } catch (error) {
         util.print_stack(error as Error)
+        // eslint-disable-next-line no-console
         console.log('failed to delete graph node')
       }
     }
@@ -623,11 +622,10 @@ View3D {
     }
 
     if (aabb === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('could not get bounding box')
       return
     }
-
-    console.log('v3d aabb ret', aabb[0], aabb[1])
 
     const is_point = aabb[0].vectorDistance(aabb[1]) === 0.0
 
@@ -680,13 +678,8 @@ View3D {
 
     const fov = (Math.PI * this.camera.fovy) / 180
 
-    const pos = new Vector3(this.camera.pos)
-    const up = new Vector3(this.camera.up)
-    const target = new Vector3(this.camera.target)
-
     //dis = Math.abs(Math.tan(fov)*dis);
     dis = Math.abs(dis / Math.tan(fov))
-    //console.log("DIS", dis);
 
     dis = dis == 0.0 ? 0.005 : dis
     if (!is_point) {
@@ -708,7 +701,6 @@ View3D {
       new HotKey('.', [], 'view3d.view_selected()'),
 
       new HotKey('Space', [], () => {
-        console.log('Space Bar!')
         spawnToolSearchMenu(this.ctx)
       }),
 
@@ -972,14 +964,11 @@ View3D {
       return
     }
 
-    console.log('view3d busSubscribe')
     // rebuild header, we will have missed toolmode registration events
     // while disconnected from the dom
     this.doOnce(this.rebuildHeader)
 
     const busgetter = () => {
-      //console.log("ID", id, this.getAttribute("id"), document.getElementById(id));
-
       if (!this.isConnected) {
         this._busSub = undefined
         return undefined
@@ -1110,7 +1099,6 @@ View3D {
       const y = e instanceof PointerEvent ? e.y : e.touches[0].pageY
       const node = this.pickElement(x, y)
 
-      //console.log(node ? node.tagName : undefined);
       if (node === this || node === this.overdraw) {
         return false
       }
@@ -1198,23 +1186,18 @@ View3D {
       }
 
       if (docontrols && eventWasTouch(e) && !e.shiftKey && !e.ctrlKey && !e.altKey) {
-        console.log('multitouch view tool')
-
         const tool = new TouchViewTool()
         this.ctx.state.toolstack.execTool(this.ctx, tool)
         window.redraw_viewport()
       } else if (docontrols && !e.shiftKey && !e.ctrlKey) {
-        console.log('orbit!')
         const tool = new OrbitTool()
         this.ctx.state.toolstack.execTool(this.ctx, tool, e)
         window.redraw_viewport()
       } else if (docontrols && e.shiftKey && !e.ctrlKey) {
-        console.log('pan!')
         const tool = new PanTool()
         this.ctx.state.toolstack.execTool(this.ctx, tool)
         window.redraw_viewport()
       } else if (docontrols && e.ctrlKey && !e.shiftKey) {
-        console.log('zoom!')
         const tool = new ZoomTool()
         this.ctx.state.toolstack.execTool(this.ctx, tool)
         window.redraw_viewport()
@@ -1319,8 +1302,13 @@ View3D {
       this.ctx.scene.updateWidgets()
     }
 
+    if (this !== this.owning_sarea?.area) {
+      return
+    }
+
     const screen = this.ctx.screen
     if (this.pos![1] + this.size![1] > screen.size[1] + 4) {
+      // eslint-disable-next-line no-console
       console.log('view3d is too big', this.pos![1] + this.size![1], screen.size[1])
       this.ctx.screen.snapScreenVerts()
       this.ctx.screen.regenBorders()
@@ -1353,7 +1341,6 @@ View3D {
   makeGrid() {
     const mesh = new SimpleMesh(LayerTypes.LOC | LayerTypes.UV | LayerTypes.COLOR)
 
-    const d = 3
     //let quad = mesh.quad([-d, -d, 0], [-d, d, 0], [d, d, 0], [d, -d, 0]);
     //quad.colors(clr, clr, clr, clr);
 
@@ -1486,8 +1473,6 @@ View3D {
 
     size[0] /= camera.aspect
 
-    //console.log(pos, size, camera.aspect);
-
     pos.floor()
     size.floor()
 
@@ -1505,6 +1490,7 @@ View3D {
       this.drawObjects(camera)
     } catch (error) {
       util.print_stack(error as Error)
+      // eslint-disable-next-line no-console
       console.warn('Draw error')
     }
   }
@@ -1615,6 +1601,7 @@ View3D {
         try {
           self.drawObjects()
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error('[overlay] drawObjects threw:', err)
         }
         // Toolmode overlays — mesh-edit verts/edges/faces, sculpt brush
@@ -1625,11 +1612,13 @@ View3D {
           try {
             scene.toolmode.on_drawstart?.(self)
           } catch (err) {
+            // eslint-disable-next-line no-console
             console.error('[overlay] toolmode.on_drawstart threw:', err)
           }
           try {
             scene.toolmode.on_drawend?.(self)
           } catch (err) {
+            // eslint-disable-next-line no-console
             console.error('[overlay] toolmode.on_drawend threw:', err)
           }
         }
@@ -1639,6 +1628,7 @@ View3D {
         try {
           self.widgets?.draw(self, self.gl)
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error('[overlay] widgets.draw threw:', err)
         }
       }
@@ -1656,9 +1646,9 @@ View3D {
   }
 
   makeDrawQuad(v1: Vector3, v2: Vector3, v3: Vector3, v4: Vector3, color: Vector4 | number[], useZ = true): DrawQuad {
-    if (typeof color == 'string') {
-      color = css2color(color)
-    }
+    //if (typeof color == 'string') {
+    //color = css2color(color)
+    //}
 
     //const dq = new DrawQuad(v1, v2, v3, v4, color)
     throw new Error('implement me!')

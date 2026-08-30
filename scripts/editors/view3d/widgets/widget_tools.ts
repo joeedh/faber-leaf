@@ -1,38 +1,12 @@
-import {Vector2, Vector3, Vector4, Quat, Matrix4} from '../../../util/vectormath.js'
-import {SimpleMesh, LayerTypes} from '../../../webgl/simplemesh.js'
-import {
-  IntProperty,
-  BoolProperty,
-  FloatProperty,
-  EnumProperty,
-  FlagProperty,
-  ToolProperty,
-  Vec3Property,
-  ToolOp,
-  ToolFlags,
-  UndoFlags,
-  PropFlags,
-  PropTypes,
-  PropSubTypes,
-} from '../../../path.ux/scripts/pathux.js'
-import {Shaders} from '../../../shaders/shaders.js'
-import {dist_to_line_2d} from '../../../path.ux/scripts/util/math.js'
-import {CallbackNode, Node, NodeFlags} from '../../../core/graph.js'
-import {DependSocket} from '../../../core/graphsockets.js'
+import {Vector3, Vector4, Matrix4} from '../../../util/vectormath.js'
 import * as util from '../../../util/util.js'
 import {SelMask} from '../../../core/select_types.js'
 
-import {View3DFlags} from '../view3d_base.js'
-import {WidgetBase, WidgetSphere, WidgetArrow, WidgetFlags, WidgetManager} from './widgets.js'
+import {WidgetBase, WidgetSphere, WidgetFlags, WidgetManager} from './widgets.js'
 import {TranslateOp, ScaleOp, RotateOp} from '../transform/transform_ops.js'
-import {calcTransCenter, type TransCenterResult} from '../transform/transform_query.js'
+import {type TransCenterResult} from '../transform/transform_query.js'
 import {Icons} from '../../icon_enum.js'
-import {ConstraintSpaces} from '../transform/transform_base.js'
 import type {ViewContext} from '../../../core/context.js'
-
-const update_temps = util.cachering.fromConstructor(Vector3, 64)
-const update_temps4 = util.cachering.fromConstructor(Vector4, 64)
-const update_mats = util.cachering.fromConstructor(Matrix4, 64)
 
 export class WidgetSceneCursor extends WidgetBase {
   constructor() {
@@ -119,7 +93,6 @@ export class TransformWidget extends WidgetBase {
     }
 
     const ctx = this.ctx
-    const view3d = ctx.view3d
     const aabb = ctx.view3d.getTransBounds()
 
     if (!aabb) {
@@ -182,7 +155,7 @@ export class ThreeAxisWidget extends TransformWidget {
     this.center_widget!.matrix.scale(sz, sz, sz)
 
     const p = new Vector3(ret.center)
-    const w = this.ctx!.view3d.project(p)
+    this.ctx!.view3d.project(p)
 
     const mat = new Matrix4() //XXX get proper matrix space transform
     if ('spaceMatrix' in ret) {
@@ -269,8 +242,6 @@ export class TranslateWidget extends ThreeAxisWidget {
   }
 
   create(ctx: ViewContext, manager: WidgetManager) {
-    console.log('creating widget')
-
     super.create(ctx, manager)
 
     const center = (this.center_widget = this.getSphere(undefined, new Vector4([0.5, 0.5, 0.5, 1.0])))
@@ -367,7 +338,6 @@ export class ScaleWidget extends ThreeAxisWidget {
   }
 
   create(ctx: ViewContext, manager: WidgetManager) {
-    console.log('creating widget')
     super.create(ctx, manager)
 
     const center = (this.center_widget = this.getSphere(undefined, new Vector4([0.5, 0.5, 0.5, 1.0])))
@@ -483,7 +453,6 @@ export class RotateWidget extends TransformWidget {
   }
 
   _handleClick(e: PointerEvent, axis: number) {
-    console.log(axis)
     const op = new RotateOp()
     const con = new Vector3()
     con[axis] = 1.0

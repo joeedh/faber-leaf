@@ -46,7 +46,8 @@ export class ObjectSelectOpBase extends ToolOp {
       let ob = datalib.get(k)
 
       if (ob === undefined) {
-        console.warn('error in object select op base undo', k)
+        // eslint-disable-next-line no-console
+        console.error('error in object select op base undo', k)
         continue
       }
 
@@ -112,11 +113,10 @@ export class ObjectSelectOneOp extends ObjectSelectOpBase {
     ob = ctx.datalib.get(ob)
 
     if (ob === undefined) {
-      console.warn('error in SelectOneOp', ob, this.inputs.objectId.getValue())
+      // eslint-disable-next-line no-console
+      console.error('error in SelectOneOp', ob, this.inputs.objectId.getValue())
       return
     }
-
-    console.log('mode', mode)
 
     if (mode === SelOneToolModes.UNIQUE) {
       scene.objects.clearSelection()

@@ -629,7 +629,7 @@ describe('LeafMesh validateAndRepair', () => {
 
 describe('LeafMesh derived-state invariant', () => {
   test('rebuildDerivedTopo is a no-op on a primitive', () => {
-    const builders: Array<(mesh: LeafMesh) => void> = [
+    const builders: [(mesh: LeafMesh) => void][] = [
       (mesh) => makeCube(mesh, 2),
       (mesh) => makeUVSphere(mesh, 8, 4, 1),
       (mesh) => makeTube(mesh, 8, 1, 0.5, 1),

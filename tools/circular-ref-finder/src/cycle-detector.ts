@@ -12,7 +12,6 @@ export class CycleDetector {
   }
 
   detectCycles(): Cycle[] {
-    console.log('detecting cycles')
     this.cycles = []
     this.visited = new Set()
     this.recursionStack = new Set()

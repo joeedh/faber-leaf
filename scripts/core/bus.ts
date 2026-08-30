@@ -127,6 +127,7 @@ export class MessageBus {
     const i = this.findEmitter(emitter, emitterClass)
     if (i === undefined) {
       //throw new Error('emitter not found')
+      // eslint-disable-next-line no-console
       console.warn('emitter not found', this, i)
       return
     }
@@ -175,6 +176,7 @@ export class MessageBus {
   validateSubscribers(): void {
     for (const sb of new Set(this.subscribers)) {
       if (!sb.getter()) {
+        // eslint-disable-next-line no-console
         console.warn('Dead subscriber', sb)
         this.subscribers.remove(sb)
       }
@@ -207,6 +209,7 @@ export class MessageBus {
     }
 
     if (!ok) {
+      // eslint-disable-next-line no-console
       console.warn('Invalid message type ' + messageType, 'valid ones are', types)
     }
 
@@ -260,12 +263,15 @@ export class MessageBus {
         subscriber = sb.getter()
       } catch (error) {
         subscriber = undefined
+        // eslint-disable-next-line no-console
         console.log((error as Error).stack)
+        // eslint-disable-next-line no-console
         console.log((error as Error).message)
       }
 
       if (!subscriber) {
         //dead owner
+        // eslint-disable-next-line no-console
         console.warn('Dead subscriber', sb)
         if (!del) {
           del = [sb]
@@ -283,7 +289,9 @@ export class MessageBus {
       try {
         sb.callback(msg)
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log((error as Error).stack)
+        // eslint-disable-next-line no-console
         console.log((error as Error).message)
       }
     }

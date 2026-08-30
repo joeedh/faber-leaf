@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* Repro the saved-toolstack undo bug:
  * load ts2.wproj (restores saved toolstack) -> CTX.replay() -> step undo/redo,
  * snapshotting order-independent vertex-position stats at each step. */

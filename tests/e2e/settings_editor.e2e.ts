@@ -15,7 +15,6 @@ test('settings editor opens and binds feature flags', async ({page}) => {
   await page.goto('/?renderer=webgpu')
 
   await page.waitForFunction(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     () => !!(window as any)._appstate?.screen,
     undefined,
     {timeout: 60_000}
@@ -25,7 +24,6 @@ test('settings editor opens and binds feature flags', async ({page}) => {
   await page.setViewportSize({width: 1280, height: 800})
 
   const opened = await page.evaluate(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = window as any
     const result = w.CTX.debug.showEditor({editorType: 'settings-editor', minVisibleWidth: 500})
     w.__settingsEd = result.editor
@@ -37,7 +35,6 @@ test('settings editor opens and binds feature flags', async ({page}) => {
   // container exists, then activate each tab (only the active tab's page is
   // attached to the DOM). path.ux widgets nest shadow roots, so walk them.
   await page.waitForFunction(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     () => !!((window as any).__settingsEd as any)?.tabs,
     undefined,
     {timeout: 30_000}
@@ -45,7 +42,6 @@ test('settings editor opens and binds feature flags', async ({page}) => {
 
   const collectTabBindings = (tabName: string) =>
     page.evaluate(async (name) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ed = (window as any).__settingsEd as any
       // getTab matches container.name, which tab() never sets — find the page
       // through its TabItem label instead.
@@ -80,7 +76,6 @@ test('settings editor opens and binds feature flags', async ({page}) => {
 
   // The bound path round-trips through the FeatureFlagManager singleton.
   const roundtrip = await page.evaluate(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = window as any
     const path = 'settings.featureFlags.sculptcore_quad_remesher'
     const initial = w.CTX.api.getValue(w.CTX, path)

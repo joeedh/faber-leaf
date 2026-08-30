@@ -1,13 +1,5 @@
-import {keymap, reverse_keymap} from '../../../path.ux/scripts/util/simple_events.js'
-import {
-  TransDataElem,
-  TransformData,
-  TransDataType,
-  PropModes,
-  TransDataTypes,
-  TransDataList,
-  ITransDataType,
-} from './transform_base.js'
+import {keymap} from '../../../path.ux/scripts/util/simple_events.js'
+import {TransformData, TransDataType, PropModes, TransDataList, ITransDataType} from './transform_base.js'
 // Same reason, for transform_base.js: the hub already depends on this module,
 // so routing the interface through it keeps framework_api.ts out of one more
 // import cycle (§8).
@@ -15,31 +7,25 @@ export {TransDataElem, TransDataList, TransDataType} from './transform_base.js'
 export type {ITransDataType, TransformDefine} from './transform_base.js'
 import {
   ToolOp,
-  UndoFlags,
-  IntProperty,
   FlagProperty,
   EnumProperty,
   Vec3Property,
   Mat4Property,
   FloatProperty,
-  util,
   BoolProperty,
   PropFlags,
-  PropTypes,
-  PropSubTypes,
   PropertySlots,
   StringSetProperty,
-  ListProperty,
   ContextLike,
   ToolDef,
 } from '../../../path.ux/scripts/pathux.js'
 import {SelMask} from '../../../core/select_types.js'
 import {InvalidationKind} from '../../../core/geometry_contract.js'
-import {Vector2, Vector3, EulerOrders, Vector4, Quat, Matrix4} from '../../../util/vectormath.js'
+import {Vector2, Vector3, EulerOrders, Vector4, Matrix4} from '../../../util/vectormath.js'
 import {View3DOp} from '../view3d_ops.js'
 import {isect_ray_plane} from '../../../path.ux/scripts/util/math.js'
 import {calcTransCenter} from './transform_query.js'
-import {CastModes, castViewRay} from '../findnearest.js'
+import {castViewRay} from '../findnearest.js'
 
 import {ModalFlags} from '../../../core/modalflags.js'
 import {invalidatableOf} from '../../../core/data_kinds.js'

@@ -120,6 +120,7 @@ export class NodeGraphOp<
   /** Resolve the target graph from `graphPath`; returns undefined (not throws) on a bad path. */
   fetchGraph(ctx: ToolContext): AnyGraph | undefined {
     if (this.inputs.graphPath.getValue() === '') {
+      // eslint-disable-next-line no-console
       console.warn('graphPath was empty string')
       return undefined
     }
@@ -128,6 +129,7 @@ export class NodeGraphOp<
       return ctx.api.getValue<AnyGraph>(ctx, this.inputs.graphPath.getValue())
     } catch (error) {
       if (error instanceof DataPathError) {
+        // eslint-disable-next-line no-console
         console.warn('Unknown graph path ' + this.inputs.graphPath.getValue())
         return undefined
       } else {
@@ -151,17 +153,17 @@ export class NodeGraphOp<
     const undo: NodeGraphUndo = (this._undo = {})
 
     if (graphPath === '') {
+      // eslint-disable-next-line no-console
       console.warn('graphPath was empty string')
       return
     }
 
     const graph = ctx.api.getValue<AnyGraph>(ctx, graphPath)
     if (!graph) {
+      // eslint-disable-next-line no-console
       console.warn('could not get graph')
       return
     }
-
-    console.log('GRAPH', graph, graphPath)
 
     const saved = new SavedGraph(graph)
 
@@ -189,12 +191,14 @@ export class NodeGraphOp<
     const path = this._undo.graphPath
 
     if (!data || path === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('no undo data')
       return
     }
 
     const graph = ctx.api.getValue<AnyGraph>(ctx, path)
     if (!graph) {
+      // eslint-disable-next-line no-console
       console.warn('failed to resolve graph at path ' + path)
       return
     }
@@ -368,8 +372,6 @@ export class AddNodeOp extends NodeGraphOp<
     const graphPath = this.inputs.graphPath.getValue()
     const gclassName = this.inputs.graphClass.getValue()
     const nclass = this.inputs.nodeClass.getValue()
-
-    console.log(gclassName, nclass, graphPath)
 
     const graph = ctx.api.getValue<AnyGraph>(ctx, graphPath)!
     const gclass = AbstractGraphClass.getGraphClass(gclassName)
@@ -568,13 +570,17 @@ export class ConnectNodeOp extends NodeGraphOp<{
     const sock2 = graph.sock_idmap.get(this.inputs.sock2_id.getValue())
 
     if (!node1 || !sock1 || !node2 || !sock2) {
+      // eslint-disable-next-line no-console
       console.log(this)
+      // eslint-disable-next-line no-console
       console.warn('Error in node connect op')
       return
     }
 
     if (node1 === node2 || sock1 === sock2 || sock1.socketType === sock2.socketType) {
+      // eslint-disable-next-line no-console
       console.log(this)
+      // eslint-disable-next-line no-console
       console.warn('Error in node connect op: bad arguments')
       return
     }

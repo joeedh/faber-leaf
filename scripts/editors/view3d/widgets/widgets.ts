@@ -11,16 +11,14 @@ import {SimpleMesh, LayerTypes} from '../../../webgl/simplemesh'
 import {Shapes} from '../../../webgl/simplemesh_shapes.js'
 import {Shaders} from '../../../shaders/shaders.js'
 import {isect_ray_plane} from '../../../path.ux/scripts/util/math.js'
-import {isMobile} from '../../../path.ux/scripts/util/util.js'
-import {CallbackNode, INodeConstructor, INodeSocketDef, INodeSocketSet, Node, NodeFlags} from '../../../core/graph.js'
+import {CallbackNode, INodeConstructor, INodeSocketSet, Node, NodeFlags} from '../../../core/graph.js'
 import {DependSocket} from '../../../core/graphsockets.js'
 import {css2color} from '../../../path.ux/scripts/core/ui_base.js'
 import type {View3D} from '../view3d.js'
 import {OptionalIf} from '../../../util/optionalIf.js'
-import type {ToolContext, ViewContext} from '../../../core/context.js'
-import {util, math, ToolOp, PropertySlots, IVector4} from '../../../path.ux/pathux.js'
+import type {ViewContext} from '../../../core/context.js'
+import {util, math, ToolOp, IVector4} from '../../../path.ux/pathux.js'
 import {IUniformsBlock} from '../../../webgl/webgl.js'
-import {SelMask} from '../../../core/select_types.js'
 
 export type IDistToMouse = [number, number, number?]
 
@@ -33,9 +31,7 @@ export interface IFindNearestResult<T = WidgetBase> {
 
 const dist_temp_mats = util.cachering.fromConstructor(Matrix4, 512)
 const dist_temps = util.cachering.fromConstructor(Vector3, 512)
-const dist_temps4 = util.cachering.fromConstructor(Vector4, 512)
 const dist_rets2 = new util.cachering(() => [0, 0] as [number, number], 512)
-const dist_rets3 = new util.cachering(() => [0, 0, 0] as [number, number, number], 512)
 
 export const WidgetFlags = {
   SELECT       : 1,
@@ -111,9 +107,7 @@ export class WidgetShape<OPT extends {dead?: true | false | undefined} = {}> {
 
     this.mesh = new SimpleMesh(LayerTypes.LOC | LayerTypes.COLOR | LayerTypes.UV)
 
-    this.onclick = () => {
-      console.log('widget click!')
-    }
+    this.onclick = () => {}
   }
 
   onContextLost(e: WebGLContextEvent) {
@@ -124,6 +118,7 @@ export class WidgetShape<OPT extends {dead?: true | false | undefined} = {}> {
 
   destroy(gl: WebGL2RenderingContext) {
     if (this.gl !== undefined && gl !== this.gl) {
+      // eslint-disable-next-line no-console
       console.warn('Destroy called with new gl context')
     } else if (this.gl === undefined && gl !== undefined) {
       this.gl = gl
@@ -177,16 +172,14 @@ export class WidgetShape<OPT extends {dead?: true | false | undefined} = {}> {
 
   draw(gl: WebGL2RenderingContext, manager: WidgetManager, matrix: Matrix4, alpha = 1.0, no_z_write = false) {
     if (this.destroyed) {
-      console.log('Reusing widget shape')
       this.destroyed = false
     }
 
     if (this.mesh === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('missing mesh in WidgetShape.prototype.draw()')
       return
     }
-
-    const view3d = manager.ctx.view3d
 
     this.mesh.program = Shaders.WidgetMeshShader
 
@@ -206,18 +199,17 @@ export class WidgetShape<OPT extends {dead?: true | false | undefined} = {}> {
     /* Use w component of projected vector. */
     co[3] = 1.0
     co.multVecMatrix(camera.rendermat)
-    const w = co[3]
-
+  
     const smat = this._tempmat
     smat.makeIdentity()
 
-    let scale = isMobile() ? w * 0.15 : w * 0.075 //Math.max(w*0.05, 0.01);
-    if (this.worldscale) {
-      scale = 1.0
-    }
+    //let scale = isMobile() ? w * 0.15 : w * 0.075 //Math.max(w*0.05, 0.01);
+    //if (this.worldscale) {
+    //  scale = 1.0
+    //}
 
     //XXX
-    scale = 1.0
+    const scale = 1.0
 
     this.wscale = scale
 
@@ -329,8 +321,6 @@ export class WidgetTorus extends WidgetShape {
     dis *= viewsize
     z *= viewsize / wscale
 
-    console.log('dis', dis.toFixed(4), 'scale', scale, wscale)
-
     return [dis, z]
   }
 }
@@ -367,14 +357,12 @@ export class WidgetArrow extends WidgetShape {
     const tout = dist_rets2.next()
     tout[0] = tout[1] = 0.0
 
-    let t = tout[0]
-
     const p = new Vector2().loadXY(x, y)
     const t1 = new Vector2(v2 as unknown as Vector2).sub(v1)
     const t2 = new Vector2(p).sub(v1)
     t1.normalize()
 
-    t = t1.dot(t2) / v1.vectorDistance(v2)
+    let t = t1.dot(t2) / v1.vectorDistance(v2)
     t = Math.min(Math.max(t, -0.25), 1.25)
 
     const lineco = dist_temps.next()
@@ -414,7 +402,6 @@ export class WidgetSphere extends WidgetShape {
   }
 
   distToMouse(view3d: View3D, x: number, y: number, matrix: Matrix4, wscale = 1.0): IDistToMouse {
-    const v = new Vector3()
     //measure scale
 
     const v1 = dist_temps.next().zero()
@@ -778,6 +765,7 @@ export class WidgetBase<Inputs extends INodeSocketSet = {}, Outputs extends INod
 
   remove() {
     if (this.manager === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('widget not part of a graph', this.manager)
       return
     }
@@ -1074,6 +1062,7 @@ export class WidgetManager {
       const n = this.nodes[k]
 
       if (n.graph_graph !== graph) {
+        // eslint-disable-next-line no-console
         console.log('prune zombie node')
         delete this.nodes[k]
         continue
@@ -1165,8 +1154,6 @@ export class WidgetManager {
 
   /**see view3d.getSubEditorMpos for how localX/localY are derived*/
   on_mousedown(e: PointerEvent, localX: number, localY: number, was_touch?: boolean) {
-    console.log('widget mouse down')
-
     if (this._fireAllEventWidgets(e, 'on_mousedown', localX, localY, was_touch)) {
       return true
     }
@@ -1182,7 +1169,6 @@ export class WidgetManager {
   }
 
   findNearest(x: number, y: number, limit = 16): WidgetBase | undefined {
-    let mindis = 1e17
     let minw: WidgetBase | undefined
     let minf: number | undefined
 
@@ -1208,7 +1194,6 @@ export class WidgetManager {
       const f = WidgetBase._weightDisZ(view3d, dis, z)
 
       if (minw === undefined || f < minf!) {
-        mindis = dis
         minf = f
         minw = ret.data
       }
@@ -1261,11 +1246,13 @@ export class WidgetManager {
 
   add(widget: WidgetBase) {
     if (widget === undefined || !(widget instanceof WidgetBase)) {
+      // eslint-disable-next-line no-console
       console.warn('invalid widget type for ', widget)
       throw new Error('invalid widget type for ' + widget)
     }
 
     if (widget.id !== -1 && widget.id in this.widget_idmap) {
+      // eslint-disable-next-line no-console
       console.warn('Warning, tried to add same widget twice')
       return undefined
     }
@@ -1299,11 +1286,12 @@ export class WidgetManager {
 
   remove(widget: WidgetBase) {
     if (!(widget.id in this.widget_idmap)) {
+      // eslint-disable-next-line no-console
       console.warn('widget not in manager', widget.id, widget)
       return
     }
 
-    if (this.ctx && this.ctx.graph) {
+    if (this.ctx?.graph) {
       this.ctx.graph.remove(widget)
     }
 
@@ -1352,6 +1340,7 @@ export class WidgetManager {
     }
 
     if (this.gl !== undefined && gl !== this.gl) {
+      // eslint-disable-next-line no-console
       console.warn('Destroy called with new gl context')
     } else if (this.gl === undefined && gl !== undefined) {
       this.gl = gl
@@ -1377,6 +1366,7 @@ export class WidgetManager {
         w.destroy(gl)
       } catch (error) {
         util.print_stack(error as Error)
+        // eslint-disable-next-line no-console
         console.warn('Failed to destroy a widget', w)
       }
     }

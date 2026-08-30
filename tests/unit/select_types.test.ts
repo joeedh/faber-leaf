@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * The frozen `SelMask` wire format and the select-type registry (P6 / W1a,
  * plan documentation/plans/2026-08-15-0325-w1-selmask-format-migration.md §6).

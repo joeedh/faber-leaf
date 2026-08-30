@@ -93,8 +93,6 @@ node.NodeViewer {
     this.addEventListener('mousedown', () => {
       this.push_ctx_active()
 
-      console.log('node viewer mousedown')
-
       const toolop = new VelPanPanOp()
       toolop.inputs.velpanPath.setValue('nodeViewer.velpan')
       this.ctx.toolstack.execTool(this.ctx, toolop)
@@ -105,7 +103,6 @@ node.NodeViewer {
     this.header!.button('Arrange', () => {
       const graph = this.getGraph()
 
-      console.log('Arranging graph', graph)
       if (graph) {
         sortGraphSpatially(graph, {
           socksize    : this.sockSize,
@@ -122,8 +119,6 @@ node.NodeViewer {
 
     this.addEventListener('wheel', (e) => {
       const df = Math.sign(e.deltaY) * 0.15
-
-      console.log('wheel in node viewer!')
 
       this.velpan.scale.mulScalar(1.0 - df)
       this.velpan.update()
@@ -432,12 +427,12 @@ node.NodeViewer {
     }
 
     this._last_graph_path = this.graphPath
-    console.log('rebuilding node editor')
 
     this.updateCanvasSize()
 
     const graph = this.ctx.api.getValue<AnyGraph>(this.ctx, this.graphPath)
     if (this.graphPath === '' || graph === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('Failed to load graph!')
       this._last_graph_path = undefined
       return

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 /**
  * Layer-boundary check: cruises scripts/ + addons/ with .dependency-cruiser.cjs,
  * prints a per-rule table, and ratchets the violation count.

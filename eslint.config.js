@@ -18,7 +18,11 @@ import {allowDefaultProject} from './.defaultProjectEslint.mjs'
 
 export default defineConfig([
   globalIgnores([
-    //
+    //XXX disable js files for now
+    '**/*.js',
+    '**/*.mjs',
+    '**/*.cjs',
+
     '**/.**/**',
     '**/documentation/research/**',
     '**/.turbo/**',

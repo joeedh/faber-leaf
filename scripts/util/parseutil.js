@@ -1,5 +1,3 @@
-import * as util from './util.js'
-
 export class token {
   constructor(type, val, lexpos, lexlen, lineno, lexer, parser) {
     this.type = type
@@ -42,8 +40,8 @@ export class PUTLParseError extends Error {
 //should propegate an error when an error
 //has happened
 export class lexer {
-  constructor(tokdef, errfunc) {
-    this.tokdef = tokdef
+  constructor(tokdefs, errfunc) {
+    this.tokdef = tokdefs
     this.tokens = []
     this.lexpos = 0
     this.lexdata = ''
@@ -51,19 +49,19 @@ export class lexer {
     this.errfunc = errfunc
     this.tokints = {}
 
-    for (var i = 0; i < tokdef.length; i++) {
-      this.tokints[tokdef[i].name] = i
+    for (var i = 0; i < tokdefs.length; i++) {
+      this.tokints[tokdefs[i].name] = i
     }
 
     this.statestack = [['__main__', 0]]
-    this.states = {__main__: [tokdef, errfunc]}
+    this.states = {__main__: [tokdefs, errfunc]}
     this.statedata = 0 //public variable
   }
 
   //errfunc is optional, defines state-specific error function
   add_state(name, tokdef, errfunc) {
     if (errfunc == undefined) {
-      errfunc = function (lexer) {
+      errfunc = function (lexer2) {
         return true
       }
     }
@@ -111,8 +109,10 @@ export class lexer {
   error() {
     if (this.errfunc != undefined && !this.errfunc(this)) return
 
+    // eslint-disable-next-line no-console
     console.log('Syntax error near line ' + this.lineno)
     var next = Math.min(this.lexpos + 8, this.lexdata.length)
+    // eslint-disable-next-line no-console
     console.log('  ' + this.lexdata.slice(this.lexpos, next))
 
     throw new PUTLParseError('Parse error')
@@ -156,13 +156,14 @@ export class lexer {
     var lexdata = this.lexdata.slice(this.lexpos, this.lexdata.length)
 
     var results = []
+    let res
 
-    for (var i = 0; i < tlen; i++) {
-      var t = ts[i]
+    for (var j = 0; j < tlen; j++) {
+      var t = ts[j]
 
       if (t.re == undefined) continue
 
-      var res = t.re.exec(lexdata)
+      res = t.re.exec(lexdata)
 
       if (res?.index == 0) {
         results.push([t, res])
@@ -171,8 +172,8 @@ export class lexer {
 
     var max_res = 0
     var theres = undefined
-    for (var i = 0; i < results.length; i++) {
-      var res = results[i]
+    for (var j = 0; j < results.length; j++) {
+      res = results[j]
 
       if (res[1][0].length > max_res) {
         theres = res
@@ -246,9 +247,13 @@ export class parser {
       }
     }
 
+    // eslint-disable-next-line no-console
     console.log('------------------')
+    // eslint-disable-next-line no-console
     console.log(buf)
+    // eslint-disable-next-line no-console
     console.log('==================')
+    // eslint-disable-next-line no-console
     console.log(estr)
 
     if (this.errfunc && !this.errfunc(tok)) {
@@ -402,12 +407,14 @@ function test_parser() {
   }
 
   var lex = new lexer(tokens, errfunc)
+  // eslint-disable-next-line no-console
   console.log('Testing lexical scanner...')
 
   lex.input(a)
 
   var tok
   while ((tok = lex.next())) {
+    // eslint-disable-next-line no-console
     console.log(tok.toString())
   }
 
@@ -449,8 +456,6 @@ function test_parser() {
 
   function p_Field(p) {
     var field = {}
-
-    console.log('-----', p.peek().type)
 
     field.name = p.expect('ID', 'struct field name')
     p.expect('COLON')
@@ -498,5 +503,6 @@ function test_parser() {
 
   var ret = p_Struct(parser)
 
+  // eslint-disable-next-line no-console
   console.log(JSON.stringify(ret))
 }

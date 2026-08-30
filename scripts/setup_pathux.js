@@ -1,7 +1,6 @@
 import cconst2 from './path.ux/scripts/config/const.js'
 import {default as config, loadConfigLocal} from './config/config.js'
-import {IconManager, setBaseUnit, setIconManager, setIconMap, setMetric, UIBase} from './path.ux/scripts/pathux.js'
-import {Icons} from './editors/icon_enum.js'
+import {IconManager, setBaseUnit, setIconManager, setMetric, UIBase} from './path.ux/scripts/pathux.js'
 import {resolvePath} from './config.js'
 import {_setUIBase} from './framework_api.js'
 

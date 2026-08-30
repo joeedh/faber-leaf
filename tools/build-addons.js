@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 /**
  * Per-addon esbuild driver. Discovers every `addons/builtin/<id>/manifest.json`,
  * bundles each addon's TypeScript entry into `build/addons/<id>/<entry>.js`,

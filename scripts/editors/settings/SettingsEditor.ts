@@ -66,12 +66,9 @@ SettingsEditor {
         theme
       theme += '\nsetTheme(theme);\n\n'
 
-      console.log(theme)
-
       const blob = new Blob([theme], {type: 'application/javascript'})
       const url = URL.createObjectURL(blob)
 
-      console.log('url', url)
       window.open(url)
     })
 
@@ -98,11 +95,13 @@ SettingsEditor {
         pickAndInstallAddon()
           .then((result) => {
             if (result) {
+              // eslint-disable-next-line no-console
               console.log(`installed addon "${result.manifest.id}"`)
               rebuild()
             }
           })
           .catch((err) => {
+            // eslint-disable-next-line no-console
             console.error('addon install failed:', err)
             window.alert?.(`Addon install failed: ${err.message}`)
           })
@@ -126,6 +125,7 @@ SettingsEditor {
           addonManager
             .uninstall(manifest.id)
             .then(() => rebuild())
+            // eslint-disable-next-line no-console
             .catch((err) => console.error('uninstall failed:', err))
         })
       }

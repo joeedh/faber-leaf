@@ -1,13 +1,4 @@
-import {
-  IVector4,
-  Matrix4,
-  Vector2,
-  Vector2Like,
-  Vector3,
-  Vector3Like,
-  Vector4,
-  Vector4Like,
-} from '../../util/vectormath'
+import {IVector4, Matrix4, Vector2Like, Vector3, Vector3Like, Vector4, Vector4Like} from '../../util/vectormath'
 import {util} from '../../path.ux/scripts/pathux'
 
 /** A screen-space label the viewport draws this frame and forgets the next. */

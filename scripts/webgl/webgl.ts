@@ -35,6 +35,7 @@ export function initDebugGL(gl: WebGL2RenderingContext): WebGL2RenderingContext 
 
       const err = obj.getError()
       if (err !== 0) {
+        // eslint-disable-next-line no-console
         console.warn('gl.' + k + ':', constmap[err as number])
       }
 
@@ -638,7 +639,9 @@ v${attr} = ${attr};
         // Something went wrong during compilation; get the error
         const error = gl.getShaderInfoLog(shader)
 
+        // eslint-disable-next-line no-console
         console.log(format_lines(code, error ?? 'unknown error'))
+        // eslint-disable-next-line no-console
         console.log('\nError compiling shader: ', error)
 
         gl.deleteShader(shader)
@@ -686,9 +689,12 @@ v${attr} = ${attr};
       // something went wrong with the link
       const error = gl.getProgramInfoLog(program)
 
+      // eslint-disable-next-line no-console
       console.log('\nVERTEX:\n' + format_lines(vshader))
+      // eslint-disable-next-line no-console
       console.log('\nFRAGMENT\n:' + format_lines(fshader))
 
+      // eslint-disable-next-line no-console
       console.log('Error in program linking:' + error)
 
       gl.deleteProgram(program)
@@ -1036,6 +1042,7 @@ v${attr} = ${attr};
               gl.uniform4fv(loc, arr)
               break
             default:
+              // eslint-disable-next-line no-console
               console.log(v)
               throw new Error('invalid array')
           }
@@ -1045,6 +1052,7 @@ v${attr} = ${attr};
         } else if (typeof v === 'number') {
           gl.uniform1f(loc, v)
         } else if (v !== undefined && v !== null) {
+          // eslint-disable-next-line no-console
           console.warn('Invalid uniform', k, v)
           throw new Error('Invalid uniform')
         }
@@ -1091,10 +1099,12 @@ export class VBO {
       this.gl = gl
       this.vbo = gl.createBuffer()
 
+      // eslint-disable-next-line no-console
       console.warn('context loss detected')
     }
 
     if (!this.ready) {
+      // eslint-disable-next-line no-console
       console.warn('buffer was not ready; forgot to call .uploadData?')
     }
 
@@ -1111,6 +1121,7 @@ export class VBO {
       this.gl = gl
       this.vbo = gl.createBuffer()
 
+      // eslint-disable-next-line no-console
       console.warn('context loss detected')
 
       if (this.lastData !== undefined) {
@@ -1124,7 +1135,6 @@ export class VBO {
       this.dead = false
       this.gl = gl
       this.vbo = gl.createBuffer()
-      console.log('vbo creation')
     }
 
     this.ready = false
@@ -1135,6 +1145,7 @@ export class VBO {
 
   destroy(gl: WebGL2RenderingContext): void {
     if (this.dead) {
+      // eslint-disable-next-line no-console
       console.warn('tried to kill vbo twice')
       return
     }
@@ -1161,6 +1172,7 @@ export class VBO {
       this.vbo = gl.createBuffer()
       this.size = -1
 
+      // eslint-disable-next-line no-console
       console.warn('Restoring VBO after context loss')
     }
 
@@ -1177,6 +1189,7 @@ export class VBO {
       gl.bufferSubData(target, 0, dataF32)
     } else {
       if (window.DEBUG?.simplemesh) {
+        // eslint-disable-next-line no-console
         console.warn('bufferData')
       }
       gl.bufferData(target, dataF32, drawhint)
@@ -1230,6 +1243,7 @@ export class RenderBuffer {
       }
     } else {
       if (!(name in this._layers)) {
+        // eslint-disable-next-line no-console
         console.trace('WARNING: gl buffer not in RenderBuffer!', name, gl)
         return
       }
@@ -1287,6 +1301,7 @@ export class Texture {
 
   static defaultParams(gl: WebGL2RenderingContext, tex: Texture, target: number = gl.TEXTURE_2D): void {
     if (!(tex instanceof Texture)) {
+      // eslint-disable-next-line no-console
       console.warn(
         "Depracated call to Texture.defaultParams with 'tex' a raw WebGLTexture instance instance of wrapper webgl.Texture object"
       )

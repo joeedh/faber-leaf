@@ -1,5 +1,5 @@
-/* eslint-disable no-console */
 #!/usr/bin/env node
+/* eslint-disable no-console */
 
 import {DependencyAnalyzer} from './analyzer'
 import {CycleDetector} from './cycle-detector'

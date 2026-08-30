@@ -70,6 +70,7 @@ export class ObjectPanel extends ColumnFrame<ViewContext> {
     panel.prop(`object.inputs["loc"].value`)
 
     panel.label('Rotation')
+    // it's odd that 'loc' is picked up but not these others
     panel.prop('object.inputs["rot"].value')
     panel.prop('object.inputs["rotOrder"].value')
 

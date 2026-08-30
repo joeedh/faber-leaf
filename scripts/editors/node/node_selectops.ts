@@ -62,6 +62,7 @@ export class NodeSelectOpBase<
       const node = graph.node_idmap.get(k as unknown as number)
 
       if (node === undefined) {
+        // eslint-disable-next-line no-console
         console.warn('Warning: missing node ' + k + ' in graph ' + this.inputs.graphPath.getValue())
         continue
       }
@@ -85,6 +86,7 @@ export class NodeSelectOpBase<
       const i = order[k as unknown as number]
 
       if (node === undefined) {
+        // eslint-disable-next-line no-console
         console.warn('Warning: missing node ' + k + ' in graph ' + this.inputs.graphPath.getValue())
         continue
       }
@@ -96,6 +98,7 @@ export class NodeSelectOpBase<
     //do a sanity check that we've re-added all nodes
     for (const node of nodes) {
       if (!(node.graph_id in donemap)) {
+        // eslint-disable-next-line no-console
         console.warn('orphan node found in node_selectops.NodeSelectOpBase.prototype.undo')
         for (let i = 0; i < nodes.length; i++) {
           if (nodeList[i] === undefined) {
@@ -144,11 +147,10 @@ export class NodeSelectOneOp extends NodeSelectOpBase<{nodeId: IntProperty; mode
     const graph = this.fetchGraph(ctx)
 
     if (graph === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('error in node_selectops.NodeSelectOneOp')
       return
     }
-
-    console.log('mode', mode)
 
     const node = graph.node_idmap.get(this.inputs.nodeId.getValue())
     if (node === undefined) {
@@ -205,9 +207,8 @@ export class NodeToggleSelectAll extends NodeSelectOpBase<{mode: EnumProperty}> 
     let mode = this.inputs.mode.getValue()
     const graph = this.fetchGraph(ctx)
 
-    console.log('toggle select all', graph)
-
     if (graph === undefined) {
+      // eslint-disable-next-line no-console
       console.warn('error in node_selectops.NodeToggleSelectAll')
       return
     }
@@ -222,8 +223,6 @@ export class NodeToggleSelectAll extends NodeSelectOpBase<{mode: EnumProperty}> 
         }
       }
     }
-
-    console.log('mode', mode)
 
     for (const node of graph.nodes) {
       graph.nodes.setSelect(node, mode === SelToolModes.ADD)

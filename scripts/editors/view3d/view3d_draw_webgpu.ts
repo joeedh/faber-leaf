@@ -134,6 +134,8 @@ async function initViewport(
   }
   gpu.device.addEventListener?.('uncapturederror', (ev) => {
     const e = ev as unknown as {error: GPUError}
+    // eslint-disable-next-line no-console
+    // eslint-disable-next-line no-console
     console.error('[webgpu] uncapturederror:', e.error.message)
   })
   return viewport
@@ -166,6 +168,7 @@ const warnedFeatures = new Set<string>()
 function warnOnce(key: string, message: string): void {
   if (warnedFeatures.has(key)) return
   warnedFeatures.add(key)
+  // eslint-disable-next-line no-console
   console.warn(`[webgpu] ${key}: ${message}`)
 }
 
@@ -193,6 +196,7 @@ export function primeWebGpuViewport(canvas: HTMLCanvasElement | OffscreenCanvas)
         w.redraw_viewport?.()
       })
       .catch((err) => {
+        // eslint-disable-next-line no-console
         console.error('[webgpu] init failed — falling back to WebGL on next frame', err)
       })
   }
@@ -516,12 +520,14 @@ function ensureMaterialPipeline(
   try {
     def = mat.generateWgsl(scene, rlights)
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(`[webgpu] mat-${mat.lib_id} generateWgsl failed:`, err)
     return undefined
   }
 
   if (!loggedMaterialWgsl.has(mat.lib_id)) {
     loggedMaterialWgsl.add(mat.lib_id)
+    // eslint-disable-next-line no-console
     console.log(`[webgpu] mat-${mat.lib_id} WGSL:\n${def.wgsl}`)
   }
 
@@ -544,19 +550,23 @@ function ensureMaterialPipeline(
     wgpu.device.pushErrorScope('validation')
     pipeline = wgpu.pipelineCache.get(desc)
     void wgpu.device.popErrorScope().then((err) => {
+      // eslint-disable-next-line no-console
       if (err) console.error(`[webgpu] mat-${mat.lib_id} pipeline validation error:`, err.message)
     })
     void pipeline.module.getCompilationInfo().then((info) => {
       const bad = info.messages.filter((m) => m.type === 'error' || m.type === 'warning')
       if (bad.length > 0) {
+        // eslint-disable-next-line no-console
         console.group(`[webgpu] mat-${mat.lib_id} WGSL compilation messages`)
         for (const m of bad) {
           console[m.type === 'error' ? 'error' : 'warn'](`${m.type} at L${m.lineNum}:${m.linePos}: ${m.message}`)
         }
+        // eslint-disable-next-line no-console
         console.groupEnd()
       }
     })
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error(`[webgpu] mat-${mat.lib_id} pipeline compile threw:`, err)
     return undefined
   }
@@ -659,6 +669,7 @@ function drawRenderWebGpu(view3d: ViewLike): void {
       try {
         consumer.setRequestedAttrs(state.requestedAttrs)
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error(`[webgpu] mat-${mat.lib_id} requested-attr push threw:`, err)
       }
     }
@@ -671,12 +682,14 @@ function drawRenderWebGpu(view3d: ViewLike): void {
       ob.draw(view3d, view3d.gl as WebGL2RenderingContext, uniforms, state.program as unknown as ShaderProgram)
       nDrawn++
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error(`[webgpu] drawRender ob ${ob.lib_id} ob.draw threw:`, err)
     }
   }
 
   if (!loggedRenderSummary) {
     loggedRenderSummary = true
+    // eslint-disable-next-line no-console
     console.log(
       `[webgpu] drawRenderWebGpu: ${nTotal} total, ${nUsesMat} usesMaterial, ${nWithMat} with material slot, ${nDrawn} drawn`
     )

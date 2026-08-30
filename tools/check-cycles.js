@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 /**
  * Import-cycle ratchet: runs tools/circular-ref-finder over the app's module
  * graph, splits the cycles it finds into host-owned and submodule-owned, and

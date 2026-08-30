@@ -64,7 +64,6 @@ describe('only an addon-owned type registers from an addon', () => {
   // module scope only while it says why, directly above the call.
   const HOST_REGISTRATIONS: [string, string][] = [
     ['scripts/editors/view3d/transform/transform_types.ts', 'ObjectTransType'],
-    ['scripts/editors/view3d/widgets/widget_utils.ts', 'TransMovWidget'],
   ]
 
   test.each(HOST_REGISTRATIONS)('%s registers %s at module scope, with a reason', (rel, name) => {

@@ -261,6 +261,7 @@ graph.NodeSocketType {
   }*/
 
   noUnits() {
+    // eslint-disable-next-line no-console
     console.warn('Deprecated call to NodeSocketType.prototype.noUnits()')
     return this
   }
@@ -320,12 +321,14 @@ graph.NodeSocketType {
 
   connect(sock: this) {
     if (this.edges.includes(sock)) {
+      // eslint-disable-next-line no-console
       console.warn('Already have socket connected')
       return
     }
 
     for (const s of this.edges) {
       if (s.node === sock.node && s.name === sock.name) {
+        // eslint-disable-next-line no-console
         console.warn('Possible duplicate socket add', s, sock)
       }
     }
@@ -334,12 +337,14 @@ graph.NodeSocketType {
     sock.edges.push(this)
 
     if (!sock.node) {
+      // eslint-disable-next-line no-console
       console.warn('graph corruption')
     } else {
       sock.node.graphUpdate()
     }
 
     if (!this.node) {
+      // eslint-disable-next-line no-console
       console.warn('graph corruption')
     } else {
       this.node.graphUpdate()
@@ -359,6 +364,7 @@ graph.NodeSocketType {
 
       while (this.edges.length > 0) {
         if (_i++ > 10000) {
+          // eslint-disable-next-line no-console
           console.warn('infinite loop detected in graph code')
           break
         }
@@ -411,6 +417,7 @@ graph.NodeSocketType {
   }
 
   update() {
+    // eslint-disable-next-line no-console
     console.warn('NodeSocketType.prototype.update() is deprecated; use .graphUpdate instead')
     return this.graphUpdate()
   }
@@ -422,6 +429,7 @@ graph.NodeSocketType {
   graphUpdate(updateParentNode = false, _exclude?: NodeSocketType) {
     if (this.graph_id === -1) {
       //we're not in a graph
+      // eslint-disable-next-line no-console
       console.warn('graphUpdate called on non-node', this)
       return
     }
@@ -891,6 +899,7 @@ graph.Node {
 
   update(): this {
     this.graphUpdate()
+    // eslint-disable-next-line no-console
     console.warn('deprecated call to graph.Node.prototype.update(); use graphUpdate instead')
 
     //this.graph_flag |= NodeFlags.UPDATE;
@@ -964,12 +973,8 @@ graph.Node {
         let s2 = socks2[k]
 
         if (s1.constructor !== s2.constructor) {
-          console.warn('==========================Node patch!', s1, s2)
-
           //our types differ?
           if (s2 instanceof s1.constructor! || s1 instanceof (s2 as NodeSocketType).constructor!) {
-            console.log('Inheritance')
-
             //easy case, the old file uses a parent class of a new one,
             //e.g. Vec4Socket was changed to RGBASocket
             s2 = s2.copy()
@@ -1285,6 +1290,7 @@ export class GraphNodes<ExecContextType, NodeBase extends Node = GenericNode<Exe
     if (i >= 0) {
       this[i] = newitem
     } else {
+      // eslint-disable-next-line no-console
       console.warn(olditem, newitem)
       throw new Error('Node is not in node list')
     }
@@ -1436,6 +1442,7 @@ graph.Graph {
             const bad = sock3.node?.graph_graph && sock3.node.graph_graph !== this
 
             if (bad) {
+              // eslint-disable-next-line no-console
               console.log('bad socket', sock3)
               continue
             }
@@ -1444,6 +1451,7 @@ graph.Graph {
             const n4 = ret.node_idmap.get(n3.graph_id)
 
             if (!n4) {
+              // eslint-disable-next-line no-console
               console.log('bad socket2', sock3)
               continue
             }
@@ -1452,6 +1460,7 @@ graph.Graph {
             const sock4 = socks[sock3.socketName]
 
             if (!sock4) {
+              // eslint-disable-next-line no-console
               console.log('bad socket3', sock3, socks)
               continue
             }
@@ -1531,6 +1540,7 @@ graph.Graph {
 
     const dosort = (n: NodeBase) => {
       if (n.graph_flag & NodeFlags.CYCLE_TAG) {
+        // eslint-disable-next-line no-console
         console.warn('Warning: graph cycle detected!')
         this.graph_flag |= GraphFlags.CYCLIC
         n.graph_flag &= ~NodeFlags.CYCLE_TAG
@@ -1570,6 +1580,7 @@ graph.Graph {
 
     const cyclesearch = (n: GenericNode<ExecContextType>): boolean => {
       if (n.graph_flag & NodeFlags.CYCLE_TAG) {
+        // eslint-disable-next-line no-console
         console.warn('Warning: graph cycle detected!')
         this.graph_flag |= GraphFlags.CYCLIC
         return true
@@ -1581,6 +1592,7 @@ graph.Graph {
         n.graph_flag |= NodeFlags.CYCLE_TAG
         for (const s2 of s1.edges) {
           if (s2.node === undefined) {
+            // eslint-disable-next-line no-console
             console.warn('Dependency graph corruption detected', s1, s2, n)
             continue
           }
@@ -1633,6 +1645,7 @@ graph.Graph {
         const diff = Math.abs(sock.diffValue(sock._old))
 
         if (isNaN(diff)) {
+          // eslint-disable-next-line no-console
           console.warn("Got NaN from a socket's diffValue method!", sock)
           continue
         }
@@ -1648,8 +1661,6 @@ graph.Graph {
   }
 
   _cyclic_exec(context: ExecContextType) {
-    //console.log("cycle exec", this.sortlist.length, this.nodes.length);
-
     const sortlist = this.sortlist
 
     for (const n of sortlist) {
@@ -1665,8 +1676,6 @@ graph.Graph {
     for (let i = 0; i < this.max_cycle_steps; i++) {
       const limit = this.cycle_stop_threshold
       const change = this._cyclic_step(context)
-
-      //console.log("change", change.toFixed(5), limit);
 
       if (Math.abs(change) < limit) {
         break
@@ -1704,19 +1713,20 @@ graph.Graph {
   }
 
   update() {
+    // eslint-disable-next-line no-console
     console.warn('Graph.prototype.update() called; use .graphUpdate instead')
     return this.graphUpdate()
   }
 
   graphUpdate() {
     if (this.graph_flag & GraphFlags.RESORT) {
-      console.log('resorting graph')
       this.sort()
     }
   }
 
   remove(node: Node) {
     if (node.graph_id === -1) {
+      // eslint-disable-next-line no-console
       console.warn('Warning, twiced to remove node not in graph (double remove?)', node.graph_id, node)
       return
     }
@@ -1728,6 +1738,7 @@ graph.Graph {
         s.disconnect(s.edges[0])
 
         if (_i++ > 10000) {
+          // eslint-disable-next-line no-console
           console.warn('infinite loop detected')
           break
         }
@@ -1751,6 +1762,7 @@ graph.Graph {
 
   add(node: NodeBase) {
     if (node.graph_id !== -1) {
+      // eslint-disable-next-line no-console
       console.warn('Warning, tried to add same node twice', node.graph_id, node)
       return
     }
@@ -1811,6 +1823,7 @@ graph.Graph {
 
       for (const s of n.allsockets) {
         if (s.graph_id === -1) {
+          // eslint-disable-next-line no-console
           console.warn('Found patched socket from old file; fixing.', s)
           //old file, didn't have socket
           s.graph_id = this.graph_idgen.next()
@@ -1865,6 +1878,7 @@ graph.Graph {
           }
 
           if (!e) {
+            // eslint-disable-next-line no-console
             console.warn('pruning dead graph connection', sock)
             sock.edges.remove(sock.edges[i])
             i--
@@ -1880,16 +1894,12 @@ graph.Graph {
 
   //substitute proxy with original node
   relinkProxyOwner<NodeType extends NodeBase>(n: NodeType): void {
-    //console.warn("relinkProxyOwner", n.name);
-
-    type InputSet = typeof n.inputs
-    type OutputSet = typeof n.outputs
-
     let ok = n !== undefined && this.node_idmap.has(n.graph_id)
     ok = ok && this.node_idmap.get(n.graph_id) instanceof ProxyNode
 
     //console.trace("relinking proxy", n.name);
     if (!ok) {
+      // eslint-disable-next-line no-console
       console.warn(
         'structural error in Graph: relinkProxyOwner was called in error',
         n,
@@ -1927,6 +1937,7 @@ graph.Graph {
             //attempt to copy old value
             s1.setValue(s2.getValue())
           } catch (error) {
+            // eslint-disable-next-line no-console
             console.warn('Failed to load data from old file ' + s2.constructor!.name + ' to ' + s1.constructor!.name)
           }
 
@@ -1971,13 +1982,10 @@ graph.Graph {
 
   execSubtree(startnode: Node, context: ExecContextType, checkStartParents = true) {
     if (this.graph_flag & GraphFlags.RESORT) {
-      console.log('resorting graph')
       this.sort()
     }
 
     function visit(node: Node) {
-      //console.log(node.constructor.name, node.graph_id);
-
       if (node.graph_flag & NodeFlags.CYCLE_TAG) {
         throw new GraphCycleError('Cycle error')
       }
@@ -2043,6 +2051,7 @@ graph.Graph {
     for (const n of this.nodes) {
       for (const s of n.allsockets) {
         if (s.graph_id < 0) {
+          // eslint-disable-next-line no-console
           console.warn('graph corruption', s)
           s.graph_id = this.graph_idgen.next()
           this.sock_idmap.set(s.graph_id, s)

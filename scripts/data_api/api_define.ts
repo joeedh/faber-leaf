@@ -1,26 +1,10 @@
-import {
-  util,
-  nstructjs,
-  Vector2,
-  Vector3,
-  Vector4,
-  Quat,
-  Matrix4,
-  ToolPropertyCache,
-  buildToolSysAPI,
-  BoundConstructor,
-  CallbackThis,
-} from '../path.ux/scripts/pathux.js'
-
-import * as editors from '../editors/all.js'
+import {Matrix4, ToolPropertyCache, buildToolSysAPI, BoundConstructor, CallbackThis} from '../path.ux/scripts/pathux.js'
 
 import '../image/image_ops.js'
 import '../image/image.js'
 import '../light/light.js'
 import '../light/light_ops.js'
 
-import {ResourceBrowser} from '../editors/resbrowser/resbrowser.js'
-import {resourceManager} from '../core/resource.js'
 import '../core/image.js'
 // CameraData self-registers at module scope; this side-effect import pulls it into
 // the bundle.
@@ -28,21 +12,12 @@ import '../camera/camera.js'
 
 import {NodeSocketClasses} from '../core/graph.js'
 
-const STRUCT = nstructjs.STRUCT
 import '../editors/view3d/widgets/widget_tools.js' //ensure widget tools are all registered
-import {WidgetFlags} from '../editors/view3d/widgets/widgets.js'
-import {AddLightOp} from '../light/light_ops.js'
 import {Light} from '../light/light.js'
 import {DataAPI, DataStruct} from '../path.ux/scripts/pathux.js'
-import {DataBlock, DataRef, Library, onBlockRegister, defineLibrarySet} from '../core/lib_api.js'
-import {View3D} from '../editors/view3d/view3d.js'
-import {View3DFlags, CameraModes} from '../editors/view3d/view3d_base.js'
+import {DataBlock, Library, onBlockRegister, defineLibrarySet} from '../core/lib_api.js'
 import {App, buildEditorsAPI} from '../editors/editor_base.js'
-import {NodeEditorBase} from '../editors/node/NodeEditor.js'
-import {NodeViewer} from '../editors/node/NodeViewer.js'
-import {MenuBarEditor} from '../editors/menu/MainMenu.js'
-import {RGBASocket, Vec4Socket, Vec2Socket, Vec3Socket, FloatSocket} from '../core/graphsockets.js'
-import {VelPan, VelPanFlags} from '../editors/velpan.js'
+import {VelPan} from '../editors/velpan.js'
 import {SelMask} from '../core/select_types.js'
 import {ToolContext} from '../core/context.js'
 import type {ViewContext} from '../core/context.js'
@@ -52,19 +27,14 @@ import '../shadernodes/allnodes.js'
 import {ShaderNode} from '../shadernodes/shader_nodes.js'
 import {Graph, Node, SocketFlags, NodeSocketType} from '../core/graph.js'
 import {SceneObject} from '../sceneobject/sceneobject.js'
-import {ObjectSelectOneOp} from '../sceneobject/selectops.js'
-import {DeleteObjectOp} from '../sceneobject/sceneobject_ops.js'
 import {Scene} from '../scene/scene.js'
 import {api_define_graphclasses} from '../core/graph_class.js'
-import {DisplayModes} from '../editors/debug/DebugEditor_base.js'
-import {DebugEditor} from '../editors/debug/DebugEditor.js'
 
 export type MyDataAPI = DataAPI<ViewContext>
 const dataApi = new DataAPI() as MyDataAPI
 
 import {Icons} from '../editors/icon_enum.js'
 import {setSceneObjectMaterialClass} from '../sceneobject/sceneobject_base.js'
-import {MaterialEditor} from '../editors/node/MaterialEditor.js'
 
 import {buildProcTextureAPI} from '../texture/proceduralTex.js'
 import {AppSettings} from '../core/settings.js'
@@ -142,8 +112,8 @@ function api_define_shadernode(api: MyDataAPI, cls?: AnyClass): DataStruct {
   return nstruct
 }
 
-function api_define_graph(api: MyDataAPI, cls: AnyClass = Graph): DataStruct {
-  const gstruct = api.mapStruct(cls)
+function api_define_graph(rootApi: MyDataAPI, cls: AnyClass = Graph): DataStruct {
+  const gstruct = rootApi.mapStruct(cls)
 
   gstruct.list('', 'nodes', [
     function getIter(api: MyDataAPI, list: any) {
@@ -198,11 +168,11 @@ onBlockRegister(function onDataBlockRegister(blockCls: any) {
   }
 })
 
-function api_define_library(api: MyDataAPI, parent: DataStruct): void {
+function api_define_library(rootApi: MyDataAPI, parent: DataStruct): void {
   // Library's per-blocktype lists (library.mesh, …) are its own struct members,
   // populated by Library.defineAPI in the registry pass. This driver fetches that
   // struct, keeps the dynamic-registration wiring, and wires the parent attaches.
-  const lstruct = api.mapStruct(Library, false)
+  const lstruct = rootApi.mapStruct(Library, false)
   libraryStruct = lstruct
 
   parent.struct('datalib', 'library', 'Library', lstruct)
@@ -354,47 +324,47 @@ export function getDataAPI(): MyDataAPI {
   cstruct.struct('object', 'object', SceneObject as unknown as string, ostruct)
 
   cstruct.list('', 'objects', [
-    function getIter(api: MyDataAPI, list: any) {
+    function getIter(api2: MyDataAPI, list: any) {
       return (function* () {
         for (const ob of list.datalib.object) {
           yield ob
         }
       })()
     },
-    function getLength(api: MyDataAPI, list: any) {
+    function getLength(api2: MyDataAPI, list: any) {
       return list.datalib.object.length
     },
-    function get(api: MyDataAPI, list: any, key: number | string) {
+    function get(api2: MyDataAPI, list: any, key: number | string) {
       return list.datalib.get(key)
     },
-    function getKey(api: MyDataAPI, list: any, obj: any) {
+    function getKey(api2: MyDataAPI, list: any, obj: any) {
       return obj.lib_id
     },
-    function getStruct(api: MyDataAPI, list: any, key: number | string) {
+    function getStruct(api2: MyDataAPI, list: any, key: number | string) {
       return ostruct
     },
   ])
   dataApi.setRoot(cstruct)
 
   cstruct.list('', 'datablocks', [
-    function getIter(api: MyDataAPI, list: any) {
+    function getIter(api2: MyDataAPI, list: any) {
       return list.datalib.allBlocks
     },
-    function getLength(api: MyDataAPI, list: any) {
+    function getLength(api2: MyDataAPI, list: any) {
       let len = 0
-      for (const block of list.datalib.allBlocks) {
+      for (const _unused of list.datalib.allBlocks) {
         len++
       }
       return len
     },
-    function get(api: MyDataAPI, list: any, key: number | string) {
+    function get(api2: MyDataAPI, list: any, key: number | string) {
       return list.datalib.get(key)
     },
-    function getKey(api: MyDataAPI, list: any, obj: any) {
+    function getKey(api2: MyDataAPI, list: any, obj: any) {
       return obj.lib_id
     },
-    function getStruct(api: MyDataAPI, list: any, key: number | string) {
-      return api.mapStruct(list.datalib.get(key).constructor, false)
+    function getStruct(api2: MyDataAPI, list: any, key: number | string) {
+      return api2.mapStruct(list.datalib.get(key).constructor, false)
     },
   ])
 

@@ -260,7 +260,6 @@ export class UnlinkDataBlockOp<
       rdef.obj.lib_remUser(block)
     }
 
-    console.log(`setting ${path} to undefined`)
     ctx.api.setValue(ctx, path, undefined)
   }
 }
@@ -336,7 +335,6 @@ export class DataBlockBrowser<BlockType extends DataBlock> extends Container<Vie
   }
 
   flagRebuild() {
-    console.warn('flagRebuild')
     this._needs_rebuild = true
   }
 
@@ -357,8 +355,6 @@ export class DataBlockBrowser<BlockType extends DataBlock> extends Container<Vie
       //this.label("Nothing selected");
       return
     }
-
-    console.warn('Data block browser recalc')
 
     const col = this.col()
 
@@ -389,8 +385,6 @@ export class DataBlockBrowser<BlockType extends DataBlock> extends Container<Vie
 
       const block = ctx.datalib.get(id)!
       block.lib_addUser(meta.obj)
-
-      console.log('Assigning block')
 
       this.useDataPathUndo = false
       this.setPathValue(ctx, path, block)
@@ -780,7 +774,6 @@ export class EditorSideBar extends Container<ViewContext> {
       this.style['height'] = '' + this._height + 'px'
       this.setCSS()
       this.flushUpdate()
-      console.log('Sidebar height update')
       this.updateIcon()
     }
   }
@@ -1038,8 +1031,6 @@ export function spawnToolSearchMenu(ctx: ViewContext) {
 
       if (hotkey) {
         hotkey = hotkey.buildString()
-
-        console.log('hotkey:', hotkey)
       }
     }
 
@@ -1055,8 +1046,6 @@ export function spawnToolSearchMenu(ctx: ViewContext) {
   menu.float(screen.mpos[0], screen.mpos[1], 8)
   menu.style['width'] = '500px'
   menu.on_select = (item: number | string) => {
-    console.log(item, 'got item')
-
     const cls = tools[item as number]
     const tool = cls.invoke(ctx, {})
 
@@ -1153,7 +1142,6 @@ App {
         window.redraw_viewport()
       }),
       new HotKey('Y', ['ctrl'], () => {
-        console.log('redo!')
         getAppState().toolstack.redo()
         window.redraw_viewport()
       }),
@@ -1280,8 +1268,6 @@ App {
     update = update || view3d.size![0] !== w || view3d.size![1] !== h
 
     if (update) {
-      console.log('menu update', x, y, w, h)
-
       view3d.pos![0] = x
       view3d.pos![1] = y
       view3d.size![0] = w
@@ -1388,7 +1374,9 @@ export class MaterialChooser extends Container<ViewContext> {
       try {
         this.rebuild()
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error((error as any).stack)
+        // eslint-disable-next-line no-console
         console.error((error as any).message)
         this.doOnce(this.rebuild)
       }
@@ -1470,6 +1458,7 @@ export class MaterialChooser extends Container<ViewContext> {
     this.button('Add Material', () => {
       const obData = this.ctx.api.getValue<SceneObjectData>(this.ctx, this.getAttribute('datapath')!)
       if (obData === undefined) {
+        // eslint-disable-next-line no-console
         console.log('Invalid sceneobject data at ' + this.getAttribute('datapath'))
         this.ctx.error('Invalid sceneobject data at ' + this.getAttribute('datapath'))
         return
@@ -1574,15 +1563,14 @@ export class MaterialPanel extends Container<ViewContext> {
 
   rebuild() {
     if (!this.ctx || !this.hasAttribute('datapath') || this.chooser === undefined || this.subpanel === undefined) {
+      // eslint-disable-next-line no-console
       console.error('material panel error cannot build widget')
       return
     }
 
     const objectData = this.ctx.api.getValue<SceneObjectData>(this.ctx, this.getAttribute('datapath')!)
-
-    console.log('Material panel rebuild')
-
     const uidata = saveUIData(this.subpanel, 'mesh material panel')
+
     this.subpanel?.clear()
 
     if (!objectData) {
@@ -1757,7 +1745,6 @@ export class DirectionChooser extends UIBase<ViewContext, Vector3> {
 
   endModal() {
     if (this.modaldata) {
-      console.log('end modal')
       popModalLight(this.modaldata)
     }
 
@@ -1902,8 +1889,6 @@ export class DirectionChooser extends UIBase<ViewContext, Vector3> {
         },
 
         on_keydown: (e: KeyboardEvent) => {
-          console.log(e.keyCode, this.modaldata)
-
           switch (e.keyCode) {
             case keymap['Escape']:
               this.setValue(this.start_value)
@@ -1973,8 +1958,6 @@ export class DirectionChooser extends UIBase<ViewContext, Vector3> {
   }
 
   render() {
-    //console.log("rendering direction chooser");
-
     const g = this.g
     const canvas = this.canvas
     const size = canvas.width
@@ -2041,10 +2024,7 @@ export class DirectionChooser extends UIBase<ViewContext, Vector3> {
         p.multVecMatrix(rmat)
 
         const w = proj(p)
-
         if (w < 0) continue
-
-        //console.log("XY",p[0].toFixed(3), p[1].toFixed(3), th, i, dth);
 
         g.moveTo(p[0], p[1])
         g.arc(p[0], p[1], r / w, -Math.PI, Math.PI)
@@ -2113,8 +2093,6 @@ export class DirectionChooser extends UIBase<ViewContext, Vector3> {
 
     this.disabled = false
     if (this.value.vectorDistance(val) > 0.0001) {
-      console.log('path update')
-
       this.value.load(val)
       if (this.on_change) {
         this.on_change(val)

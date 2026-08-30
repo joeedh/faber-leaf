@@ -429,10 +429,17 @@ export class SimpleNoise extends PatternGen {
   }
 
   static buildSettings(container: Container<ViewContext>): void {
-    container.prop('levels')
-    container.prop('levelScale')
-    container.prop('factor')
+    // we're using container.dataPathPrefix so the
+    // eslint rule checker isn't valid
+    // we could eventually support this with a prefix template parameter to Container
 
+    // eslint-disable-next-line pathux/valid-datapath
+    container.prop('levels')
+    // eslint-disable-next-line pathux/valid-datapath
+    container.prop('levelScale')
+    // eslint-disable-next-line pathux/valid-datapath
+    container.prop('factor')
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('zoff')
   }
 
@@ -508,8 +515,8 @@ export class SimpleNoise extends PatternGen {
     let v = Math.fract(y)
     let w = Math.fract(z)
 
-    function hash3(x: number, y: number, z: number) {
-      const f = x * Math.sqrt(3.0) + y * Math.sqrt(5.0) * 10.0 + z * Math.sqrt(7.0) * 100.0
+    function hash4(x2: number, y2: number, z2: number) {
+      const f = x2 * Math.sqrt(3.0) + y2 * Math.sqrt(5.0) * 10.0 + z2 * Math.sqrt(7.0) * 100.0
       return Math.fract(hash(f))
       //return hash(x*y*z + x*x + y*y + z*x);
     }
@@ -518,16 +525,16 @@ export class SimpleNoise extends PatternGen {
     const cy = Math.floor(y)
     const cz = Math.floor(z)
 
-    const h1 = hash3(cx, cy, cz)
+    const h1 = hash4(cx, cy, cz)
 
-    const h2 = hash3(cx, cy + 1, cz)
-    const h3 = hash3(cx + 1, cy + 1, cz)
-    const h4 = hash3(cx + 1, cy, cz)
+    const h2 = hash4(cx, cy + 1, cz)
+    const h3 = hash4(cx + 1, cy + 1, cz)
+    const h4 = hash4(cx + 1, cy, cz)
 
-    const h5 = hash3(cx, cy, cz + 1)
-    const h6 = hash3(cx, cy + 1, cz + 1)
-    const h7 = hash3(cx + 1, cy + 1, cz + 1)
-    const h8 = hash3(cx + 1, cy, cz + 1)
+    const h5 = hash4(cx, cy, cz + 1)
+    const h6 = hash4(cx, cy + 1, cz + 1)
+    const h7 = hash4(cx + 1, cy + 1, cz + 1)
+    const h8 = hash4(cx + 1, cy, cz + 1)
 
     u = u * u * (3.0 - 2.0 * u)
     v = v * v * (3.0 - 2.0 * v)
@@ -579,7 +586,9 @@ export class MoireNoise extends PatternGen {
   }
 
   static buildSettings(container: Container<ViewContext>): void {
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('angleOffset')
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('dynamicAngle')
   }
 
@@ -729,10 +738,15 @@ export class CombPattern extends PatternGen {
   }
 
   static buildSettings(container: Container<ViewContext>): void {
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('mode')
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('count')
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('angleOffset')
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('combWidth')
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('blackPoint')
   }
 
@@ -823,24 +837,6 @@ export class CombPattern extends PatternGen {
 
   evaluate(co: Vector3): number {
     return super.evaluate(co)
-    /*
-    let d = co[0]*co[0] + co[1]*co[1];
-    d = 1.0 - Math.sqrt(d);
-    d = Math.fract(d);
-    return d;
-    //*/
-
-    const p = mevals.next().load(co)
-    p.rot2d(this.angleOffset)
-
-    let f = Math.fract(p[0] * this.count)
-    const cwid = 1.0 - this.combWidth
-
-    f = Math.min(f * (1.0 + cwid), 1.0)
-
-    const b = this.blackPoint
-
-    return ModeFuncs[this.mode](f) * (1.0 - b) + b
   }
 }
 
@@ -891,13 +887,19 @@ export class GaborNoise extends PatternGen {
   }
 
   static buildSettings(container: Container<ViewContext>): void {
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('levels')
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('levelScale')
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('factor')
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('randomness')
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('decayPower')
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('decay2')
-
+    // eslint-disable-next-line pathux/valid-datapath
     container.prop('zoff')
   }
 
@@ -942,44 +944,9 @@ export class GaborNoise extends PatternGen {
 
   evaluate(co: Vector3): number {
     return super.evaluate(co)
-    ;`
-    co = sntmps.next().load(co)
-
-    let scale = 5.0 //*Math.pow(this.levelScale, this.levels);
-    const f = this.evaluate_intern(co, scale)
-
-    return f
-    let f1 = f
-    let f2 = 0.0
-    let tot = 1.0
-
-    const lscale = 1.0 / this.levelScale
-
-    for (let i = 0; i < this.levels; i++) {
-      const rf = i + 1
-
-      co[0] += hash(rf) * 1024.0
-      co[1] += hash(rf + 0.234) * 1024.0
-      co[2] += hash(rf + 0.345) * 1024.0
-
-      scale *= lscale
-
-      const f3 = this.evaluate_intern(co, scale)
-      f1 *= f3
-      f2 += f3
-      tot++
-    }
-
-    f1 = Math.pow(f1, 1.0 / tot)
-    f2 /= tot
-
-    return f1 + (f2 - f1) * this.factor
-    `
   }
 
   genGlsl(inputP: string, outputC: string, uniforms: any): string {
-    const u = uniforms
-
     return `
     vec3 co = ${inputP} * 5.0;
   
@@ -1078,7 +1045,7 @@ export class GaborNoise extends PatternGen {
     const y = co[1] * scale
     const z = co[2] * scale + this.zoff
 
-    let f = 0.0
+    let f: number
     let tot = 0.0
 
     /*
@@ -1111,7 +1078,6 @@ export class GaborNoise extends PatternGen {
     const efac = this.decayPower
 
     f = 0.0
-    const fmax = 0.0
 
     for (let ix = -n; ix <= n; ix++) {
       for (let iy = -n; iy <= n; iy++) {
@@ -1164,10 +1130,6 @@ export class GaborNoise extends PatternGen {
 
     f = f * 1.8
     return f * f * f * f
-
-    const u = Math.fract(x)
-    const v = Math.fract(y)
-    const w = Math.fract(z)
   }
 }
 

@@ -1,6 +1,4 @@
-import {Vector2, Vector3, Vector4, Matrix4, Quat} from './vectormath.js'
-import * as math from './math.js'
-import * as util from './util.js'
+import {Vector3, Vector4} from './vectormath.js'
 
 let scache = {}
 let rcache = {}
@@ -42,16 +40,16 @@ var hashsizes = [
   225031553,
 ]
 
-const SUSED = 0,
-  SID = 1,
-  SX = 2,
-  SY = 3,
-  SZ = 4,
-  SR = 5,
-  CIX = 6,
-  CIY = 7,
-  CIZ = 8,
-  STOT = 9
+const SUSED = 0
+const SID = 1
+const SX = 2
+const SY = 3
+const SZ = 4
+const SR = 5
+const CIX = 6
+const CIY = 7
+const CIZ = 8
+const STOT = 9
 
 function hash3(x, y, z) {
   let f1 = (x * 27191) % 45803279
@@ -72,7 +70,7 @@ function hash3(x, y, z) {
 window._hash3 = hash3
 
 export class SpatialHash {
-  constructor(cellsize, size = undefined) {
+  constructor(cellsize, size) {
     if (!cellsize) {
       throw new Error('cellsize cannot be undefined')
     }
@@ -127,8 +125,8 @@ export class SpatialHash {
     let rsqr = r * r
     let rsteps = Math.ceil(r * cz)
 
-    let size = this.size,
-      tab = this.table
+    let size = this.size
+    let tab = this.table
     let ret = new Set()
 
     for (let off of getSearchOff(rsteps)) {
@@ -142,9 +140,9 @@ export class SpatialHash {
       let probe = 0
 
       while (tab[idx]) {
-        let x = tab[idx + SX],
-          y = tab[idx + SY],
-          z = tab[idx + SZ]
+        let x = tab[idx + SX]
+        let y = tab[idx + SY]
+        let z = tab[idx + SZ]
 
         let dx = x - co[0]
         let dy = y - co[1]
@@ -174,10 +172,10 @@ export class SpatialHash {
       return new SpatialHash(1.0)
     }
 
-    let minlen = 1e17,
-      maxlen = -1e17,
-      avglen = 0,
-      tot = 0
+    let minlen = 1e17
+    let maxlen = -1e17
+    let avglen = 0
+    let tot = 0
     let edges = new Set()
 
     let min = new Vector3().addScalar(1e17)

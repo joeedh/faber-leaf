@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * The UV editor's headless suite runs with the engine absent — P18 §6, §8.
  *

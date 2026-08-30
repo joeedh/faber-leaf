@@ -103,16 +103,22 @@ function isTSJS(filePath: string): boolean {
 
 function eslintVersion(repoRoot: string): string {
   try {
-    const pkg = JSON.parse(
-      fs.readFileSync(path.join(repoRoot, 'node_modules', 'eslint', 'package.json'), 'utf-8')
-    ) as {version?: string}
+    const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, 'node_modules', 'eslint', 'package.json'), 'utf-8')) as {
+      version?: string
+    }
     return pkg.version ?? 'unknown'
   } catch {
     return 'unknown'
   }
 }
 
-function resultCacheKey(parts: {configHash: string; eslintVersion: string; argsKey: string; relPath: string; content: string}): string {
+function resultCacheKey(parts: {
+  configHash: string
+  eslintVersion: string
+  argsKey: string
+  relPath: string
+  content: string
+}): string {
   const {configHash, eslintVersion, argsKey, relPath, content} = parts
   return sha256([configHash, eslintVersion, argsKey, relPath, sha256(content)].join(' '))
 }
@@ -145,7 +151,10 @@ async function runWithConcurrency<T>(items: T[], limit: number, worker: (item: T
 
 function spawnCapture(cmd: string, args: string[]): Promise<{stdout: string; stderr: string}> {
   return new Promise((resolve) => {
-    const proc = child_process.spawn(cmd, args, {shell: true})
+    const proc = child_process.spawn(cmd, args, {
+      shell: true,
+      stdio: 'pipe',
+    })
     let stdout = ''
     let stderr = ''
     proc.stdout.setEncoding('utf-8')
@@ -203,7 +212,7 @@ async function run(targetPath: string, rawEslintArgs: string[]) {
     rawEslintArgs.push('--fix')
   }
 
-  const fixMode = rawEslintArgs.find(arg => arg === '--fix') !== undefined
+  const fixMode = rawEslintArgs.find((arg) => arg === '--fix') !== undefined
   const repoRoot = getRepoRoot()
   const {ignores, configHash} = await loadConfig(repoRoot)
   const version = eslintVersion(repoRoot)
@@ -230,7 +239,7 @@ async function run(targetPath: string, rawEslintArgs: string[]) {
   }
 
   // Key representing the eslint arguments, excluding --fix which we have special logic for
-  const argsKey = eslintArgs.filter(k => k !== '--fix').join(' ')
+  const argsKey = eslintArgs.filter((k) => k !== '--fix').join(' ')
 
   // --fix rewrites files in place, so a cache entry keyed off their pre-fix content would
   // be stale the instant it's written - always run those files through real eslint.
@@ -275,12 +284,12 @@ async function run(targetPath: string, rawEslintArgs: string[]) {
     let cached = casRead<CachedLintResult>(path.join(RESULT_CACHE_DIR, `${key}.json`))
 
     if (cached?.output?.search(/allowDefaultProject/) !== -1) {
-      // files that failed due to not existing in tsconfig should 
+      // files that failed due to not existing in tsconfig should
       // not respect cache so we can fix it in .defaultProjectEslint.mjs
       // and not have to invalidate the entire ESLint cache.
       cached = undefined
     }
-    if (!cached || cached?.errorCount > 0 && fixMode) {
+    if (!cached || (cached?.errorCount > 0 && fixMode)) {
       toLint.push(file)
       continue
     }
@@ -296,6 +305,7 @@ async function run(targetPath: string, rawEslintArgs: string[]) {
     }
   }
 
+  // eslint-disable-next-line no-console
   console.log(
     `eslint: ${files.length} files, ${cachedClean + cachedWithErrors} from cache ` +
       `(${cachedWithErrors} with errors), ${toLint.length} to lint`

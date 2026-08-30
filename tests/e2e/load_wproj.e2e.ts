@@ -27,7 +27,6 @@ test('loads a .wproj project and renders it', async ({page}) => {
 
   // App booted and built its UI screen.
   await page.waitForFunction(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     () => !!(window as any)._appstate?.screen,
     undefined,
     {timeout: 60_000}
@@ -38,7 +37,6 @@ test('loads a .wproj project and renders it', async ({page}) => {
 
   // Load the project file from inside the page so it shares the app's realm.
   const counts = await page.evaluate(async (url) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const appstate = (window as any)._appstate
     const buf = await fetch(url).then((r) => r.arrayBuffer())
 

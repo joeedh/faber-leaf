@@ -296,6 +296,8 @@ DataBlock {
 
       for (const block of this.lib_userlist) {
         if (block.lib_id < 0) {
+          // eslint-disable-next-line no-console
+          // eslint-disable-next-line no-console
           console.log('Dead block in user list')
           this.lib_users--
           this.lib_userlist.remove(block)
@@ -325,11 +327,13 @@ DataBlock {
       //bad = bad || user.lib_id < 0;
 
       if (bad) {
+        // eslint-disable-next-line no-console
         console.error(
           `
 Bad owner passed to lib_addUser; ref count will be increased,
 but owner will not be added to this.lib_userlist`.trim()
         )
+        // eslint-disable-next-line no-console
         console.warn('this:', this, 'owner:', user)
       } else {
         this.lib_userlist.push(user)
@@ -348,10 +352,12 @@ but owner will not be added to this.lib_userlist`.trim()
     }
 
     if (this.lib_users < 0) {
+      // eslint-disable-next-line no-console
       console.warn('Warning, a datablock had negative users', this.lib_users, this)
     }
 
     if (this.lib_users <= 0 && this.lib_flag & BlockFlags.FAKE_USER) {
+      // eslint-disable-next-line no-console
       console.log('Warning, somehow fake user was cleared', this)
       this.lib_users = 1
     }
@@ -370,6 +376,7 @@ but owner will not be added to this.lib_userlist`.trim()
         this.lib_userData = JSON.parse(this.lib_userData)
       } catch (error) {
         util.print_stack(error as Error)
+        // eslint-disable-next-line no-console
         console.error('Error parsing lib_userData!', this.lib_userData)
       }
     }
@@ -451,6 +458,7 @@ DataRef {
     }
 
     if (!block.constructor?.blockDefine) {
+      // eslint-disable-next-line no-console
       console.warn('Invalid block in fromBlock: ', block)
     } else {
       // Instance field, not the static: a MissingDataBlock standing in for an
@@ -581,7 +589,6 @@ BlockSet {
 
   set active(val) {
     this.__active = val
-    //console.trace("active set", this);
   }
 
   setActive(val?: BlockType): void {
@@ -630,6 +637,7 @@ BlockSet {
     block.name = this.uniqueName(block.name)
 
     if (block.lib_id >= 0 && block.lib_id in this.idmap) {
+      // eslint-disable-next-line no-console
       console.warn('Block already in dataset')
       return 0
     }
@@ -688,6 +696,7 @@ BlockSet {
     bad = bad || !(block.lib_id in this.idmap)
 
     if (bad) {
+      // eslint-disable-next-line no-console
       console.warn('Bad call to lib_api.BlockSet.prototype.remove(); block:', block)
       return
     }
@@ -724,6 +733,7 @@ BlockSet {
       block.destroy()
     } catch (error) {
       util.print_stack(error as Error)
+      // eslint-disable-next-line no-console
       console.log('block.destroy() callback failed', block)
     }
 
@@ -741,6 +751,7 @@ BlockSet {
     const type = this.type.blockDefine().typeName
 
     if (window.DEBUG?.DataLink) {
+      // eslint-disable-next-line no-console
       console.warn('Linking ' + type + '. . .', this.active, this.idmap)
     }
 
@@ -1062,6 +1073,7 @@ Library {
 
       if (type === undefined) {
         if (MissingDataBlockType === undefined) {
+          // eslint-disable-next-line no-console
           console.warn('Failed to load library type', blockType)
 
           this.libs.remove(lib)
@@ -1071,6 +1083,7 @@ Library {
         // The addon that owns this block type isn't loaded. Keep the set —
         // dropping it here strands every MissingDataBlock the load path is
         // about to put in it, because the save walks `this.libs`. See plan §4.1.
+        // eslint-disable-next-line no-console
         console.warn('Unknown library type', blockType, '- preserving its blocks')
 
         lib._origTypeName = blockType
@@ -1166,6 +1179,7 @@ DataRefProperty {
         'invalid block type ' + val.constructor.blockDefine().typeName + '; expected' + this.blockType + '.'
       )
     } else if (typeof val == 'number') {
+      // eslint-disable-next-line no-console
       console.warn("Warning, DataRefProperty.setValue was fed a number; can't validate it's type")
       //can't validate in this case
 
@@ -1174,6 +1188,7 @@ DataRefProperty {
     } else if (typeof val === 'object' && val instanceof DataBlock) {
       this.data.set(val)
     } else {
+      // eslint-disable-next-line no-console
       console.warn('failed to set DataRefProperty; arguments:', arguments)
     }
 

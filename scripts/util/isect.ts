@@ -290,6 +290,7 @@ export function tri_aabb_isect(v1: Vec3Arg, v2: Vec3Arg, v3: Vec3Arg, min: Vec3A
   return triBoxOverlap(cent, size, triverts)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ray_tri_attrib = `
 * Ray-Triangle Intersection Test Routines *
 * Different optimizations of my and Ben Trumbore's *
@@ -435,7 +436,6 @@ export function aabb_cone_isect(
       return true
     }
 
-    r = radius1 + (radius2 - radius1) * t2
     p.load(co).addFac(ray, t2)
 
     if (t2 > 0.0 && t2 < rlen && p[a1] >= min[a1] && p[a1] <= max[a1] && p[a2] >= min[a2] && p[a2] <= max[a2]) {

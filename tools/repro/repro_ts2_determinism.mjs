@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* Is dyntopo replay deterministic? Load+replay twice (fresh page state each
  * time via reload) and compare index-aligned mesh co. If they differ, replay
  * itself is non-deterministic, which explains why a re-recorded meshlog can't
