@@ -1,0 +1,82 @@
+{
+  // Gate cut: a comment scoring at or above this is reported. Omit to use
+  // the model's own calibrated cut, which is what most projects should run.
+  // "threshold": 0.6,
+
+  // Most findings to print; the rest are still counted. Omit for no limit.
+  // "limit": 100,
+
+  // Skip comments shorter than this many characters.
+  // "minLength": 40,
+
+  // Extra gitignore-style patterns to skip, on top of .gitignore and
+  // .commentlintignore.
+  "exclude": [
+	  "build/**", 
+	  "**/generated/**", 
+	  "**/extern/**", 
+	  "scripts/path.ux/**",
+	  "vendor/nstructjs/**",
+	  "distributions/**",
+	  "archive/**",
+	  "sculptcore/**"
+  ],
+  "languageExtensions": {
+    "c-style" : [".c", ".cc", ".h", ".hpp", ".cpp", ".ts", ".js", ".tsx", ".jsx", ".cjs", ".mjs", ".mts"],
+    "markdown" : [".md"],
+    "python-style" : [".py"]
+  },
+
+  // Extra ignore files to read, beyond .gitignore and .commentlintignore.
+  // "ignorePath": [".gitignore"],
+
+  // Scan node_modules too. Off by default.
+  // "withNodeModules": false,
+
+  // Cache findings between runs, keyed on file stamp and the model's bytes.
+  "cache": true,
+
+  // "metadata" trusts mtime and size; "content" hashes file contents
+  // instead, which is slower but survives a checkout that skips mtimes.
+  // "cacheStrategy": "metadata",
+
+  // Which backend scores comments: "linear" (what ships) or "encoder".
+  // "backend": "linear",
+
+  // Model directory to load, resolved relative to this file. A
+  // "//"-prefixed path resolves from the git repository root instead.
+  // "model": "./model_linear",
+
+  // Scan .md/.markdown files during directory walks. The shipped model was
+  // trained on code comments, so a markdown finding is reported as
+  // experimental.
+  "markdown": false,
+
+  // Always check these markdown files, regardless of "markdown". Once this
+  // is non-empty it replaces the directory walk: only the named files are
+  // checked, not the whole tree.
+  "markdownFiles": ["CLAUDE.md"],
+
+  // Rule ids never to report. The gate that decides whether a comment is
+  // flagged at all still runs over every rule; disabling one only changes
+  // which rule a finding is named after.
+  "disableRules": ["P10", "C2"]
+
+  // Rule ids to turn back on even though they ship off by default (C10,
+  // C11, C13 -- style calls the taxonomy can't settle for every codebase).
+  // "enableRules": [],
+
+  // Codepoints and ranges that rule C13 (no non-Latin-1 characters in a
+  // comment) lets through. Each entry is either "U+XXXX" for one codepoint
+  // or "U+XXXX-U+YYYY" for an inclusive range. C13 ships off by default, so
+  // this only matters once it is turned on with enableRules.
+  // "unicodeWhitelist": ["U+2018-U+201F"],
+
+  // Inherit from another config file; this file's own keys win over the
+  // parent's. A "//"-prefixed path resolves from the git repository root,
+  // the same as "model" and "markdownFiles".
+  // "extends": "//configs/.commentlintrc.json",
+
+  // Settings read by the npm wrapper, not by commentlint itself.
+  // "npm": {}
+}
