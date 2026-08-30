@@ -456,3 +456,8 @@ this file, and to everything under `documentation/`.
   it unclear whether the second comma closes an interpolation or opens a new clause. Write
   "Dropping onto itself (or onto a neighbor it would split against) is not a rip". Drop any comma
   that would follow the closing bracket — it separates the subject from its verb.
+
+- **DO NOT INVOKE ESLINT DIRECTLY** use tools/eslint.mts
+  - use node to execute it directly, if it's new enough it'll
+   parse the type annotations.
+  - otherwise use tsx
