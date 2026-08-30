@@ -15,7 +15,7 @@ export var iconmanager
  *        The NW.js shell needs the markup: its window.html sits one directory
  *        down, so resolvePath() would aim at `nwjs/assets/`.
  */
-export function setupIconsSvg(iconSheetUrl = undefined) {
+export function setupIconsSvg(iconSheetUrl) {
   const existingSheet = document.querySelector('#iconsheet')
   let iconsheet
 

@@ -102,7 +102,7 @@ function boundaryTest(): BoundaryTestResult {
     let draw: SculptBrush | undefined
     for (const k in DefaultBrushes.brushes) {
       const b = DefaultBrushes.brushes[k]
-      if (b && b.tool === SculptTools.DRAW) draw = b
+      if (b?.tool === SculptTools.DRAW) draw = b
     }
     if (!draw) throw new Error('no default DRAW brush')
 

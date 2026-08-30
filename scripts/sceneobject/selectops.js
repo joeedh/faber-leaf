@@ -39,8 +39,8 @@ export class ObjectSelectOpBase extends ToolOp {
   undo(ctx) {
     let ud = this._undo
     let flags = ud.flags
-    let datalib = ctx.datalib,
-      scene = ctx.scene
+    let datalib = ctx.datalib
+    let scene = ctx.scene
 
     for (let k in flags) {
       let ob = datalib.get(k)

@@ -23,7 +23,6 @@ import {IUniformsBlock, ShaderProgram} from '../../webgl/webgl'
 import type {SceneObjectData} from '../../sceneobject/sceneobject_base'
 import type {BoundingBox} from './view3d_utils'
 import type {StructReader} from '../../path.ux/scripts/util/nstructjs'
-import {updateToolModeAPI} from '../../scene/scene_utils'
 import {normalizeSelMask, selMaskToNames} from '../../core/select_types.js'
 
 export interface IToolModeDefine {
@@ -260,9 +259,7 @@ export class ToolMode<NodeInputs extends INodeSocketSet = {}, NodeOutputs extend
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    const cls = this
-
-    const tstruct = struct ?? api.mapStruct(cls, true)
+    const tstruct = struct ?? api.mapStruct(this, true)
     tstruct.name = this.name !== undefined ? this.name : this.toolModeDefine().name
     tstruct.string('typeName', 'type', 'Type', 'Tool Mode Type')
 

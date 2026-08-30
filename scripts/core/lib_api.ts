@@ -245,18 +245,18 @@ DataBlock {
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    let dstruct = Node.defineAPI(api, struct ?? api.mapStruct(this, true))
+    const dstruct = Node.defineAPI(api, struct ?? api.mapStruct(this, true))
 
     dstruct.int('lib_id', 'lib_id', 'Lib ID').readOnly()
 
-    let def = dstruct.flags('lib_flag', 'lib_flag', BlockFlags, 'Flag')
+    const def = dstruct.flags('lib_flag', 'lib_flag', BlockFlags, 'Flag')
 
     def.icons({
       FAKE_USER: Icons.FAKE_USER,
     })
 
     def.on('change', function (this: {dataref: any}, newval: any, oldval: any) {
-      let owner = this.dataref
+      const owner = this.dataref
 
       if (newval === oldval) {
         return
@@ -343,7 +343,7 @@ but owner will not be added to this.lib_userlist`.trim()
   lib_remUser(user?: DataBlock): void {
     this.lib_users--
 
-    if (user && this.lib_userlist.indexOf(user) >= 0) {
+    if (user && this.lib_userlist.includes(user)) {
       this.lib_userlist.remove(user)
     }
 
@@ -450,7 +450,7 @@ DataRef {
       return ret
     }
 
-    if (!block.constructor || !block.constructor.blockDefine) {
+    if (!block.constructor?.blockDefine) {
       console.warn('Invalid block in fromBlock: ', block)
     } else {
       // Instance field, not the static: a MissingDataBlock standing in for an
@@ -809,7 +809,7 @@ export function defineLibrarySet(
         return
       }
 
-      let obj = list.idmap[key]
+      const obj = list.idmap[key]
       if (obj === undefined) {
         throw new DataPathError('unknown datablock key ' + key + '.')
       }
@@ -820,13 +820,13 @@ export function defineLibrarySet(
       return obj.lib_id
     },
     function getStruct(api: DataAPI, list: any, key: number | string) {
-      let obj = typeof key === 'string' ? list.namemap[key] : list.idmap[key]
+      const obj = typeof key === 'string' ? list.namemap[key] : list.idmap[key]
 
       if (obj === undefined) {
         return api.getStruct(DataBlock)
       }
 
-      let ret = api.getStruct(obj.constructor)
+      const ret = api.getStruct(obj.constructor)
 
       if (ret === undefined) {
         return api.getStruct(DataBlock)
@@ -850,10 +850,10 @@ Library {
   )
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    let lstruct = struct ?? api.mapStruct(this)
+    const lstruct = struct ?? api.mapStruct(this)
 
-    for (let cls of BlockTypes) {
-      let def = cls.blockDefine()
+    for (const cls of BlockTypes) {
+      const def = cls.blockDefine()
 
       defineLibrarySet(api, def.typeName!, def.typeName!, def.uiName!, lstruct, cls)
     }

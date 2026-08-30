@@ -24,8 +24,8 @@ await page.waitForFunction(() => !!window._appstate?.screen, undefined, {timeout
 
 await page.evaluate(() => {
   window.__co = () => {
-    const mesh = globalThis._appstate?.ctx?.object?.data,
-      wasm = mesh.wasm
+    const mesh = globalThis._appstate?.ctx?.object?.data
+    const wasm = mesh.wasm
     const cls = wasm.manager.findVectorClass('float')
     const vec = wasm.manager.constructWith(cls.findDefaultConstructor())
     mesh.mesh.dumpVertCo(vec)
@@ -64,11 +64,11 @@ const res = await page.evaluate(() => {
   ts.redo()
   const Q = window.__co()
   const eq = (a, b) => a && b && Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) < 1e-6
-  let qEqU = 0,
-    qOther = 0,
-    createdInStep = 0,
-    worst = 0,
-    worstIdx = -1
+  let qEqU = 0
+  let qOther = 0
+  let createdInStep = 0
+  let worst = 0
+  let worstIdx = -1
   const diffs = []
   for (const [idx, p] of P) {
     const q = Q.get(idx)

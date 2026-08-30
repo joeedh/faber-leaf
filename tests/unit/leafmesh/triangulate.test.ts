@@ -68,11 +68,11 @@ function expectConsistent(mesh: LeafMesh, f: number, tris: readonly Tri[]): void
   }
 }
 
-function ngon(mesh: LeafMesh, xy: ReadonlyArray<readonly [number, number]>): number {
+function ngon(mesh: LeafMesh, xy: readonly (readonly [number, number])[]): number {
   return mesh.makeFace([xy.map(([x, y]) => mesh.makeVert([x, y, 0]))])
 }
 
-const U_SHAPE: ReadonlyArray<readonly [number, number]> = [
+const U_SHAPE: readonly (readonly [number, number])[] = [
   [0, 0],
   [3, 0],
   [3, 3],
@@ -102,7 +102,7 @@ describe('triangulateFace', () => {
 
   test('fans a convex n-gon', () => {
     const mesh = new LeafMesh()
-    const xy: Array<[number, number]> = []
+    const xy: [number, number][] = []
     for (let i = 0; i < 7; i++) {
       const a = (2 * Math.PI * i) / 7
       xy.push([Math.cos(a), Math.sin(a)])

@@ -45,7 +45,7 @@ export class GpuTextureHistory {
     if (this.entries.length >= this.max) {
       dest = this.entries.shift()
     }
-    if (!dest || dest.width !== source.width || dest.height !== source.height || dest.format !== source.format) {
+    if (dest?.width !== source.width || dest.height !== source.height || dest.format !== source.format) {
       dest?.destroy()
       dest = new GpuTexture(device, {
         label,
@@ -107,7 +107,7 @@ export class WebGpuDebug {
 let singleton: WebGpuDebug | undefined
 
 export function getWebGpuDebug(device: GPUDevice): WebGpuDebug {
-  if (!singleton || singleton.device !== device) {
+  if (singleton?.device !== device) {
     singleton?.dispose()
     singleton = new WebGpuDebug(device)
   }

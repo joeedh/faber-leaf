@@ -100,7 +100,7 @@ function ensureDebugSurface(): GpuBrushDebug {
       },
       async forceReadback() {
         const c = activeController
-        if (!c || !c.stroke.valid) {
+        if (!c?.stroke.valid) {
           return false
         }
         await c.forceReadback()
@@ -108,7 +108,7 @@ function ensureDebugSurface(): GpuBrushDebug {
       },
       async scatterSelfCheck() {
         const c = activeController
-        if (!c || !c.stroke.valid) {
+        if (!c?.stroke.valid) {
           return {checked: false, reason: 'no active GPU stroke'}
         }
         return c.scatterSelfCheck()
@@ -292,7 +292,7 @@ export class GpuStrokeController {
       const device = this.stroke.device
       const gen = this.wasm.GpuBrush_info(this.session, GpuBrushInfo.GPU_LAYOUT_GEN)
       let cache = scatterCache.get(this.mesh)
-      if (!cache || cache.gen !== gen) {
+      if (cache?.gen !== gen) {
         cache?.mapBuf.destroy()
         cache?.paramsBufs.forEach((b) => b.destroy())
         const metaBytes = this.wasm.GpuBrush_data(this.session, GpuBrushData.SCATTER_META).slice()

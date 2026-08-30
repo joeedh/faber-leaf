@@ -748,7 +748,6 @@ graph.EnumSocket {
     this.value = ~~value
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _saveMap(obj: {[k: string | number]: any}): any[] {
     obj = obj === undefined ? {} : obj
     const ret = []
@@ -771,7 +770,6 @@ graph.EnumSocket {
       return {}
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const ret = {} as {[k: string]: any}
     for (const k of obj) {
       ret[k.key] = k.val

@@ -31,6 +31,6 @@
     "scripts/**/*.ts",
     "addons/**/*.ts",
     "distributions/**/*.ts",
-    "tools/**/*.mjs",
+    "tools/**/*.mjs", "tools/eslint.mts",
   ],
 }

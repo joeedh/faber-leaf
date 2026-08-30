@@ -102,7 +102,7 @@ function ringEdges(mesh: LeafMesh, ring: readonly number[]): number[] | undefine
 /** The edge a cut leaves `f` by, having entered it across `e`. */
 function acrossFace(mesh: LeafMesh, f: number, e: number): number | undefined {
   const ring = outerRing(mesh, f)
-  if (ring === undefined || ring.length !== 4) {
+  if (ring?.length !== 4) {
     return undefined
   }
 
@@ -430,7 +430,7 @@ export function subdivideSelection(
     for (const f of liveUnique((i) => mesh.f.has(i), faces)) {
       const ring = outerRing(mesh, f)
       const own = ring === undefined ? undefined : ringEdges(mesh, ring)
-      if (own === undefined || !own.every((e) => selected.has(e))) {
+      if (!own?.every((e) => selected.has(e))) {
         continue
       }
 

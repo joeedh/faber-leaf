@@ -1,4 +1,4 @@
-export let greymask = {
+export const greymask = {
   dimen        : 64,
   format       : 'greyscale',
   bytesPerPixel: 1,
@@ -222,7 +222,7 @@ export let greymask = {
   ]),
 }
 
-export let cmyk = {
+export const cmyk = {
   dimen        : 128,
   format       : 'cmyk',
   bytesPerPixel: 4,

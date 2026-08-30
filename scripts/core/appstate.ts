@@ -54,7 +54,7 @@ import {DefaultBrushes, DynTopoFlags, DynTopoOverrides, SculptBrush, SculptTools
 import {APP_VERSION, CompressionFlags, isBreakingFileVersion, STABLE_STRUCT_ID_VERSION} from './const'
 import type {Screen} from '../path.ux/scripts/pathux'
 import type {DataAPI} from '../path.ux/scripts/pathux'
-import {genDefaultFile, RootFileOp, RootLoadFileOp} from './gen_default_file'
+import {genDefaultFile, RootLoadFileOp} from './gen_default_file'
 import {AutosaveManager} from './autosave'
 import {startStorageSync} from './storage_sync'
 import {
@@ -529,7 +529,6 @@ export class AppState {
 
     return new Promise((accept, reject) => {
       const readblocks = function* (filectx: FileContext): Generator<void, void, unknown> {
-        let args = filectx.args
         filectx.datablocks = []
         const file = filectx.file
 
@@ -540,9 +539,9 @@ export class AppState {
           yield
         }
 
-        args = filectx.args
+        const args2 = filectx.args
 
-        if (!args.load_library) {
+        if (!args2.load_library) {
           window.FILE_LOADING = false
           return
         }
@@ -556,8 +555,8 @@ export class AppState {
 
       let step = 0.0
 
-      const log = function (...args: unknown[]): void {
-        console.log.apply(console, args as Parameters<typeof console.log>)
+      const log = function (...args2: unknown[]): void {
+        console.log.apply(console, args2 as Parameters<typeof console.log>)
       }
 
       const gen = function* (): Generator<void, void, unknown> {
@@ -572,7 +571,7 @@ export class AppState {
         const startstep = 0
 
         log('reading blocks')
-        for (const block of readblocks(filectx)) {
+        for (const _unused of readblocks(filectx)) {
           const file = filectx.file
           const perc = file.i / file.view.buffer.byteLength
 
@@ -782,7 +781,7 @@ export class AppState {
   }
 
   loadFile_readBlock(filectx: FileContext): DataBlock | AppSettings | undefined {
-    const {istruct, flag, version, args, buf, file} = filectx
+    const {istruct, version, args, file} = filectx
 
     const type = file.string(4)
     const len = file.int32()
@@ -798,7 +797,6 @@ export class AppState {
     } else if (args.load_screen && type === BlockTypes.SCREEN) {
       console.warn('Old screen block detected')
 
-      const screen = istruct.readObject(dataView, App)
       filectx.found_screen = true
     } else if (args.load_library && type === BlockTypes.LIBRARY) {
       filectx.datalib = istruct.readObject(dataView, Library)
@@ -808,12 +806,12 @@ export class AppState {
     } else if (args.load_library && type === BlockTypes.DATABLOCK) {
       const file2 = new BinaryReader(dataView)
 
-      let len = file2.int32()
-      const clsname = file2.string(len)
+      let len2 = file2.int32()
+      const clsname = file2.string(len2)
 
       const cls = DataBlock.getClass(clsname)
-      len = dataView.byteLength - len - 4
-      const data2 = file2.bytes(len)
+      len2 = dataView.byteLength - len2 - 4
+      const data2 = file2.bytes(len2)
       let block: DataBlock | undefined
 
       if (!args.load_screen && cls?.blockDefine().typeName === 'screen') {
@@ -857,8 +855,6 @@ export class AppState {
   }
 
   loadFile_readBlocks(filectx: FileContext): void {
-    let args = filectx.args
-    const datablocks = (filectx.datablocks = [])
     const file = filectx.file
 
     window.FILE_LOADING = true
@@ -869,14 +865,13 @@ export class AppState {
       this.loadFile_readBlock(filectx)
     }
 
-    args = filectx.args
-
+    const args = filectx.args
     if (!args.load_library) {
       window.FILE_LOADING = false
       return
     }
 
-    const {istruct, screen, found_screen, datalib, flag, version, buf} = filectx
+    const {datalib} = filectx
 
     if (datalib === undefined) {
       window.FILE_LOADING = false
@@ -886,7 +881,7 @@ export class AppState {
   }
 
   loadFile_initDatalib(filectx: FileContext): void {
-    const {screen, found_screen, datalib, version, datablocks} = filectx
+    const {datalib, version, datablocks} = filectx
 
     if (!datalib) {
       throw new Error('datalib is undefined')
@@ -950,7 +945,8 @@ export class AppState {
   }
 
   loadFile_loadScreen(filectx: FileContext): void {
-    let {screen, getblock, getblock_addUser, found_screen, datalib, version, args, datablocks} = filectx
+    let {screen, found_screen} = filectx
+    const {getblock, getblock_addUser, datalib, args} = filectx
 
     if (!datalib) {
       return
@@ -970,8 +966,6 @@ export class AppState {
     }
 
     if (screen !== undefined) {
-      found_screen = filectx.found_screen = true
-
       if (this.screen !== screen && this.screen !== undefined) {
         this.screen.destroy()
         this.screen.remove()
@@ -1022,7 +1016,7 @@ export class AppState {
   }
 
   loadFile_finish(filectx: FileContext): void {
-    const {lastscreens, found_screen, screen, version, datalib, lastscreens_active, datablocks, args} = filectx
+    const {lastscreens, found_screen, version, datalib, lastscreens_active, args} = filectx
 
     if (!datalib) {
       return
@@ -1292,8 +1286,8 @@ export function initProcessGlobals(): void {
     animreq = requestAnimationFrame(f)
   }
 
-  let lastKey: number | undefined = undefined
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let lastKey: number | undefined
   const on_keydown = (e: KeyboardEvent): void => {
     lastKey = e.keyCode
 

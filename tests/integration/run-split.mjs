@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Runs the integration suites as two sequential jest invocations, one per
  * sculptcore backend: `SC_TEST_BACKEND=wasm`, then `SC_TEST_BACKEND=native`.

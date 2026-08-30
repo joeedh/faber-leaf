@@ -291,7 +291,7 @@ function dumpScene(): unknown {
   // node.toggle_select_all in editors/node/) mutate `library.material[id].graph`
   // without needing a rendered mesh object. Duck-typed so core stays free of the
   // material import.
-  const materials: Array<{libId: number; nodeCount: number}> = []
+  const materials: {libId: number; nodeCount: number}[] = []
   try {
     const matSet = (app.datalib as {material?: Iterable<{lib_id?: number; graph?: {nodes?: {length?: number}}}>})
       .material
@@ -493,7 +493,7 @@ export async function runTestHarness(argv: string[] = getAppArgv()): Promise<voi
         // active editor type — see the CTX.debug guide in CLAUDE.md). Await the
         // result so an async driver (e.g. __autosaveTest's 5s stroke+save loop)
         // completes before --dump snapshots its reflected result.
-        // eslint-disable-next-line no-eval
+
         await (0, eval)(expr)
         console.log(`${TAG} eval ${expr}`)
       } catch (err) {

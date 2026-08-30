@@ -184,7 +184,7 @@ export class AddonManager {
     for (const addon of this.addons) {
       if (!addon.enabled) continue
       const entries = addon.addonAPI?.menuContributions?.[menuId]
-      if (entries && entries.length) {
+      if (entries?.length) {
         list.push(Menu.SEP)
         list = list.concat(entries)
       }
@@ -693,7 +693,7 @@ export class AddonManager {
       }
     }
 
-    if (!rec || !rec.manifest) {
+    if (!rec?.manifest) {
       throw new Error('Unknown addon ' + addon_or_url)
     }
 

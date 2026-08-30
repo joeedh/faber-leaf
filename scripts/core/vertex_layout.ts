@@ -101,8 +101,8 @@ export function vertexFormatFor(shape: VertexAttrShape): GPUVertexFormat {
  * hold the highest claimed slot. A duplicate slot is a caller bug and throws —
  * silently keeping one of the two produces a pipeline that draws garbage.
  */
-export function buildVertexBufferLayout(attrs: Iterable<VertexAttrDesc>): Array<GPUVertexBufferLayout | null> {
-  const out: Array<GPUVertexBufferLayout | null> = []
+export function buildVertexBufferLayout(attrs: Iterable<VertexAttrDesc>): (GPUVertexBufferLayout | null)[] {
+  const out: (GPUVertexBufferLayout | null)[] = []
 
   for (const attr of attrs) {
     if (attr.slot < 0) {

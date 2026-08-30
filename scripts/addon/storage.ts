@@ -146,10 +146,10 @@ function bytesToBase64(bytes: Uint8Array): string {
     binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunkSize)))
   }
   // btoa is universal in browser/jsdom; in pure Node we'd need Buffer.from.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const btoaFn = (globalThis as any).btoa as ((s: string) => string) | undefined
   if (btoaFn) return btoaFn(binary)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const buf = (globalThis as any).Buffer
   if (buf?.from) return buf.from(binary, 'binary').toString('base64')
   throw new Error('no base64 encoder available')
@@ -396,7 +396,7 @@ export class IndexedDBAddonStorage implements AddonStorage {
 // ---------------------------------------------------------------------------
 
 export interface INodeFs {
-  readdir(path: string, options: {withFileTypes: true}): Promise<Array<{name: string; isDirectory(): boolean}>>
+  readdir(path: string, options: {withFileTypes: true}): Promise<{name: string; isDirectory(): boolean}[]>
   readFile(path: string): Promise<Uint8Array>
   writeFile(path: string, data: Uint8Array): Promise<void>
   mkdir(path: string, options?: {recursive?: boolean}): Promise<string | undefined>

@@ -1,4 +1,4 @@
-import {Attribute, AttributeAny, AttributeClasses} from './litemesh_types'
+import {AttributeAny, AttributeClasses} from './litemesh_types'
 import {nstructjs} from '../../../../scripts/path.ux/pathux'
 import {AttrType} from './litemesh_base'
 

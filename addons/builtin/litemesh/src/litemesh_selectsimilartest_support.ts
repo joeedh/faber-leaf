@@ -13,7 +13,6 @@
 
 import {getAppState} from '@framework/api'
 import {LiteMesh, type IMeshLogSelect} from './litemesh'
-import type {ViewContext} from '../../../../scripts/core/context'
 import type {View3D} from '../../../../scripts/editors/view3d/view3d'
 import {SculptPaintOp} from './sculptcore_ops'
 

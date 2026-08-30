@@ -26,7 +26,7 @@ import {NullObject} from '../nullobject/nullobject.js'
 import {FrameContext} from '../render/queue'
 import {createDrawQueue} from '../render/queue_factory.js'
 
-let loc_rets = util.cachering.fromConstructor(Vector3, 256)
+const loc_rets = util.cachering.fromConstructor(Vector3, 256)
 
 /**
  Scene object flags
@@ -57,7 +57,7 @@ function mix(a: IVector4 | number[], b: IVector4 | number[], t: number) {
   return new Vector4(a).interp(b as unknown as IVector4, t)
 }
 
-export let Colors: {[k: number]: Vector4} = {
+export const Colors: {[k: number]: Vector4} = {
   0                    : new Vector4([0.7, 0.7, 0.7, 1.0]), //0
   [ObjectFlags.SELECT]   : new Vector4([1.0, 0.378, 0.15, 1.0]), //1
   [ObjectFlags.HIGHLIGHT]: new Vector4([0.9, 0.5, 0.3, 1.0]), //8
@@ -94,7 +94,7 @@ export function composeObjectMatrix(
   mat.euler_rotate_order(rot[0], rot[1], rot[2], rotorder)
   mat.scale(scale[0], scale[1], scale[2])
 
-  let m = mat.$matrix
+  const m = mat.$matrix
   m.m41 = loc[0]
   m.m42 = loc[1]
   m.m43 = loc[2]
@@ -179,7 +179,7 @@ export class SceneObject<
   }
 
   get locationWorld() {
-    let ret = loc_rets.next().zero()
+    const ret = loc_rets.next().zero()
 
     ret.multVecMatrix(this.outputs.matrix.getValue())
 
@@ -218,7 +218,7 @@ export class SceneObject<
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    let ostruct = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
+    const ostruct = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
 
     ostruct.dynamicStruct('data', 'data', 'data')
     ostruct.struct('material', 'material', 'Material', api.mapStruct(Material, false))
@@ -261,7 +261,7 @@ SceneObject {
   )
 
   getEditorColor() {
-    let flag = this.flag & (ObjectFlags.SELECT | ObjectFlags.HIGHLIGHT | ObjectFlags.ACTIVE)
+    const flag = this.flag & (ObjectFlags.SELECT | ObjectFlags.HIGHLIGHT | ObjectFlags.ACTIVE)
 
     return Colors[flag]
   }
@@ -281,7 +281,7 @@ SceneObject {
       return //data doesn't have a depend socket
     }
 
-    for (let s of this.outputs.depend.edges) {
+    for (const s of this.outputs.depend.edges) {
       if (s.node === this.data) {
         return true
       }
@@ -303,11 +303,11 @@ SceneObject {
       pmat = this.inputs.matrix.getValue()
     }
 
-    let loc = this.inputs.loc.getValue()
-    let rot = this.inputs.rot.getValue()
-    let scale = this.inputs.scale.getValue()
+    const loc = this.inputs.loc.getValue()
+    const rot = this.inputs.rot.getValue()
+    const scale = this.inputs.scale.getValue()
 
-    let mat = this.outputs.matrix.getValue()
+    const mat = this.outputs.matrix.getValue()
 
     mat.makeIdentity()
 
@@ -324,7 +324,7 @@ SceneObject {
     mat.euler_rotate_order(rot[0], rot[1], rot[2], this.inputs.rotOrder.getValue())
     mat.scale(scale[0], scale[1], scale[2])
 
-    let m = mat.$matrix
+    const m = mat.$matrix
     m.m41 = loc[0]
     m.m42 = loc[1]
     m.m43 = loc[2]
@@ -341,9 +341,9 @@ SceneObject {
   }
 
   loadMatrixToInputs(mat: Matrix4): void {
-    let rot = new Vector3()
-    let loc = new Vector3()
-    let size = new Vector3()
+    const rot = new Vector3()
+    const loc = new Vector3()
+    const size = new Vector3()
 
     mat.decompose(loc, rot, size)
 
@@ -365,7 +365,7 @@ SceneObject {
     //note that DataBlock.prototype.copy
     //will have copied datagraph sockets for us, though not their connections
 
-    let ret = super.copy()
+    const ret = super.copy()
 
     ret.flag = this.flag
     ret.drawMode = this.drawMode
@@ -388,7 +388,7 @@ SceneObject {
       ret = [ret[0].copy(), ret[1].copy()]
     }
 
-    let matrix = this.outputs.matrix.getValue()
+    const matrix = this.outputs.matrix.getValue()
 
     ret[0].multVecMatrix(matrix)
     ret[1].multVecMatrix(matrix)
@@ -447,7 +447,7 @@ SceneObject {
 
       frame.program = Shaders.ObjectLineShader
 
-      let off = uniforms.polygonOffset
+      const off = uniforms.polygonOffset
 
       uniforms.polygonOffset = 0.3
       uniforms.uColor = [0, 0, 0, 1]

@@ -149,7 +149,7 @@ describe('no concrete-type branching in the host', () => {
     'scripts/editors/properties',
   ]
 
-  const PATTERNS: Array<[string, RegExp]> = [
+  const PATTERNS: [string, RegExp][] = [
     ['instanceof Mesh', /\binstanceof\s+(Wasm)?Mesh\b/],
     ['instanceof LiteMesh', /\binstanceof\s+LiteMesh\b/],
     ["type === 'mesh'", /\.type\s*===\s*['"]mesh['"]/],

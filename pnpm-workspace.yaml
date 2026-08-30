@@ -1,7 +1,5 @@
 packages:
   - addons/*
-  # Builtin addons are not packages today; the glob is here so one that
-  # grows its own package.json is picked up without a workspace edit.
   - addons/builtin/*
   - sculptcore/tests
   - sculptcore/source/litestl/binding/typescriptRuntime
@@ -24,6 +22,7 @@ ignoredBuiltDependencies:
 
 onlyBuiltDependencies:
   - '@kmamal/gpu'
+  - comment-lint
   - nw
 
 overrides:

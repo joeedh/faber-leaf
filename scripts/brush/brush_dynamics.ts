@@ -1,18 +1,5 @@
-import {Curve1D, SplineTemplates, util, Vector4} from '../path.ux/scripts/pathux.js'
-import {Icons} from '../editors/icon_enum.js'
-import {DataBlock, BlockFlags, BlockLoader, BlockLoaderAddUser} from '../core/lib_api.js'
-import {NodeFlags} from '../core/graph.js'
-import {
-  CombModes,
-  CombPattern,
-  ProceduralTex,
-  ProceduralTexUser,
-  TexUserFlags,
-  TexUserModes,
-} from '../texture/proceduralTex'
-import {nstructjs, Number4} from '../path.ux/pathux.js'
-import type {Scene} from '../scene/scene.js'
-import type {ToolContext} from '../core/context'
+import {Curve1D, util} from '../path.ux/scripts/pathux.js'
+import {nstructjs} from '../path.ux/pathux.js'
 import type {StructReader} from '../path.ux/scripts/util/nstructjs.js'
 
 const _bdhash = new util.HashDigest()
@@ -231,7 +218,7 @@ export class BrushDynamics {
     for (const ch1 of this.channels) {
       const ch2 = b.getChannel(ch1.name, false)
 
-      if (!ch2 || !ch2.equals(ch1)) {
+      if (!ch2?.equals(ch1)) {
         return false
       }
     }
@@ -265,7 +252,7 @@ export class BrushDynamics {
       const ch = new BrushDynChannel(name)
       this.channels.push(ch)
 
-      if (!this.hasOwnProperty(name)) {
+      if (!Object.prototype.hasOwnProperty.call(this, name)) {
         Object.defineProperty(this, name, {
           get: function () {
             return this.getChannel(name)
@@ -290,7 +277,7 @@ export class BrushDynamics {
     reader(this)
 
     const defineProp = (name: string) => {
-      if (this.hasOwnProperty(name)) {
+      if (Object.prototype.hasOwnProperty.call(this, name)) {
         return
       }
 

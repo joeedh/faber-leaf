@@ -201,9 +201,9 @@ export function pickNearestUV(
 
       if (dist < limit) {
         hits.push({
-          handle  : ring[i],
-          u       : uv[i * 2],
-          v       : uv[i * 2 + 1],
+          handle: ring[i],
+          u     : uv[i * 2],
+          v     : uv[i * 2 + 1],
           dist,
           z,
           selected: (flags[i] & UV_SELECT) !== 0,
@@ -412,7 +412,11 @@ export function selectOneUV(
  * what a seam is the absence of. `getUVFans` supplies the second relation, so
  * this needs no notion of an edge and works on a source with no topology.
  */
-export function uvIslands(source: IUVSource, layer: number, scope: UVScope = {}): {offsets: Int32Array; values: Int32Array} {
+export function uvIslands(
+  source: IUVSource,
+  layer: number,
+  scope: UVScope = {}
+): {offsets: Int32Array; values: Int32Array} {
   const rings = readUVRings(source, layer, scope)
   const handles = ringElements(rings)
 

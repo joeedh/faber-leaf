@@ -45,7 +45,7 @@ export function createDrawQueue(frame: FrameContext): DrawQueue {
   }
 
   const ctx = activeCtx
-  if (!ctx || !ctx.encoder) {
+  if (!ctx?.encoder) {
     if (!warnedNoCtx) {
       console.warn(
         'createDrawQueue: WebGPU selected but no active WebGpuRenderContext is open — ' +

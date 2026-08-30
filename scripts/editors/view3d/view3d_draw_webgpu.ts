@@ -508,7 +508,7 @@ function ensureMaterialPipeline(
   for (const k in rlights) lightHash = (lightHash * 31 + rlights[k].light.data.type) | 0
   const hash = ((mat.calcUpdateHash?.() ?? 0) * 1009 + lightHash) | 0
   const existing = materialStates.get(mat)
-  if (existing && existing.hash === hash && !mat._regen) {
+  if (existing?.hash === hash && !mat._regen) {
     return existing
   }
 
@@ -630,10 +630,10 @@ function drawRenderWebGpu(view3d: ViewLike): void {
     }
   }
 
-  let nTotal = 0,
-    nUsesMat = 0,
-    nWithMat = 0,
-    nDrawn = 0
+  let nTotal = 0
+  let nUsesMat = 0
+  let nWithMat = 0
+  let nDrawn = 0
   for (const ob of renderable) {
     nTotal++
     const data = ob.data as DataLike | undefined

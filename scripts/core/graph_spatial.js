@@ -1,15 +1,4 @@
-import {
-  Matrix4,
-  Vector2,
-  Vector3,
-  Vector4,
-  util,
-  nstructjs,
-  math,
-  PackNode,
-  PackNodeVertex,
-  graphPack,
-} from '../path.ux/scripts/pathux.js'
+import {Vector2, PackNode, PackNodeVertex, graphPack} from '../path.ux/scripts/pathux.js'
 
 export function calcGraphAABB(graph) {
   let found = 0
@@ -64,8 +53,6 @@ export function layoutNode(node, args = {}) {
   let minsize = maxsocks * socksize + 15
   ret.size[1] = Math.max(ret.size[1], minsize)
 
-  let wid = 100
-
   for (let i = 0; i < 2; i++) {
     let socks = !i ? node.inputs : node.outputs
     let def = !i ? ret.inputs : ret.outputs
@@ -74,8 +61,6 @@ export function layoutNode(node, args = {}) {
     let y = 35
 
     for (let k in socks) {
-      let sock = socks[k]
-
       let p = new Vector2()
 
       p[0] = x
@@ -89,22 +74,6 @@ export function layoutNode(node, args = {}) {
 
   return ret
 }
-
-class NodeEdge {
-  constructor(a, b) {
-    this.v1 = a
-    this.v2 = b
-  }
-
-  [Symbol.keystr]() {
-    let i1 = this.v1.graph_id,
-      i2 = this.v2.graph_id
-
-    return Math.min(i1, i2) + ':' + Math.max(i1, i2)
-  }
-}
-
-function sortGraphSpatially_intern(graph, args) {}
 
 export function sortGraphSpatially(graph, args = {}) {
   let nodes = []

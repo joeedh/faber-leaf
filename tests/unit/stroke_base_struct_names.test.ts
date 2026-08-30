@@ -20,7 +20,7 @@ const WPROJ = path.join(ROOT, 'examples', 'brush_asymmetric_toolstack.wproj')
 const STROKE_BASE = path.join(ROOT, 'addons', 'builtin', 'litemesh', 'src', 'stroke_base.ts')
 
 /** The hoisted classes, each with the struct it inherits its leading fields from. */
-const HOISTED: ReadonlyArray<readonly [string, string | null]> = [
+const HOISTED: readonly (readonly [string, string | null])[] = [
   ['PaintSample', null],
   ['PaintSampleProperty', 'ToolProperty'],
   ['BrushProperty', 'ToolProperty'],

@@ -1,7 +1,7 @@
 import {CommandExecutor, MeshLog, Brush as WasmBrush, BrushProgram, DynTopoParams} from '@sculptcore/api'
 import type {ToolContext, ViewContext} from '../../../../scripts/core/context'
 import {LiteMesh, LiteMeshDisplayMode} from './index'
-import {Matrix4, ToolOp, Vector2, Vector3, Vector4} from '../../../../scripts/path.ux/pathux'
+import {Matrix4, Vector2, Vector3, Vector4} from '../../../../scripts/path.ux/pathux'
 import {StrokeDriverOp} from './stroke_paint_op'
 import {AnchoredLiveMode, IStrokeHit, StrokeInput, StrokeRayCast, StrokeSpaceMode} from './stroke_driver'
 import type {SculptCorePaintMode} from './sculptcore'
@@ -1412,7 +1412,7 @@ window._sculptcoreStrokeTester = {
       if (!(k in brush)) {
         throw new Error(`invalid brush setting ${k}`)
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       ;(brush as any)[k] = brushSettings[k as keyof SculptBrush]
     }
 
@@ -1673,7 +1673,6 @@ function dumpDab(ps: PaintSample): StrokeDabDump {
   radius?: number,
   symmetryAxes?: number
 ) {
-  const g = globalThis as unknown as any
   const mesh = peekAppState()?.ctx?.object?.data
   if (!(mesh instanceof LiteMesh)) {
     return {error: 'active object is not a LiteMesh'}

@@ -32,7 +32,7 @@ function readJson(path) {
 
 /** Names of `workspace:` optionalDependencies that did not install. */
 function missingOptionalDeps(addonDir, pkg) {
-  const optional = (pkg && pkg.optionalDependencies) || {}
+  const optional = pkg?.optionalDependencies || {}
   const missing = []
 
   for (const [name, spec] of Object.entries(optional)) {
@@ -65,7 +65,7 @@ export function discoverBuiltins() {
     }
     const addonDir = Path.join(BUILTIN_DIR, entry.name)
     const manifest = readJson(Path.join(addonDir, 'manifest.json'))
-    if (!manifest || manifest.id !== entry.name) {
+    if (manifest?.id !== entry.name) {
       continue
     }
     const missing = missingOptionalDeps(addonDir, readJson(Path.join(addonDir, 'package.json')))
@@ -85,7 +85,7 @@ export function discoverBuiltins() {
  *
  * `inBundleIds` is tools/distributions.mjs's set; undefined means "no filter".
  */
-export function collectBuildAssets(builtins = discoverBuiltins(), inBundleIds = undefined) {
+export function collectBuildAssets(builtins = discoverBuiltins(), inBundleIds) {
   const entryPoints = []
   const external = []
 

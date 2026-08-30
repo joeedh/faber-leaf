@@ -50,6 +50,9 @@ importers:
       '@typescript/native-preview':
         specifier: 7.0.0-dev.20260406.1
         version: 7.0.0-dev.20260406.1
+      comment-lint:
+        specifier: ^0.3.7
+        version: 0.3.7
       dependency-cruiser:
         specifier: ^17.4.0
         version: 17.4.0
@@ -310,6 +313,9 @@ importers:
       cmake-js:
         specifier: ^8.0.0
         version: 8.0.0(patch_hash=0b5466f1fdb8a596ede8913c5be2d45f05dacecf9d9f25a9691285d307aaaf1a)
+      comment-lint:
+        specifier: ^0.3.7
+        version: 0.3.7
       yargs:
         specifier: ^18.0.0
         version: 18.0.0
@@ -2561,6 +2567,11 @@ packages:
 
   commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
+
+  comment-lint@0.3.7:
+    resolution: {integrity: sha512-0Njw7uUHcEVfyHaVZZwZvUFUBX/i92lPaW/RqH8e7uaGEgi8MIayvx0bMEwXlfN+vOUJNwsTlYEm84VuBVrB8Q==}
+    engines: {node: '>=16'}
+    hasBin: true
 
   commondir@1.0.1:
     resolution: {integrity: sha512-W9pAhw0ja1Edb5GVdIF1mjZw/ASI0AlShXM83UUGe2DVr5TdAPEA1OA8m/g8zWp9x6On7gqufY+FatDbC3MDQg==}
@@ -6611,6 +6622,8 @@ snapshots:
   commander@14.0.3: {}
 
   commander@2.20.3: {}
+
+  comment-lint@0.3.7: {}
 
   commondir@1.0.1: {}
 

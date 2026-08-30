@@ -1,15 +1,12 @@
-import {Icons} from '../icon_enum.js'
-import {warning} from '../../path.ux/scripts/widgets/ui_noteframe.js'
-import * as util from '../../util/util.js'
-import {ResourceType, resourceManager} from '../../core/resource.js'
+import {resourceManager} from '../../core/resource.js'
 import {getAppState} from '../../core/app_instance.js'
-import {ResourcePageType, ResourcePages} from './resbrowser_types.js'
+import {ResourcePages} from './resbrowser_types.js'
 import {genResBrowserScreen} from '../screengen.js'
 import {nstructjs} from '../../path.ux/scripts/pathux.js'
 
 import {Editor} from '../editor_base.ts'
 import {KeyMap} from '../../path.ux/scripts/util/simple_events.js'
-import {Area, AreaFlags} from '../../path.ux/scripts/screen/ScreenArea.js'
+import {AreaFlags} from '../../path.ux/scripts/screen/ScreenArea.js'
 import {UIBase} from '../../path.ux/scripts/core/ui_base.js'
 
 let ResIconStyle = `
@@ -147,7 +144,6 @@ ResourceBrowser {
 
       let resarea = screen.sareas[0].area
 
-      console.log(resarea)
       resarea._swapEnd = () => {
         getAppState().unswapScreen()
       }
@@ -177,8 +173,6 @@ ResourceBrowser {
     header.button('Load', () => {
       let res = this.icons.active
 
-      console.log('res', res)
-
       if (res === undefined) {
         return
       }
@@ -191,8 +185,6 @@ ResourceBrowser {
     })
 
     header.button('Cancel', () => {
-      console.log('Cancel')
-
       this.end()
 
       if (this.swapCancelled !== undefined) {
@@ -205,8 +197,6 @@ ResourceBrowser {
   }
 
   end() {
-    console.log(this._swapEnd)
-
     if (this._swapEnd !== undefined) {
       this._swapEnd()
     }
@@ -255,8 +245,6 @@ ResourceBrowser {
 
     this.needsRebuild = false
 
-    console.log('rebuilding resource browser', width)
-
     this.icons = []
     this.icons.active = undefined
 
@@ -264,7 +252,6 @@ ResourceBrowser {
     table.clear()
 
     if (!(this.resourceType in ResourcePages)) {
-      console.log('Invalid resource type', this.resourceType)
       return
     }
 
@@ -280,7 +267,6 @@ ResourceBrowser {
     }
 
     let icon_click = (e) => {
-      //console.log(e.target, e.srcElement);
       setActive(e.target)
     }
 

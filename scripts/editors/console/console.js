@@ -1,16 +1,5 @@
 import {Editor} from '../editor_base.ts'
-import {
-  color2css,
-  css2color,
-  UIBase,
-  keymap,
-  util,
-  cconst,
-  nstructjs,
-  Vector2,
-  Vector3,
-  Matrix4,
-} from '../../path.ux/scripts/pathux.js'
+import {color2css, css2color, UIBase, keymap, util, nstructjs, Vector2} from '../../path.ux/scripts/pathux.js'
 import {termColorMap} from '../../path.ux/scripts/util/util.js'
 import {Icons} from '../icon_enum.js'
 
@@ -145,7 +134,6 @@ export class HitBox {
 
     for (let l of this.lines) {
       let i = editor.lines.indexOf(l)
-      let starti = i
 
       //console.log(l.children);
 
@@ -242,24 +230,23 @@ ConsoleEditor {
 
   formatMessage() {
     let s = ''
-    let prev = ''
 
     function safestr(obj) {
       if (typeof obj === 'object' && Array.isArray(obj)) {
-        let s = '[\n'
+        let s2 = '[\n'
         let i = 0
 
         for (let item of obj) {
           if (i > 0) {
-            s += ',\n'
+            s2 += ',\n'
           }
 
-          s += '  ' + safestr(item)
+          s2 += '  ' + safestr(item)
           i++
         }
 
-        s += ']\n'
-        return s
+        s2 += ']\n'
+        return s2
       } else if (typeof obj === 'object' && (!obj.toString || obj.toString === Object.prototype.toString)) {
         return `[object ${obj.constructor.name}]`
       }
@@ -295,7 +282,6 @@ ConsoleEditor {
       }
 
       s += s2 + ' '
-      prev = s2
     }
 
     return ('' + s).trim()
@@ -448,8 +434,8 @@ ConsoleEditor {
   }
 
   _mouse(e) {
-    let x = e.x,
-      y = e.y
+    let x = e.x
+    let y = e.y
 
     let rect = this.canvas.getClientRects()[0]
     let dpi = UIBase.getDPI()
@@ -538,10 +524,7 @@ ConsoleEditor {
   }
 
   on_mouseup(e) {
-    e = this._mouse(e)
-    _silence()
-    //console.log(e.x, e.y);
-    _unsilence()
+    this._mouse(e)
   }
 
   init() {
@@ -552,15 +535,9 @@ ConsoleEditor {
       this.queueRedraw()
     })
 
-    let header = this.header
     let container = this.container
-
     let col = container.col()
-
-    //let canvas = this.getCanvas("console", undefined, false);
-    //let g = this.g = canvas.g;
     let canvas = (this.canvas = document.createElement('canvas'))
-    let g = (this.g = canvas.getContext('2d'))
 
     canvas.addEventListener('mousemove', this.on_mousemove.bind(this))
     canvas.addEventListener('mousedown', this.on_mousedown.bind(this))
@@ -613,7 +590,7 @@ ConsoleEditor {
     this.scroll[1] = 0.0
 
     this.pushHistory(cmd)
-    let v = undefined
+    let v
 
     try {
       v = eval(cmd)
@@ -657,7 +634,7 @@ ConsoleEditor {
 
     try {
       obj = prefix === '' ? window : eval(prefix)
-    } catch (error) {
+    } catch (_error) {
       obj = undefined
     }
 
@@ -825,8 +802,6 @@ ConsoleEditor {
     g.font = font.genCSS(ts)
     g.fillStyle = font.color
 
-    let width = canvas.width,
-      height = canvas.height
     let lh = this.lineHeight
     let pad1 = 10 * UIBase.getDPI()
 
@@ -841,32 +816,32 @@ ConsoleEditor {
 
     let stateMachine = {
       stack: [],
-      start(x, y, color) {
+      start(x2, y2, color2) {
         this.stack.length = 0
-        this.x = x
-        this.y = y
+        this.x = x2
+        this.y = y2
         this.state = this.base
         this.d = 0
         this.param1 = 0
         this.param2 = 0
         this.bgcolor = undefined
 
-        this.color = color
+        this.color = color2
         this.font = g.font
       },
 
-      escape(c) {
-        let ci = c.charCodeAt(0)
+      escape(c2) {
+        let ci = c2.charCodeAt(0)
 
-        if (this.d === 0 && c === '[') {
+        if (this.d === 0 && c2 === '[') {
           this.d++
         } else if (this.d === 1 && ci >= 48 && ci <= 57) {
-          this.param1 = c
+          this.param1 = c2
           this.d++
         } else if (this.d === 2 && ci >= 48 && ci <= 57) {
-          this.param2 = c
+          this.param2 = c2
           this.d++
-        } else if (c === 'm' && this.d >= 2) {
+        } else if (c2 === 'm' && this.d >= 2) {
           let tcolor = this.param1
           if (this.d > 2) {
             tcolor += this.param2
@@ -907,8 +882,8 @@ ConsoleEditor {
         return false //ci > 27 ? c : "?";
       },
 
-      base(c) {
-        let ci = c.charCodeAt(0)
+      base(c2) {
+        let ci = c2.charCodeAt(0)
 
         if (ci === 27) {
           this.state = this.escape
@@ -918,10 +893,10 @@ ConsoleEditor {
           return false
         }
 
-        if (c === ' ') {
+        if (c2 === ' ') {
           this.x += ts
           return false
-        } else if (c == '\t') {
+        } else if (c2 == '\t') {
           this.x += ts * 2.0
           return false
         }
@@ -929,18 +904,18 @@ ConsoleEditor {
         if (ci < 30) {
           return '?'
         }
-        return c
+        return c2
       },
     }
 
-    let fillText = (s, x, y, bg) => {
-      stateMachine.start(x, y, color)
+    let fillText = (s, x2, y2, bg2) => {
+      stateMachine.start(x2, y2, color)
 
       for (let i = 0; i < s.length; i++) {
-        let c = s[i]
+        let c2 = s[i]
 
-        c = stateMachine.state(c)
-        if (c === false) {
+        c2 = stateMachine.state(c2)
+        if (c2 === false) {
           continue
         }
 
@@ -948,7 +923,7 @@ ConsoleEditor {
           g.font = stateMachine.font
         }
 
-        let ms = g.measureText(c)
+        let ms = g.measureText(c2)
         if (ms.actualBoundingBoxLeft !== undefined) {
           stateMachine.x += ms.actualBoundingBoxLeft
         }
@@ -963,7 +938,7 @@ ConsoleEditor {
         }
 
         g.fillStyle = stateMachine.color
-        g.fillText(c, stateMachine.x, stateMachine.y)
+        g.fillText(c2, stateMachine.x, stateMachine.y)
 
         if (ms.actualBoundingBoxRight !== undefined) {
           stateMachine.x += ms.actualBoundingBoxRight
@@ -977,21 +952,21 @@ ConsoleEditor {
       stateMachine.start(0, 0, color)
 
       for (let i = 0; i < s.length; i++) {
-        let c = s[i]
+        let c2 = s[i]
 
-        c = stateMachine.state(c)
-        if (c === false) {
+        c2 = stateMachine.state(c2)
+        if (c2 === false) {
           continue
         }
         if (stateMachine.font !== g.font) {
           g.font = stateMachine.font
         }
 
-        let w = g.measureText(c).width
+        let w = g.measureText(c2).width
         stateMachine.x += w
 
         g.fillStyle = stateMachine.color
-        g.fillText(c, stateMachine.x, stateMachine.y)
+        g.fillText(c2, stateMachine.x, stateMachine.y)
       }
 
       return {width: stateMachine.x}

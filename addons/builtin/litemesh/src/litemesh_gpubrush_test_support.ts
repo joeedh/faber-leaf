@@ -54,7 +54,7 @@ function fingerprint(data: Float32Array | undefined): Fingerprint | undefined {
 }
 
 function maxAbsDiff(a: Float32Array | undefined, b: Float32Array | undefined): number {
-  if (!a || !b || a.length !== b.length) {
+  if (!a || a.length !== b?.length) {
     return Infinity
   }
   let m = 0

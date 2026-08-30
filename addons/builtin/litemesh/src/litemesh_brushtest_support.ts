@@ -128,7 +128,7 @@ function readGpuBuffer(lm: LiteMesh, name: string): Float32Array | undefined {
   let total = 0
   for (let i = 0; i < (buffers.length | 0); i++) {
     const buf = buffers[i]
-    if (!buf || buf.name !== name || !(buf.size | 0) || !(buf.elemsize | 0)) continue
+    if (buf?.name !== name || !(buf.size | 0) || !(buf.elemsize | 0)) continue
     const floatCount = (buf.size | 0) * (buf.elemsize | 0)
     const bytes = floatCount * 4
     let u8: Uint8Array | undefined
@@ -200,7 +200,7 @@ function mirrorBalance(
   eps: number
 ): {movedPos: number; movedNeg: number; maxDisp: number; invalid?: string} {
   const out = {movedPos: 0, movedNeg: 0, maxDisp: 0}
-  if (!before || !after || before.length !== after.length) {
+  if (!before || before.length !== after?.length) {
     return {...out, invalid: 'position buffer unreadable/resized'}
   }
   for (let i = 0; i < before.length; i += 3) {
@@ -228,7 +228,7 @@ function octantCoverage(
   after: Float32Array | undefined,
   eps: number
 ): {octantsCovered: number; movedCount: number; invalid?: string} {
-  if (!before || !after || before.length !== after.length) {
+  if (!before || before.length !== after?.length) {
     return {octantsCovered: 0, movedCount: 0, invalid: 'position buffer unreadable/resized'}
   }
   const seen = new Set<number>()
@@ -537,7 +537,7 @@ function brushTest(): BrushTestResult {
     strokeAndMeasure(mesh, colorBrush, SculptTools.COLOR, [0, 0, R], [0, 0, 1], radius, {strength: 1, dabs: 3})
     const colAfter = readGpuBuffer(mesh, 'color')
     colorBrush.color.load(savedColor)
-    if (!colBefore || !colAfter || colBefore.length !== colAfter.length) {
+    if (!colBefore || colBefore.length !== colAfter?.length) {
       result.color = {paintedCount: 0, meanR: 0, meanG: 0, meanB: 0, invalid: 'color buffer unreadable/resized'}
     } else {
       let painted = 0
@@ -596,7 +596,7 @@ function brushTest(): BrushTestResult {
       mesh.spatial.setDisplayColorAttr(activeIdx)
 
       const changedCount = (before: Float32Array | undefined, after: Float32Array | undefined): number => {
-        if (!before || !after || before.length !== after.length) return -1
+        if (!before || before.length !== after?.length) return -1
         let n = 0
         for (let i = 0; i < after.length; i += 4) {
           const d =

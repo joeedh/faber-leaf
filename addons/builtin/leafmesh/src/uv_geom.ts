@@ -92,7 +92,7 @@ export function uvFaces(mesh: LeafMesh, selectedOnly = false): Int32Array {
 
   const hits: number[] = []
   for (const f of mesh.f) {
-    if (flags === undefined || flags[f] !== 0) {
+    if (flags?.[f] !== 0) {
       hits.push(f)
     }
   }

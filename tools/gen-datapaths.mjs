@@ -254,7 +254,7 @@ function finishLoad(mod) {
     throw new Error(`api_define.js has no export "${EXPORT_NAME}" (or default)`)
   }
   const api = typeof exported === 'function' ? exported() : exported
-  if (!api || !api.rootContextStruct) {
+  if (!api?.rootContextStruct) {
     throw new Error(`"${EXPORT_NAME}" did not yield a DataAPI with a rootContextStruct`)
   }
   return api

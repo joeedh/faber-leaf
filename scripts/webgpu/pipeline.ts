@@ -11,7 +11,7 @@ export interface PipelineDescriptor {
   wgsl: string
   vertexEntry?: string
   fragmentEntry?: string
-  vertexBuffers: Array<GPUVertexBufferLayout | null>
+  vertexBuffers: (GPUVertexBufferLayout | null)[]
   colorTargets: GPUColorTargetState[]
   depthStencil?: GPUDepthStencilState
   primitive?: GPUPrimitiveState

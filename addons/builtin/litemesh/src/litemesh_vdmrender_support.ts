@@ -245,7 +245,7 @@ function vdmRenderTest(
     attr.outputs.color.connect(diff.inputs.color)
     diff.outputs.surface.connect(output.inputs.surface)
     app!.datalib.add(mat)
-    ;(mesh as unknown as {materials: Array<unknown> & {active?: unknown}}).materials[0] = mat
+    ;(mesh as unknown as {materials: unknown[] & {active?: unknown}}).materials[0] = mat
 
     // The seam overlay would draw every edge (markAllSeams) over the A/B
     // images — and would track the ref displacement but not the vdm one.

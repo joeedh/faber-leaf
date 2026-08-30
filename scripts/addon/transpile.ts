@@ -17,9 +17,9 @@ import type {IAddonManifest} from './manifest.js'
 // Minimal subset of the esbuild module shape we use. Both esbuild-wasm and
 // esbuild-node expose this.
 interface IEsbuildBuildResult {
-  outputFiles?: Array<{path: string; contents: Uint8Array; text: string}>
-  errors: Array<{text: string}>
-  warnings: Array<{text: string}>
+  outputFiles?: {path: string; contents: Uint8Array; text: string}[]
+  errors: {text: string}[]
+  warnings: {text: string}[]
 }
 interface IEsbuildBuildOptions {
   stdin?: {
@@ -125,7 +125,7 @@ export async function transpileAddonSources(
 
   const vfsPlugin = {
     name: 'addon-vfs',
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     setup(build: any) {
       build.onResolve({filter: /.*/}, (args: {path: string; importer: string; namespace: string}) => {
         // Relative imports resolve against the importer's directory; bare

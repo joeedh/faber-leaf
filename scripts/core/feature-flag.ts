@@ -1,5 +1,5 @@
-import {DataAPI, DataStruct, ToolProperty} from '../path.ux/scripts/pathux'
-import {default as messageBus, IBusEmitterClass, IBusEmitter, BusTriggers} from './bus'
+import {DataAPI, DataStruct} from '../path.ux/scripts/pathux'
+import {default as messageBus, IBusEmitter, BusTriggers} from './bus'
 import {getAppStorage} from './app_storage'
 import {registerSyncTarget, noteLocalWrite} from './storage_sync'
 import {registerDataAPI} from '../data_api/api_define_registry'
@@ -28,7 +28,7 @@ declare global {
    * A build whose augmentations are all absent degrades to `string`, which is
    * looser but never wrong.
    */
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+
   interface FeatureFlagRegistry {}
 }
 

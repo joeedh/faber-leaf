@@ -290,23 +290,23 @@ AppSettings {
     st.struct('featureFlags', 'featureFlags', 'Feature Flags', api.mapStruct(FeatureFlagManager, true))
 
     st.list('addonSettings', 'addons', {
-      getStruct(api: any, list: any, key: string) {
+      getStruct(api2: any, list: any, key: string) {
         return ast
       },
 
-      get(api: any, list: Record<string, AddonSettings>, key: string) {
+      get(api2: any, list: Record<string, AddonSettings>, key: string) {
         return list[key]
       },
 
-      getKey(api: any, list: any, obj: AddonSettings) {
+      getKey(api2: any, list: any, obj: AddonSettings) {
         return obj.name
       },
 
-      getLength(api: any, list: Record<string, AddonSettings>) {
+      getLength(api2: any, list: Record<string, AddonSettings>) {
         return Object.keys(list).length
       },
 
-      getIter(api: any, list: Record<string, AddonSettings>) {
+      getIter(api2: any, list: Record<string, AddonSettings>) {
         return (function* () {
           for (const k in list) {
             yield list[k]

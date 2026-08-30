@@ -85,7 +85,7 @@ export class Float2Attribute extends Attribute<AttrType.Float2, Vector2> {
 
   /** Warning: returns values in a cachering! */
   get(i: number) {
-    let i2 = (i % this.pageSize) * 2
+    const i2 = (i % this.pageSize) * 2
     const data = this.pages[~~(i / this.pageSize)].data!
     const x = data[i2]
     const y = data[i2 + 1]
@@ -93,7 +93,7 @@ export class Float2Attribute extends Attribute<AttrType.Float2, Vector2> {
   }
 
   set(i: number, value: Vector2): void {
-    let i2 = (i % this.pageSize) * 2
+    const i2 = (i % this.pageSize) * 2
     const data = this.pages[~~(i / this.pageSize)].data!
     data[i2] = value[0]
     data[i2 + 1] = value[1]
@@ -110,7 +110,7 @@ export class Float3Attribute extends Attribute<AttrType.Float3, Vector3> {
 
   /** Warning: returns values in a cachering! */
   get(i: number) {
-    let i2 = (i % this.pageSize) * 3
+    const i2 = (i % this.pageSize) * 3
     const data = this.pages[~~(i / this.pageSize)].data!
     const x = data[i2]
     const y = data[i2 + 1]
@@ -119,7 +119,7 @@ export class Float3Attribute extends Attribute<AttrType.Float3, Vector3> {
   }
 
   set(i: number, value: Vector3): void {
-    let i2 = (i % this.pageSize) * 3
+    const i2 = (i % this.pageSize) * 3
     const data = this.pages[~~(i / this.pageSize)].data!
     data[i2] = value[0]
     data[i2 + 1] = value[1]
@@ -137,7 +137,7 @@ export class Float4Attribute extends Attribute<AttrType.Float4, Vector4> {
 
   /** Warning: returns values in a cachering! */
   get(i: number) {
-    let i2 = (i % this.pageSize) * 4
+    const i2 = (i % this.pageSize) * 4
     const data = this.pages[~~(i / this.pageSize)].data!
     const x = data[i2]
     const y = data[i2 + 1]
@@ -147,7 +147,7 @@ export class Float4Attribute extends Attribute<AttrType.Float4, Vector4> {
   }
 
   set(i: number, value: Vector4): void {
-    let i2 = (i % this.pageSize) * 4
+    const i2 = (i % this.pageSize) * 4
     const data = this.pages[~~(i / this.pageSize)].data!
     data[i2] = value[0]
     data[i2 + 1] = value[1]
@@ -166,7 +166,7 @@ export class Int2Attribute extends Attribute<AttrType.Int2, Vector2> {
 
   /** Warning: returns values in a cachering! */
   get(i: number) {
-    let i2 = (i % this.pageSize) * 2
+    const i2 = (i % this.pageSize) * 2
     const data = this.pages[~~(i / this.pageSize)].data!
     const x = data[i2]
     const y = data[i2 + 1]
@@ -174,7 +174,7 @@ export class Int2Attribute extends Attribute<AttrType.Int2, Vector2> {
   }
 
   set(i: number, value: Vector2): void {
-    let i2 = (i % this.pageSize) * 2
+    const i2 = (i % this.pageSize) * 2
     const data = this.pages[~~(i / this.pageSize)].data!
     data[i2] = value[0]
     data[i2 + 1] = value[1]
@@ -191,7 +191,7 @@ export class Int3Attribute extends Attribute<AttrType.Int3, Vector3> {
 
   /** Warning: returns values in a cachering! */
   get(i: number) {
-    let i2 = (i % this.pageSize) * 3
+    const i2 = (i % this.pageSize) * 3
     const data = this.pages[~~(i / this.pageSize)].data!
     const x = data[i2]
     const y = data[i2 + 1]
@@ -200,7 +200,7 @@ export class Int3Attribute extends Attribute<AttrType.Int3, Vector3> {
   }
 
   set(i: number, value: Vector3): void {
-    let i2 = (i % this.pageSize) * 3
+    const i2 = (i % this.pageSize) * 3
     const data = this.pages[~~(i / this.pageSize)].data!
     data[i2] = value[0]
     data[i2 + 1] = value[1]
@@ -218,7 +218,7 @@ export class Int4Attribute extends Attribute<AttrType.Int4, Vector4> {
 
   /** Warning: returns values in a cachering! */
   get(i: number) {
-    let i2 = (i % this.pageSize) * 4
+    const i2 = (i % this.pageSize) * 4
     const data = this.pages[~~(i / this.pageSize)].data!
     const x = data[i2]
     const y = data[i2 + 1]
@@ -228,7 +228,7 @@ export class Int4Attribute extends Attribute<AttrType.Int4, Vector4> {
   }
 
   set(i: number, value: Vector4): void {
-    let i2 = (i % this.pageSize) * 4
+    const i2 = (i % this.pageSize) * 4
     const data = this.pages[~~(i / this.pageSize)].data!
     data[i2] = value[0]
     data[i2 + 1] = value[1]

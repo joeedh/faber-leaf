@@ -266,11 +266,7 @@ export class LiteMeshUVSource implements IUVSource {
       return
     }
 
-    this.mesh.uvFlagsScatter(
-      col,
-      this.intVecIn(handles).vec as never,
-      this.intVecIn(flags).vec as never
-    )
+    this.mesh.uvFlagsScatter(col, this.intVecIn(handles).vec as never, this.intVecIn(flags).vec as never)
     this.data.invalidate(InvalidationKind.SELECTION)
   }
 

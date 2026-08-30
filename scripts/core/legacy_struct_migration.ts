@@ -172,7 +172,7 @@ function renameTypeRefs(type: any, map: Record<string, string>): boolean {
     case StructEnum.ITERKEYS:
     case StructEnum.STATIC_ARRAY:
       // container types nest the element descriptor under .data.type
-      return renameTypeRefs(type.data && type.data.type, map)
+      return renameTypeRefs(type.data?.type, map)
     case StructEnum.OPTIONAL:
       // optional(T) nests the descriptor directly under .data
       return renameTypeRefs(type.data, map)

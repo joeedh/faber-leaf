@@ -807,7 +807,7 @@ export class UVProjectOp extends UVCoordOpBase<{matrix: Mat4Property; selectedOn
 
   exec(ctx: ToolContext): void {
     const source = this._source(ctx)
-    if (source === undefined || source.getUVElementPositions === undefined) {
+    if (source?.getUVElementPositions === undefined) {
       return
     }
 
@@ -922,7 +922,7 @@ export class UVUnwrapOp extends UVLayoutOpBase<{
 
   exec(ctx: ToolContext): void {
     const source = this._source(ctx)
-    if (source === undefined || source.getUVElementPositions === undefined) {
+    if (source?.getUVElementPositions === undefined) {
       return
     }
 

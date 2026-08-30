@@ -66,7 +66,7 @@ export class SceneObjectData<
   OutputSet extends INodeSocketSet = {},
 > extends DataBlock<InputSet & {depend: DependSocket}, OutputSet & {depend: DependSocket}> {
   material?: Material = undefined
-  materials: Array<Material | undefined> & {active?: Material} = []
+  materials: (Material | undefined)[] & {active?: Material} = []
   usesMaterial = false
 
   // update generation
@@ -111,21 +111,21 @@ SceneObjectData {
   )
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    let mstruct = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
-    mstruct.list<Array<Material | undefined>, number, Material>('materials', 'materials', [
-      function getIter(api: DataAPI, list: Array<Material | undefined>) {
+    const mstruct = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
+    mstruct.list<(Material | undefined)[], number, Material>('materials', 'materials', [
+      function getIter(api: DataAPI, list: (Material | undefined)[]) {
         return list
       },
-      function getLength(api: DataAPI, list: Array<Material | undefined>) {
+      function getLength(api: DataAPI, list: (Material | undefined)[]) {
         return list.length
       },
-      function get(api: DataAPI, list: Array<Material | undefined>, key: number) {
+      function get(api: DataAPI, list: (Material | undefined)[], key: number) {
         return list[key]
       },
-      function getKey(api: DataAPI, list: Array<Material | undefined>, obj: Material) {
+      function getKey(api: DataAPI, list: (Material | undefined)[], obj: Material) {
         return list.indexOf(obj)
       },
-      function getStruct(api: DataAPI, list: Array<Material | undefined>, key: number) {
+      function getStruct(api: DataAPI, list: (Material | undefined)[], key: number) {
         return api.mapStruct(_MaterialClass!)
       },
     ])
@@ -149,7 +149,7 @@ SceneObjectData {
     for (const sock of this.inputs.depend.edges) {
       // XXX fixme: cannot use instanceof here because of circular dependency
       // but this is still a hack
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       if ((sock.node as any).constructor.name === 'SceneObject' && (sock.node as unknown as any).data === this) {
         return sock.node as SceneObject
       }
@@ -375,7 +375,7 @@ SceneObjectData {
     // Slot positions are load-bearing: per-face material indices reference them,
     // so an unresolvable material must leave a hole rather than shift every
     // later slot down onto the wrong faces.
-    const mats = [] as Array<Material | undefined>
+    const mats = [] as (Material | undefined)[]
 
     //non-datablock materials are allowed
 

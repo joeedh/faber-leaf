@@ -469,7 +469,7 @@ export class SelectNearestLiteMeshOp extends LiteMeshSelectOpBase<{
     const {origin, dir} = localRay(view3d, obmatrix, lx, ly)
 
     const domain = this._domains(ctx)[0]
-    let idx = -1
+    let idx: number
     if (domain === 2) {
       idx = mesh.pickFace(origin, dir)
     } else if (domain === 1) {

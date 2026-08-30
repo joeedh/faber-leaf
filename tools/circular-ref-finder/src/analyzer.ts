@@ -30,7 +30,7 @@ export class DependencyAnalyzer {
       noEmit          : true,
     }
 
-    let filePaths = [] as string[]
+    const filePaths = [] as string[]
 
     function createCustomHost(options: ts.CompilerOptions): ts.CompilerHost {
       // 1. Create the default host
@@ -249,7 +249,7 @@ export class DependencyAnalyzer {
     const dir = path.dirname(fromFile)
     const extensions = ['.ts', '.tsx', '.js', '.jsx', '.mts', '.cts', '.mjs', '.cjs']
 
-    let resolved = path.resolve(dir, importPath)
+    const resolved = path.resolve(dir, importPath)
 
     if (fs.existsSync(resolved)) {
       const stat = fs.statSync(resolved)

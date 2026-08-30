@@ -71,10 +71,10 @@ const ts = await page.evaluate(async (url) => {
     reset_toolstack: true,
     reset_context  : true,
   })
-  const ts = window._appstate.toolstack
+  const ts2 = window._appstate.toolstack
   const ops = []
-  for (let i = 0; i < ts.length; i++) ops.push(ts[i]?.constructor?.name ?? '?')
-  return {len: ts.length, cur: ts.cur, ops}
+  for (let i = 0; i < ts2.length; i++) ops.push(ts2[i]?.constructor?.name ?? '?')
+  return {len: ts2.length, cur: ts2.cur, ops}
 }, WPROJ)
 console.log('toolstack:', JSON.stringify(ts))
 
@@ -95,11 +95,11 @@ const len = ts.len
 for (let i = 0; i < len; i++) {
   const info = await page.evaluate(() => {
     const app = window._appstate
-    const ts = app.toolstack
-    if (ts.cur < 0) return {cur: ts.cur, op: null, done: true}
-    const op = ts[ts.cur]?.constructor?.name
+    const ts2 = app.toolstack
+    if (ts2.cur < 0) return {cur: ts2.cur, op: null, done: true}
+    const op = ts2[ts2.cur]?.constructor?.name
     app.toolstack.undo()
-    return {cur: ts.cur, op}
+    return {cur: ts2.cur, op}
   })
   if (info.done) {
     console.log('  (no more to undo)')
@@ -115,10 +115,10 @@ for (let i = 0; i < len; i++) {
 for (let i = 0; i < len; i++) {
   const info = await page.evaluate(() => {
     const app = window._appstate
-    const ts = app.toolstack
-    if (ts.cur >= ts.length - 1) return {done: true}
+    const ts2 = app.toolstack
+    if (ts2.cur >= ts2.length - 1) return {done: true}
     app.toolstack.redo()
-    return {cur: ts.cur, op: ts[ts.cur]?.constructor?.name}
+    return {cur: ts2.cur, op: ts2[ts2.cur]?.constructor?.name}
   })
   if (info.done) {
     console.log('  (no more to redo)')

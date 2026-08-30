@@ -628,7 +628,7 @@ export class GpuBrushStroke {
       enc.copyBufferToBuffer(this.tsResolve!, 0, this.tsStaging!, 0, 16)
     }
     this.encodeTripwire(enc, nodeCount)
-    if (scatterOwners && scatterOwners.length) {
+    if (scatterOwners?.length) {
       this.encodeScatter(enc, scatterOwners)
     }
     dev.queue.submit([enc.finish()])

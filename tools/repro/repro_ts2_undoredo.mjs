@@ -33,20 +33,22 @@ await page.evaluate(() => {
       window.__snaps[label] = null
       return -1
     }
-    const wasm = mesh.wasm,
-      spatial = mesh.spatial
+    const wasm = mesh.wasm
+    const spatial = mesh.spatial
     try {
       spatial.update?.(wasm.gpu)
-    } catch (e) {}
+    } catch (e) {
+      console.log('spatial.update err', String(e))
+    }
     const buffersVec = wasm.gpu?.buffers
     const buffers = wasm.HEAPU8 !== undefined ? buffersVec : wasm.getBoundVector('', buffersVec)
     const chunks = []
     let total = 0
     for (let i = 0; i < (buffers.length | 0); i++) {
       const buf = buffers[i]
-      if (!buf || buf.name !== 'position' || !(buf.size | 0) || !(buf.elemsize | 0)) continue
-      const fc = (buf.size | 0) * (buf.elemsize | 0),
-        bytes = fc * 4
+      if (buf?.name !== 'position' || !(buf.size | 0) || !(buf.elemsize | 0)) continue
+      const fc = (buf.size | 0) * (buf.elemsize | 0)
+      const bytes = fc * 4
       let u8
       if (wasm.HEAPU8 !== undefined) u8 = new Uint8Array(wasm.HEAPU8.buffer, buf.data, bytes)
       else u8 = wasm.pointerBytes?.(buf, 'data', bytes)
@@ -66,8 +68,8 @@ await page.evaluate(() => {
   window.__sortedOf = (label) => {
     const arr = window.__snaps[label]
     if (!arr) return null
-    const m = (arr.length / 3) | 0,
-      v = new Array(m)
+    const m = (arr.length / 3) | 0
+    const v = new Array(m)
     for (let i = 0; i < m; i++) v[i] = [arr[3 * i], arr[3 * i + 1], arr[3 * i + 2]]
     v.sort((p, q) => p[0] - q[0] || p[1] - q[1] || p[2] - q[2])
     window.__snaps['sorted_' + label] = v
@@ -76,16 +78,16 @@ await page.evaluate(() => {
   window.__msdiff = (pa, pb) => {
     window.__sortedOf(pa)
     window.__sortedOf(pb)
-    const va = window.__snaps['sorted_' + pa],
-      vb = window.__snaps['sorted_' + pb]
+    const va = window.__snaps['sorted_' + pa]
+    const vb = window.__snaps['sorted_' + pb]
     if (!va || !vb) return {error: 'missing'}
     const m = Math.min(va.length, vb.length)
-    let ms = 0,
-      msw = 0
+    let ms = 0
+    let msw = 0
     for (let i = 0; i < m; i++) {
-      const dx = va[i][0] - vb[i][0],
-        dy = va[i][1] - vb[i][1],
-        dz = va[i][2] - vb[i][2]
+      const dx = va[i][0] - vb[i][0]
+      const dy = va[i][1] - vb[i][1]
+      const dz = va[i][2] - vb[i][2]
       const d = Math.sqrt(dx * dx + dy * dy + dz * dz)
       if (d > 1e-5) ms++
       if (d > msw) msw = d

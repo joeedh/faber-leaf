@@ -549,7 +549,7 @@ PropsEditor {
 
     const obDataTab = this.tabs.tab('ObData')
     let obDataType: string | undefined
-    let obDataUIDatas = new Map<string, string>()
+    const obDataUIDatas = new Map<string, string>()
 
     // Feature flags gate whole panels inside buildPropertiesTab (sculpt layers,
     // multires, VDM), so a flag flip must rebuild the tab, not wait for restart.

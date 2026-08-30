@@ -459,9 +459,9 @@ async function stencilAmplifyTest(): Promise<StencilAmplifyTestResult> {
       // bit-exact per the S5 gate), and amplified verts never enter the mesh.
       const js = new Float32Array(level.fineCount * 3)
       for (let i = 0; i < level.fineCount; i++) {
-        let px = 0,
-          py = 0,
-          pz = 0
+        let px = 0
+        let py = 0
+        let pz = 0
         const e = level.offsets[i + 1]
         for (let k = level.offsets[i]; k < e; k++) {
           const s = level.indices[k] * 3
@@ -611,7 +611,7 @@ function vdmSculptTest(): VdmSculptResult {
     let draw: SculptBrush | undefined
     for (const k in DefaultBrushes.brushes) {
       const b = DefaultBrushes.brushes[k]
-      if (b && b.tool === SculptTools.DRAW) draw = b
+      if (b?.tool === SculptTools.DRAW) draw = b
     }
     if (!draw) throw new Error('no default DRAW brush')
 
@@ -654,8 +654,9 @@ function vdmSculptTest(): VdmSculptResult {
     result.tilesAfterApply = store.tileCount()
     let applyMoved = 0
     {
-      const {co} = mesh.dumpVertCo()
-      void co
+      // this code appears to do nothing, does it have side effects?
+      const co2 = mesh.dumpVertCo().co
+      void co2
       applyMoved = result.posAfterApply === result.posBeforeApply ? 0 : 1
     }
     result.applyMoved = applyMoved
@@ -755,7 +756,7 @@ function vdmPersistTest(): VdmPersistResult {
     let draw: SculptBrush | undefined
     for (const k in DefaultBrushes.brushes) {
       const b = DefaultBrushes.brushes[k]
-      if (b && b.tool === SculptTools.SMOOTH) draw = b
+      if (b?.tool === SculptTools.SMOOTH) draw = b
     }
     // SMOOTH is not VDM-routed, so it deforms the level vertices directly.
     if (draw) {

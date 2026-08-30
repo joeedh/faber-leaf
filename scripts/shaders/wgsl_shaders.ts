@@ -586,7 +586,7 @@ export const WGSL_VERTEX_SLOTS = Object.freeze({
  * `MeshLinearZShader`. WGSL declares `@location(0) pos, @location(1) color,
  * @location(2) id`, mapped onto canonical slots 0/3/4.
  */
-export const POS_COLOR_ID_VERTEX_LAYOUT: Array<GPUVertexBufferLayout | null> = [
+export const POS_COLOR_ID_VERTEX_LAYOUT: (GPUVertexBufferLayout | null)[] = [
   locLayout(0),
   null,
   null,
@@ -602,7 +602,7 @@ export const POS_COLOR_ID_VERTEX_LAYOUT: Array<GPUVertexBufferLayout | null> = [
  * to give the legacy `GL_POINTS` mesh-edit verts a sized splat on WebGPU
  * (the native `point-list` topology is 1-pixel only).
  */
-export const POS_COLOR_ID_INSTANCE_LAYOUT: Array<GPUVertexBufferLayout | null> = [
+export const POS_COLOR_ID_INSTANCE_LAYOUT: (GPUVertexBufferLayout | null)[] = [
   {...locLayout(0), stepMode: 'instance'},
   null,
   null,
@@ -657,7 +657,7 @@ fn fs_main(in : VsOut) -> @location(0) vec4f {
  * `position + uv + color + id` shape — `MeshIDShader`. WGSL locations
  * 0/1/2/3 mapped onto canonical slots 0/2/3/4.
  */
-export const STANDARD_VERTEX_LAYOUT: Array<GPUVertexBufferLayout | null> = [
+export const STANDARD_VERTEX_LAYOUT: (GPUVertexBufferLayout | null)[] = [
   locLayout(0),
   null,
   uvLayout(1),
@@ -670,19 +670,14 @@ export const STANDARD_VERTEX_LAYOUT: Array<GPUVertexBufferLayout | null> = [
  * `ObjectLineShader`, `BasicLineShader2D`. WGSL locations 0/1/2 mapped
  * onto canonical slots 0/2/3.
  */
-export const NO_ID_VERTEX_LAYOUT: Array<GPUVertexBufferLayout | null> = [
-  locLayout(0),
-  null,
-  uvLayout(1),
-  colorLayout(2),
-]
+export const NO_ID_VERTEX_LAYOUT: (GPUVertexBufferLayout | null)[] = [locLayout(0), null, uvLayout(1), colorLayout(2)]
 
 /**
  * Lit-mesh shape: position + normal + uv + color. `BasicLitMesh`,
  * `WidgetMeshShader`, `NormalPassShader`. WGSL locations 0/1/2/3
  * mapped onto canonical slots 0/1/2/3.
  */
-export const LIT_MESH_VERTEX_LAYOUT: Array<GPUVertexBufferLayout | null> = [
+export const LIT_MESH_VERTEX_LAYOUT: (GPUVertexBufferLayout | null)[] = [
   locLayout(0),
   normalLayout(1),
   uvLayout(2),
@@ -1287,7 +1282,7 @@ export interface WgslShaderEntry {
    *  slot (`WGSL_VERTEX_SLOTS`). Slots the shader doesn't use are
    *  `null` so positional alignment with `SimpleIsland.drawGPU` is
    *  preserved. */
-  vertexBuffers: Array<GPUVertexBufferLayout | null>
+  vertexBuffers: (GPUVertexBufferLayout | null)[]
   /** Default color target — caller can override per-pass. */
   colorTargets: GPUColorTargetState[]
   /** Default primitive topology. */
@@ -1371,7 +1366,7 @@ export function buildPipelineDescriptor(
  */
 export function buildMaterialVertexLayout(
   requestedAttrs: readonly MaterialVertexAttr[] = []
-): Array<GPUVertexBufferLayout | null> {
+): (GPUVertexBufferLayout | null)[] {
   const attrs: VertexAttrDesc[] = [...MATERIAL_BASE_VERTEX_ATTRS]
 
   for (const req of requestedAttrs) {
@@ -1399,7 +1394,7 @@ export function buildMaterialVertexLayout(
 export function buildMaterialPipelineDescriptor(
   wgsl: string,
   label: string,
-  vertexBuffers: Array<GPUVertexBufferLayout | null>
+  vertexBuffers: (GPUVertexBufferLayout | null)[]
 ): PipelineDescriptor {
   return {
     label,

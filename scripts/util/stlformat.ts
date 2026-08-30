@@ -40,22 +40,22 @@ export function exportSTLMesh(meshes: Iterable<GeometryDataRef>): ArrayBuffer {
 
   for (const {positions, indices} of batches) {
     for (let i = 0; i < indices.length; i += 3) {
-      const a = indices[i] * 3,
-        b = indices[i + 1] * 3,
-        c = indices[i + 2] * 3
+      const a = indices[i] * 3
+      const b = indices[i + 1] * 3
+      const c = indices[i + 2] * 3
 
       // STL stores a facet normal, so take the geometric one rather than
       // averaging whatever per-vertex normals the source happened to supply.
-      const ux = positions[b] - positions[a],
-        uy = positions[b + 1] - positions[a + 1],
-        uz = positions[b + 2] - positions[a + 2]
-      const vx = positions[c] - positions[a],
-        vy = positions[c + 1] - positions[a + 1],
-        vz = positions[c + 2] - positions[a + 2]
+      const ux = positions[b] - positions[a]
+      const uy = positions[b + 1] - positions[a + 1]
+      const uz = positions[b + 2] - positions[a + 2]
+      const vx = positions[c] - positions[a]
+      const vy = positions[c + 1] - positions[a + 1]
+      const vz = positions[c + 2] - positions[a + 2]
 
-      let nx = uy * vz - uz * vy,
-        ny = uz * vx - ux * vz,
-        nz = ux * vy - uy * vx
+      let nx = uy * vz - uz * vy
+      let ny = uz * vx - ux * vz
+      let nz = ux * vy - uy * vx
       const len = Math.sqrt(nx * nx + ny * ny + nz * nz)
 
       if (len > 0.0) {

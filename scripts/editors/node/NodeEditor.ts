@@ -486,7 +486,7 @@ NodeEditor {
     }
 
     let n1: UIBase<ViewContext> | undefined = elem
-    while (n1 && n1.parentWidget) {
+    while (n1?.parentWidget) {
       if (n1 instanceof NodeUI) {
         elem = n1
         break

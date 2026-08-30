@@ -1,19 +1,10 @@
-import {DataBlock, DataRef} from '../core/lib_api.js'
+import {DataBlock} from '../core/lib_api.js'
 import {nstructjs} from '../path.ux/pathux.js'
 import {registerDataAPI} from '../data_api/api_define_registry.js'
 
-let STRUCT = nstructjs.STRUCT
-import {Graph, Node, NodeFlags, SocketFlags} from '../core/graph.js'
-import {Matrix4, Vector3, Vector4, Quat} from '../util/vectormath.js'
-import {
-  Vec3Socket,
-  FloatSocket,
-  DependSocket,
-  Matrix4Socket,
-  Vec4Socket,
-  RGBASocket,
-  RGBSocket,
-} from '../core/graphsockets.js'
+import {NodeFlags} from '../core/graph.js'
+import {Vector3} from '../util/vectormath.js'
+import {FloatSocket, DependSocket, RGBSocket} from '../core/graphsockets.js'
 import {Shapes} from '../webgl/simplemesh_shapes.js'
 import {Shaders} from '../shaders/shaders.js'
 import {SceneObjectData} from '../sceneobject/sceneobject_base.js'

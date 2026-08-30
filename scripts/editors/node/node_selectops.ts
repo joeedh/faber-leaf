@@ -41,8 +41,8 @@ export class NodeSelectOpBase<
       order: {} as {[graph_id: number]: number},
     })
 
-    const sel = ud.sel,
-      order = ud.order
+    const sel = ud.sel
+    const order = ud.order
 
     let i = 0
     for (const node of graph.nodes) {
@@ -53,8 +53,8 @@ export class NodeSelectOpBase<
 
   undo(ctx: ToolContext): void {
     const ud = this._undo!
-    const sel = ud.sel!,
-      order = ud.order!
+    const sel = ud.sel!
+    const order = ud.order!
     const graph = this.fetchGraph(ctx)!
 
     for (const k in sel) {

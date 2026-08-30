@@ -29,10 +29,9 @@ export function initDebugGL(gl: WebGL2RenderingContext): WebGL2RenderingContext 
   const addfuncs = {} as {[k: string]: any}
 
   const makeDebugFunc = (k: string, k2: string) => {
-    return function () {
-      // @ts-ignore
-      const obj = this as unknown as any
-      const ret = obj[k2].apply(obj, arguments)
+    return function (this: any, ...args: any[]) {
+      const obj = this
+      const ret = obj[k2].apply(obj, args)
 
       const err = obj.getError()
       if (err !== 0) {
@@ -158,7 +157,7 @@ export function addFastParameterGet(gl: {[k: string]: any}): void {
 
 //*/
 
-export function onContextLost(e: WebGLContextEvent) {}
+export function onContextLost(_e: WebGLContextEvent) {}
 
 //params are passed to canvas.getContext as-is
 export function init_webgl(
@@ -250,8 +249,7 @@ function format_lines(script: string, errortext?: string): string {
   const maxcol = Math.ceil(Math.log(lines.length) / Math.log(10)) + 1
 
   if (typeof linenr === 'number') {
-    let a = Math.max(linenr - 25, 0)
-    a = 0
+    const a = 0
     const b = Math.min(linenr + 5, lines.length)
 
     i = a + 1
@@ -311,8 +309,6 @@ export interface IShaderDef {
 }
 
 export function hashShader(sdef: IShaderDef): string {
-  let hash
-
   const clean = {
     vertex    : sdef.vertex,
     fragment  : sdef.fragment,
@@ -473,7 +469,8 @@ export class ShaderProgram {
   }
 
   static multilayerAttrDeclare(attr: string, type: string, is_fragment: boolean, is_glsl_300?: boolean): string {
-    let keyword, keyword2
+    let keyword
+    let keyword2
 
     if (is_fragment) {
       keyword = is_glsl_300 ? 'in' : 'attribute'
@@ -543,6 +540,8 @@ ${type} get_${attr}_layer(int i) {
       `
     }
 
+    // TODO: figure out what this func var generates
+    // eslint-disable-next-line no-useless-assignment, @typescript-eslint/no-unused-vars
     func += '  }\n}\n'
 
     return ret
@@ -599,8 +598,8 @@ v${attr} = ${attr};
     this.gl = gl
     this.rebuild = false
 
-    let vshader = this.vertexSource,
-      fshader = this.fragmentSource
+    let vshader = this.vertexSource
+    let fshader = this.fragmentSource
 
     if (!this._use_def_shaders) {
       let defs = ''
@@ -1039,7 +1038,6 @@ v${attr} = ${attr};
             default:
               console.log(v)
               throw new Error('invalid array')
-              break
           }
         } else if (v instanceof Matrix4) {
           //console.log("found matrix");
@@ -1058,7 +1056,7 @@ v${attr} = ${attr};
 }
 
 const GL_ARRAY_BUFFER = 34962
-const GL_ELEMENT_ARRAY_BUFFER = 34963
+//const GL_ELEMENT_ARRAY_BUFFER = 34963
 
 export class VBO {
   gl: WebGL2RenderingContext
@@ -1189,7 +1187,6 @@ export class VBO {
 }
 
 export class RenderBuffer {
-  // @ts-ignore
   _layers: {[k: string]: VBO}
 
   constructor() {

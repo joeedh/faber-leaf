@@ -38,24 +38,24 @@ await page.evaluate(() => {
     return m.size
   }
   window.__diffCo = (pa, pb) => {
-    const a = window.__snaps[pa],
-      b = window.__snaps[pb]
+    const a = window.__snaps[pa]
+    const b = window.__snaps[pb]
     if (!a || !b) return {error: 'missing'}
-    let onlyA = 0,
-      onlyB = 0,
-      diff = 0,
-      worst = 0,
-      worstIdx = -1,
-      same = 0
+    let onlyA = 0
+    let onlyB = 0
+    let diff = 0
+    let worst = 0
+    let worstIdx = -1
+    let same = 0
     for (const [idx, ca] of a) {
       const cb = b.get(idx)
       if (!cb) {
         onlyA++
         continue
       }
-      const dx = ca[0] - cb[0],
-        dy = ca[1] - cb[1],
-        dz = ca[2] - cb[2]
+      const dx = ca[0] - cb[0]
+      const dy = ca[1] - cb[1]
+      const dz = ca[2] - cb[2]
       const d = Math.sqrt(dx * dx + dy * dy + dz * dz)
       if (d > 1e-6) {
         diff++

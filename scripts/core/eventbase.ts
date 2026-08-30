@@ -20,7 +20,7 @@ export class EventBase {
   }
 
   fire(event: string, data: any) {
-    for (let cb of this._getEventList(event)) {
+    for (const cb of this._getEventList(event)) {
       cb(data)
     }
   }

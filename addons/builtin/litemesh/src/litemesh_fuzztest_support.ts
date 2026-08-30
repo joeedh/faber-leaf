@@ -132,9 +132,9 @@ function fuzzTest(opts: {iters?: number; seed?: number; maxMs?: number} = {}): F
       // Random surface anchor: a live vertex, projected to the sphere of radius
       // R, with its (normalized) position as the dab normal.
       const v = co[Math.floor(rng() * co.length)]
-      let nx = v[0],
-        ny = v[1],
-        nz = v[2]
+      let nx = v[0]
+      let ny = v[1]
+      let nz = v[2]
       const len = Math.hypot(nx, ny, nz) || 1
       nx /= len
       ny /= len
@@ -159,9 +159,9 @@ function fuzzTest(opts: {iters?: number; seed?: number; maxMs?: number} = {}): F
       const dabs: {p: number[]; normal: number[]}[] = []
       if (resolveToolDabPolicy(tool).isGrab) {
         // Build a tangent perpendicular to the normal.
-        let tx = -ny,
-          ty = nx,
-          tz = 0
+        let tx = -ny
+        let ty = nx
+        let tz = 0
         if (Math.hypot(tx, ty, tz) < 1e-4) {
           tx = 0
           ty = -nz

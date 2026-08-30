@@ -51,7 +51,7 @@ export class ShadowSettings {
   }
 
   copy() {
-    let ret = new ShadowSettings()
+    const ret = new ShadowSettings()
 
     this.copyTo(ret)
 
@@ -105,7 +105,7 @@ ShaderNetwork {
   }
 
   copy(addLibUsers = false, owner?: DataBlock) {
-    let ret = super.copy(addLibUsers, owner)
+    const ret = super.copy(addLibUsers, owner)
 
     ret.graph = this.graph.copy(addLibUsers)
     ret.shadow = this.shadow.copy()
@@ -124,7 +124,7 @@ ShaderNetwork {
   getUsedNodes() {
     let out
 
-    for (let node of this.graph.nodes) {
+    for (const node of this.graph.nodes) {
       if (node instanceof OutputNode) {
         out = node
         break
@@ -132,19 +132,19 @@ ShaderNetwork {
     }
 
     type ShaderNetNode = {graph_id: number; inputs: INodeSocketSet; outputs: INodeSocketSet}
-    let ret = new Set<ShaderNetNode>()
+    const ret = new Set<ShaderNetNode>()
 
-    let rec = (n: ShaderNetNode) => {
+    const rec = (n: ShaderNetNode) => {
       if (ret.has(n)) {
         return
       }
 
       ret.add(n)
 
-      for (let k in n.inputs) {
-        let sock = n.inputs[k]
+      for (const k in n.inputs) {
+        const sock = n.inputs[k]
 
-        for (let e of sock.edges) {
+        for (const e of sock.edges) {
           rec(e.node)
         }
       }
@@ -158,17 +158,17 @@ ShaderNetwork {
   }
 
   calcUpdateHash() {
-    let graph = this.graph
+    const graph = this.graph
 
-    let hash = new util.HashDigest()
-    for (let node of this.usedNodes) {
+    const hash = new util.HashDigest()
+    for (const node of this.usedNodes) {
       hash.add(node.graph_id)
 
       for (let i = 0; i < 2; i++) {
-        let socks = i ? node.outputs : node.inputs
+        const socks = i ? node.outputs : node.inputs
 
-        for (let k in socks) {
-          let sock = socks[k]
+        for (const k in socks) {
+          const sock = socks[k]
 
           if (sock.edges.length === 0) {
             if (sock instanceof FloatSocket) {
@@ -188,7 +188,7 @@ ShaderNetwork {
               hash.add(sock.value[3] * 1000.0)
             }
           } else {
-            for (let e of sock.edges) {
+            for (const e of sock.edges) {
               hash.add(e.graph_id)
             }
           }
@@ -264,7 +264,7 @@ ShaderNetwork {
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    let mstruct = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
+    const mstruct = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
 
     mstruct.struct('graph', 'graph', 'Shader Graph', api.getStruct(Graph))
 
@@ -282,12 +282,12 @@ ShaderNetwork {
 DataBlock.register(ShaderNetwork)
 
 export function makeDefaultShaderNetwork() {
-  let sn = new ShaderNetwork()
+  const sn = new ShaderNetwork()
 
-  let out = new OutputNode()
+  const out = new OutputNode()
   sn.graph.add(out)
 
-  let shader = new DiffuseNode()
+  const shader = new DiffuseNode()
   sn.graph.add(shader)
 
   shader.outputs.surface.connect(out.inputs.surface)

@@ -1,27 +1,7 @@
-import {Curve1D, SplineTemplates, util, Vector4} from '../path.ux/scripts/pathux.js'
 import {Icons} from '../editors/icon_enum.js'
-import {DataBlock, BlockFlags, BlockLoader, BlockLoaderAddUser} from '../core/lib_api.js'
-import {NodeFlags} from '../core/graph.js'
-import {
-  CombModes,
-  CombPattern,
-  ProceduralTex,
-  ProceduralTexUser,
-  TexUserFlags,
-  TexUserModes,
-} from '../texture/proceduralTex'
-import {nstructjs, Number4} from '../path.ux/pathux.js'
-import type {Scene} from '../scene/scene.js'
-import type {ToolContext} from '../core/context'
-import type {StructReader} from '../path.ux/scripts/util/nstructjs.js'
-import {BrushDynamics} from './brush_dynamics'
 export {BrushDynamics} from './brush_dynamics'
 import {SculptTools} from './brush_enums'
 export * from './brush_enums'
-
-function feq(a: number, b: number) {
-  return Math.abs(a - b) < 0.00001
-}
 
 export const BrushSpacingModes = {
   NONE: 0,

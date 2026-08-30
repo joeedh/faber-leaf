@@ -1949,7 +1949,7 @@ export class SimpleIsland<OPT extends {dead?: true | false} = {dead: true}> {
     // slot 2, COLOR at slot 3, etc. so pipelines declare their
     // `vertexBuffers` against these stable positions.
     const layerflag = this.layerflag
-    const slotForType: Array<[LayerTypes, number]> = [
+    const slotForType: [LayerTypes, number][] = [
       [LayerTypes.LOC, 0],
       [LayerTypes.NORMAL, 1],
       [LayerTypes.UV, 2],
@@ -2201,7 +2201,7 @@ export class SimpleMesh {
     if (!isWebGPU()) return false
     if (linesOnly) return false
     const ctx = getActiveWebGpuContext()
-    if (!ctx || !ctx.currentPass) return false
+    if (!ctx?.currentPass) return false
     const program = program_override ?? this.program
     if (!program) return false
     const merged = (uniforms ? {...this.uniforms, ...uniforms} : this.uniforms) as IUniformsBlock

@@ -227,10 +227,10 @@ export class DynTopoSettingsSC {
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    let st = struct ?? api.mapStruct(this)
+    const st = struct ?? api.mapStruct(this)
 
-    let tooltips: Record<string, string> = {}
-    for (let k in DynTopoOverridesSC) {
+    const tooltips: Record<string, string> = {}
+    for (const k in DynTopoOverridesSC) {
       if (k === 'NONE') {
         tooltips[k] = 'Use Defaults For Everything'
       } else {

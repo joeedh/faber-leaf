@@ -1,16 +1,16 @@
 var EPSILON = 1.0 / 1048576.0
 
 function supertriangle(vertices) {
-  var xmin = Number.POSITIVE_INFINITY,
-    ymin = Number.POSITIVE_INFINITY,
-    xmax = Number.NEGATIVE_INFINITY,
-    ymax = Number.NEGATIVE_INFINITY,
-    i,
-    dx,
-    dy,
-    dmax,
-    xmid,
-    ymid
+  var xmin = Number.POSITIVE_INFINITY
+  var ymin = Number.POSITIVE_INFINITY
+  var xmax = Number.NEGATIVE_INFINITY
+  var ymax = Number.NEGATIVE_INFINITY
+  var i
+  var dx
+  var dy
+  var dmax
+  var xmid
+  var ymid
 
   for (i = vertices.length; i--; ) {
     if (vertices[i][0] < xmin) xmin = vertices[i][0]
@@ -33,24 +33,24 @@ function supertriangle(vertices) {
 }
 
 function circumcircle(vertices, i, j, k) {
-  var x1 = vertices[i][0],
-    y1 = vertices[i][1],
-    x2 = vertices[j][0],
-    y2 = vertices[j][1],
-    x3 = vertices[k][0],
-    y3 = vertices[k][1],
-    fabsy1y2 = Math.abs(y1 - y2),
-    fabsy2y3 = Math.abs(y2 - y3),
-    xc,
-    yc,
-    m1,
-    m2,
-    mx1,
-    mx2,
-    my1,
-    my2,
-    dx,
-    dy
+  var x1 = vertices[i][0]
+  var y1 = vertices[i][1]
+  var x2 = vertices[j][0]
+  var y2 = vertices[j][1]
+  var x3 = vertices[k][0]
+  var y3 = vertices[k][1]
+  var fabsy1y2 = Math.abs(y1 - y2)
+  var fabsy2y3 = Math.abs(y2 - y3)
+  var xc
+  var yc
+  var m1
+  var m2
+  var mx1
+  var mx2
+  var my1
+  var my2
+  var dx
+  var dy
 
   /* Check for coincident points */
   if (fabsy1y2 < EPSILON && fabsy2y3 < EPSILON) throw new Error('Eek! Coincident points!')
@@ -84,7 +84,12 @@ function circumcircle(vertices, i, j, k) {
 }
 
 function dedup(edges) {
-  var i, j, a, b, m, n
+  var i
+  var j
+  var a
+  var b
+  var m
+  var n
 
   for (j = edges.length; j; ) {
     b = edges[--j]
@@ -105,19 +110,19 @@ function dedup(edges) {
 
 let Delaunay = {
   triangulate: function (vertices, key) {
-    var n = vertices.length,
-      i,
-      j,
-      indices,
-      st,
-      open,
-      closed,
-      edges,
-      dx,
-      dy,
-      a,
-      b,
-      c
+    var n = vertices.length
+    var i
+    var j
+    var indices
+    var st
+    var open
+    var closed
+    var edges
+    var dx
+    var dy
+    var a
+    var b
+    var c
 
     /* Bail if there aren't enough vertices to form any triangles. */
     if (n < 3) return []
@@ -212,17 +217,17 @@ let Delaunay = {
     )
       return null
 
-    var a = tri[1][0] - tri[0][0],
-      b = tri[2][0] - tri[0][0],
-      c = tri[1][1] - tri[0][1],
-      d = tri[2][1] - tri[0][1],
-      i = a * d - b * c
+    var a = tri[1][0] - tri[0][0]
+    var b = tri[2][0] - tri[0][0]
+    var c = tri[1][1] - tri[0][1]
+    var d = tri[2][1] - tri[0][1]
+    var i = a * d - b * c
 
     /* Degenerate tri. */
     if (i === 0.0) return null
 
-    var u = (d * (p[0] - tri[0][0]) - b * (p[1] - tri[0][1])) / i,
-      v = (a * (p[1] - tri[0][1]) - c * (p[0] - tri[0][0])) / i
+    var u = (d * (p[0] - tri[0][0]) - b * (p[1] - tri[0][1])) / i
+    var v = (a * (p[1] - tri[0][1]) - c * (p[0] - tri[0][0])) / i
 
     /* If we're outside the tri, fail. */
     if (u < 0.0 || v < 0.0 || u + v > 1.0) return null

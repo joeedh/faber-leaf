@@ -184,7 +184,7 @@ float fsample(vec3 co, vec3 colorOut) {
       const list = (i ? this.uniforms : this.params) as unknown as any
 
       for (const k in list) {
-        let arr = list[k] as number[] | Matrix4
+        const arr = list[k] as number[] | Matrix4
 
         if (!(arr instanceof Array)) {
           continue

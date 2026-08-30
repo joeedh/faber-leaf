@@ -204,7 +204,6 @@ ImageBlock {
     return ret
   }
 
-  // eslint-disable-next-line no-unused-vars
   downloadFromGL = function (this: ImageBlock<OPT & {dead: false}>): void {
     if (!this.glTex) {
       console.error('No gl texture data')
@@ -393,7 +392,7 @@ ImageBlock {
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    let st = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
+    const st = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
 
     st.enum('type', 'type', ImageTypes, 'Image Type')
     st.enum('genType', 'genType', ImageGenTypes, 'Generator')
@@ -617,16 +616,16 @@ ImageBlock {
 
         const colors = ['rgb(200, 200, 200)', 'rgb(65, 65, 65)']
 
-        const cx = canvas.width / steps,
-          cy = canvas.height / steps
+        const cx = canvas.width / steps
+        const cy = canvas.height / steps
 
         g.strokeStyle = 'black'
         const tsize = cx * 0.5
         g.font = tsize + 'px sans-serif'
 
         for (let i = 0; i < steps * steps; i++) {
-          const ix = i % steps,
-            iy = ~~(i / steps)
+          const ix = i % steps
+          const iy = ~~(i / steps)
 
           const x = (ix / steps) * canvas.width
           const y = (iy / steps) * canvas.height
@@ -822,7 +821,7 @@ ImageUser {
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    let st = struct ?? api.mapStruct(this, true)
+    const st = struct ?? api.mapStruct(this, true)
 
     st.struct('image', 'image', 'Image', api.mapStruct(ImageBlock))
 

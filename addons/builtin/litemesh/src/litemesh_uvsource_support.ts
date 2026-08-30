@@ -93,8 +93,6 @@ registerUVSourceFixture('litemesh', () => {
     throw e
   }
 })
-
-;(globalThis as {__uvsourceLiteMesh?: typeof runLiteMeshUVConformance}).__uvsourceLiteMesh =
-  runLiteMeshUVConformance
+;(globalThis as {__uvsourceLiteMesh?: typeof runLiteMeshUVConformance}).__uvsourceLiteMesh = runLiteMeshUVConformance
 
 export {runLiteMeshUVConformance}

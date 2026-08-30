@@ -376,14 +376,13 @@ class DebugEditorAPI {
    * TypeScript `enum` reverse mapping (numeric key → name), so `Flags` must be a
    * real `enum` (e.g. AreaFlags); a plain `{NAME: bit}` object yields nothing.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   private extractTSFlags(Flags: any, flag: number) {
     const flags = [] as string[]
     for (const k in Flags) {
       if (typeof k === 'string' && !isNaN(parseInt(k))) {
         const bit = parseInt(k)
         if (flag & bit) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           flags.push((Flags as any)[k])
         }
       }
@@ -598,7 +597,7 @@ export class ViewContext extends ToolContext {
     }
 
     const image = editor.imageUser.image
-    if (!image || !image.ready) {
+    if (!image?.ready) {
       if (image) {
         image.update()
       }

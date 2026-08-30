@@ -109,7 +109,7 @@ module.exports = {
         'P18 removed the last two (MainMenu, MaterialEditor) and took 23 cycles with them. ' +
         'Import the defining module directly; `@framework/api` is for addons.',
       from    : {path: HOST},
-      to      : {path: '^scripts/framework_api\.ts$'},
+      to      : {path: '^scripts/framework_api.ts$'},
     },
     {
       name    : 'no-circular',

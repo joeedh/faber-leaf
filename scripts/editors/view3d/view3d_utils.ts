@@ -71,7 +71,7 @@ export function calcUpdateHash(view3d: View3D, do_objects = true) {
   }
 
   for (let _i = 0; _i < 3; _i++) {
-    let i = _i as Number3
+    const i = _i as Number3
     thehash.add(view3d.camera.pos[i])
     thehash.add(view3d.camera.target[i])
     thehash.add(view3d.camera.up[i])

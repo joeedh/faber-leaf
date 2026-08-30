@@ -116,7 +116,7 @@ function readPos(lm: LiteMesh): Float32Array | undefined {
   let total = 0
   for (let i = 0; i < (buffers.length | 0); i++) {
     const buf = buffers[i]
-    if (!buf || buf.name !== 'position' || !(buf.size | 0) || !(buf.elemsize | 0)) continue
+    if (buf?.name !== 'position' || !(buf.size | 0) || !(buf.elemsize | 0)) continue
     const floatCount = (buf.size | 0) * (buf.elemsize | 0)
     const bytes = floatCount * 4
     let u8: Uint8Array | undefined
@@ -172,7 +172,7 @@ function sigClose(a: PosSig, b: PosSig): boolean {
 
 async function autosaveTest(): Promise<AutosaveTestResult> {
   const result: AutosaveTestResult = {ok: false}
-  const stash: Array<Uint8Array | undefined> = []
+  const stash: (Uint8Array | undefined)[] = []
   // Record the last stage entered so a failure (or unexpected hang) is
   // diagnosable from the --dump JSON; the renderer console isn't forwarded.
   const setStage = (s: string) => {
@@ -187,7 +187,7 @@ async function autosaveTest(): Promise<AutosaveTestResult> {
     let draw: SculptBrush | undefined
     for (const k in DefaultBrushes.brushes) {
       const b = DefaultBrushes.brushes[k]
-      if (b && b.tool === SculptTools.DRAW) draw = b
+      if (b?.tool === SculptTools.DRAW) draw = b
     }
     if (!draw) throw new Error('no default DRAW brush')
 

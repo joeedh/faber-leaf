@@ -49,7 +49,7 @@ function readGpuBuffer(lm: LiteMesh, name: string): Float32Array | undefined {
   let total = 0
   for (let i = 0; i < (buffers.length | 0); i++) {
     const buf = buffers[i]
-    if (!buf || buf.name !== name || !(buf.size | 0) || !(buf.elemsize | 0)) {
+    if (buf?.name !== name || !(buf.size | 0) || !(buf.elemsize | 0)) {
       continue
     }
     const floatCount = (buf.size | 0) * (buf.elemsize | 0)

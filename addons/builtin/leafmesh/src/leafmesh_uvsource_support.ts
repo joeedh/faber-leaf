@@ -208,8 +208,6 @@ registerUVSourceFixture('leafmesh-dome', () => ({source: makeDomeSource()}))
 registerUVSourceFixture('leafmesh-mirror', () => ({
   source: withUVSourceFixture('litemesh', mirrorSource),
 }))
-
-;(globalThis as {__uvsourceLeafMesh?: typeof runLeafMeshUVConformance}).__uvsourceLeafMesh =
-  runLeafMeshUVConformance
+;(globalThis as {__uvsourceLeafMesh?: typeof runLeafMeshUVConformance}).__uvsourceLeafMesh = runLeafMeshUVConformance
 
 export {runLeafMeshUVConformance}

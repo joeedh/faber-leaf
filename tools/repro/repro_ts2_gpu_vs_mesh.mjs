@@ -25,8 +25,8 @@ await page.evaluate(() => {
   // GPU position buffer -> sorted vec3 multiset
   window.__gpuVecs = () => {
     const mesh = globalThis._appstate?.ctx?.object?.data
-    const wasm = mesh.wasm,
-      spatial = mesh.spatial
+    const wasm = mesh.wasm
+    const spatial = mesh.spatial
     let updErr = null
     try {
       spatial.update?.(wasm.gpu)
@@ -38,9 +38,9 @@ await page.evaluate(() => {
     const v = []
     for (let i = 0; i < (buffers.length | 0); i++) {
       const buf = buffers[i]
-      if (!buf || buf.name !== 'position' || !(buf.size | 0) || !(buf.elemsize | 0)) continue
-      const fc = (buf.size | 0) * (buf.elemsize | 0),
-        bytes = fc * 4
+      if (buf?.name !== 'position' || !(buf.size | 0) || !(buf.elemsize | 0)) continue
+      const fc = (buf.size | 0) * (buf.elemsize | 0)
+      const bytes = fc * 4
       let u8
       if (wasm.HEAPU8 !== undefined) u8 = new Uint8Array(wasm.HEAPU8.buffer, buf.data, bytes)
       else u8 = wasm.pointerBytes?.(buf, 'data', bytes)
@@ -66,9 +66,9 @@ await page.evaluate(() => {
   }
   // For each GPU vec, is it present (within eps) in the mesh multiset? Count misses.
   window.__gpuConsistency = () => {
-    const g = window.__gpuVecs(),
-      gpu = g.v,
-      mesh = window.__meshVecs()
+    const g = window.__gpuVecs()
+    const gpu = g.v
+    const mesh = window.__meshVecs()
     // build a quantized set of mesh coords for membership test
     const Q = 1e4
     const key = (p) => `${Math.round(p[0] * Q)},${Math.round(p[1] * Q)},${Math.round(p[2] * Q)}`

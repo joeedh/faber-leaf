@@ -23,7 +23,7 @@ import {
   ShortAttribute,
 } from './litemesh_types'
 import {SceneObjectData} from '../../../../scripts/sceneobject/sceneobject_base'
-import {BlockLoader, BlockLoaderAddUser, DataBlock} from '../../../../scripts/core/lib_api'
+import {BlockLoader, BlockLoaderAddUser} from '../../../../scripts/core/lib_api'
 import {SelMask} from '../../../../scripts/core/select_types'
 import {NodeFlags} from '../../../../scripts/core/graph'
 import {DrawBatch, MeshLog, SpatialTree, Mesh as WasmMesh} from '@sculptcore/api'
@@ -591,20 +591,20 @@ export class LiteMesh extends SceneObjectData {
     // list(valueProp, apiPathSegment, funcs): value read from mesh.attrItems,
     // addressed in the data API as `object.data.attrs`.
     mstruct.list('attrItems', 'attrs', {
-      getIter(api: DataAPI, list: LiteMeshAttrItem[]) {
+      getIter(api2: DataAPI, list: LiteMeshAttrItem[]) {
         return list
       },
-      getLength(api: DataAPI, list: LiteMeshAttrItem[]) {
+      getLength(api2: DataAPI, list: LiteMeshAttrItem[]) {
         return list.length
       },
-      get(api: DataAPI, list: LiteMeshAttrItem[], key: number) {
+      get(api2: DataAPI, list: LiteMeshAttrItem[], key: number) {
         return list[key]
       },
-      getKey(api: DataAPI, list: LiteMeshAttrItem[], obj: LiteMeshAttrItem) {
+      getKey(api2: DataAPI, list: LiteMeshAttrItem[], obj: LiteMeshAttrItem) {
         return list.indexOf(obj)
       },
-      getStruct(api: DataAPI, list: LiteMeshAttrItem[], key: number) {
-        return api.mapStruct(LiteMeshAttrItem)
+      getStruct(api2: DataAPI, list: LiteMeshAttrItem[], key: number) {
+        return api2.mapStruct(LiteMeshAttrItem)
       },
     })
 
@@ -615,24 +615,24 @@ export class LiteMesh extends SceneObjectData {
     lstruct.string('attrName', 'attrName', 'Name').readOnly()
 
     mstruct.list('sculptLayerItems', 'sculptLayers', {
-      getIter(api: DataAPI, list: LiteMeshSculptLayerItem[]) {
+      getIter(api2: DataAPI, list: LiteMeshSculptLayerItem[]) {
         return list
       },
-      getLength(api: DataAPI, list: LiteMeshSculptLayerItem[]) {
+      getLength(api2: DataAPI, list: LiteMeshSculptLayerItem[]) {
         return list.length
       },
-      get(api: DataAPI, list: LiteMeshSculptLayerItem[], key: number) {
+      get(api2: DataAPI, list: LiteMeshSculptLayerItem[], key: number) {
         return list[key]
       },
-      getKey(api: DataAPI, list: LiteMeshSculptLayerItem[], obj: LiteMeshSculptLayerItem) {
+      getKey(api2: DataAPI, list: LiteMeshSculptLayerItem[], obj: LiteMeshSculptLayerItem) {
         return list.indexOf(obj)
       },
-      getStruct(api: DataAPI, list: LiteMeshSculptLayerItem[], key: number) {
-        return api.mapStruct(LiteMeshSculptLayerItem)
+      getStruct(api2: DataAPI, list: LiteMeshSculptLayerItem[], key: number) {
+        return api2.mapStruct(LiteMeshSculptLayerItem)
       },
       // Read-only active mirror: the layer ListBox highlights the layer the
       // sculpt_layer_* ops select (write side stays the panel's click handler).
-      getActive(api: DataAPI, list: LiteMeshSculptLayerItem[]) {
+      getActive(api2: DataAPI, list: LiteMeshSculptLayerItem[]) {
         const mesh = list.length > 0 ? list[0].mesh : undefined
         const li = mesh?.activeSculptLayer ?? -1
         return li >= 0 && li < list.length ? list[li] : undefined
@@ -770,10 +770,14 @@ export class LiteMesh extends SceneObjectData {
     container.label('LiteMesh')
 
     const display = container.panel('Display')
+    // dynamic api struct
+    // eslint-disable-next-line pathux/valid-datapath
     display.prop('object.data.displayColorMode')
 
     const attrs = container.panel('Attributes')
+    // eslint-disable-next-line pathux/valid-datapath
     attrs.prop('object.data.showBuiltinAttrs')
+
     // pathux ListBox bound to the attribute DataList (api_define_litemesh).
     const listbox = document.createElement('listbox-x')
     listbox.setAttribute('datapath', 'object.data.attrs')
@@ -800,6 +804,8 @@ export class LiteMesh extends SceneObjectData {
     // Category dropdown for the selected attr (Wave 2b). The enum offers all
     // roles; selectedAttrCategory's setter rejects any not valid for the attr's
     // type/domain (validCategories). Setting a role also activates the layer.
+    // object.data is a dynamic api struct
+    // eslint-disable-next-line pathux/valid-datapath
     attrs.prop('object.data.selectedAttrCategory')
 
     // Add / Remove (Wave 2b) run through ToolOps (litemesh.add_attr /
@@ -835,10 +841,16 @@ export class LiteMesh extends SceneObjectData {
       })
       layers.add(layerBox as unknown as Container<ViewContext>)
 
+      // object.data is a dynamic api struct
+      // eslint-disable-next-line pathux/valid-datapath
       layers.prop('object.data.activeSculptLayerEditTarget')
+
+      // eslint-disable-next-line pathux/valid-datapath
       const weightWidget = layers.prop('object.data.activeSculptLayerWeight')
       const row = layers.row()
+      // eslint-disable-next-line pathux/valid-datapath
       const enabledWidget = row.prop('object.data.activeSculptLayerEnabled')
+      // eslint-disable-next-line pathux/valid-datapath
       const frozenWidget = row.prop('object.data.activeSculptLayerFrozen')
 
       // The weight/enabled/frozen setters are inert while the active layer is
@@ -870,8 +882,11 @@ export class LiteMesh extends SceneObjectData {
     // no-op when the stack state doesn't match (enable ↔ already enabled, etc).
     if (FeatureFlags.get('sculptcore.multires')) {
       const multires = container.panel('Multires')
+      // eslint-disable-next-line pathux/valid-datapath
       multires.prop('object.data.multiresLevel')
+      // eslint-disable-next-line pathux/valid-datapath
       multires.prop('object.data.multiresLevels')
+      // eslint-disable-next-line pathux/valid-datapath
       multires.prop('object.data.tessellatedDisplay')
       multires.tool('litemesh.multires_enable()', {label: 'Enable (2 levels)'})
       multires.tool('litemesh.multires_enable(levels=4)', {label: 'Enable (4 levels)'})
@@ -1625,7 +1640,7 @@ export class LiteMesh extends SceneObjectData {
     if (active >= renderLevel) return
     const st = this._tessState
     const storeRev = this._tessStoreRev()
-    if (st && st.meshRev === this.meshRevision && st.level === renderLevel) {
+    if (st?.meshRev === this.meshRevision && st.level === renderLevel) {
       // Geometry clean. If only texels changed (interactive VDM splats /
       // their undo), re-run just the finalize over the kept amplified
       // channels — the SpMV chain result is still current.
@@ -3010,7 +3025,7 @@ export class LiteMesh extends SceneObjectData {
     const dir = new Vector3(p2).sub(origin)
 
     const isectOut = this.wasm.manager.construct('sculptcore::spatial::CastRayIsect')
-    let face = -1
+    let face: number
     try {
       const originF3 = this.wasm.float3([origin[0], origin[1], origin[2]])
       const dirF3 = this.wasm.float3([dir[0], dir[1], dir[2]])
@@ -3088,7 +3103,7 @@ export class LiteMesh extends SceneObjectData {
     const dir = new Vector3(p2).sub(origin)
 
     const isectOut = this.wasm.manager.construct('sculptcore::spatial::CastRayIsect')
-    let face = -1
+    let face: number
     try {
       const originF3 = this.wasm.float3([origin[0], origin[1], origin[2]])
       const dirF3 = this.wasm.float3([dir[0], dir[1], dir[2]])
@@ -3902,7 +3917,7 @@ export class LiteMesh extends SceneObjectData {
       const texW = Math.max(atlasW, tileSize, 1)
       const texH = Math.max(atlasH, tileSize, 1)
 
-      if (!this._vdmAtlasTex || this._vdmAtlasTex.width !== texW || this._vdmAtlasTex.height !== texH) {
+      if (this._vdmAtlasTex?.width !== texW || this._vdmAtlasTex.height !== texH) {
         this._vdmAtlasTex?.destroy()
         this._vdmAtlasTex = new GpuTexture(device, {
           label : 'litemesh.vdmAtlas',
@@ -3921,7 +3936,7 @@ export class LiteMesh extends SceneObjectData {
         const flat = arr instanceof Int32Array ? arr : Int32Array.from(arr as ArrayLike<number>)
         const tw = 1024
         const th = Math.max(1, Math.ceil(flat.length / tw))
-        if (!this._vdmPageTex || this._vdmPageTex.width !== tw || this._vdmPageTex.height !== th) {
+        if (this._vdmPageTex?.width !== tw || this._vdmPageTex.height !== th) {
           this._vdmPageTex?.destroy()
           this._vdmPageTex = new GpuTexture(device, {
             label : 'litemesh.vdmPtexTable',
@@ -3941,7 +3956,7 @@ export class LiteMesh extends SceneObjectData {
         )
       } else {
         const gridTex = Math.max(grid, 1)
-        if (!this._vdmPageTex || this._vdmPageTex.width !== gridTex || this._vdmPageTex.height !== gridTex) {
+        if (this._vdmPageTex?.width !== gridTex || this._vdmPageTex.height !== gridTex) {
           this._vdmPageTex?.destroy()
           this._vdmPageTex = new GpuTexture(device, {
             label : 'litemesh.vdmPage',
@@ -4346,7 +4361,7 @@ export class LiteMesh extends SceneObjectData {
     // opt-in (flag `sculptcore.backface_cull`); cullMode is baked into the
     // executor's pipelines, so a flag flip rebuilds the executor (same pattern
     // as the xray-driven overlay executor rebuild below).
-    const backfaceCull = FeatureFlags.get('sculptcore.backface_cull') === true
+    const backfaceCull = FeatureFlags.get('sculptcore.backface_cull')
     if (this.drawBatchExecutorGPU === undefined || this._surfaceBackfaceCull !== backfaceCull) {
       this.drawBatchExecutorGPU = this._makeGPUExecutor(
         ctx,

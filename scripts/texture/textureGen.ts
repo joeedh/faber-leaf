@@ -2,7 +2,7 @@ import {PropTypes} from '../path.ux/scripts/pathux.js'
 import * as mathl from '../mathl/index'
 import {TextureShader} from './texture_base'
 
-let proptypemap = {
+const proptypemap = {
   [PropTypes.INT]  : 'int',
   [PropTypes.FLOAT]: 'float',
   [PropTypes.VEC3] : 'vec3',
@@ -14,13 +14,13 @@ export const compileCache = new Map<string, mathl.CompiledJS>()
 
 export function compileTexShaderJS(shader: TextureShader): mathl.CompiledJS {
   let code = shader.genCode()
-  let sdef = shader.constructor.textureDefine()
+  const sdef = shader.constructor.textureDefine()
 
   let uniforms = ''
 
-  for (let k in sdef.uniforms) {
-    let prop = sdef.uniforms[k]
-    let type = proptypemap[prop.type as keyof typeof proptypemap]
+  for (const k in sdef.uniforms) {
+    const prop = sdef.uniforms[k]
+    const type = proptypemap[prop.type as keyof typeof proptypemap]
 
     if (!type) {
       console.log(shader, k, prop)
@@ -71,9 +71,9 @@ declare global {
 }
 
 window._testTexShaders = function () {
-  let texCls = TextureShader.getTextureClass('worley')!
-  let tex = new texCls()
-  let result = compileTexShaderJS(tex)
+  const texCls = TextureShader.getTextureClass('worley')!
+  const tex = new texCls()
+  const result = compileTexShaderJS(tex)
 
   console.log(result)
   return result

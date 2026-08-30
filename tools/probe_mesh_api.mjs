@@ -44,7 +44,7 @@ const info = await page.evaluate(() => {
     // sample
     if (co && typeof co.get === 'function') {
       out.coGet0 = co.get(0)
-    } else if (co && co[0] !== undefined) {
+    } else if (co?.[0] !== undefined) {
       out.coIdx0 = co[0]
     }
   } catch (e) {

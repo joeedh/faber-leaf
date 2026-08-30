@@ -17,7 +17,6 @@ import * as api from './framework_api.js'
 import * as pathux from './path.ux/scripts/pathux.js'
 
 declare global {
-  // eslint-disable-next-line no-var
   var _framework: {
     api: typeof api
     pathux: typeof pathux

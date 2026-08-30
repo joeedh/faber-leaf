@@ -189,7 +189,7 @@ export class TransDataType {
   static register(type: ITransDataType): void {
     const def = type.transformDefine()
 
-    if (TransDataTypes.indexOf(type) >= 0) {
+    if (TransDataTypes.includes(type)) {
       return
     }
 

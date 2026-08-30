@@ -22,7 +22,7 @@ let active: AppStateGlobal | undefined
  * first. Registering twice is a no-op, so a re-entrant boot cannot double-list.
  */
 export function registerAppInstance(state: AppStateGlobal): void {
-  if (instances.indexOf(state) >= 0) {
+  if (instances.includes(state)) {
     return
   }
 
@@ -53,7 +53,7 @@ export function unregisterAppInstance(state: AppStateGlobal): void {
 
 /** Makes `state` the one `getAppState()` answers with. It must be registered. */
 export function setActiveAppInstance(state: AppStateGlobal): void {
-  if (instances.indexOf(state) < 0) {
+  if (!instances.includes(state)) {
     throw new Error('setActiveAppInstance: instance is not registered')
   }
 

@@ -44,7 +44,7 @@ declare global {
   interface Window {
     JSZip?: IJSZipConstructor
   }
-  // eslint-disable-next-line no-var
+
   var JSZip: IJSZipConstructor | undefined
 }
 

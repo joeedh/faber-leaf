@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+// because of __baseModulePath and eslint
+
 let exports = {
   addonLoadWaitTime: 500,
   pathuxConfig: {

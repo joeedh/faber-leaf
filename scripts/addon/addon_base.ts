@@ -38,7 +38,6 @@ import {
   type DefineAPIClass,
 } from '../data_api/api_define_registry'
 import {ToolMode} from '../editors/view3d/view3d_toolmode'
-import {SceneObject, composeObjectMatrix} from '../sceneobject/sceneobject'
 import {
   Editor,
   VelPan,
@@ -63,7 +62,7 @@ import * as widgets from '../editors/view3d/widgets/widgets'
 import * as simplemesh from '../webgl/simplemesh'
 import * as bezier from '../util/bezier'
 import * as shaders from '../shaders/shaders'
-import * as graph from '../core/graph'
+import * as graphapi from '../core/graph'
 import * as graphsockets from '../core/graphsockets'
 import * as sceneobject from '../sceneobject/index'
 import type {ToolContext} from '../core/context'
@@ -86,7 +85,6 @@ import {TransDataType, type ITransDataType} from '../editors/view3d/transform/tr
 
 /** is a constructor a subclass of another constructor? */
 export function subclassOf<T>(testCls: unknown, cls2: T): testCls is T {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let p = testCls as any
   while (p && p !== p.__proto__) {
     if (p === cls2 || p.constructor === cls2) {
@@ -117,10 +115,10 @@ export interface IAddon {
   validArgv(api: AddonAPI<this>, argv: string[]): void
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 type GenericConstructor = Function
 
-export class AddonClasses<T> {
+export class AddonClasses<_unusedT> {
   dataBlockClasses: IDataBlockConstructor[] = []
   toolOpClasses: GenericConstructor[] = []
   structClasses: GenericConstructor[] = []
@@ -196,7 +194,7 @@ export class AddonAPI<T> {
     BoolProperty,
   } as const
   readonly graph = {
-    ...graph,
+    ...graphapi,
     ...graphsockets,
   }
 
@@ -206,7 +204,7 @@ export class AddonAPI<T> {
   addonId?: string
 
   classes = new AddonClasses<T>()
-  _graphNodes = new Set<graph.Node['graph_id']>()
+  _graphNodes = new Set<graphapi.Node['graph_id']>()
 
   /**
    * Undo thunks for the non-class registries below (data kinds, transform
@@ -255,7 +253,6 @@ export class AddonAPI<T> {
     //reference back to addon
     this.addon = undefined
 
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const this2 = this
     const dataBlockProxy = class DataBlockAddon extends DataBlock {
       static register(cls: any) {
@@ -323,7 +320,7 @@ export class AddonAPI<T> {
    * menu entries unregistered, so it is no more usable than an absent one.
    */
   has(id: string): boolean {
-    return window._addons?.isEnabled(id) === true
+    return window._addons?.isEnabled(id)
   }
 
   // -------------------------------------------------------------------------
@@ -479,7 +476,6 @@ export class AddonAPI<T> {
       return
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (Object.hasOwnProperty.call(cls, 'STRUCT') && !nstructjs.isRegistered(cls as any)) {
       nstructjs.register(cls)
     }
@@ -599,10 +595,10 @@ export class AddonAPI<T> {
   }
 
   graphConnect<
-    SRC extends graph.Node,
-    SRCOUT extends graph.NodeSocketType | string,
-    DST extends graph.Node,
-    DSTIN extends graph.NodeSocketType | string,
+    SRC extends graphapi.Node,
+    SRCOUT extends graphapi.NodeSocketType | string,
+    DST extends graphapi.Node,
+    DSTIN extends graphapi.NodeSocketType | string,
   >(src: SRC, output: SRCOUT, dst: DST, input: DSTIN) {
     const graph = this.ctx.graph
 
@@ -618,8 +614,8 @@ export class AddonAPI<T> {
       this._graphNodes.add(dst.graph_id)
     }
 
-    const outsocket = (typeof output === 'string' ? src.outputs[output] : output) as graph.NodeSocketType
-    const insocket = (typeof input === 'string' ? dst.inputs[input] : input) as graph.NodeSocketType
+    const outsocket = (typeof output === 'string' ? src.outputs[output] : output) as graphapi.NodeSocketType
+    const insocket = (typeof input === 'string' ? dst.inputs[input] : input) as graphapi.NodeSocketType
 
     outsocket.connect(insocket)
   }
@@ -630,12 +626,12 @@ export class AddonAPI<T> {
     this._graphNodes = new Set()
   }
 
-  graphAdd(node: graph.Node) {
+  graphAdd(node: graphapi.Node) {
     this.ctx.graph.add(node)
     this._graphNodes.add(node.graph_id)
   }
 
-  graphRemove(node: graph.Node) {
+  graphRemove(node: graphapi.Node) {
     const id = node.graph_id
     this.ctx.graph.remove(node)
     this._graphNodes.delete(id)
@@ -700,7 +696,6 @@ export class AddonAPI<T> {
         if (n) {
           graph.remove(n)
         }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error(error.stack)
         console.error(error.message)

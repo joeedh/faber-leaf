@@ -1,18 +1,7 @@
-import {
-  nstructjs,
-  ToolOp,
-  FloatProperty,
-  BoolProperty,
-  EnumProperty,
-  FlagProperty,
-  StringProperty,
-  IntProperty,
-} from '../path.ux/scripts/pathux.js'
-import * as util from '../util/util.js'
-import {DataRefProperty, DataRefListProperty} from '../core/lib_api.js'
+import {ToolOp, StringProperty} from '../path.ux/scripts/pathux.js'
+import {DataRefProperty} from '../core/lib_api.js'
 import {ImageBlock, ImageTypes} from './image.js'
 import * as platform from '../core/platform.js'
-import * as cconst from '../core/const.js'
 import bus from '../core/bus.js'
 import {ImageBus} from '../editors/image/ImageBus.js'
 

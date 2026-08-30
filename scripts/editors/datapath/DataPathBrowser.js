@@ -178,7 +178,7 @@ editors.DataPathBrowser {
             panel.label('error')
           }
 
-          if (rdef && rdef.dstruct) {
+          if (rdef?.dstruct) {
             panel.onchange = makeLoadPanel(rdef.dstruct, path2 + dpath.apiname, dpath)
           }
 

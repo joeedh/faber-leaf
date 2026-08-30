@@ -1,3 +1,6 @@
+// WARNING! any changes to this file invalidates our entire eslint cache
+// (which we build ourselves in tools/eslint.mts)
+
 import js from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
@@ -9,9 +12,16 @@ import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 // submodule), which gen-datapaths.mjs writes a copy to. No-ops if absent.
 import validDatapath from './scripts/path.ux/buildtools/eslint-rules/valid-datapath.mjs'
 
+// used to extend allowDefaultProject property in ESLint config
+// without invalidating the entire ESLint cache
+import {allowDefaultProject} from './.defaultProjectEslint.mjs'
+
 export default defineConfig([
   globalIgnores([
     //
+    '**/.**/**',
+    '**/documentation/research/**',
+    '**/.turbo/**',
     '**/node_modules/**',
     '**/emsdk/**',
     '**/sculptcore/**',
@@ -48,7 +58,9 @@ export default defineConfig([
   {
     languageOptions: {
       parserOptions: {
-        projectService : true,
+        projectService: {
+          allowDefaultProject,
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -121,11 +133,34 @@ export default defineConfig([
   },
   {
     rules: {
+      'no-console': [
+        'error',
+        {
+        },
+      ],
+      'no-regex-spaces'                                          : 'off',
+      '@typescript-eslint/array-type': [
+        'error',
+        {
+          default : 'array',
+          readonly: 'array',
+        },
+      ],
+      // don't enforce undefined variable checks as TypeScript handles this
+      // and we don't want it in JS files
+      'no-undef'                                                  : 'off',
+      '@typescript-eslint/no-this-alias'                          : 'off',
+      'prefer-spread'                                             : 'off',
       'no-unused-vars'                                            : 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
-          args: 'none',
+          vars                     : 'all',
+          args                     : 'none',
+          ignoreRestSiblings       : false,
+          varsIgnorePattern        : '^_unused',
+          caughtErrors             : 'all',
+          caughtErrorsIgnorePattern: '^_',
         },
       ],
       'sort-imports'                                              : 'off',
@@ -135,6 +170,7 @@ export default defineConfig([
       'no-unreachable'                                            : 'error',
       'no-unsafe-negation'                                        : 'error',
       'no-useless-assignment'                                     : 'error',
+      '@typescript-eslint/no-explicit-any'                        : 'off',
       '@typescript-eslint/array-type'                             : 'error',
       '@typescript-eslint/no-for-in-array'                        : 'error',
       '@typescript-eslint/no-mixed-enums'                         : 'error',

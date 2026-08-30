@@ -159,7 +159,6 @@ describe('the UV editor double suites are engine-free', () => {
     for (const [dir, why] of FORBIDDEN_DIRS) {
       const hits = graph.files.filter((f) => dir.test(f))
       if (hits.length) {
-        // eslint-disable-next-line no-console
         console.error(`[uv-editor] reaches ${why}:\n  ${hits.join('\n  ')}`)
       }
       expect(hits).toEqual([])

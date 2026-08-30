@@ -1,15 +1,7 @@
 import {util, DataAPI, DataStruct} from '../path.ux/scripts/pathux.js'
 import {nstructjs} from '../path.ux/pathux.js'
 
-import {
-  SculptTools,
-  BrushFlags,
-  DynTopoFlags,
-  DynTopoOverrides,
-  SubdivModes,
-  DynTopoModes,
-  BrushSpacingModes,
-} from './brush_base'
+import {DynTopoFlags, DynTopoOverrides, SubdivModes, DynTopoModes, BrushSpacingModes} from './brush_base'
 
 function feq(a: number, b: number) {
   return Math.abs(a - b) < 0.00001
@@ -235,14 +227,14 @@ export class DynTopoSettings {
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    let st = struct ?? api.mapStruct(this)
+    const st = struct ?? api.mapStruct(this)
 
     st.int('valenceGoal', 'valenceGoal', 'Valence Goal', 'Number of edges around vertices to aim for')
       .range(0, 12)
       .noUnits()
 
-    let tooltips: Record<string, string> = {}
-    for (let k in DynTopoOverrides) {
+    const tooltips: Record<string, string> = {}
+    for (const k in DynTopoOverrides) {
       if (k === 'NONE') {
         tooltips[k] = 'Use Defaults For Everything'
       } else {

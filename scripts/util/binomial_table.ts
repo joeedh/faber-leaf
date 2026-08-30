@@ -1,5 +1,5 @@
-function gen(): Array<number[]> {
-  const ret: Array<number[]> = []
+function gen(): number[][] {
+  const ret: number[][] = []
 
   for (let i = 1; i < 10; i++) {
     const list = [] as number[]

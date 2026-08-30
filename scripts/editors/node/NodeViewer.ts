@@ -353,7 +353,7 @@ node.NodeViewer {
       for (const k in inputs2) {
         const sock = inputs2[k]
 
-        for (let sock2 of sock.edges) {
+        for (const sock2 of sock.edges) {
           let node3 = this.node_idmap[sock2.node.graph_id]
           node3 = this.node_idmap[node3.graph_id]
 

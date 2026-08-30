@@ -720,7 +720,6 @@ export class EditorSideBar extends Container<ViewContext> {
 
     this._closed = true
 
-    // eslint-disable-next-line prefer-const
     let anim: ReturnType<typeof this.animate> | undefined
 
     const finish = () => {
@@ -803,7 +802,6 @@ export class EditorSideBar extends Container<ViewContext> {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   loadData(obj: any): this {
     if (!obj) {
       return this
@@ -1082,7 +1080,7 @@ App {
   )
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    let st = struct ?? api.mapStruct(this)
+    const st = struct ?? api.mapStruct(this)
 
     st.list('sareas', 'editors', [
       //list should be main App (Screen) instance
@@ -1104,7 +1102,7 @@ App {
 
       function getIter(api: DataAPI, list: any) {
         return (function* () {
-          for (let sarea of list) {
+          for (const sarea of list) {
             yield sarea.area
           }
         })()
@@ -1308,7 +1306,7 @@ App {
 
 window.setInterval(() => {
   const state = peekAppState()
-  if (state && state.ctx && state.screen) {
+  if (state?.ctx && state.screen) {
     window.updateDataGraph(true)
   }
 
@@ -1317,7 +1315,7 @@ window.setInterval(() => {
 
 window.setInterval(() => {
   const state = peekAppState()
-  if (state && state.ctx) {
+  if (state?.ctx) {
     messageBus.validateSubscribers()
   }
 }, 5000)
@@ -1368,8 +1366,6 @@ ScreenBlock {
 }
 
 DataBlock.register(ScreenBlock)
-
-
 
 export class MaterialChooser extends Container<ViewContext> {
   addButton?: UIBase<ViewContext> = undefined
@@ -1424,7 +1420,6 @@ export class MaterialChooser extends Container<ViewContext> {
     })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   loadData(json: any) {
     super.loadData(json)
 

@@ -115,7 +115,7 @@ export class MessageBus {
   }
 
   addEmitter<CLS extends IBusEmitterClass>(emitter: IBusEmitter<CLS>, emitterClass: CLS) {
-    let index = this.findEmitter(emitter, emitterClass, true)
+    const index = this.findEmitter(emitter, emitterClass, true)
     this.emitters[index] = {emitter, emitterClass}
     return this
   }
@@ -124,7 +124,7 @@ export class MessageBus {
   }
 
   removeEmitter<CLS extends IBusEmitterClass>(emitter: IBusEmitter<CLS>, emitterClass: CLS) {
-    let i = this.findEmitter(emitter, emitterClass)
+    const i = this.findEmitter(emitter, emitterClass)
     if (i === undefined) {
       //throw new Error('emitter not found')
       console.warn('emitter not found', this, i)
@@ -182,7 +182,7 @@ export class MessageBus {
   }
 
   unsubscribe(sub: Subscriber<IBusEmitterClass>): this {
-    if (this.subscribers.indexOf(sub) >= 0) {
+    if (this.subscribers.includes(sub)) {
       this.subscribers.remove(sub)
     }
 

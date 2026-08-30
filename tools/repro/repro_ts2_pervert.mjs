@@ -109,15 +109,15 @@ console.log('snap B (redone, top):', b.arr?.length, 'floats, mv', b.mv)
 // diff element-wise (vec3 stride)
 if (a.arr && b.arr) {
   const n = Math.min(a.arr.length, b.arr.length)
-  let worst = 0,
-    worstIdx = -1,
-    nDiff = 0,
-    sumAbs = 0
+  let worst = 0
+  let worstIdx = -1
+  let nDiff = 0
+  let sumAbs = 0
   const hist = {}
   for (let j = 0; j < n; j += 3) {
-    const dx = a.arr[j] - b.arr[j],
-      dy = a.arr[j + 1] - b.arr[j + 1],
-      dz = a.arr[j + 2] - b.arr[j + 2]
+    const dx = a.arr[j] - b.arr[j]
+    const dy = a.arr[j + 1] - b.arr[j + 1]
+    const dz = a.arr[j + 2] - b.arr[j + 2]
     const d = Math.sqrt(dx * dx + dy * dy + dz * dz)
     if (d > 1e-6) {
       nDiff++
@@ -145,15 +145,15 @@ if (a.arr && b.arr) {
     v.sort((p, q) => p[0] - q[0] || p[1] - q[1] || p[2] - q[2])
     return v
   }
-  const va = toVecs(a.arr),
-    vb = toVecs(b.arr)
-  let msMismatch = 0,
-    msWorst = 0
+  const va = toVecs(a.arr)
+  const vb = toVecs(b.arr)
+  let msMismatch = 0
+  let msWorst = 0
   const m = Math.min(va.length, vb.length)
   for (let i = 0; i < m; i++) {
-    const dx = va[i][0] - vb[i][0],
-      dy = va[i][1] - vb[i][1],
-      dz = va[i][2] - vb[i][2]
+    const dx = va[i][0] - vb[i][0]
+    const dy = va[i][1] - vb[i][1]
+    const dz = va[i][2] - vb[i][2]
     const d = Math.sqrt(dx * dx + dy * dy + dz * dz)
     if (d > 1e-5) msMismatch++
     if (d > msWorst) msWorst = d

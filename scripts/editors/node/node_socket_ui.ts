@@ -226,7 +226,7 @@ export class NodeSocketElem extends RowFrame<ViewContext> {
   }
 
   updatePos(): void {
-    let key = '' + this.pos[0] + ':' + this.pos[1] + ':' + this.size + ':' + UIBase.getDPI()
+    const key = '' + this.pos[0] + ':' + this.pos[1] + ':' + this.size + ':' + UIBase.getDPI()
 
     if (key === this._last_update_key) {
       return
@@ -267,7 +267,7 @@ export class NodeSocketElem extends RowFrame<ViewContext> {
     const pos = new Vector2(this.pos)
     pos.add(this.uinode!.pos)
 
-    let w = this.uinode!.size[0] / 2.0
+    const w = this.uinode!.size[0] / 2.0
 
     if (this.isOutput) {
       pos[0] -= w

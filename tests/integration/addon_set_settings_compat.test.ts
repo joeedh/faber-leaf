@@ -154,6 +154,7 @@ if (!canRun && isDefaultBackendPass()) {
   ]
     .filter(Boolean)
     .join('; ')
+  // eslint-disable-next-line no-console
   console.warn(`[addon_set_settings_compat] skipped: ${why}`)
 }
 

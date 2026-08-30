@@ -35,8 +35,8 @@ async function replayAndGrab() {
     await window._appstate.ctx.replay(() => true)
   })
   const co = await page.evaluate(() => {
-    const mesh = globalThis._appstate?.ctx?.object?.data,
-      wasm = mesh.wasm
+    const mesh = globalThis._appstate?.ctx?.object?.data
+    const wasm = mesh.wasm
     const cls = wasm.manager.findVectorClass('float')
     const vec = wasm.manager.constructWith(cls.findDefaultConstructor())
     mesh.mesh.dumpVertCo(vec)
@@ -53,15 +53,15 @@ const a = await replayAndGrab()
 const b = await replayAndGrab()
 console.log('replay1 floats', a.length, 'replay2 floats', b.length)
 
-const ma = new Map(),
-  mb = new Map()
+const ma = new Map()
+const mb = new Map()
 for (let i = 0; i + 3 < a.length; i += 4) ma.set(a[i] | 0, [a[i + 1], a[i + 2], a[i + 3]])
 for (let i = 0; i + 3 < b.length; i += 4) mb.set(b[i] | 0, [b[i + 1], b[i + 2], b[i + 3]])
-let diff = 0,
-  worst = 0,
-  worstIdx = -1,
-  onlyA = 0,
-  onlyB = 0
+let diff = 0
+let worst = 0
+let worstIdx = -1
+let onlyA = 0
+let onlyB = 0
 for (const [idx, ca] of ma) {
   const cb = mb.get(idx)
   if (!cb) {

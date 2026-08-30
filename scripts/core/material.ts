@@ -207,7 +207,7 @@ Material {
       }
     }
 
-    let def = st.bool('', 'has_shader', 'Has Shader', 'Has Shader')
+    const def = st.bool('', 'has_shader', 'Has Shader', 'Has Shader')
 
     def.customGetSet(function (this: {dataref: any}) {
       return getShaderNode(this.dataref) !== undefined

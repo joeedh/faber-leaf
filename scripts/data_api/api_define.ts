@@ -28,7 +28,7 @@ import '../camera/camera.js'
 
 import {NodeSocketClasses} from '../core/graph.js'
 
-let STRUCT = nstructjs.STRUCT
+const STRUCT = nstructjs.STRUCT
 import '../editors/view3d/widgets/widget_tools.js' //ensure widget tools are all registered
 import {WidgetFlags} from '../editors/view3d/widgets/widgets.js'
 import {AddLightOp} from '../light/light_ops.js'
@@ -118,7 +118,7 @@ function defineOnce<
 }
 
 function api_define_socket(api: MyDataAPI, cls: AnyClass = NodeSocketType): DataStruct {
-  let nstruct = api.mapStruct(cls, true)
+  const nstruct = api.mapStruct(cls, true)
 
   nstruct.flags('graph_flag', 'graph_flag', SocketFlags, 'Graph Flags', 'Flags')
   nstruct.int('graph_id', 'graph_id', 'Graph ID', 'Unique graph ID').readOnly()
@@ -137,13 +137,13 @@ function api_define_datablock(api: MyDataAPI, cls: AnyClass = DataBlock): DataSt
 }
 
 function api_define_shadernode(api: MyDataAPI, cls?: AnyClass): DataStruct {
-  let nstruct = api_define_node(api, ShaderNode)
+  const nstruct = api_define_node(api, ShaderNode)
 
   return nstruct
 }
 
 function api_define_graph(api: MyDataAPI, cls: AnyClass = Graph): DataStruct {
-  let gstruct = api.mapStruct(cls)
+  const gstruct = api.mapStruct(cls)
 
   gstruct.list('', 'nodes', [
     function getIter(api: MyDataAPI, list: any) {
@@ -165,11 +165,11 @@ function api_define_graph(api: MyDataAPI, cls: AnyClass = Graph): DataStruct {
       list.nodes.active = list.node_idmap.get(key)
     },
     function getStruct(api: MyDataAPI, list: any, key: string) {
-      let obj = list.node_idmap.get(key)
+      const obj = list.node_idmap.get(key)
 
       if (obj === undefined) return api.getStruct(Node)
 
-      let ret = api.getStruct(obj.constructor)
+      const ret = api.getStruct(obj.constructor)
       return ret === undefined ? api.getStruct(Node) : ret
     },
   ])
@@ -182,10 +182,10 @@ function api_define_nodesockets(api: MyDataAPI): void {
   // lists via api.getStruct(NodeSocketType)).
   api_define_socket(api)
 
-  for (let cls of NodeSocketClasses) {
+  for (const cls of NodeSocketClasses) {
     // Chain the base socket props onto each subclass's own struct, then let the
     // subclass add its specifics — no dependency on NodeSocketType being built first.
-    let st = api_define_socket(api, cls)
+    const st = api_define_socket(api, cls)
     cls.defineAPI(api, st)
   }
 }
@@ -193,7 +193,7 @@ function api_define_nodesockets(api: MyDataAPI): void {
 let libraryStruct: DataStruct | undefined
 onBlockRegister(function onDataBlockRegister(blockCls: any) {
   if (libraryStruct !== undefined) {
-    let def = blockCls.blockDefine()
+    const def = blockCls.blockDefine()
     defineLibrarySet(dataApi, def.typeName, def.typeName, def.uiName, libraryStruct, blockCls)
   }
 })
@@ -202,7 +202,7 @@ function api_define_library(api: MyDataAPI, parent: DataStruct): void {
   // Library's per-blocktype lists (library.mesh, …) are its own struct members,
   // populated by Library.defineAPI in the registry pass. This driver fetches that
   // struct, keeps the dynamic-registration wiring, and wires the parent attaches.
-  let lstruct = api.mapStruct(Library, false)
+  const lstruct = api.mapStruct(Library, false)
   libraryStruct = lstruct
 
   parent.struct('datalib', 'library', 'Library', lstruct)
@@ -218,7 +218,7 @@ function api_define_library(api: MyDataAPI, parent: DataStruct): void {
 
     function getLength(api: MyDataAPI, list: any) {
       let len = 0
-      for (let list2 of list.libs) {
+      for (const list2 of list.libs) {
         len += list2.length
       }
 
@@ -236,13 +236,13 @@ function api_define_library(api: MyDataAPI, parent: DataStruct): void {
       return obj.lib_id
     },
     function getStruct(api: MyDataAPI, list: any, key: number | string) {
-      let obj = list.get(key)
+      const obj = list.get(key)
 
       if (obj === undefined) {
         return api.getStruct(DataBlock)
       }
 
-      let ret = api.getStruct(obj.constructor)
+      const ret = api.getStruct(obj.constructor)
 
       if (ret === undefined) {
         return api.getStruct(DataBlock)
@@ -252,7 +252,7 @@ function api_define_library(api: MyDataAPI, parent: DataStruct): void {
 }
 
 export function api_define_velpan(api: MyDataAPI, parent?: DataStruct): DataStruct {
-  let vp = api.mapStruct(VelPan)
+  const vp = api.mapStruct(VelPan)
 
   vp.vec2('pos', 'pos', 'Position')
   vp.vec2('scale', 'scale', 'Scale')
@@ -263,13 +263,13 @@ export function api_define_velpan(api: MyDataAPI, parent?: DataStruct): DataStru
 }
 
 export function api_define_matrix4(api: MyDataAPI): DataStruct {
-  let st = api.mapStruct(Matrix4, true)
+  const st = api.mapStruct(Matrix4, true)
 
-  let data = st.struct('$matrix', 'data', 'Matrix Data')
+  const data = st.struct('$matrix', 'data', 'Matrix Data')
 
   for (let i = 1; i <= 4; i++) {
     for (let j = 1; j <= 4; j++) {
-      let key = 'm' + i + j
+      const key = 'm' + i + j
 
       data.float(key, key, key).noUnits()
     }
@@ -285,7 +285,7 @@ export function getDataAPI(): MyDataAPI {
     return dataApi
   }
 
-  let cstruct = dataApi.mapStruct(ToolContext)
+  const cstruct = dataApi.mapStruct(ToolContext)
 
   // ── Population pass ─────────────────────────────────────────────────────
   // Non-class struct builders (path.ux types, free structs, the socket inherit
@@ -310,7 +310,7 @@ export function getDataAPI(): MyDataAPI {
   // another's struct first. Core classes self-register at module scope (reached as an
   // import side-effect here); addon classes through their own `register(api)` hook.
   // By here the registry is fully populated.
-  for (let cls of getDataAPIRegistry()) {
+  for (const cls of getDataAPIRegistry()) {
     defineOnce(dataApi, cls)
   }
 
@@ -348,7 +348,7 @@ export function getDataAPI(): MyDataAPI {
   cstruct.struct('scene', 'scene', 'Scene', dataApi.mapStruct(Scene, false))
   cstruct.struct('light', 'light', 'Light', dataApi.mapStruct(Light, false))
 
-  let ostruct = dataApi.mapStruct(SceneObject, false)
+  const ostruct = dataApi.mapStruct(SceneObject, false)
   // uiname is typed `string` but the SceneObject class is passed here; the value
   // is only used for display, so the mismatch is harmless.
   cstruct.struct('object', 'object', SceneObject as unknown as string, ostruct)
@@ -356,7 +356,7 @@ export function getDataAPI(): MyDataAPI {
   cstruct.list('', 'objects', [
     function getIter(api: MyDataAPI, list: any) {
       return (function* () {
-        for (let ob of list.datalib.object) {
+        for (const ob of list.datalib.object) {
           yield ob
         }
       })()
@@ -382,7 +382,7 @@ export function getDataAPI(): MyDataAPI {
     },
     function getLength(api: MyDataAPI, list: any) {
       let len = 0
-      for (let block of list.datalib.allBlocks) {
+      for (const block of list.datalib.allBlocks) {
         len++
       }
       return len
@@ -410,7 +410,7 @@ export function getDataAPI(): MyDataAPI {
     OBJECT: Icons.CIRCLE_SEL,
   })
 
-  let sstruct = dataApi.mapStruct(Scene, false)
+  const sstruct = dataApi.mapStruct(Scene, false)
 
   def = sstruct.flags('selectMask', 'selectMaskEnum', SelMask, 'Selection Mode', 'Selection Mode')
   def.icons({
@@ -420,17 +420,17 @@ export function getDataAPI(): MyDataAPI {
     OBJECT: Icons.CIRCLE_SEL,
   })
   def.on('change', function (this: ApiCallbackThis<Scene>, newv: any, oldv: any) {
-    let owner = this.dataref
+    const owner = this.dataref
 
-    let mask = owner.selectMask
-    let old = oldv
+    const mask = owner.selectMask
+    const old = oldv
 
-    let newf = mask & ~old
+    const newf = mask & ~old
 
     owner.selectMask &= ~(SelMask.VERTEX | SelMask.FACE | SelMask.EDGE)
     owner.selectMask |= newf
 
-    for (let ob of owner.objects.selected.editable) {
+    for (const ob of owner.objects.selected.editable) {
       // Duck-type on `regenElementsDraw` so core doesn't import the addon-owned
       // Mesh class. Any SceneObjectData exposing it (Mesh and its subclasses) gets
       // its draw buffers rebuilt on mode change.

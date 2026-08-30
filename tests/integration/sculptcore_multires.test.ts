@@ -484,7 +484,7 @@ interface PtexRenderResult {
 /** Boot on litemesh-cube, drive `__vdmRenderTest(mode)` (the vdmrender support
  * gained 'mrflat'/'ptex' modes), capture the screenshot. */
 function runPtexRender(
-  nwExe: string,
+  nwExe2: string,
   backend: 'wasm' | 'native',
   mode: 'mrflat' | 'ptex'
 ): {result: PtexRenderResult; image: GrayImage} {
@@ -492,7 +492,7 @@ function runPtexRender(
   const dumpPath = Path.join(dir, 'dump.json')
   const pngPath = Path.join(dir, 'shot.png')
   execFileSync(
-    nwExe,
+    nwExe2,
     [
       NWJS_APP_DIR,
       ...isolatedProfileArgs(),
@@ -681,9 +681,9 @@ interface VdmSculptResult {
   tilesAfterCaptureUndo?: number
 }
 
-function runVdmSculpt(nwExe: string, backend: 'wasm' | 'native'): VdmSculptResult {
+function runVdmSculpt(nwExe2: string, backend: 'wasm' | 'native'): VdmSculptResult {
   const dump = bootDump(
-    nwExe,
+    nwExe2,
     [
       '--headless',
       '--no-devtools',
@@ -817,9 +817,9 @@ interface VdmPersistResult {
   posResidual?: number
 }
 
-function runVdmPersist(nwExe: string, backend: 'wasm' | 'native'): VdmPersistResult {
+function runVdmPersist(nwExe2: string, backend: 'wasm' | 'native'): VdmPersistResult {
   const dump = bootDump(
-    nwExe,
+    nwExe2,
     [
       '--headless',
       '--no-devtools',

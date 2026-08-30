@@ -19,10 +19,10 @@ export {ClosureGLSL, PointLightCode} from './shader_lib.js'
 
 export type IRenderLights = Record<string, RenderLight>
 
-export let ShaderNodeTypes: Array<typeof ShaderNode> = []
+export const ShaderNodeTypes: (typeof ShaderNode)[] = []
 
 export class ShaderNetworkClass extends AbstractGraphClass {
-  declare static NodeTypes: Array<typeof ShaderNode>
+  declare static NodeTypes: (typeof ShaderNode)[]
 
   static graphdef() {
     return {
@@ -132,7 +132,7 @@ shader.ClosureSocket {
   }
 
   copy(): this {
-    let ret = new ClosureSocket()
+    const ret = new ClosureSocket()
     this.copyTo(ret as this)
 
     ret.data.load(this.data)
@@ -399,8 +399,8 @@ export class ImageNode<InputSet extends INodeSocketSet = {}, OutputSet extends I
     super.buildUI(container)
 
     container.label('Image')
-    let iuser = UIBase.createElement('image-user-x') as ImageUserWidget
-    let path = container._joinPrefix('imageUser') ?? ''
+    const iuser = UIBase.createElement('image-user-x') as ImageUserWidget
+    const path = container._joinPrefix('imageUser') ?? ''
 
     iuser.setAttribute('datapath', path)
     iuser.vertical = true

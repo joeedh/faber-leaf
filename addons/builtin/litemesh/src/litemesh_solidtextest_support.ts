@@ -14,7 +14,6 @@ import {LiteMesh} from './litemesh'
 import {ImageBlock} from '../../../../scripts/image/image'
 import {ImageNode, DiffuseNode} from '../../../../scripts/shadernodes/shader_nodes'
 import type {Material} from '../../../../scripts/core/material'
-import type {ViewContext} from '../../../../scripts/core/context'
 import {getActiveWebGpuContext} from '../../../../scripts/render/queue_factory'
 
 interface SolidTexTestResult {

@@ -91,7 +91,7 @@ const ANCHOR_POINTS = [
 // [name, sampleStroke opts]. sculptTool 0 = CLAY, 9 = GRAB.
 // brushSettings.strokeMethod: 0 PATH, 1 ANCHORED, 2 DRAG_DOT.
 // brushSettings.radiusMode: 0 SCREEN, 1 WORLD. spaceMode: 0 SCREEN, 1 WORLD.
-const CASES: Array<[string, Record<string, unknown>]> = [
+const CASES: [string, Record<string, unknown>][] = [
   ['path-screen-screenRadius', {points: PATH_POINTS, sculptTool: 0, brushSettings: {strokeMethod: 0}}],
   [
     'path-screen-worldRadius',

@@ -10,15 +10,13 @@ import {
   PackFlags,
   PanelContents,
   UIBase,
-  util,
   Vector2,
   Vector3,
   Vector4,
   IconButton,
-  Button,
 } from '../../../../scripts/path.ux/pathux'
 import {FeatureFlags} from '@framework/api'
-import {ToolMode, type IToolModeDefine} from '../../../../scripts/editors/view3d/view3d_toolmode'
+import {type IToolModeDefine} from '../../../../scripts/editors/view3d/view3d_toolmode'
 import {PaintToolModeBase} from './stroke_base.js'
 import {Icons} from '../../../../scripts/editors/icon_enum.js'
 import type {View3D} from '../../../../scripts/editors/view3d/view3d'
@@ -33,7 +31,6 @@ import {
   StrokeMethod,
 } from '../../../../scripts/brush/brush_base.js'
 import {SelMask} from '../../../../scripts/core/select_types.js'
-import type {ISurfaceSampler} from '../../../../scripts/util/spatial'
 import type {LiteMesh} from './index'
 import {BrushRadiusModes, DynTopoSettings, DynTopoSettingsSC, SculptBrush} from '../../../../scripts/brush/index'
 import type {ViewContext} from '../../../../scripts/core/context'
@@ -176,9 +173,9 @@ export class SculptCorePaintMode extends PaintToolModeBase {
     strip.prop(path + '.brush.anchoredLiveMode')
 
     function doChannel(chName: string, settingsPanel: PanelContents<ViewContext> = settings) {
-      const strip = settingsPanel.col()
+      const strip2 = settingsPanel.col()
 
-      const panelCh = strip.panel('')
+      const panelCh = strip2.panel('')
       const col2 = panelCh.panelFrame.titleframe.strip()
       if (chName === 'radius') {
         col2.prop(path + `.brushRadius`)
@@ -200,7 +197,7 @@ export class SculptCorePaintMode extends PaintToolModeBase {
       panelCh.flushSetCSS()
       panelCh.flushUpdate()
 
-      return strip
+      return strip2
     }
 
     /*
@@ -314,24 +311,24 @@ export class SculptCorePaintMode extends PaintToolModeBase {
     col.prop(path + '.brush.normalfac')
 
     function dfield(con: Container<ViewContext>, key: string): UIBase<ViewContext> {
-      const row = con.row()
-      const strip = row.strip(undefined, 4, 0)
+      const row2 = con.row()
+      const strip2 = row2.strip(undefined, 4, 0)
 
-      strip.overrideDefault('labelOnTop', 0)
-      strip.overrideDefault('BoxMargin', 0)
-      strip.overrideDefault('margin', 0)
-      strip.overrideDefault('BoxRadius', 5)
+      strip2.overrideDefault('labelOnTop', 0)
+      strip2.overrideDefault('BoxMargin', 0)
+      strip2.overrideDefault('margin', 0)
+      strip2.overrideDefault('BoxRadius', 5)
 
       const opath = `${path}.dynTopo.overrides[NONE]`
 
       const okey = DynTopoSettingsSC.apiKeyToOverride(key)
-      const ret = strip.prop(`${path}.dynTopo.${key}`)
+      const ret = strip2.prop(`${path}.dynTopo.${key}`)
       if (!okey) {
         // No override mapping for this key — render the value without the
         // per-field inherit toggle (avoids an `overrides[undefined]` binding).
         return ret
       }
-      const icon = strip.iconcheck(`${path}.dynTopo.overrides[${okey}]`, -1)
+      const icon = strip2.iconcheck(`${path}.dynTopo.overrides[${okey}]`, -1)
 
       icon.iconsheet = 0 //use small icons
       icon.drawCheck = false
@@ -378,6 +375,8 @@ export class SculptCorePaintMode extends PaintToolModeBase {
 
     const dbg = col.panel('Debug')
     dbg.useIcons(false)
+    // object.data is a dynamic api struct
+    // eslint-disable-next-line pathux/valid-datapath
     dbg.prop('object.data.saveTempAttrs')
 
     //panel
@@ -460,6 +459,7 @@ export class SculptCorePaintMode extends PaintToolModeBase {
     strip.prop(path + '.strength')
 
     strip = row.strip()
+    // eslint-disable-next-line pathux/valid-datapath
     strip.pathlabel('object.data.faceCount', 'Faces')
 
     strip.prop(path + '.spacing')
@@ -657,7 +657,6 @@ export class SculptCorePaintMode extends PaintToolModeBase {
             ;(this.dynTopo as any)[key] = val
           }
         } else {
-          const flag = 0
           const oflag = brush.dynTopo.overrideMask
 
           for (const k in DynTopoFlags) {
@@ -1053,10 +1052,10 @@ export class SculptCorePaintMode extends PaintToolModeBase {
       return
     }
 
-    const drawCircle = (x: number, y: number, r: number, mat: Matrix4 = new Matrix4(), z: number = 0.0): void => {
+    const drawCircle = (x2: number, y2: number, r: number, mat: Matrix4 = new Matrix4(), z: number = 0.0): void => {
       const p = new Vector3()
-      p[0] = x
-      p[1] = y
+      p[0] = x2
+      p[1] = y2
       p[2] = z
       this._brush_lines.push(view3d.overdraw!.circle(Array.from(p), r, 'rgb(255,175,75)'))
     }

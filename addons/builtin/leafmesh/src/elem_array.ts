@@ -256,7 +256,7 @@ export class ElemArray {
 
     for (const col of this.cols.values()) {
       const from = src.cols.get(col.name)
-      if (from !== undefined && from.size === col.size && from.ctor === col.ctor) {
+      if (from?.size === col.size && from.ctor === col.ctor) {
         col.data = from.data.slice() as TypedArray
       } else {
         col.data = new col.ctor(this.capacity * col.size)

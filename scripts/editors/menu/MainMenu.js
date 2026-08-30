@@ -61,7 +61,8 @@ export class ToolHistoryConsole extends ColumnFrame {
 
       table.clear()
 
-      let focusrow, lastrow
+      let focusrow
+      let lastrow
 
       for (let l of lines) {
         let row = table.row()
@@ -382,12 +383,7 @@ MenuBarEditor {
   update() {
     super.update()
 
-    if (
-      this.ctx &&
-      this.ctx.toolmode &&
-      this.ctx.toolmode.constructor &&
-      this.ctx.toolmode.constructor.name !== this._last_toolmode
-    ) {
+    if (this.ctx?.toolmode?.constructor && this.ctx.toolmode.constructor.name !== this._last_toolmode) {
       console.warn('Rebuilding edit menu')
       this._last_toolmode = this.ctx.toolmode.constructor.name
       this.buildEditMenu()

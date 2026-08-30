@@ -465,7 +465,7 @@ leafmesh.LeafMeshData {
 
     const ctor = data.constructor as {new (length: number): typeof data}
     const ret =
-      out !== undefined && out.constructor === data.constructor && out.byteLength >= n * data.BYTES_PER_ELEMENT
+      out?.constructor === data.constructor && out.byteLength >= n * data.BYTES_PER_ELEMENT
         ? (out as typeof data)
         : new ctor(n)
 

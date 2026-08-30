@@ -153,6 +153,19 @@ function branchSubmodulesFromRemoteMaster() {
   console.log(`submodules: each on new branch '${branch}' at its remote master tip`)
 }
 
+// --- copy the local eslint cache (content-addressed; safe to share) ---
+// tools/eslint.mts keys its result/config cache entries by (config hash, eslint
+// version, CLI args, path relative to the repo root, file-content hash) — none
+// of which are worktree-specific — so copying the whole directory verbatim
+// gives the new worktree a warm cache instead of relinting the tree cold.
+{
+  const srcCache = Path.join(MAIN, '.eslintcache')
+  if (fs.existsSync(srcCache)) {
+    fs.cpSync(srcCache, Path.join(DEST, '.eslintcache'), {recursive: true})
+    console.log('eslint cache  : copied from main worktree (warm lint cache)')
+  }
+}
+
 // --- cap build parallelism via sculptcore's local-build-options.mjs ---
 // BUILD_JOBS feeds every make.mjs build mode (wasm/native/node, debug/sbrush
 // targets, deps builds). Seed the new worktree's (gitignored) options file from

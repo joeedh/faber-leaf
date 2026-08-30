@@ -36,16 +36,16 @@ const posStats = () => {
   } catch (e) {}
   const buffersVec = wasm.gpu?.buffers
   const buffers = wasm.HEAPU8 !== undefined ? buffersVec : wasm.getBoundVector('', buffersVec)
-  let n = 0,
-    nan = 0
-  let mn = [1e30, 1e30, 1e30],
-    mx = [-1e30, -1e30, -1e30]
-  let cx = 0,
-    cy = 0,
-    cz = 0
+  let n = 0
+  let nan = 0
+  let mn = [1e30, 1e30, 1e30]
+  let mx = [-1e30, -1e30, -1e30]
+  let cx = 0
+  let cy = 0
+  let cz = 0
   for (let i = 0; i < (buffers.length | 0); i++) {
     const buf = buffers[i]
-    if (!buf || buf.name !== 'position' || !(buf.size | 0) || !(buf.elemsize | 0)) continue
+    if (buf?.name !== 'position' || !(buf.size | 0) || !(buf.elemsize | 0)) continue
     const floatCount = (buf.size | 0) * (buf.elemsize | 0)
     const bytes = floatCount * 4
     let u8
@@ -54,9 +54,9 @@ const posStats = () => {
     if (!u8 || u8.length < bytes) continue
     const f = new Float32Array(u8.buffer.slice(u8.byteOffset, u8.byteOffset + bytes))
     for (let j = 0; j < f.length; j += 3) {
-      const x = f[j],
-        y = f[j + 1],
-        z = f[j + 2]
+      const x = f[j]
+      const y = f[j + 1]
+      const z = f[j + 2]
       if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
         nan++
         continue

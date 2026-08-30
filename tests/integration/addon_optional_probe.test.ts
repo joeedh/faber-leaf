@@ -50,7 +50,7 @@ interface ManagerState {
   /** Load (record) order — topological, so a dependency precedes its dependent. */
   order: string[]
   enabled: string[]
-  unloaded: Array<{id: string; reason: string; message: string}>
+  unloaded: {id: string; reason: string; message: string}[]
   probe: ProbeReport | null
   brokenRan: boolean
 }
@@ -112,7 +112,7 @@ function unloadedReason(state: ManagerState, id: string): string | undefined {
 
 function fixturesInIndex(): boolean {
   try {
-    const json = JSON.parse(fs.readFileSync(INDEX_PATH, 'utf-8')) as Array<{manifest: {id: string}}>
+    const json = JSON.parse(fs.readFileSync(INDEX_PATH, 'utf-8')) as {manifest: {id: string}}[]
     const ids = new Set(json.map((e) => e.manifest.id))
     return ['optional_probe', 'optional_probe_dep', 'optional_probe_broken'].every((id) => ids.has(id))
   } catch {

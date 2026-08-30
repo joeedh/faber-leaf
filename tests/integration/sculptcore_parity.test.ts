@@ -132,7 +132,7 @@ maybe('sculptcore native↔WASM parity', () => {
   })
 
   test('both dumps contain a LiteMesh with populated GPU buffers', () => {
-    const lm = (wasmDump.objects as Array<Record<string, unknown>>).find((o) => o.dataType === 'LiteMesh')
+    const lm = (wasmDump.objects as Record<string, unknown>[]).find((o) => o.dataType === 'LiteMesh')
     expect(lm).toBeDefined()
     const bufs = lm!.gpuBuffers as Record<string, unknown> | undefined
     expect(bufs && Object.keys(bufs).length).toBeGreaterThan(0)

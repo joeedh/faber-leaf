@@ -164,7 +164,7 @@ export class lexer {
 
       var res = t.re.exec(lexdata)
 
-      if (res != null && res != undefined && res.index == 0) {
+      if (res?.index == 0) {
         results.push([t, res])
       }
     }

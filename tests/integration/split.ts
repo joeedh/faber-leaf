@@ -40,7 +40,7 @@ export function selectedBackends(haveNative: boolean): Backend[] {
 
 /** `.each` table for `backends`, never empty — jest throws on an empty table,
  * and a suite with no legs is `describe.skip`ped by its `canRun` anyway. */
-export function backendTable(backends: Backend[]): Array<readonly [Backend]> {
+export function backendTable(backends: Backend[]): (readonly [Backend])[] {
   const legs = backends.length ? backends : (['wasm'] as Backend[])
   return legs.map((b) => [b] as const)
 }

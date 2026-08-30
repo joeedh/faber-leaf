@@ -151,6 +151,7 @@ if (!canRun && isDefaultBackendPass()) {
   ]
     .filter(Boolean)
     .join('; ')
+  // eslint-disable-next-line no-console
   console.warn(`[legacy_file_compat] skipped: ${why}`)
 }
 

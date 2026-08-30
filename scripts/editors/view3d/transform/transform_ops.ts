@@ -209,7 +209,7 @@ export class TransformOp<InputSet extends PropertySlots = {}, OutputSet extends 
       // addon that contributed the type can be disabled between runs (§8).
       const type = TransDataType.getClass(name)
 
-      if (!type || !type.isValid(ctx, this)) {
+      if (!type?.isValid(ctx, this)) {
         continue
       }
       this._types.push(type)

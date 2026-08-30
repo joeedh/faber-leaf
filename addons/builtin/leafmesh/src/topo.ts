@@ -564,7 +564,7 @@ export class LeafMesh {
    * passed in. Returns `ELEM_NONE` if any ring is shorter than three
    * vertices, repeats a vertex, or names a dead one.
    */
-  makeFace(loops: ReadonlyArray<readonly number[]>, hint = ELEM_NONE): number {
+  makeFace(loops: readonly (readonly number[])[], hint = ELEM_NONE): number {
     const rings = this.prepareRings(loops)
     if (rings === null) {
       return ELEM_NONE
@@ -998,7 +998,7 @@ export class LeafMesh {
 
     let created = 0
     for (const f of this.f) {
-      if (skipFaces !== undefined && skipFaces.has(f)) {
+      if (skipFaces?.has(f)) {
         continue
       }
 
@@ -1125,7 +1125,7 @@ export class LeafMesh {
   }
 
   /** Validate the input rings and orient the holes. Returns null on bad input. */
-  private prepareRings(loops: ReadonlyArray<readonly number[]>): number[][] | null {
+  private prepareRings(loops: readonly (readonly number[])[]): number[][] | null {
     if (loops.length === 0) {
       return null
     }

@@ -123,7 +123,7 @@ function layerTest(): LayerTestResult {
       })
 
       const after = readGpuBuffer(mesh, 'position')
-      if (!after || after.length !== before.length) {
+      if (after?.length !== before.length) {
         throw new Error('post-stroke position buffer unreadable/resized')
       }
 

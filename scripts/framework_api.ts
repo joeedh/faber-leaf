@@ -163,11 +163,7 @@ export {
 export type {UVConformanceResult} from './core/uv_source_conformance.js'
 // The same idea one step further: a named factory per implementor, so a check
 // that lives in one addon can get a source built by another.
-export {
-  registerUVSourceFixture,
-  uvSourceFixtureNames,
-  withUVSourceFixture,
-} from './core/uv_source_fixtures.js'
+export {registerUVSourceFixture, uvSourceFixtureNames, withUVSourceFixture} from './core/uv_source_fixtures.js'
 export type {UVSourceFixture, UVSourceFixtureFactory} from './core/uv_source_fixtures.js'
 export {setDefaultSceneBuilder} from './core/default_file.js'
 // The app's own CLI flags: an addon that takes one (sculptcore's --backend)

@@ -174,7 +174,7 @@ export class NodeGraphOp<
   }
 
   calcUndoMem(_ctx: ToolContext): number {
-    if (this._undo && this._undo.data) {
+    if (this._undo?.data) {
       return this._undo.data.byteLength
     }
     return 0

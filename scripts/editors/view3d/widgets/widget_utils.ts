@@ -63,13 +63,13 @@ export class TransMovWidget extends TransDataType {
       return []
     }
 
-    let manager = ctx.scene.widgets
+    const manager = ctx.scene.widgets
 
-    let ret = []
-    let api = ctx.api
+    const ret = []
+    const api = ctx.api
 
-    for (let path of toolop.inputs.datapaths) {
-      let td = new TransDataElem()
+    for (const path of toolop.inputs.datapaths) {
+      const td = new TransDataElem()
       td.data1 = path
       td.data2 = new Vector3(api.getValue(ctx, path))
 
@@ -81,7 +81,7 @@ export class TransMovWidget extends TransDataType {
   }
 
   static applyTransform(ctx, elem, do_prop, matrix, toolop) {
-    let co = new Vector3()
+    const co = new Vector3()
 
     co.load(elem.data2).multVecMatrix(matrix)
     ctx.api.getValue(ctx, elem.data1).load(co)
@@ -92,12 +92,12 @@ export class TransMovWidget extends TransDataType {
   }
 
   static undoPre(ctx, elemlist) {
-    let ret = {
+    const ret = {
       paths: [],
       cos  : [],
     }
 
-    for (let td of elemlist) {
+    for (const td of elemlist) {
       ret.paths.push(td.data1)
       ret.cos.push(td.data2.copy())
     }
@@ -106,12 +106,12 @@ export class TransMovWidget extends TransDataType {
   }
 
   static undo(ctx, udata) {
-    let paths = udata.paths
-    let cos = udata.cos
+    const paths = udata.paths
+    const cos = udata.cos
 
     for (let i = 0; i < paths.length; i++) {
-      let path = paths[i],
-        co = cos[i]
+      const path = paths[i]
+      const co = cos[i]
       ctx.api.getValue(ctx, path).load(co)
     }
 
@@ -128,11 +128,11 @@ export class TransMovWidget extends TransDataType {
    * @param space_matrix_out   : Matrix4, optional, matrix to put constraint space in
    */
   static getCenter(ctx, list, selmask, spacemode, space_matrix_out, toolop) {
-    let center = new Vector3()
+    const center = new Vector3()
     let tot = 0.0
 
-    for (let td of list) {
-      let co = ctx.api.getValue(ctx, td.data1)
+    for (const td of list) {
+      const co = ctx.api.getValue(ctx, td.data1)
 
       center.add(co)
       tot++
@@ -197,10 +197,10 @@ export class MovableWidget extends WidgetBase {
   }
 
   get iterWidgets() {
-    let this2 = this
+    const this2 = this
 
     return (function* () {
-      for (let w of this2.manager.widgets) {
+      for (const w of this2.manager.widgets) {
         if (w instanceof MovableWidget) {
           yield w
         }
@@ -209,15 +209,15 @@ export class MovableWidget extends WidgetBase {
   }
 
   on_mousedown(e, localX, localY, was_touch) {
-    let ctx = this.ctx
+    const ctx = this.ctx
 
     console.log('Movable widget mouse down!')
 
-    let tools = []
+    const tools = []
 
     if (this.tools.selectOne) {
       let path = this.tools.selectOne
-      let p = this.getValue()
+      const p = this.getValue()
 
       let mode
       if (e.shiftKey) {
@@ -228,14 +228,14 @@ export class MovableWidget extends WidgetBase {
 
       path = `${path}(mode='${mode}' path='${this.datapath}')`
 
-      let toolop = ctx.api.createTool(ctx, path)
+      const toolop = ctx.api.createTool(ctx, path)
       tools.push(toolop)
     }
 
     if (e.button == 0 || was_touch) {
-      let toolop = new MovWidgetTranslateOp()
+      const toolop = new MovWidgetTranslateOp()
 
-      for (let w of this.iterWidgets) {
+      for (const w of this.iterWidgets) {
         if (w.getSelect()) {
           toolop.inputs.datapaths.push(w.datapath)
         }
@@ -246,16 +246,16 @@ export class MovableWidget extends WidgetBase {
     }
 
     if (tools.length > 1) {
-      let macro = new ToolMacro()
+      const macro = new ToolMacro()
 
-      for (let tool of tools) {
+      for (const tool of tools) {
         macro.add(tool)
       }
 
       macro.connect(tools[0], tools[1], (tool1, tool2) => {
         tool2.inputs.datapaths.clear()
 
-        for (let path of tool1.outputs.selectPaths) {
+        for (const path of tool1.outputs.selectPaths) {
           tool2.inputs.datapaths.push(path)
         }
       })
@@ -301,7 +301,7 @@ export class MovableWidget extends WidgetBase {
       this.shape = new WidgetSphere(manager)
     }
 
-    let scale = 0.25
+    const scale = 0.25
 
     this.matrix.makeIdentity()
     let co
@@ -324,12 +324,12 @@ export class MovableWidget extends WidgetBase {
       return
     }
 
-    let sel = co.select
-    let mask = sel ? ObjectFlags.SELECT : 0
-    let hmask = ObjectFlags.HIGHLIGHT | mask
+    const sel = co.select
+    const mask = sel ? ObjectFlags.SELECT : 0
+    const hmask = ObjectFlags.HIGHLIGHT | mask
 
-    let color = Colors[mask]
-    let hcolor = Colors[hmask]
+    const color = Colors[mask]
+    const hcolor = Colors[hmask]
 
     this.shape.color.load(color)
     this.shape.hcolor.load(hcolor)

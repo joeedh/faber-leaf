@@ -46,8 +46,8 @@ export abstract class View3DOp<InputSet extends PropertySlots, OutputSet extends
     let steps = Math.ceil((r * 2.0 * Math.PI) / quality)
     steps = Math.max(steps, 6)
 
-    let t = -Math.PI,
-      dt = (2.0 * Math.PI) / (steps - 1)
+    let t = -Math.PI
+    const dt = (2.0 * Math.PI) / (steps - 1)
     const p1 = new Vector2()
     const p2 = new Vector2()
 

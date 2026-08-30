@@ -714,7 +714,7 @@ graph.Node {
   static graphDefineAPI(api: DataAPI, nodeStruct: DataStruct) {}
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    let nstruct = struct ?? api.mapStruct(this, true)
+    const nstruct = struct ?? api.mapStruct(this, true)
 
     nstruct.flags('graph_flag', 'graph_flag', NodeFlags, 'Graph Flags', 'Flags')
     nstruct.int('graph_id', 'graph_id', 'Graph ID', 'Unique graph ID').readOnly()
@@ -723,7 +723,7 @@ graph.Node {
       nstruct.list('', inorouts, [
         function getIter(api: DataAPI, list: any) {
           return (function* () {
-            for (let k in list[inorouts]) {
+            for (const k in list[inorouts]) {
               yield list[inorouts][k]
             }
           })()
@@ -735,12 +735,12 @@ graph.Node {
           return list[inorouts][key]
         },
         function getKey(api: DataAPI, list: any, obj: any) {
-          for (let k in list[inorouts]) {
+          for (const k in list[inorouts]) {
             if (list[inorouts][k] === obj) return k
           }
         },
         function getStruct(api: DataAPI, list: any, key: string) {
-          let obj = list[inorouts][key]
+          const obj = list[inorouts][key]
 
           if (obj === undefined) return api.getStruct(NodeSocketType)
 

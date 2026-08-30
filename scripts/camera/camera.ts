@@ -1,16 +1,14 @@
 import {SceneObjectData} from '../sceneobject/sceneobject_base.js'
 import {registerDataAPI} from '../data_api/api_define_registry.js'
 import {Vector3, Vector4, Matrix4} from '../util/vectormath.js'
-import {Shaders} from '../shaders/shaders.js'
 import {nstructjs, DataAPI, DataStruct} from '../path.ux/scripts/pathux.js'
 import {BlockLoader, BlockLoaderAddUser, DataBlock, DataRef} from '../core/lib_api.js'
-import {Camera, IUniformsBlock} from '../webgl/webgl.js'
+import {Camera} from '../webgl/webgl.js'
 import {SelMask} from '../core/select_types.js'
 import {NodeFlags} from '../core/graph.js'
 import type {DependSocket} from '../core/graphsockets.js'
 import {SimpleMesh, LayerTypes} from '../webgl/simplemesh.js'
 import {CameraTypes} from './camera_types.js'
-import {ShaderProgram} from '../webgl/webgl.js'
 import type {View3D} from '../editors/view3d/view3d.js'
 import type {SceneObject} from '../sceneobject/sceneobject.js'
 import type {ToolContext} from '../core/context.js'
@@ -280,10 +278,10 @@ export class CameraData extends SceneObjectData {
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
     // CameraData extends SceneObjectData (helper layering ≠ JS inheritance);
     // chain the SceneObjectData base, not DataBlock.
-    let mstruct = SceneObjectData.defineAPI(api, struct ?? api.mapStruct(this, true))
+    const mstruct = SceneObjectData.defineAPI(api, struct ?? api.mapStruct(this, true))
 
-    let onchange = function (this: {dataref: CameraData}) {
-      let camera = this.dataref
+    const onchange = function (this: {dataref: CameraData}) {
+      const camera = this.dataref
 
       camera.update()
     }

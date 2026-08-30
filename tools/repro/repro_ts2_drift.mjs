@@ -24,8 +24,8 @@ await page.waitForFunction(() => !!window._appstate?.screen, undefined, {timeout
 
 await page.evaluate(() => {
   window.__co = () => {
-    const mesh = globalThis._appstate?.ctx?.object?.data,
-      wasm = mesh.wasm
+    const mesh = globalThis._appstate?.ctx?.object?.data
+    const wasm = mesh.wasm
     const cls = wasm.manager.findVectorClass('float')
     const vec = wasm.manager.constructWith(cls.findDefaultConstructor())
     mesh.mesh.dumpVertCo(vec)
@@ -39,13 +39,13 @@ await page.evaluate(() => {
     window.__M0 = window.__co()
   }
   window.__driftVsM0 = () => {
-    const a = window.__M0,
-      b = window.__co()
-    let diff = 0,
-      worst = 0,
-      worstIdx = -1,
-      onlyA = 0,
-      onlyB = 0
+    const a = window.__M0
+    const b = window.__co()
+    let diff = 0
+    let worst = 0
+    let worstIdx = -1
+    let onlyA = 0
+    let onlyB = 0
     for (const [idx, ca] of a) {
       const cb = b.get(idx)
       if (!cb) {

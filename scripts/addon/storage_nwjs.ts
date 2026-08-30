@@ -16,7 +16,6 @@
 
 import {NodeFsAddonStorage} from './storage.js'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type RequireFn = (id: string) => any
 
 declare global {
@@ -24,7 +23,7 @@ declare global {
     /** Set by nwjs/window.html when running under NW.js. */
     haveNwjs?: boolean
   }
-  // eslint-disable-next-line no-var
+
   var nw: {App: {dataPath: string}} | undefined
 }
 
@@ -33,7 +32,6 @@ declare global {
  * renderer. Throws if called outside NW.js or if `require` isn't available.
  */
 export async function createNwjsAddonStorage(): Promise<NodeFsAddonStorage> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const req = (globalThis as any).require as RequireFn | undefined
   if (typeof req !== 'function') {
     throw new Error('createNwjsAddonStorage: require() not available — is this NW.js?')
@@ -41,9 +39,9 @@ export async function createNwjsAddonStorage(): Promise<NodeFsAddonStorage> {
 
   // We're inside NW.js so these requires succeed at runtime. TypeScript can't
   // resolve them without @types/node; the casts are deliberate.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const fsp = req('fs/promises') as any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const pathlib = req('path') as any
 
   // NW.js owns the per-app data directory; read it directly (no IPC).

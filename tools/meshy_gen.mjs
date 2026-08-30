@@ -109,7 +109,7 @@ async function main() {
     const p = uniquePct(pct)
     if (p !== null) process.stdout.write(`PROGRESS ${p} generating\n`)
     if (task.status === 'SUCCEEDED') {
-      modelUrl = task.model_urls && task.model_urls.obj
+      modelUrl = task.model_urls?.obj
       if (!modelUrl) fail('task succeeded but no OBJ url in model_urls')
       break
     }
@@ -137,4 +137,4 @@ async function main() {
   process.stdout.write(`RESULT ${outPath.replace(/\\/g, '/')}\n`)
 }
 
-main().catch((e) => fail(e && e.message ? e.message : String(e)))
+main().catch((e) => fail(e?.message ? e.message : String(e)))

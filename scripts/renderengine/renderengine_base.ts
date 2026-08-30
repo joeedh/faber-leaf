@@ -49,7 +49,7 @@ export class RenderSettings {
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    let st = struct ?? api.mapStruct(this, true)
+    const st = struct ?? api.mapStruct(this, true)
 
     st.bool('sharpen', 'sharpen', 'Sharpen')
     st.int('sharpenWidth', 'sharpenWidth', 'Sharpen Width').noUnits()

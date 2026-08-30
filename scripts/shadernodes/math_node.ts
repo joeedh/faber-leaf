@@ -28,7 +28,7 @@ export const MathNodeFuncs = {
   EXP  : 20,
 }
 
-let mf = MathNodeFuncs
+const mf = MathNodeFuncs
 export const WgslMathSnippets: Record<number, string> = {
   [mf.ADD]  : 'A + B',
   [mf.SUB]  : 'A - B',

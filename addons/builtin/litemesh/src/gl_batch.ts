@@ -1,10 +1,10 @@
-import {GPUManager, Buffer, DrawBatch, DrawCommand, ShaderDef} from '@sculptcore/api'
+import {Buffer, DrawBatch, DrawCommand, ShaderDef} from '@sculptcore/api'
 import {} from '@litestl/typescript-runtime'
 import {GPUType} from '@sculptcore/api/sculptcore/gpu/GPUType'
 import {GPUBufferType} from '@sculptcore/api/sculptcore/gpu/GPUBufferType'
 import {GPUCmdType} from '@sculptcore/api/sculptcore/gpu/GPUCmdType'
 import {IWasmInterface} from '@sculptcore/api/api'
-import {loadShader, type IUniformsBlock, type ShaderProgram} from '@framework/api'
+import {type IUniformsBlock, type ShaderProgram} from '@framework/api'
 
 interface BoundLike {
   ptr: number
@@ -84,14 +84,12 @@ export class WebGLBatchExecutor {
   private bufferCache = new Map<number, CachedBuffer>()
   private vao: WebGLVertexArrayObject
   private shader: ShaderProgram
-  private shaderCache = new Map<number, ShaderProgram>()
 
   constructor(gl: WebGL2RenderingContext, wasm: IWasmInterface, shader: ShaderProgram) {
     this.gl = gl
     this.wasm = wasm
     this.vao = gl.createVertexArray()!
     this.shader = shader
-    this.shaderCache = new Map()
   }
 
   private uploadBuffer(buf: Buffer): WebGLBuffer {
@@ -110,7 +108,6 @@ export class WebGLBatchExecutor {
 
     if (cached.uploadedSize !== bytes || cached.uploadedDataPtr !== dataPtr || buf.update_buffer) {
       const view = new Uint8Array(this.wasm.HEAPU8.buffer, dataPtr, bytes)
-      const f32view = new Float32Array(this.wasm.HEAPU8.buffer, dataPtr, bytes >> 2)
       const target = bufferTargetGL(gl, buf.target)
       gl.bindBuffer(target, cached.glBuf)
       gl.bufferData(target, view, gl.STATIC_DRAW)

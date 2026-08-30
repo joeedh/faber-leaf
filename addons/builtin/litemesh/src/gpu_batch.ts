@@ -318,7 +318,7 @@ export class WebGPUBatchExecutor {
 
     let cached = this.bufferCache.get(key)
     let fresh = false
-    if (!cached || cached.uploadedSize !== bytes) {
+    if (cached?.uploadedSize !== bytes) {
       cached?.buf.destroy()
       cached = {
         buf: new GpuBuffer(this.device, {
@@ -493,7 +493,7 @@ export class WebGPUBatchExecutor {
 
     for (let i = 0; i < commands.length; i++) {
       const cmd = commands[i]
-      if (!cmd || !cmd.shader) continue
+      if (!cmd?.shader) continue
       // Skip a single bad draw command rather than letting a throw abort the
       // whole batch (an unported WGSL shader, a not-yet-filled buffer); warn
       // once per shader, like the old per-command dispatch loop did.
@@ -645,7 +645,7 @@ export class WebGPUBatchExecutor {
     const targetsKey = this.colorTargets.map((t) => t.format).join('+') + '|' + (this.opts.cullMode ?? 'none')
 
     let cache = this.batchCaches.get(key)
-    if (!cache || cache.version !== version || cache.targetsKey !== targetsKey) {
+    if (cache?.version !== version || cache.targetsKey !== targetsKey) {
       cache = this.buildBatchCache(batch, version, targetsKey)
       if (this.batchCaches.size > 32) {
         const oldest = this.batchCaches.keys().next().value

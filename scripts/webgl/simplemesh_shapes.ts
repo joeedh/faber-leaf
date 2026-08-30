@@ -8,7 +8,7 @@ export const Shapes = {} as {[k in keyof typeof ShapeOBJs]: SimpleMesh}
 
 export function loadShapes() {
   const ShapeSources = ShapeOBJs as {[k: string]: string}
-  for (let k in ShapeSources) {
+  for (const k in ShapeSources) {
     Shapes[k as keyof typeof ShapeOBJs] = readOBJToSimpleMesh(atob(ShapeSources[k]))
   }
 }
