@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* Per-step undo/redo corruption localizer.
  * load ts2.wproj -> replay to top -> for each cursor level, do a single
  * undo()+redo() round trip and check if 'position' buffers return identical.

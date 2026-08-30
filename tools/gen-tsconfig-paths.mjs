@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Generate tsconfig.paths.json — the `compilerOptions.paths` block and the
  * `exclude` list that both tsconfig.json and scripts/tsconfig.json extend.

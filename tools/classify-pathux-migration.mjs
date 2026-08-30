@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 #!/usr/bin/env node
 /**
  * Computes the set of symbols that an addon importing from `@framework/api`

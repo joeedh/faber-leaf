@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* Compare the GPU 'position' buffer multiset against the mesh.dumpVertCo
  * multiset IN THE SAME STATE. This removes the P-vs-Q confound: it tells us
  * directly whether the GPU buffers are consistent with the mesh at a given

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* Read mesh-truth vert co (mesh.mesh.dumpVertCo) across a single undo+redo
  * round trip of the top step. Index-aligned compare => definitively shows
  * whether the MESH vertex data is corrupted (vs stale GPU leaf buffers). */

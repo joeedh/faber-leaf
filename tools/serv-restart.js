@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Kill any process listening on the dev server port, then spawn a
  * fresh detached `serv.js` and exit. Lets `pnpm serv:restart` cycle

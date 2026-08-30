@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 // Icon-sheet helper. Zero dependencies (pure Node ESM).
 //
 //   node tools/iconsheet.mjs locate <NAME|index>   -> grid row/col + SVG pixel box

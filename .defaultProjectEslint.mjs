@@ -32,6 +32,10 @@ export const allowDefaultProject = [
   'tests/fixtures/addons/optional_probe_broken/src/*.ts',
   'tests/fixtures/addons/optional_probe/src/*.ts',
   'tests/fixtures/addons/api_consumer/src/*.ts',
-  'tools/*.mjs',
+  'tools/framework_api_plugin.js',
+  'tools/fix-framework-imports.js',
+  'tools/serv-restart.js',
+  'tools/esbuilder.js',
+  'tools/serv.js',
   'tests/e2e/*.ts',
 ]

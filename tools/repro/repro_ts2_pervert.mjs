@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* Per-render-vertex undo/redo corruption localizer.
  * load ts2.wproj -> CTX.replay() -> snapshot positions at cursor=top,
  * undo to base, redo to top, snapshot again, diff element-wise. A lossless

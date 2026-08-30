@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* Characterize the undo->redo round-trip loss. Capture index-aligned mesh co
  * at three points of the TOP step: P (replayed top), U (after one undo), Q
  * (after redo back to top). Q should equal P exactly. For each vert where

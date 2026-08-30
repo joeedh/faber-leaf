@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Generates the committed `.wproj` fixtures the P10 file-compat tests read
  * (documentation/plans/2026-08-15-0345-serialization-and-file-compat-hardening.md §5).

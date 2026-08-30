@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 // Create a sibling git worktree with the submodules synced and the sccache
 // environment ready, so a fresh worktree builds at compiler-cache speed instead
 // of recompiling the C++ tree from scratch. See the `create-worktree` skill

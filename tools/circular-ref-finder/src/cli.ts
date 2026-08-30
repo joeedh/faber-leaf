@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import * as path from 'path'
 import {Cycle, CliOptions} from './types'
 

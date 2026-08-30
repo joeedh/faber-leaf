@@ -35,8 +35,8 @@
     "test:e2e": "playwright test",
 	  "lint:prose": "pnpm --loglevel=error exec commentlint --concise",
 	  "lint:prose:full": "pnpm --loglevel=error exec commentlint",
-	  "lint" : "pnpm lint:prose",
-    "eslint": "pnpm --loglevel=error tsx tools/eslint.mts",
+	  "lint" : "pnpm lint:prose && pnpm lint",
+    "lint:eslint": "tsx tools/eslint.mts",
     "format": "bash node_modules/.bin/prettier --cache --write \"**/*.{ts,tsx,js,jsx,mjs,cjs}\"",
     "format:check": "bash node_modules/.bin/prettier --check \"**/*.{ts,tsx,js,jsx,mjs,cjs}\"",
     "markdown-toc": "bash tools/run_markdown_toc.sh"

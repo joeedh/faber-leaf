@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 // Build + register the cross-worktree sccache launcher (see sccache_launcher.cc
 // and the create-worktree skill). Idempotent and cheap; safe to run on every
 // `make.mjs configure native`.

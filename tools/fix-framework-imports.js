@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 /**
  * Converts default-style and namespace-style imports of `@framework/api`
  * into named imports, since the alias re-export hub uses named exports.

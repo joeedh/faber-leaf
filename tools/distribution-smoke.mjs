@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Boot the built bundle and prove the distribution it was built for is the one
  * that came up, that its startup file is on screen, and that something can

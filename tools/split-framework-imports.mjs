@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 /**
  * Migrates addon imports of pathux-sourced symbols from `@framework/api`
  * to `@framework/pathux`. Run AFTER the runtime resolver + pathux runtime

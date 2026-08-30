@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* Determine whether undo or redo corrupts, per step.
  * Single replay pass: the replay stopCB fires after each step, so we grab
  * ground-truth G{cur} at every cursor. Then walk down with undo()/up with

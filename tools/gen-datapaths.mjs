@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**
  * Generate the app's data-path catalog + compile-time typo-check artifacts.
  *

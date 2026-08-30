@@ -99,7 +99,7 @@ async function main() {
   if (!id) fail(`create returned no task id: ${JSON.stringify(created)}`)
 
   // 2. Poll until SUCCEEDED, forwarding progress (cap at 95% until downloaded).
-  let modelUrl = null
+  let modelUrl
   for (;;) {
     await sleep(args.pollMs)
     res = await fetch(`${API}/${id}`, {headers: auth})

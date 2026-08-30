@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* Distinguish stale-GPU-buffer corruption from real mesh-data corruption.
  * Two grabs of the top step's single undo+redo round trip:
  *   - plain (incremental spatial.update, as the renderer sees it)
