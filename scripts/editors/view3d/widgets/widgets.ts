@@ -17,7 +17,7 @@ import {css2color} from '../../../path.ux/scripts/core/ui_base.js'
 import type {View3D} from '../view3d.js'
 import {OptionalIf} from '../../../util/optionalIf.js'
 import type {ViewContext} from '../../../core/context.js'
-import {util, math, ToolOp, IVector4} from '../../../path.ux/pathux.js'
+import {util, math, ToolOp, IVector4, DataStruct, DataAPI} from '../../../path.ux/pathux.js'
 import {IUniformsBlock} from '../../../webgl/webgl.js'
 
 export type IDistToMouse = [number, number, number?]
@@ -575,6 +575,7 @@ export interface IWidgetConstructor<
   new (...args: unknown[]): T
   widgetDefine(): IWidgetDef
   nodedef: INodeConstructor<T, Inputs, Outputs>['nodedef']
+  defineAPI: (api: DataAPI, nodeStruct: DataStruct) => DataStruct
 }
 
 export class WidgetBase<Inputs extends INodeSocketSet = {}, Outputs extends INodeSocketSet = {}> extends Node<

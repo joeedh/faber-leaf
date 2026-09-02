@@ -162,7 +162,7 @@ export class DependencyAnalyzer {
     return pathin
   }
 
-  private analyzeFile(sourceFile: ts.SourceFile, sourcePath, program: ts.Program) {
+  private analyzeFile(sourceFile: ts.SourceFile, sourcePath: string, program: ts.Program) {
     this.sourceFile = sourceFile
     const filePath = sourcePath
 

@@ -1,5 +1,6 @@
 import {nstructjs, Container, DataAPI, DataStruct} from '../path.ux/scripts/pathux.js'
 import {ShaderNetworkClass, ShaderNode} from './shader_nodes.js'
+import type {ShaderNodeDataPrefix} from './shader_nodes.js'
 import type {WgslShaderGenerator} from './shader_nodes_wgsl.js'
 import type {StructReader} from '../path.ux/scripts/util/nstructjs.js'
 import {FloatSocket} from '../core/graphsockets.js'
@@ -71,11 +72,14 @@ shader.MathNode {
   }
 
   buildUI(container: Container) {
-    container.prop('mathFunc')
+    const con = container.withDataPrefix<ShaderNodeDataPrefix>()
+    con.prop('mathFunc')
   }
 
-  static graphDefineAPI(api: DataAPI, nstruct: DataStruct) {
+  static defineAPI(api: DataAPI, nstruct: DataStruct) {
+    super.defineAPI(api, nstruct)
     nstruct.enum('mathFunc', 'mathFunc', MathNodeFuncs, 'Function', 'Math function to use')
+    return nstruct
   }
 
   genWgsl(gen: WgslShaderGenerator) {

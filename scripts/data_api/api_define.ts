@@ -24,7 +24,7 @@ import type {ViewContext} from '../core/context.js'
 import {ShaderNetwork} from '../shadernodes/shadernetwork.js'
 import {Material} from '../core/material.js'
 import '../shadernodes/allnodes.js'
-import {ShaderNode} from '../shadernodes/shader_nodes.js'
+import {ShaderNetworkClass, ShaderNode} from '../shadernodes/shader_nodes.js'
 import {Graph, Node, SocketFlags, NodeSocketType} from '../core/graph.js'
 import {SceneObject} from '../sceneobject/sceneobject.js'
 import {Scene} from '../scene/scene.js'
@@ -274,6 +274,8 @@ export function getDataAPI(): MyDataAPI {
     builder.build(dataApi)
   }
 
+  api_define_graphclasses(dataApi)
+
   // Every participating class populates its own struct via `defineAPI`; `defineOnce`
   // runs each registered class exactly once. Order is irrelevant — subclass `defineAPI`s
   // chain their parent, declaring its members onto the child struct, so none depends on
@@ -288,7 +290,6 @@ export function getDataAPI(): MyDataAPI {
   // class structs (e.g. buildProcMeshAPI chains DataBlock.defineAPI), so they
   // must run after the registry pass.
   buildProcTextureAPI(dataApi, api_define_datablock)
-  api_define_graphclasses(dataApi)
 
   for (const builder of getDataAPIBuilders('after-classes')) {
     builder.build(dataApi)
@@ -380,7 +381,7 @@ export function getDataAPI(): MyDataAPI {
     OBJECT: Icons.CIRCLE_SEL,
   })
 
-  const sstruct = dataApi.mapStruct(Scene, false)
+  const sstruct = dataApi.mapStruct(Scene, false) as DataStruct<ViewContext>
 
   def = sstruct.flags('selectMask', 'selectMaskEnum', SelMask, 'Selection Mode', 'Selection Mode')
   def.icons({
@@ -388,7 +389,7 @@ export function getDataAPI(): MyDataAPI {
     EDGE  : Icons.EDGE_MODE,
     FACE  : Icons.FACE_MODE,
     OBJECT: Icons.CIRCLE_SEL,
-  })
+  });
   def.on('change', function (this: ApiCallbackThis<Scene>, newv: any, oldv: any) {
     const owner = this.dataref
 

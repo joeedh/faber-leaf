@@ -125,6 +125,7 @@ export interface INodeConstructor<
 
   nodedef(): INodeDef<InputSet, OutputSet>
   getFinalNodeDef?(): INodeDef<InputSet, OutputSet>
+  defineAPI(api: DataAPI, nodeStruct: DataStruct): void
 }
 
 export interface ISocketConstructor {
@@ -713,8 +714,6 @@ graph.Node {
       }
     })() as unknown as Iterable<NodeSocketType>
   }
-
-  static graphDefineAPI(api: DataAPI, nodeStruct: DataStruct) {}
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
     const nstruct = struct ?? api.mapStruct(this, true)

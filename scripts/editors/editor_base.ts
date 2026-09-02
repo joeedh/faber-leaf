@@ -388,10 +388,8 @@ export class DataBlockBrowser<BlockType extends DataBlock> extends Container<Vie
       this.flagRebuild()
     }
 
-    const update = dropbox.update as (...args: any[]) => void
-    dropbox.update = (...args: any[]) => {
-      dropbox.prop = ctx.datalib.getBlockListEnum(this.blockClass!, this.filterFunc!)
-      update.apply(dropbox, args)
+    dropbox.uiProp = () => {
+      return ctx.datalib.getBlockListEnum(this.blockClass!, this.filterFunc!)
     }
 
     let row
@@ -1845,7 +1843,7 @@ export class DirectionChooser extends UIBase<ViewContext, Vector3> {
             this.setPathValue(this.ctx, this.getAttribute('datapath')!, this.value)
           }
           if (this.on_change) {
-            this.on_change(this.value as unknown as Event)
+            ;(this.on_change as unknown as (value: Vector3) => void)(this.value)
           } //*/
 
           this.last_mpos[0] = e.x

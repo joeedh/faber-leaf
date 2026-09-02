@@ -1,6 +1,6 @@
 import {DataPathError, haveModal} from '../../path.ux/scripts/pathux.js'
 import {UIBase, PackFlags, color2css} from '../../path.ux/scripts/core/ui_base.js'
-import {RowFrame} from '../../path.ux/scripts/core/ui.js'
+import {RowFrame} from '../../path.ux/scripts/core/ui_containers.js'
 import {Vector2} from '../../util/vectormath.js'
 import {SocketTypes} from '../../core/graph.js'
 import type {ViewContext} from '../../core/context'

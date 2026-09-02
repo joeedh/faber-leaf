@@ -8,7 +8,8 @@ import {saveFile, loadFile, DataPathError, KeyMap, HotKey} from '../../path.ux/s
 
 import {UIBase, color2css, _getFont, css2color, nstructjs, DropBox, createMenu} from '../../path.ux/pathux.js'
 
-import {Container, RowFrame, ColumnFrame} from '../../path.ux/scripts/core/ui.js'
+import {Container} from '../../path.ux/scripts/core/ui.js'
+import {RowFrame, ColumnFrame} from '../../path.ux/scripts/core/ui_containers.js'
 import {Vector2, Vector3, Vector4, Quat, Matrix4} from '../../util/vectormath.js'
 import * as util from '../../util/util.js'
 import {DataRef} from '../../core/lib_api.js'

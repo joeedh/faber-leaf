@@ -14,7 +14,8 @@ import {
 } from '../../path.ux/scripts/pathux'
 
 import {UIBase} from '../../path.ux/scripts/core/ui_base'
-import {Container, ColumnFrame} from '../../path.ux/scripts/core/ui'
+import {Container} from '../../path.ux/scripts/core/ui'
+import {ColumnFrame} from '../../path.ux/scripts/core/ui_containers'
 import {ProceduralTex, ProceduralTexUser} from '../../texture/proceduralTex'
 import {listPropsPanels} from '../../core/props_panels'
 import type {ViewContext} from '../../core/context'

@@ -19,7 +19,8 @@ import {
 } from '../../path.ux/scripts/pathux.js'
 
 import {UIBase, PackFlags} from '../../path.ux/scripts/core/ui_base.js'
-import {Container, RowFrame} from '../../path.ux/scripts/core/ui.js'
+import {Container} from '../../path.ux/scripts/core/ui.js'
+import {RowFrame} from '../../path.ux/scripts/core/ui_containers.js'
 import {Vector2} from '../../util/vectormath.js'
 import * as util from '../../util/util.js'
 import {ShaderNodeTypes} from '../../shadernodes/shader_nodes.js'

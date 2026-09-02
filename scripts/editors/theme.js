@@ -90,7 +90,16 @@ export const theme = {
     oneAxisPadding      : 2,
     padding             : 1,
   },
-
+  "propLabels": {
+    font: new CSSFont({
+      font   : 'sans-serif',
+      weight : 'normal',
+      variant: 'normal',
+      style  : 'normal',
+      size   : 12,
+      color  : 'rgb(252,252,252)',
+    }),
+  },
   button: {
     DefaultText: new CSSFont({
       font   : 'sans-serif',

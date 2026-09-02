@@ -14,6 +14,7 @@ import type {RenderLight} from '../renderengine/renderengine_realtime.js'
 import type {WgslShaderGenerator} from './shader_nodes_wgsl.js'
 import {LightGenWgsl, DiffuseBRDFWgsl} from './shader_lib_wgsl.js'
 import * as units from '../path.ux/scripts/core/units.js'
+import { ViewContext } from '@framework/api'
 
 export {ClosureGLSL, PointLightCode} from './shader_lib.js'
 
@@ -161,6 +162,9 @@ export const ShaderContext = {
 
 const _warnedNoEmitter = new Set<string>()
 
+/** Prefix on the container a ShaderNode's `buildUI` is handed. */
+export type ShaderNodeDataPrefix = 'shadernetwork.graph.nodes[n].'
+type DataPrefix = ShaderNodeDataPrefix
 export class ShaderNode<
   InputSet extends INodeSocketSet = INodeSocketSet,
   OutputSet extends INodeSocketSet = INodeSocketSet,
@@ -174,10 +178,6 @@ shader.ShaderNode {
 
   constructor() {
     super()
-  }
-
-  static graphDefineAPI(api: DataAPI, nodeStruct: DataStruct) {
-    super.graphDefineAPI(api, nodeStruct)
   }
 
   /**
@@ -274,10 +274,10 @@ export class MixNode<InputSet extends INodeSocketSet = {}, OutputSet extends INo
     this.graph_ui_size[1] = 350
   }
 
-  static graphDefineAPI(api: DataAPI, nodeStruct: DataStruct) {
-    super.graphDefineAPI(api, nodeStruct)
-
+  static defineAPI(api: DataAPI, nodeStruct: DataStruct) {
+    super.defineAPI(api, nodeStruct)
     nodeStruct.enum('mode', 'mode', MixModes, 'Mode')
+    return nodeStruct
   }
 
   static nodedef() {
@@ -360,10 +360,10 @@ export class ImageNode<InputSet extends INodeSocketSet = {}, OutputSet extends I
     this.graph_ui_size[1] = 512
   }
 
-  static graphDefineAPI(api: DataAPI, nodeStruct: DataStruct) {
-    super.graphDefineAPI(api, nodeStruct)
-
+  static defineAPI(api: DataAPI, nodeStruct: DataStruct) {
+    super.defineAPI(api, nodeStruct)
     nodeStruct.struct('imageUser', 'imageUser', 'Image', api.mapStruct(ImageUser))
+    return nodeStruct
   }
 
   static nodedef() {
@@ -547,13 +547,15 @@ export class SubsurfaceScatteringNode<
     this.unit = SSSUnits.MILLIMETER
   }
 
-  static graphDefineAPI(api: DataAPI, nodeStruct: DataStruct) {
-    super.graphDefineAPI(api, nodeStruct)
+  static defineAPI(api: DataAPI, nodeStruct: DataStruct) {
+    super.defineAPI(api, nodeStruct)
     nodeStruct.enum('unit', 'unit', SSSUnits, 'Unit', 'Unit the scatter radius is authored in')
+    return nodeStruct
   }
 
   buildUI(container: Container): void {
-    container.prop('unit')
+    const con = container.withDataPrefix<DataPrefix>()
+    con.prop('unit')
   }
 
   static nodedef() {
@@ -751,10 +753,10 @@ export class AttributeNode<
     this.category = AttributeCategory.COLOR
   }
 
-  static graphDefineAPI(api: DataAPI, nodeStruct: DataStruct) {
-    super.graphDefineAPI(api, nodeStruct)
-
+  static defineAPI(api: DataAPI, nodeStruct: DataStruct) {
+    super.defineAPI(api, nodeStruct)
     nodeStruct.enum('category', 'category', AttributeCategory, 'Category', 'Attribute category to list')
+    return nodeStruct
   }
 
   static nodedef() {

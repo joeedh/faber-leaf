@@ -76,6 +76,36 @@ The `pathux/valid-datapath` ESLint rule (warn) flags `prop(...)` strings not in
 the catalog; dynamically-indexed paths (e.g. `flag[ENUMNAME]`) warn because the
 walker can't enumerate them — those are expected and harmless.
 
+## Containers built under a path prefix
+
+A `buildUI(container)` hook is handed a container whose `dataPrefix` is already
+set, so its paths are relative — `container.prop('unit')` resolves to
+`shadernetwork.graph.nodes[n].unit`. Nothing in that call says so, which leaves
+the linter matching `unit` against every path ending in `.unit`. Declare the
+prefix instead:
+
+```ts
+type DataPrefix = 'shadernetwork.graph.nodes[n].'
+
+buildUI(container: Container): void {
+  const con = container.withDataPrefix<DataPrefix>()
+  con.prop('unit')
+}
+```
+
+`withDataPrefix` only re-types the container (whoever built it already set the
+runtime prefix). From there `prop` autocompletes the paths under the prefix, and
+the ESLint rule reads the prefix off the receiver's type and checks the joined
+path exactly, so a typo reports as
+`Unknown data path "shadernetwork.graph.nodes[n].unitt"` with the real tails
+listed. `scripts/shadernodes/shader_nodes.ts` is the worked example, and
+`scripts/data_api/datapath_prefix_types.ts` fails the typecheck if the
+prefix-to-tails resolution regresses.
+
+Full write-up: path.ux
+[`documentation/container.md`](../scripts/path.ux/documentation/container.md)
+§ Path prefixes.
+
 ## How icons attach to bindings
 
 Icons are bound to **enum and bitflag properties**, one icon per enum key:

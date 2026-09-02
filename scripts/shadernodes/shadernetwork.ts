@@ -7,8 +7,9 @@ import type {StructReader} from '../path.ux/scripts/util/nstructjs.js'
 
 import {DependSocket, Vec3Socket, Vec4Socket, FloatSocket, IntSocket, BoolSocket} from '../core/graphsockets.js'
 import * as util from '../util/util.js'
-import {OutputNode, DiffuseNode, type IRenderLights} from './shader_nodes.js'
+import {OutputNode, DiffuseNode, type IRenderLights, ShaderNode, ShaderNetworkClass} from './shader_nodes.js'
 import {WgslShaderGenerator, type RequestedAttrDesc} from './shader_nodes_wgsl.js'
+import {defineGraphAPI} from '../path.ux/scripts/graph/index.js'
 
 /**
  * WebGPU-side compiled material shader. Holds the emitted WGSL source +
@@ -262,10 +263,14 @@ ShaderNetwork {
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
+    const nodeStructs = []
+    for (const cls of ShaderNetworkClass.NodeTypes) {
+      nodeStructs.push(api.getStruct(cls))
+    }
+
     const mstruct = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
-
-    mstruct.struct('graph', 'graph', 'Shader Graph', api.getStruct(Graph))
-
+    const graphSt = new DataStruct()
+    mstruct.struct('graph', 'graph', 'Shader Graph', defineGraphAPI(api, graphSt, nodeStructs))
     return mstruct
   }
 

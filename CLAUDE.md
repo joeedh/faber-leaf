@@ -398,6 +398,7 @@ checkout. Conventions:
 
 
 ## Prose
+<!-- commentlint-off -->
 
 These rules govern every piece of prose in the repository. They apply to code comments, to
 this file, and to everything under `documentation/`.
@@ -461,3 +462,5 @@ this file, and to everything under `documentation/`.
   - use node to execute it directly, if it's new enough it'll
    parse the type annotations.
   - otherwise use tsx
+<!-- commentlint-on -->
+

@@ -152,6 +152,31 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `material` | struct |  |  |  |
 | `material.graph` | struct |  |  |  |
 | `material.graph.nodes` | list |  |  |  |
+| `material.graph.nodes[n].category` | prop | EnumProperty | Category | enum {GENERIC, COLOR, UV} |
+| `material.graph.nodes[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
+| `material.graph.nodes[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `material.graph.nodes[n].imageUser` | struct |  |  |  |
+| `material.graph.nodes[n].imageUser.image` | struct |  |  |  |
+| `material.graph.nodes[n].imageUser.image.flag` | prop | FlagProperty | Flag | enum {1, 2, 4, SELECT, HIDE, UPDATE} |
+| `material.graph.nodes[n].imageUser.image.genColor` | prop | Vec4Property | Color | range 0..1 |
+| `material.graph.nodes[n].imageUser.image.genType` | prop | EnumProperty | Generator | enum {0, 1, COLOR, UVGRID} |
+| `material.graph.nodes[n].imageUser.image.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
+| `material.graph.nodes[n].imageUser.image.graph_id` | prop | IntProperty | Graph ID |  |
+| `material.graph.nodes[n].imageUser.image.height` | prop | IntProperty | Height | range 1..16384 |
+| `material.graph.nodes[n].imageUser.image.inputs` | list |  |  |  |
+| `material.graph.nodes[n].imageUser.image.lib_flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, SELECT, HIDE, FAKE_USER, NO_SAVE} |
+| `material.graph.nodes[n].imageUser.image.lib_id` | prop | IntProperty | Lib ID |  |
+| `material.graph.nodes[n].imageUser.image.name` | prop | StringProperty | name |  |
+| `material.graph.nodes[n].imageUser.image.outputs` | list |  |  |  |
+| `material.graph.nodes[n].imageUser.image.ready` | prop | BoolProperty | Ready |  |
+| `material.graph.nodes[n].imageUser.image.type` | prop | EnumProperty | Image Type | enum {0, 1, 2, 3, GENERATED, BYTE_BUFFER, FLOAT_BUFFER, URL} |
+| `material.graph.nodes[n].imageUser.image.url` | prop | StringProperty | URL |  |
+| `material.graph.nodes[n].imageUser.image.width` | prop | IntProperty | Width | range 1..16384 |
+| `material.graph.nodes[n].inputs` | list |  |  |  |
+| `material.graph.nodes[n].mathFunc` | prop | EnumProperty | Function | enum {ADD, SUB, MUL, DIV, POW, SQRT, FLOOR, CEIL, MIN, MAX, FRACT, TENT, COS, SIN, TAN, ACOS, ASIN, ATAN, ATAN2, LOG, EXP} |
+| `material.graph.nodes[n].mode` | prop | EnumProperty | Mode | enum {MIX, MULTIPLY, DIVIDE, ADD, SUBTRACT} |
+| `material.graph.nodes[n].outputs` | list |  |  |  |
+| `material.graph.nodes[n].unit` | prop | EnumProperty | Unit | enum {MILLIMETER, CENTIMETER, METER, INCH, FOOT} |
 | `material.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
 | `material.graph_id` | prop | IntProperty | Graph ID |  |
 | `material.has_shader` | prop | BoolProperty | Has Shader |  |
@@ -194,6 +219,31 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `object.material` | struct |  |  |  |
 | `object.material.graph` | struct |  |  |  |
 | `object.material.graph.nodes` | list |  |  |  |
+| `object.material.graph.nodes[n].category` | prop | EnumProperty | Category | enum {GENERIC, COLOR, UV} |
+| `object.material.graph.nodes[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
+| `object.material.graph.nodes[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `object.material.graph.nodes[n].imageUser` | struct |  |  |  |
+| `object.material.graph.nodes[n].imageUser.image` | struct |  |  |  |
+| `object.material.graph.nodes[n].imageUser.image.flag` | prop | FlagProperty | Flag | enum {1, 2, 4, SELECT, HIDE, UPDATE} |
+| `object.material.graph.nodes[n].imageUser.image.genColor` | prop | Vec4Property | Color | range 0..1 |
+| `object.material.graph.nodes[n].imageUser.image.genType` | prop | EnumProperty | Generator | enum {0, 1, COLOR, UVGRID} |
+| `object.material.graph.nodes[n].imageUser.image.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
+| `object.material.graph.nodes[n].imageUser.image.graph_id` | prop | IntProperty | Graph ID |  |
+| `object.material.graph.nodes[n].imageUser.image.height` | prop | IntProperty | Height | range 1..16384 |
+| `object.material.graph.nodes[n].imageUser.image.inputs` | list |  |  |  |
+| `object.material.graph.nodes[n].imageUser.image.lib_flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, SELECT, HIDE, FAKE_USER, NO_SAVE} |
+| `object.material.graph.nodes[n].imageUser.image.lib_id` | prop | IntProperty | Lib ID |  |
+| `object.material.graph.nodes[n].imageUser.image.name` | prop | StringProperty | name |  |
+| `object.material.graph.nodes[n].imageUser.image.outputs` | list |  |  |  |
+| `object.material.graph.nodes[n].imageUser.image.ready` | prop | BoolProperty | Ready |  |
+| `object.material.graph.nodes[n].imageUser.image.type` | prop | EnumProperty | Image Type | enum {0, 1, 2, 3, GENERATED, BYTE_BUFFER, FLOAT_BUFFER, URL} |
+| `object.material.graph.nodes[n].imageUser.image.url` | prop | StringProperty | URL |  |
+| `object.material.graph.nodes[n].imageUser.image.width` | prop | IntProperty | Width | range 1..16384 |
+| `object.material.graph.nodes[n].inputs` | list |  |  |  |
+| `object.material.graph.nodes[n].mathFunc` | prop | EnumProperty | Function | enum {ADD, SUB, MUL, DIV, POW, SQRT, FLOOR, CEIL, MIN, MAX, FRACT, TENT, COS, SIN, TAN, ACOS, ASIN, ATAN, ATAN2, LOG, EXP} |
+| `object.material.graph.nodes[n].mode` | prop | EnumProperty | Mode | enum {MIX, MULTIPLY, DIVIDE, ADD, SUBTRACT} |
+| `object.material.graph.nodes[n].outputs` | list |  |  |  |
+| `object.material.graph.nodes[n].unit` | prop | EnumProperty | Unit | enum {MILLIMETER, CENTIMETER, METER, INCH, FOOT} |
 | `object.material.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
 | `object.material.graph_id` | prop | IntProperty | Graph ID |  |
 | `object.material.has_shader` | prop | BoolProperty | Has Shader |  |
@@ -223,6 +273,31 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `objects[n].material` | struct |  |  |  |
 | `objects[n].material.graph` | struct |  |  |  |
 | `objects[n].material.graph.nodes` | list |  |  |  |
+| `objects[n].material.graph.nodes[n].category` | prop | EnumProperty | Category | enum {GENERIC, COLOR, UV} |
+| `objects[n].material.graph.nodes[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
+| `objects[n].material.graph.nodes[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `objects[n].material.graph.nodes[n].imageUser` | struct |  |  |  |
+| `objects[n].material.graph.nodes[n].imageUser.image` | struct |  |  |  |
+| `objects[n].material.graph.nodes[n].imageUser.image.flag` | prop | FlagProperty | Flag | enum {1, 2, 4, SELECT, HIDE, UPDATE} |
+| `objects[n].material.graph.nodes[n].imageUser.image.genColor` | prop | Vec4Property | Color | range 0..1 |
+| `objects[n].material.graph.nodes[n].imageUser.image.genType` | prop | EnumProperty | Generator | enum {0, 1, COLOR, UVGRID} |
+| `objects[n].material.graph.nodes[n].imageUser.image.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
+| `objects[n].material.graph.nodes[n].imageUser.image.graph_id` | prop | IntProperty | Graph ID |  |
+| `objects[n].material.graph.nodes[n].imageUser.image.height` | prop | IntProperty | Height | range 1..16384 |
+| `objects[n].material.graph.nodes[n].imageUser.image.inputs` | list |  |  |  |
+| `objects[n].material.graph.nodes[n].imageUser.image.lib_flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, SELECT, HIDE, FAKE_USER, NO_SAVE} |
+| `objects[n].material.graph.nodes[n].imageUser.image.lib_id` | prop | IntProperty | Lib ID |  |
+| `objects[n].material.graph.nodes[n].imageUser.image.name` | prop | StringProperty | name |  |
+| `objects[n].material.graph.nodes[n].imageUser.image.outputs` | list |  |  |  |
+| `objects[n].material.graph.nodes[n].imageUser.image.ready` | prop | BoolProperty | Ready |  |
+| `objects[n].material.graph.nodes[n].imageUser.image.type` | prop | EnumProperty | Image Type | enum {0, 1, 2, 3, GENERATED, BYTE_BUFFER, FLOAT_BUFFER, URL} |
+| `objects[n].material.graph.nodes[n].imageUser.image.url` | prop | StringProperty | URL |  |
+| `objects[n].material.graph.nodes[n].imageUser.image.width` | prop | IntProperty | Width | range 1..16384 |
+| `objects[n].material.graph.nodes[n].inputs` | list |  |  |  |
+| `objects[n].material.graph.nodes[n].mathFunc` | prop | EnumProperty | Function | enum {ADD, SUB, MUL, DIV, POW, SQRT, FLOOR, CEIL, MIN, MAX, FRACT, TENT, COS, SIN, TAN, ACOS, ASIN, ATAN, ATAN2, LOG, EXP} |
+| `objects[n].material.graph.nodes[n].mode` | prop | EnumProperty | Mode | enum {MIX, MULTIPLY, DIVIDE, ADD, SUBTRACT} |
+| `objects[n].material.graph.nodes[n].outputs` | list |  |  |  |
+| `objects[n].material.graph.nodes[n].unit` | prop | EnumProperty | Unit | enum {MILLIMETER, CENTIMETER, METER, INCH, FOOT} |
 | `objects[n].material.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
 | `objects[n].material.graph_id` | prop | IntProperty | Graph ID |  |
 | `objects[n].material.has_shader` | prop | BoolProperty | Has Shader |  |
@@ -351,6 +426,31 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `shadernetwork` | struct |  |  |  |
 | `shadernetwork.graph` | struct |  |  |  |
 | `shadernetwork.graph.nodes` | list |  |  |  |
+| `shadernetwork.graph.nodes[n].category` | prop | EnumProperty | Category | enum {GENERIC, COLOR, UV} |
+| `shadernetwork.graph.nodes[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
+| `shadernetwork.graph.nodes[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `shadernetwork.graph.nodes[n].imageUser` | struct |  |  |  |
+| `shadernetwork.graph.nodes[n].imageUser.image` | struct |  |  |  |
+| `shadernetwork.graph.nodes[n].imageUser.image.flag` | prop | FlagProperty | Flag | enum {1, 2, 4, SELECT, HIDE, UPDATE} |
+| `shadernetwork.graph.nodes[n].imageUser.image.genColor` | prop | Vec4Property | Color | range 0..1 |
+| `shadernetwork.graph.nodes[n].imageUser.image.genType` | prop | EnumProperty | Generator | enum {0, 1, COLOR, UVGRID} |
+| `shadernetwork.graph.nodes[n].imageUser.image.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
+| `shadernetwork.graph.nodes[n].imageUser.image.graph_id` | prop | IntProperty | Graph ID |  |
+| `shadernetwork.graph.nodes[n].imageUser.image.height` | prop | IntProperty | Height | range 1..16384 |
+| `shadernetwork.graph.nodes[n].imageUser.image.inputs` | list |  |  |  |
+| `shadernetwork.graph.nodes[n].imageUser.image.lib_flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, SELECT, HIDE, FAKE_USER, NO_SAVE} |
+| `shadernetwork.graph.nodes[n].imageUser.image.lib_id` | prop | IntProperty | Lib ID |  |
+| `shadernetwork.graph.nodes[n].imageUser.image.name` | prop | StringProperty | name |  |
+| `shadernetwork.graph.nodes[n].imageUser.image.outputs` | list |  |  |  |
+| `shadernetwork.graph.nodes[n].imageUser.image.ready` | prop | BoolProperty | Ready |  |
+| `shadernetwork.graph.nodes[n].imageUser.image.type` | prop | EnumProperty | Image Type | enum {0, 1, 2, 3, GENERATED, BYTE_BUFFER, FLOAT_BUFFER, URL} |
+| `shadernetwork.graph.nodes[n].imageUser.image.url` | prop | StringProperty | URL |  |
+| `shadernetwork.graph.nodes[n].imageUser.image.width` | prop | IntProperty | Width | range 1..16384 |
+| `shadernetwork.graph.nodes[n].inputs` | list |  |  |  |
+| `shadernetwork.graph.nodes[n].mathFunc` | prop | EnumProperty | Function | enum {ADD, SUB, MUL, DIV, POW, SQRT, FLOOR, CEIL, MIN, MAX, FRACT, TENT, COS, SIN, TAN, ACOS, ASIN, ATAN, ATAN2, LOG, EXP} |
+| `shadernetwork.graph.nodes[n].mode` | prop | EnumProperty | Mode | enum {MIX, MULTIPLY, DIVIDE, ADD, SUBTRACT} |
+| `shadernetwork.graph.nodes[n].outputs` | list |  |  |  |
+| `shadernetwork.graph.nodes[n].unit` | prop | EnumProperty | Unit | enum {MILLIMETER, CENTIMETER, METER, INCH, FOOT} |
 | `shadernetwork.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
 | `shadernetwork.graph_id` | prop | IntProperty | Graph ID |  |
 | `shadernetwork.inputs` | list |  |  |  |
@@ -409,6 +509,57 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.datalib.default_unlink` | struct |  |  |  |
 | `toolDefaults.datalib.default_unlink.block` | prop | DataRefProperty | Block |  |
 | `toolDefaults.datalib.default_unlink.dataPathToUnset` | prop | StringProperty | Data Path To Unset |  |
+| `toolDefaults.graph` | struct |  |  |  |
+| `toolDefaults.graph.add_node` | struct |  |  |  |
+| `toolDefaults.graph.add_node.graphClass` | prop | StringProperty | Graph Class |  |
+| `toolDefaults.graph.add_node.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.add_node.nodeClass` | prop | StringProperty | Node Class |  |
+| `toolDefaults.graph.add_node.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
+| `toolDefaults.graph.add_node.nodeType` | prop | StringProperty | Node Type |  |
+| `toolDefaults.graph.add_node.pos` | prop | Vec2Property | Pos |  |
+| `toolDefaults.graph.add_node.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
+| `toolDefaults.graph.add_node.x` | prop | FloatProperty | X |  |
+| `toolDefaults.graph.add_node.y` | prop | FloatProperty | Y |  |
+| `toolDefaults.graph.connect` | struct |  |  |  |
+| `toolDefaults.graph.connect.disconnectSockID` | prop | IntProperty | Disconnect Sock Id |  |
+| `toolDefaults.graph.connect.dstNode` | prop | StringProperty | Dst Node |  |
+| `toolDefaults.graph.connect.dstSocket` | prop | StringProperty | Dst Socket |  |
+| `toolDefaults.graph.connect.graphClass` | prop | StringProperty | Graph Class |  |
+| `toolDefaults.graph.connect.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.connect.node1_id` | prop | IntProperty | Node1 Id |  |
+| `toolDefaults.graph.connect.node2_id` | prop | IntProperty | Node2 Id |  |
+| `toolDefaults.graph.connect.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
+| `toolDefaults.graph.connect.sock1_id` | prop | IntProperty | Sock1 Id |  |
+| `toolDefaults.graph.connect.sock2_id` | prop | IntProperty | Sock2 Id |  |
+| `toolDefaults.graph.connect.srcNode` | prop | StringProperty | Src Node |  |
+| `toolDefaults.graph.connect.srcSocket` | prop | StringProperty | Src Socket |  |
+| `toolDefaults.graph.connect.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
+| `toolDefaults.graph.delete_node` | struct |  |  |  |
+| `toolDefaults.graph.delete_node.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.delete_node.nodeId` | prop | StringProperty | Node Id |  |
+| `toolDefaults.graph.disconnect` | struct |  |  |  |
+| `toolDefaults.graph.disconnect.dstNode` | prop | StringProperty | Dst Node |  |
+| `toolDefaults.graph.disconnect.dstSocket` | prop | StringProperty | Dst Socket |  |
+| `toolDefaults.graph.disconnect.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.disconnect.srcNode` | prop | StringProperty | Src Node |  |
+| `toolDefaults.graph.disconnect.srcSocket` | prop | StringProperty | Src Socket |  |
+| `toolDefaults.graph.move_node` | struct |  |  |  |
+| `toolDefaults.graph.move_node.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.move_node.nodeId` | prop | StringProperty | Node Id |  |
+| `toolDefaults.graph.move_node.x` | prop | FloatProperty | X |  |
+| `toolDefaults.graph.move_node.y` | prop | FloatProperty | Y |  |
+| `toolDefaults.graph.rename_node` | struct |  |  |  |
+| `toolDefaults.graph.rename_node.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.rename_node.label` | prop | StringProperty | Label |  |
+| `toolDefaults.graph.rename_node.nodeId` | prop | StringProperty | Node Id |  |
+| `toolDefaults.graph.replace_node` | struct |  |  |  |
+| `toolDefaults.graph.replace_node.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.replace_node.newType` | prop | StringProperty | New Type |  |
+| `toolDefaults.graph.replace_node.nodeId` | prop | StringProperty | Node Id |  |
+| `toolDefaults.graph.set_node_prop` | struct |  |  |  |
+| `toolDefaults.graph.set_node_prop.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.set_node_prop.nodeId` | prop | StringProperty | Node Id |  |
+| `toolDefaults.graph.set_node_prop.propKey` | prop | StringProperty | Prop Key |  |
 | `toolDefaults.image` | struct |  |  |  |
 | `toolDefaults.image.open` | struct |  |  |  |
 | `toolDefaults.image.open.dataPath` | prop | StringProperty | Data Path |  |
@@ -440,12 +591,15 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.node.add_node.graphPath` | prop | StringProperty | Graph Path |  |
 | `toolDefaults.node.add_node.nodeClass` | prop | StringProperty | Node Class |  |
 | `toolDefaults.node.add_node.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
+| `toolDefaults.node.add_node.nodeType` | prop | StringProperty | Node Type |  |
 | `toolDefaults.node.add_node.pos` | prop | Vec2Property | Pos |  |
 | `toolDefaults.node.add_node.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
 | `toolDefaults.node.add_node.x` | prop | FloatProperty | X |  |
 | `toolDefaults.node.add_node.y` | prop | FloatProperty | Y |  |
 | `toolDefaults.node.connect` | struct |  |  |  |
 | `toolDefaults.node.connect.disconnectSockID` | prop | IntProperty | Disconnect Sock Id |  |
+| `toolDefaults.node.connect.dstNode` | prop | StringProperty | Dst Node |  |
+| `toolDefaults.node.connect.dstSocket` | prop | StringProperty | Dst Socket |  |
 | `toolDefaults.node.connect.graphClass` | prop | StringProperty | Graph Class |  |
 | `toolDefaults.node.connect.graphPath` | prop | StringProperty | Graph Path |  |
 | `toolDefaults.node.connect.node1_id` | prop | IntProperty | Node1 Id |  |
@@ -453,6 +607,8 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.node.connect.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
 | `toolDefaults.node.connect.sock1_id` | prop | IntProperty | Sock1 Id |  |
 | `toolDefaults.node.connect.sock2_id` | prop | IntProperty | Sock2 Id |  |
+| `toolDefaults.node.connect.srcNode` | prop | StringProperty | Src Node |  |
+| `toolDefaults.node.connect.srcSocket` | prop | StringProperty | Src Socket |  |
 | `toolDefaults.node.connect.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
 | `toolDefaults.node.delete_selected` | struct |  |  |  |
 | `toolDefaults.node.delete_selected.graphClass` | prop | StringProperty | Graph Class |  |

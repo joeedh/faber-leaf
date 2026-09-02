@@ -1,4 +1,4 @@
-import {BoolProperty, FloatProperty, nstructjs, PropFlags} from '../../path.ux/scripts/pathux.js'
+import {BoolProperty, FloatProperty, nstructjs} from '../../path.ux/scripts/pathux.js'
 import {Vector2, Vector3} from '../../util/vectormath.js'
 import {AbstractGraphClass} from '../../core/graph_class.js'
 import {Graph, SocketFlags, type Node} from '../../core/graph.js'
@@ -339,11 +339,11 @@ export class AddNodeOp extends NodeGraphOp<
   static invoke(ctx: ViewContext, args: Record<string, unknown>): AddNodeOp {
     const tool = super.invoke(ctx, args) as AddNodeOp
 
-    if ('x' in args || tool.inputs.x.flag & PropFlags.USER_SET) {
+    if ('x' in args || tool.inputs.x.wasSet) {
       tool.inputs.pos.getValue()[0] = tool.inputs.x.getValue()
     }
 
-    if ('y' in args || tool.inputs.y.flag & PropFlags.USER_SET) {
+    if ('y' in args || tool.inputs.y.wasSet) {
       tool.inputs.pos.getValue()[1] = tool.inputs.y.getValue()
     }
 

@@ -753,14 +753,359 @@
     "material.graph": {
       "kind": "struct",
       "ownerStruct": "Material",
-      "structName": "graph.Graph",
       "indexed": false,
       "dynamic": false
     },
     "material.graph.nodes": {
       "kind": "list",
-      "ownerStruct": "graph.Graph",
+      "structName": "shader.OutputNode",
       "indexed": false
+    },
+    "material.graph.nodes[n].category": {
+      "kind": "prop",
+      "ownerStruct": "shader.AttributeNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Category",
+      "description": "Attribute category to list",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "GENERIC",
+        "COLOR",
+        "UV"
+      ]
+    },
+    "material.graph.nodes[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "32",
+        "64",
+        "128",
+        "256",
+        "384",
+        "SELECT",
+        "UPDATE",
+        "SORT_TAG",
+        "CYCLE_TAG",
+        "DISABLED",
+        "ZOMBIE",
+        "SAVE_PROXY",
+        "FORCE_SOCKET_INHERIT",
+        "FORCE_FLAG_INHERIT",
+        "FORCE_INHERIT"
+      ]
+    },
+    "material.graph.nodes[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "material.graph.nodes[n].imageUser": {
+      "kind": "struct",
+      "ownerStruct": "shader.ImageNode",
+      "structName": "ImageUser",
+      "indexed": true,
+      "dynamic": false
+    },
+    "material.graph.nodes[n].imageUser.image": {
+      "kind": "struct",
+      "ownerStruct": "ImageUser",
+      "structName": "ImageBlock",
+      "indexed": true,
+      "dynamic": false
+    },
+    "material.graph.nodes[n].imageUser.image.flag": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Flag",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "SELECT",
+        "HIDE",
+        "UPDATE"
+      ]
+    },
+    "material.graph.nodes[n].imageUser.image.genColor": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "Vec4Property",
+      "uiname": "Color",
+      "description": "Color",
+      "range": [
+        0,
+        1
+      ],
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "material.graph.nodes[n].imageUser.image.genType": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Generator",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "0",
+        "1",
+        "COLOR",
+        "UVGRID"
+      ]
+    },
+    "material.graph.nodes[n].imageUser.image.graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "32",
+        "64",
+        "128",
+        "256",
+        "384",
+        "SELECT",
+        "UPDATE",
+        "SORT_TAG",
+        "CYCLE_TAG",
+        "DISABLED",
+        "ZOMBIE",
+        "SAVE_PROXY",
+        "FORCE_SOCKET_INHERIT",
+        "FORCE_FLAG_INHERIT",
+        "FORCE_INHERIT"
+      ]
+    },
+    "material.graph.nodes[n].imageUser.image.graph_id": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "material.graph.nodes[n].imageUser.image.height": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Height",
+      "range": [
+        1,
+        16384
+      ],
+      "decimalPlaces": 4,
+      "step": 5
+    },
+    "material.graph.nodes[n].imageUser.image.inputs": {
+      "kind": "list",
+      "ownerStruct": "ImageBlock",
+      "indexed": true
+    },
+    "material.graph.nodes[n].imageUser.image.lib_flag": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Flag",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "SELECT",
+        "HIDE",
+        "FAKE_USER",
+        "NO_SAVE"
+      ]
+    },
+    "material.graph.nodes[n].imageUser.image.lib_id": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Lib ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "material.graph.nodes[n].imageUser.image.name": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "name",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "material.graph.nodes[n].imageUser.image.outputs": {
+      "kind": "list",
+      "ownerStruct": "ImageBlock",
+      "indexed": true
+    },
+    "material.graph.nodes[n].imageUser.image.ready": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "BoolProperty",
+      "uiname": "Ready",
+      "description": "Is the image ready for use",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "material.graph.nodes[n].imageUser.image.type": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Image Type",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "GENERATED",
+        "BYTE_BUFFER",
+        "FLOAT_BUFFER",
+        "URL"
+      ]
+    },
+    "material.graph.nodes[n].imageUser.image.url": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "URL",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "material.graph.nodes[n].imageUser.image.width": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Width",
+      "range": [
+        1,
+        16384
+      ],
+      "decimalPlaces": 4,
+      "step": 5
+    },
+    "material.graph.nodes[n].inputs": {
+      "kind": "list",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true
+    },
+    "material.graph.nodes[n].mathFunc": {
+      "kind": "prop",
+      "ownerStruct": "shader.MathNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Function",
+      "description": "Math function to use",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "ADD",
+        "SUB",
+        "MUL",
+        "DIV",
+        "POW",
+        "SQRT",
+        "FLOOR",
+        "CEIL",
+        "MIN",
+        "MAX",
+        "FRACT",
+        "TENT",
+        "COS",
+        "SIN",
+        "TAN",
+        "ACOS",
+        "ASIN",
+        "ATAN",
+        "ATAN2",
+        "LOG",
+        "EXP"
+      ]
+    },
+    "material.graph.nodes[n].mode": {
+      "kind": "prop",
+      "ownerStruct": "shader.MixNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Mode",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "MIX",
+        "MULTIPLY",
+        "DIVIDE",
+        "ADD",
+        "SUBTRACT"
+      ]
+    },
+    "material.graph.nodes[n].outputs": {
+      "kind": "list",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true
+    },
+    "material.graph.nodes[n].unit": {
+      "kind": "prop",
+      "ownerStruct": "shader.SubsurfaceScatteringNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Unit",
+      "description": "Unit the scatter radius is authored in",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "MILLIMETER",
+        "CENTIMETER",
+        "METER",
+        "INCH",
+        "FOOT"
+      ]
     },
     "material.graph_flag": {
       "kind": "prop",
@@ -1111,14 +1456,359 @@
     "object.material.graph": {
       "kind": "struct",
       "ownerStruct": "Material",
-      "structName": "graph.Graph",
       "indexed": false,
       "dynamic": false
     },
     "object.material.graph.nodes": {
       "kind": "list",
-      "ownerStruct": "graph.Graph",
+      "structName": "shader.OutputNode",
       "indexed": false
+    },
+    "object.material.graph.nodes[n].category": {
+      "kind": "prop",
+      "ownerStruct": "shader.AttributeNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Category",
+      "description": "Attribute category to list",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "GENERIC",
+        "COLOR",
+        "UV"
+      ]
+    },
+    "object.material.graph.nodes[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "32",
+        "64",
+        "128",
+        "256",
+        "384",
+        "SELECT",
+        "UPDATE",
+        "SORT_TAG",
+        "CYCLE_TAG",
+        "DISABLED",
+        "ZOMBIE",
+        "SAVE_PROXY",
+        "FORCE_SOCKET_INHERIT",
+        "FORCE_FLAG_INHERIT",
+        "FORCE_INHERIT"
+      ]
+    },
+    "object.material.graph.nodes[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "object.material.graph.nodes[n].imageUser": {
+      "kind": "struct",
+      "ownerStruct": "shader.ImageNode",
+      "structName": "ImageUser",
+      "indexed": true,
+      "dynamic": false
+    },
+    "object.material.graph.nodes[n].imageUser.image": {
+      "kind": "struct",
+      "ownerStruct": "ImageUser",
+      "structName": "ImageBlock",
+      "indexed": true,
+      "dynamic": false
+    },
+    "object.material.graph.nodes[n].imageUser.image.flag": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Flag",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "SELECT",
+        "HIDE",
+        "UPDATE"
+      ]
+    },
+    "object.material.graph.nodes[n].imageUser.image.genColor": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "Vec4Property",
+      "uiname": "Color",
+      "description": "Color",
+      "range": [
+        0,
+        1
+      ],
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "object.material.graph.nodes[n].imageUser.image.genType": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Generator",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "0",
+        "1",
+        "COLOR",
+        "UVGRID"
+      ]
+    },
+    "object.material.graph.nodes[n].imageUser.image.graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "32",
+        "64",
+        "128",
+        "256",
+        "384",
+        "SELECT",
+        "UPDATE",
+        "SORT_TAG",
+        "CYCLE_TAG",
+        "DISABLED",
+        "ZOMBIE",
+        "SAVE_PROXY",
+        "FORCE_SOCKET_INHERIT",
+        "FORCE_FLAG_INHERIT",
+        "FORCE_INHERIT"
+      ]
+    },
+    "object.material.graph.nodes[n].imageUser.image.graph_id": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "object.material.graph.nodes[n].imageUser.image.height": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Height",
+      "range": [
+        1,
+        16384
+      ],
+      "decimalPlaces": 4,
+      "step": 5
+    },
+    "object.material.graph.nodes[n].imageUser.image.inputs": {
+      "kind": "list",
+      "ownerStruct": "ImageBlock",
+      "indexed": true
+    },
+    "object.material.graph.nodes[n].imageUser.image.lib_flag": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Flag",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "SELECT",
+        "HIDE",
+        "FAKE_USER",
+        "NO_SAVE"
+      ]
+    },
+    "object.material.graph.nodes[n].imageUser.image.lib_id": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Lib ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "object.material.graph.nodes[n].imageUser.image.name": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "name",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "object.material.graph.nodes[n].imageUser.image.outputs": {
+      "kind": "list",
+      "ownerStruct": "ImageBlock",
+      "indexed": true
+    },
+    "object.material.graph.nodes[n].imageUser.image.ready": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "BoolProperty",
+      "uiname": "Ready",
+      "description": "Is the image ready for use",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "object.material.graph.nodes[n].imageUser.image.type": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Image Type",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "GENERATED",
+        "BYTE_BUFFER",
+        "FLOAT_BUFFER",
+        "URL"
+      ]
+    },
+    "object.material.graph.nodes[n].imageUser.image.url": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "URL",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "object.material.graph.nodes[n].imageUser.image.width": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Width",
+      "range": [
+        1,
+        16384
+      ],
+      "decimalPlaces": 4,
+      "step": 5
+    },
+    "object.material.graph.nodes[n].inputs": {
+      "kind": "list",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true
+    },
+    "object.material.graph.nodes[n].mathFunc": {
+      "kind": "prop",
+      "ownerStruct": "shader.MathNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Function",
+      "description": "Math function to use",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "ADD",
+        "SUB",
+        "MUL",
+        "DIV",
+        "POW",
+        "SQRT",
+        "FLOOR",
+        "CEIL",
+        "MIN",
+        "MAX",
+        "FRACT",
+        "TENT",
+        "COS",
+        "SIN",
+        "TAN",
+        "ACOS",
+        "ASIN",
+        "ATAN",
+        "ATAN2",
+        "LOG",
+        "EXP"
+      ]
+    },
+    "object.material.graph.nodes[n].mode": {
+      "kind": "prop",
+      "ownerStruct": "shader.MixNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Mode",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "MIX",
+        "MULTIPLY",
+        "DIVIDE",
+        "ADD",
+        "SUBTRACT"
+      ]
+    },
+    "object.material.graph.nodes[n].outputs": {
+      "kind": "list",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true
+    },
+    "object.material.graph.nodes[n].unit": {
+      "kind": "prop",
+      "ownerStruct": "shader.SubsurfaceScatteringNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Unit",
+      "description": "Unit the scatter radius is authored in",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "MILLIMETER",
+        "CENTIMETER",
+        "METER",
+        "INCH",
+        "FOOT"
+      ]
     },
     "object.material.graph_flag": {
       "kind": "prop",
@@ -1393,14 +2083,359 @@
     "objects[n].material.graph": {
       "kind": "struct",
       "ownerStruct": "Material",
-      "structName": "graph.Graph",
       "indexed": true,
       "dynamic": false
     },
     "objects[n].material.graph.nodes": {
       "kind": "list",
-      "ownerStruct": "graph.Graph",
+      "structName": "shader.OutputNode",
       "indexed": true
+    },
+    "objects[n].material.graph.nodes[n].category": {
+      "kind": "prop",
+      "ownerStruct": "shader.AttributeNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Category",
+      "description": "Attribute category to list",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "GENERIC",
+        "COLOR",
+        "UV"
+      ]
+    },
+    "objects[n].material.graph.nodes[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "32",
+        "64",
+        "128",
+        "256",
+        "384",
+        "SELECT",
+        "UPDATE",
+        "SORT_TAG",
+        "CYCLE_TAG",
+        "DISABLED",
+        "ZOMBIE",
+        "SAVE_PROXY",
+        "FORCE_SOCKET_INHERIT",
+        "FORCE_FLAG_INHERIT",
+        "FORCE_INHERIT"
+      ]
+    },
+    "objects[n].material.graph.nodes[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "objects[n].material.graph.nodes[n].imageUser": {
+      "kind": "struct",
+      "ownerStruct": "shader.ImageNode",
+      "structName": "ImageUser",
+      "indexed": true,
+      "dynamic": false
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image": {
+      "kind": "struct",
+      "ownerStruct": "ImageUser",
+      "structName": "ImageBlock",
+      "indexed": true,
+      "dynamic": false
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.flag": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Flag",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "SELECT",
+        "HIDE",
+        "UPDATE"
+      ]
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.genColor": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "Vec4Property",
+      "uiname": "Color",
+      "description": "Color",
+      "range": [
+        0,
+        1
+      ],
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.genType": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Generator",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "0",
+        "1",
+        "COLOR",
+        "UVGRID"
+      ]
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "32",
+        "64",
+        "128",
+        "256",
+        "384",
+        "SELECT",
+        "UPDATE",
+        "SORT_TAG",
+        "CYCLE_TAG",
+        "DISABLED",
+        "ZOMBIE",
+        "SAVE_PROXY",
+        "FORCE_SOCKET_INHERIT",
+        "FORCE_FLAG_INHERIT",
+        "FORCE_INHERIT"
+      ]
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.graph_id": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.height": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Height",
+      "range": [
+        1,
+        16384
+      ],
+      "decimalPlaces": 4,
+      "step": 5
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.inputs": {
+      "kind": "list",
+      "ownerStruct": "ImageBlock",
+      "indexed": true
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.lib_flag": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Flag",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "SELECT",
+        "HIDE",
+        "FAKE_USER",
+        "NO_SAVE"
+      ]
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.lib_id": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Lib ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.name": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "name",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.outputs": {
+      "kind": "list",
+      "ownerStruct": "ImageBlock",
+      "indexed": true
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.ready": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "BoolProperty",
+      "uiname": "Ready",
+      "description": "Is the image ready for use",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.type": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Image Type",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "GENERATED",
+        "BYTE_BUFFER",
+        "FLOAT_BUFFER",
+        "URL"
+      ]
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.url": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "URL",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.width": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Width",
+      "range": [
+        1,
+        16384
+      ],
+      "decimalPlaces": 4,
+      "step": 5
+    },
+    "objects[n].material.graph.nodes[n].inputs": {
+      "kind": "list",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true
+    },
+    "objects[n].material.graph.nodes[n].mathFunc": {
+      "kind": "prop",
+      "ownerStruct": "shader.MathNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Function",
+      "description": "Math function to use",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "ADD",
+        "SUB",
+        "MUL",
+        "DIV",
+        "POW",
+        "SQRT",
+        "FLOOR",
+        "CEIL",
+        "MIN",
+        "MAX",
+        "FRACT",
+        "TENT",
+        "COS",
+        "SIN",
+        "TAN",
+        "ACOS",
+        "ASIN",
+        "ATAN",
+        "ATAN2",
+        "LOG",
+        "EXP"
+      ]
+    },
+    "objects[n].material.graph.nodes[n].mode": {
+      "kind": "prop",
+      "ownerStruct": "shader.MixNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Mode",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "MIX",
+        "MULTIPLY",
+        "DIVIDE",
+        "ADD",
+        "SUBTRACT"
+      ]
+    },
+    "objects[n].material.graph.nodes[n].outputs": {
+      "kind": "list",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true
+    },
+    "objects[n].material.graph.nodes[n].unit": {
+      "kind": "prop",
+      "ownerStruct": "shader.SubsurfaceScatteringNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Unit",
+      "description": "Unit the scatter radius is authored in",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "MILLIMETER",
+        "CENTIMETER",
+        "METER",
+        "INCH",
+        "FOOT"
+      ]
     },
     "objects[n].material.graph_flag": {
       "kind": "prop",
@@ -2348,14 +3383,359 @@
     "shadernetwork.graph": {
       "kind": "struct",
       "ownerStruct": "ShaderNetwork",
-      "structName": "graph.Graph",
       "indexed": false,
       "dynamic": false
     },
     "shadernetwork.graph.nodes": {
       "kind": "list",
-      "ownerStruct": "graph.Graph",
+      "structName": "shader.OutputNode",
       "indexed": false
+    },
+    "shadernetwork.graph.nodes[n].category": {
+      "kind": "prop",
+      "ownerStruct": "shader.AttributeNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Category",
+      "description": "Attribute category to list",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "GENERIC",
+        "COLOR",
+        "UV"
+      ]
+    },
+    "shadernetwork.graph.nodes[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "32",
+        "64",
+        "128",
+        "256",
+        "384",
+        "SELECT",
+        "UPDATE",
+        "SORT_TAG",
+        "CYCLE_TAG",
+        "DISABLED",
+        "ZOMBIE",
+        "SAVE_PROXY",
+        "FORCE_SOCKET_INHERIT",
+        "FORCE_FLAG_INHERIT",
+        "FORCE_INHERIT"
+      ]
+    },
+    "shadernetwork.graph.nodes[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "shadernetwork.graph.nodes[n].imageUser": {
+      "kind": "struct",
+      "ownerStruct": "shader.ImageNode",
+      "structName": "ImageUser",
+      "indexed": true,
+      "dynamic": false
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image": {
+      "kind": "struct",
+      "ownerStruct": "ImageUser",
+      "structName": "ImageBlock",
+      "indexed": true,
+      "dynamic": false
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.flag": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Flag",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "SELECT",
+        "HIDE",
+        "UPDATE"
+      ]
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.genColor": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "Vec4Property",
+      "uiname": "Color",
+      "description": "Color",
+      "range": [
+        0,
+        1
+      ],
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.genType": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Generator",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "0",
+        "1",
+        "COLOR",
+        "UVGRID"
+      ]
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "32",
+        "64",
+        "128",
+        "256",
+        "384",
+        "SELECT",
+        "UPDATE",
+        "SORT_TAG",
+        "CYCLE_TAG",
+        "DISABLED",
+        "ZOMBIE",
+        "SAVE_PROXY",
+        "FORCE_SOCKET_INHERIT",
+        "FORCE_FLAG_INHERIT",
+        "FORCE_INHERIT"
+      ]
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.graph_id": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.height": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Height",
+      "range": [
+        1,
+        16384
+      ],
+      "decimalPlaces": 4,
+      "step": 5
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.inputs": {
+      "kind": "list",
+      "ownerStruct": "ImageBlock",
+      "indexed": true
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.lib_flag": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Flag",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "SELECT",
+        "HIDE",
+        "FAKE_USER",
+        "NO_SAVE"
+      ]
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.lib_id": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Lib ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.name": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "name",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.outputs": {
+      "kind": "list",
+      "ownerStruct": "ImageBlock",
+      "indexed": true
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.ready": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "BoolProperty",
+      "uiname": "Ready",
+      "description": "Is the image ready for use",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.type": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Image Type",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "GENERATED",
+        "BYTE_BUFFER",
+        "FLOAT_BUFFER",
+        "URL"
+      ]
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.url": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "URL",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.width": {
+      "kind": "prop",
+      "ownerStruct": "ImageBlock",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Width",
+      "range": [
+        1,
+        16384
+      ],
+      "decimalPlaces": 4,
+      "step": 5
+    },
+    "shadernetwork.graph.nodes[n].inputs": {
+      "kind": "list",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true
+    },
+    "shadernetwork.graph.nodes[n].mathFunc": {
+      "kind": "prop",
+      "ownerStruct": "shader.MathNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Function",
+      "description": "Math function to use",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "ADD",
+        "SUB",
+        "MUL",
+        "DIV",
+        "POW",
+        "SQRT",
+        "FLOOR",
+        "CEIL",
+        "MIN",
+        "MAX",
+        "FRACT",
+        "TENT",
+        "COS",
+        "SIN",
+        "TAN",
+        "ACOS",
+        "ASIN",
+        "ATAN",
+        "ATAN2",
+        "LOG",
+        "EXP"
+      ]
+    },
+    "shadernetwork.graph.nodes[n].mode": {
+      "kind": "prop",
+      "ownerStruct": "shader.MixNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Mode",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "MIX",
+        "MULTIPLY",
+        "DIVIDE",
+        "ADD",
+        "SUBTRACT"
+      ]
+    },
+    "shadernetwork.graph.nodes[n].outputs": {
+      "kind": "list",
+      "ownerStruct": "shader.OutputNode",
+      "indexed": true
+    },
+    "shadernetwork.graph.nodes[n].unit": {
+      "kind": "prop",
+      "ownerStruct": "shader.SubsurfaceScatteringNode",
+      "indexed": true,
+      "propType": "EnumProperty",
+      "uiname": "Unit",
+      "description": "Unit the scatter radius is authored in",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "MILLIMETER",
+        "CENTIMETER",
+        "METER",
+        "INCH",
+        "FOOT"
+      ]
     },
     "shadernetwork.graph_flag": {
       "kind": "prop",
@@ -2891,6 +4271,489 @@
       "decimalPlaces": 4,
       "step": 0.05
     },
+    "toolDefaults.graph": {
+      "kind": "struct",
+      "ownerStruct": "ToolPropertyCache",
+      "structName": "graph",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.add_node": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "add_node",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.add_node.graphClass": {
+      "kind": "prop",
+      "ownerStruct": "add_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Class",
+      "description": "Graph Class",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.add_node.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "add_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.add_node.nodeClass": {
+      "kind": "prop",
+      "ownerStruct": "add_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Class",
+      "description": "Node Class",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.add_node.nodeEditorPath": {
+      "kind": "prop",
+      "ownerStruct": "add_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Editor Path",
+      "description": "Node Editor Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.add_node.nodeType": {
+      "kind": "prop",
+      "ownerStruct": "add_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Type",
+      "description": "Node Type",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.add_node.pos": {
+      "kind": "prop",
+      "ownerStruct": "add_node",
+      "indexed": false,
+      "propType": "Vec2Property",
+      "uiname": "Pos",
+      "description": "Pos",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.add_node.useNodeEditorGraph": {
+      "kind": "prop",
+      "ownerStruct": "add_node",
+      "indexed": false,
+      "propType": "BoolProperty",
+      "uiname": "Use Node Editor Graph",
+      "description": "Use Node Editor Graph",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.add_node.x": {
+      "kind": "prop",
+      "ownerStruct": "add_node",
+      "indexed": false,
+      "propType": "FloatProperty",
+      "uiname": "X",
+      "description": "X",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.add_node.y": {
+      "kind": "prop",
+      "ownerStruct": "add_node",
+      "indexed": false,
+      "propType": "FloatProperty",
+      "uiname": "Y",
+      "description": "Y",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.connect": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "connect",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.connect.disconnectSockID": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "IntProperty",
+      "uiname": "Disconnect Sock Id",
+      "description": "Disconnect Sock Id",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.connect.dstNode": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Dst Node",
+      "description": "Dst Node",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.connect.dstSocket": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Dst Socket",
+      "description": "Dst Socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.connect.graphClass": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Class",
+      "description": "Graph Class",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.connect.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.connect.node1_id": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "IntProperty",
+      "uiname": "Node1 Id",
+      "description": "Node1 Id",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.connect.node2_id": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "IntProperty",
+      "uiname": "Node2 Id",
+      "description": "Node2 Id",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.connect.nodeEditorPath": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Editor Path",
+      "description": "Node Editor Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.connect.sock1_id": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "IntProperty",
+      "uiname": "Sock1 Id",
+      "description": "Sock1 Id",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.connect.sock2_id": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "IntProperty",
+      "uiname": "Sock2 Id",
+      "description": "Sock2 Id",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.connect.srcNode": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Src Node",
+      "description": "Src Node",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.connect.srcSocket": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Src Socket",
+      "description": "Src Socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.connect.useNodeEditorGraph": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "BoolProperty",
+      "uiname": "Use Node Editor Graph",
+      "description": "Use Node Editor Graph",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.delete_node": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "delete_node",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.delete_node.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "delete_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.delete_node.nodeId": {
+      "kind": "prop",
+      "ownerStruct": "delete_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Id",
+      "description": "Node Id",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.disconnect": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "disconnect",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.disconnect.dstNode": {
+      "kind": "prop",
+      "ownerStruct": "disconnect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Dst Node",
+      "description": "Dst Node",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.disconnect.dstSocket": {
+      "kind": "prop",
+      "ownerStruct": "disconnect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Dst Socket",
+      "description": "Dst Socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.disconnect.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "disconnect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.disconnect.srcNode": {
+      "kind": "prop",
+      "ownerStruct": "disconnect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Src Node",
+      "description": "Src Node",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.disconnect.srcSocket": {
+      "kind": "prop",
+      "ownerStruct": "disconnect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Src Socket",
+      "description": "Src Socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.move_node": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "move_node",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.move_node.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "move_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.move_node.nodeId": {
+      "kind": "prop",
+      "ownerStruct": "move_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Id",
+      "description": "Node Id",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.move_node.x": {
+      "kind": "prop",
+      "ownerStruct": "move_node",
+      "indexed": false,
+      "propType": "FloatProperty",
+      "uiname": "X",
+      "description": "X",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.move_node.y": {
+      "kind": "prop",
+      "ownerStruct": "move_node",
+      "indexed": false,
+      "propType": "FloatProperty",
+      "uiname": "Y",
+      "description": "Y",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.rename_node": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "rename_node",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.rename_node.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "rename_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.rename_node.label": {
+      "kind": "prop",
+      "ownerStruct": "rename_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Label",
+      "description": "Label",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.rename_node.nodeId": {
+      "kind": "prop",
+      "ownerStruct": "rename_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Id",
+      "description": "Node Id",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.replace_node": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "replace_node",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.replace_node.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "replace_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.replace_node.newType": {
+      "kind": "prop",
+      "ownerStruct": "replace_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "New Type",
+      "description": "New Type",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.replace_node.nodeId": {
+      "kind": "prop",
+      "ownerStruct": "replace_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Id",
+      "description": "Node Id",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.set_node_prop": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "set_node_prop",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.set_node_prop.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "set_node_prop",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.set_node_prop.nodeId": {
+      "kind": "prop",
+      "ownerStruct": "set_node_prop",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Id",
+      "description": "Node Id",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.set_node_prop.propKey": {
+      "kind": "prop",
+      "ownerStruct": "set_node_prop",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Prop Key",
+      "description": "Prop Key",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
     "toolDefaults.image": {
       "kind": "struct",
       "ownerStruct": "ToolPropertyCache",
@@ -3180,6 +5043,16 @@
       "decimalPlaces": 4,
       "step": 0.05
     },
+    "toolDefaults.node.add_node.nodeType": {
+      "kind": "prop",
+      "ownerStruct": "add_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Type",
+      "description": "Node Type",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
     "toolDefaults.node.add_node.pos": {
       "kind": "prop",
       "ownerStruct": "add_node",
@@ -3236,6 +5109,26 @@
       "description": "Disconnect Sock Id",
       "decimalPlaces": 4,
       "step": 0.1
+    },
+    "toolDefaults.node.connect.dstNode": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Dst Node",
+      "description": "Dst Node",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.node.connect.dstSocket": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Dst Socket",
+      "description": "Dst Socket",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "toolDefaults.node.connect.graphClass": {
       "kind": "prop",
@@ -3306,6 +5199,26 @@
       "description": "Sock2 Id",
       "decimalPlaces": 4,
       "step": 0.1
+    },
+    "toolDefaults.node.connect.srcNode": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Src Node",
+      "description": "Src Node",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.node.connect.srcSocket": {
+      "kind": "prop",
+      "ownerStruct": "connect",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Src Socket",
+      "description": "Src Socket",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "toolDefaults.node.connect.useNodeEditorGraph": {
       "kind": "prop",

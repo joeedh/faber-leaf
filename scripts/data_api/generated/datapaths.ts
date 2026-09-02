@@ -260,6 +260,57 @@ export type GeneratedDataPath =
   | "toolDefaults.datalib.default_unlink"
   | "toolDefaults.datalib.default_unlink.block"
   | "toolDefaults.datalib.default_unlink.dataPathToUnset"
+  | "toolDefaults.graph"
+  | "toolDefaults.graph.add_node"
+  | "toolDefaults.graph.add_node.graphClass"
+  | "toolDefaults.graph.add_node.graphPath"
+  | "toolDefaults.graph.add_node.nodeClass"
+  | "toolDefaults.graph.add_node.nodeEditorPath"
+  | "toolDefaults.graph.add_node.nodeType"
+  | "toolDefaults.graph.add_node.pos"
+  | "toolDefaults.graph.add_node.useNodeEditorGraph"
+  | "toolDefaults.graph.add_node.x"
+  | "toolDefaults.graph.add_node.y"
+  | "toolDefaults.graph.connect"
+  | "toolDefaults.graph.connect.disconnectSockID"
+  | "toolDefaults.graph.connect.dstNode"
+  | "toolDefaults.graph.connect.dstSocket"
+  | "toolDefaults.graph.connect.graphClass"
+  | "toolDefaults.graph.connect.graphPath"
+  | "toolDefaults.graph.connect.node1_id"
+  | "toolDefaults.graph.connect.node2_id"
+  | "toolDefaults.graph.connect.nodeEditorPath"
+  | "toolDefaults.graph.connect.sock1_id"
+  | "toolDefaults.graph.connect.sock2_id"
+  | "toolDefaults.graph.connect.srcNode"
+  | "toolDefaults.graph.connect.srcSocket"
+  | "toolDefaults.graph.connect.useNodeEditorGraph"
+  | "toolDefaults.graph.delete_node"
+  | "toolDefaults.graph.delete_node.graphPath"
+  | "toolDefaults.graph.delete_node.nodeId"
+  | "toolDefaults.graph.disconnect"
+  | "toolDefaults.graph.disconnect.dstNode"
+  | "toolDefaults.graph.disconnect.dstSocket"
+  | "toolDefaults.graph.disconnect.graphPath"
+  | "toolDefaults.graph.disconnect.srcNode"
+  | "toolDefaults.graph.disconnect.srcSocket"
+  | "toolDefaults.graph.move_node"
+  | "toolDefaults.graph.move_node.graphPath"
+  | "toolDefaults.graph.move_node.nodeId"
+  | "toolDefaults.graph.move_node.x"
+  | "toolDefaults.graph.move_node.y"
+  | "toolDefaults.graph.rename_node"
+  | "toolDefaults.graph.rename_node.graphPath"
+  | "toolDefaults.graph.rename_node.label"
+  | "toolDefaults.graph.rename_node.nodeId"
+  | "toolDefaults.graph.replace_node"
+  | "toolDefaults.graph.replace_node.graphPath"
+  | "toolDefaults.graph.replace_node.newType"
+  | "toolDefaults.graph.replace_node.nodeId"
+  | "toolDefaults.graph.set_node_prop"
+  | "toolDefaults.graph.set_node_prop.graphPath"
+  | "toolDefaults.graph.set_node_prop.nodeId"
+  | "toolDefaults.graph.set_node_prop.propKey"
   | "toolDefaults.image"
   | "toolDefaults.image.open"
   | "toolDefaults.image.open.dataPath"
@@ -291,12 +342,15 @@ export type GeneratedDataPath =
   | "toolDefaults.node.add_node.graphPath"
   | "toolDefaults.node.add_node.nodeClass"
   | "toolDefaults.node.add_node.nodeEditorPath"
+  | "toolDefaults.node.add_node.nodeType"
   | "toolDefaults.node.add_node.pos"
   | "toolDefaults.node.add_node.useNodeEditorGraph"
   | "toolDefaults.node.add_node.x"
   | "toolDefaults.node.add_node.y"
   | "toolDefaults.node.connect"
   | "toolDefaults.node.connect.disconnectSockID"
+  | "toolDefaults.node.connect.dstNode"
+  | "toolDefaults.node.connect.dstSocket"
   | "toolDefaults.node.connect.graphClass"
   | "toolDefaults.node.connect.graphPath"
   | "toolDefaults.node.connect.node1_id"
@@ -304,6 +358,8 @@ export type GeneratedDataPath =
   | "toolDefaults.node.connect.nodeEditorPath"
   | "toolDefaults.node.connect.sock1_id"
   | "toolDefaults.node.connect.sock2_id"
+  | "toolDefaults.node.connect.srcNode"
+  | "toolDefaults.node.connect.srcSocket"
   | "toolDefaults.node.connect.useNodeEditorGraph"
   | "toolDefaults.node.delete_selected"
   | "toolDefaults.node.delete_selected.graphClass"
@@ -654,6 +710,57 @@ declare module "@framework/pathux" {
     "toolDefaults.datalib.default_unlink": true;
     "toolDefaults.datalib.default_unlink.block": true;
     "toolDefaults.datalib.default_unlink.dataPathToUnset": true;
+    "toolDefaults.graph": true;
+    "toolDefaults.graph.add_node": true;
+    "toolDefaults.graph.add_node.graphClass": true;
+    "toolDefaults.graph.add_node.graphPath": true;
+    "toolDefaults.graph.add_node.nodeClass": true;
+    "toolDefaults.graph.add_node.nodeEditorPath": true;
+    "toolDefaults.graph.add_node.nodeType": true;
+    "toolDefaults.graph.add_node.pos": true;
+    "toolDefaults.graph.add_node.useNodeEditorGraph": true;
+    "toolDefaults.graph.add_node.x": true;
+    "toolDefaults.graph.add_node.y": true;
+    "toolDefaults.graph.connect": true;
+    "toolDefaults.graph.connect.disconnectSockID": true;
+    "toolDefaults.graph.connect.dstNode": true;
+    "toolDefaults.graph.connect.dstSocket": true;
+    "toolDefaults.graph.connect.graphClass": true;
+    "toolDefaults.graph.connect.graphPath": true;
+    "toolDefaults.graph.connect.node1_id": true;
+    "toolDefaults.graph.connect.node2_id": true;
+    "toolDefaults.graph.connect.nodeEditorPath": true;
+    "toolDefaults.graph.connect.sock1_id": true;
+    "toolDefaults.graph.connect.sock2_id": true;
+    "toolDefaults.graph.connect.srcNode": true;
+    "toolDefaults.graph.connect.srcSocket": true;
+    "toolDefaults.graph.connect.useNodeEditorGraph": true;
+    "toolDefaults.graph.delete_node": true;
+    "toolDefaults.graph.delete_node.graphPath": true;
+    "toolDefaults.graph.delete_node.nodeId": true;
+    "toolDefaults.graph.disconnect": true;
+    "toolDefaults.graph.disconnect.dstNode": true;
+    "toolDefaults.graph.disconnect.dstSocket": true;
+    "toolDefaults.graph.disconnect.graphPath": true;
+    "toolDefaults.graph.disconnect.srcNode": true;
+    "toolDefaults.graph.disconnect.srcSocket": true;
+    "toolDefaults.graph.move_node": true;
+    "toolDefaults.graph.move_node.graphPath": true;
+    "toolDefaults.graph.move_node.nodeId": true;
+    "toolDefaults.graph.move_node.x": true;
+    "toolDefaults.graph.move_node.y": true;
+    "toolDefaults.graph.rename_node": true;
+    "toolDefaults.graph.rename_node.graphPath": true;
+    "toolDefaults.graph.rename_node.label": true;
+    "toolDefaults.graph.rename_node.nodeId": true;
+    "toolDefaults.graph.replace_node": true;
+    "toolDefaults.graph.replace_node.graphPath": true;
+    "toolDefaults.graph.replace_node.newType": true;
+    "toolDefaults.graph.replace_node.nodeId": true;
+    "toolDefaults.graph.set_node_prop": true;
+    "toolDefaults.graph.set_node_prop.graphPath": true;
+    "toolDefaults.graph.set_node_prop.nodeId": true;
+    "toolDefaults.graph.set_node_prop.propKey": true;
     "toolDefaults.image": true;
     "toolDefaults.image.open": true;
     "toolDefaults.image.open.dataPath": true;
@@ -685,12 +792,15 @@ declare module "@framework/pathux" {
     "toolDefaults.node.add_node.graphPath": true;
     "toolDefaults.node.add_node.nodeClass": true;
     "toolDefaults.node.add_node.nodeEditorPath": true;
+    "toolDefaults.node.add_node.nodeType": true;
     "toolDefaults.node.add_node.pos": true;
     "toolDefaults.node.add_node.useNodeEditorGraph": true;
     "toolDefaults.node.add_node.x": true;
     "toolDefaults.node.add_node.y": true;
     "toolDefaults.node.connect": true;
     "toolDefaults.node.connect.disconnectSockID": true;
+    "toolDefaults.node.connect.dstNode": true;
+    "toolDefaults.node.connect.dstSocket": true;
     "toolDefaults.node.connect.graphClass": true;
     "toolDefaults.node.connect.graphPath": true;
     "toolDefaults.node.connect.node1_id": true;
@@ -698,6 +808,8 @@ declare module "@framework/pathux" {
     "toolDefaults.node.connect.nodeEditorPath": true;
     "toolDefaults.node.connect.sock1_id": true;
     "toolDefaults.node.connect.sock2_id": true;
+    "toolDefaults.node.connect.srcNode": true;
+    "toolDefaults.node.connect.srcSocket": true;
     "toolDefaults.node.connect.useNodeEditorGraph": true;
     "toolDefaults.node.delete_selected": true;
     "toolDefaults.node.delete_selected.graphClass": true;
@@ -790,5 +902,132 @@ declare module "@framework/pathux" {
     "view3d.subViewPortPos": true;
     "view3d.subViewPortSize": true;
     "view3d.type": true;
+  }
+  interface IndexedDataPathRegistry {
+    "material.graph.nodes[n].category": true;
+    "material.graph.nodes[n].graph_flag": true;
+    "material.graph.nodes[n].graph_id": true;
+    "material.graph.nodes[n].imageUser": true;
+    "material.graph.nodes[n].imageUser.image": true;
+    "material.graph.nodes[n].imageUser.image.flag": true;
+    "material.graph.nodes[n].imageUser.image.genColor": true;
+    "material.graph.nodes[n].imageUser.image.genType": true;
+    "material.graph.nodes[n].imageUser.image.graph_flag": true;
+    "material.graph.nodes[n].imageUser.image.graph_id": true;
+    "material.graph.nodes[n].imageUser.image.height": true;
+    "material.graph.nodes[n].imageUser.image.inputs": true;
+    "material.graph.nodes[n].imageUser.image.lib_flag": true;
+    "material.graph.nodes[n].imageUser.image.lib_id": true;
+    "material.graph.nodes[n].imageUser.image.name": true;
+    "material.graph.nodes[n].imageUser.image.outputs": true;
+    "material.graph.nodes[n].imageUser.image.ready": true;
+    "material.graph.nodes[n].imageUser.image.type": true;
+    "material.graph.nodes[n].imageUser.image.url": true;
+    "material.graph.nodes[n].imageUser.image.width": true;
+    "material.graph.nodes[n].inputs": true;
+    "material.graph.nodes[n].mathFunc": true;
+    "material.graph.nodes[n].mode": true;
+    "material.graph.nodes[n].outputs": true;
+    "material.graph.nodes[n].unit": true;
+    "object.material.graph.nodes[n].category": true;
+    "object.material.graph.nodes[n].graph_flag": true;
+    "object.material.graph.nodes[n].graph_id": true;
+    "object.material.graph.nodes[n].imageUser": true;
+    "object.material.graph.nodes[n].imageUser.image": true;
+    "object.material.graph.nodes[n].imageUser.image.flag": true;
+    "object.material.graph.nodes[n].imageUser.image.genColor": true;
+    "object.material.graph.nodes[n].imageUser.image.genType": true;
+    "object.material.graph.nodes[n].imageUser.image.graph_flag": true;
+    "object.material.graph.nodes[n].imageUser.image.graph_id": true;
+    "object.material.graph.nodes[n].imageUser.image.height": true;
+    "object.material.graph.nodes[n].imageUser.image.inputs": true;
+    "object.material.graph.nodes[n].imageUser.image.lib_flag": true;
+    "object.material.graph.nodes[n].imageUser.image.lib_id": true;
+    "object.material.graph.nodes[n].imageUser.image.name": true;
+    "object.material.graph.nodes[n].imageUser.image.outputs": true;
+    "object.material.graph.nodes[n].imageUser.image.ready": true;
+    "object.material.graph.nodes[n].imageUser.image.type": true;
+    "object.material.graph.nodes[n].imageUser.image.url": true;
+    "object.material.graph.nodes[n].imageUser.image.width": true;
+    "object.material.graph.nodes[n].inputs": true;
+    "object.material.graph.nodes[n].mathFunc": true;
+    "object.material.graph.nodes[n].mode": true;
+    "object.material.graph.nodes[n].outputs": true;
+    "object.material.graph.nodes[n].unit": true;
+    "objects[n].data": true;
+    "objects[n].drawFlag": true;
+    "objects[n].drawMode": true;
+    "objects[n].flag": true;
+    "objects[n].graph_flag": true;
+    "objects[n].graph_id": true;
+    "objects[n].inputs": true;
+    "objects[n].lib_flag": true;
+    "objects[n].lib_id": true;
+    "objects[n].material": true;
+    "objects[n].material.graph": true;
+    "objects[n].material.graph.nodes": true;
+    "objects[n].material.graph.nodes[n].category": true;
+    "objects[n].material.graph.nodes[n].graph_flag": true;
+    "objects[n].material.graph.nodes[n].graph_id": true;
+    "objects[n].material.graph.nodes[n].imageUser": true;
+    "objects[n].material.graph.nodes[n].imageUser.image": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.flag": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.genColor": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.genType": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.graph_flag": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.graph_id": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.height": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.inputs": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.lib_flag": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.lib_id": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.name": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.outputs": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.ready": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.type": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.url": true;
+    "objects[n].material.graph.nodes[n].imageUser.image.width": true;
+    "objects[n].material.graph.nodes[n].inputs": true;
+    "objects[n].material.graph.nodes[n].mathFunc": true;
+    "objects[n].material.graph.nodes[n].mode": true;
+    "objects[n].material.graph.nodes[n].outputs": true;
+    "objects[n].material.graph.nodes[n].unit": true;
+    "objects[n].material.graph_flag": true;
+    "objects[n].material.graph_id": true;
+    "objects[n].material.has_shader": true;
+    "objects[n].material.inputs": true;
+    "objects[n].material.lib_flag": true;
+    "objects[n].material.lib_id": true;
+    "objects[n].material.name": true;
+    "objects[n].material.outputs": true;
+    "objects[n].material.shader": true;
+    "objects[n].name": true;
+    "objects[n].outputs": true;
+    "settings.addons[n].enabled": true;
+    "settings.addons[n].name": true;
+    "shadernetwork.graph.nodes[n].category": true;
+    "shadernetwork.graph.nodes[n].graph_flag": true;
+    "shadernetwork.graph.nodes[n].graph_id": true;
+    "shadernetwork.graph.nodes[n].imageUser": true;
+    "shadernetwork.graph.nodes[n].imageUser.image": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.flag": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.genColor": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.genType": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.graph_flag": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.graph_id": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.height": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.inputs": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.lib_flag": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.lib_id": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.name": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.outputs": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.ready": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.type": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.url": true;
+    "shadernetwork.graph.nodes[n].imageUser.image.width": true;
+    "shadernetwork.graph.nodes[n].inputs": true;
+    "shadernetwork.graph.nodes[n].mathFunc": true;
+    "shadernetwork.graph.nodes[n].mode": true;
+    "shadernetwork.graph.nodes[n].outputs": true;
+    "shadernetwork.graph.nodes[n].unit": true;
   }
 }
