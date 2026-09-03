@@ -123,7 +123,9 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `library.camera` | list |  |  |  |
 | `library.collection` | list |  |  |  |
 | `library.image` | list |  |  |  |
+| `library.leafmesh` | list |  |  |  |
 | `library.light` | list |  |  |  |
+| `library.litemesh` | list |  |  |  |
 | `library.material` | list |  |  |  |
 | `library.nullobject` | list |  |  |  |
 | `library.object` | list |  |  |  |
@@ -173,9 +175,19 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `material.graph.nodes[n].imageUser.image.url` | prop | StringProperty | URL |  |
 | `material.graph.nodes[n].imageUser.image.width` | prop | IntProperty | Width | range 1..16384 |
 | `material.graph.nodes[n].inputs` | list |  |  |  |
+| `material.graph.nodes[n].inputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `material.graph.nodes[n].inputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `material.graph.nodes[n].inputs[n].name` | prop | StringProperty | Name |  |
+| `material.graph.nodes[n].inputs[n].uiname` | prop | StringProperty | UI Name |  |
+| `material.graph.nodes[n].inputs[n].value` | prop | FloatProperty | value |  |
 | `material.graph.nodes[n].mathFunc` | prop | EnumProperty | Function | enum {ADD, SUB, MUL, DIV, POW, SQRT, FLOOR, CEIL, MIN, MAX, FRACT, TENT, COS, SIN, TAN, ACOS, ASIN, ATAN, ATAN2, LOG, EXP} |
 | `material.graph.nodes[n].mode` | prop | EnumProperty | Mode | enum {MIX, MULTIPLY, DIVIDE, ADD, SUBTRACT} |
 | `material.graph.nodes[n].outputs` | list |  |  |  |
+| `material.graph.nodes[n].outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `material.graph.nodes[n].outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `material.graph.nodes[n].outputs[n].name` | prop | StringProperty | Name |  |
+| `material.graph.nodes[n].outputs[n].uiname` | prop | StringProperty | UI Name |  |
+| `material.graph.nodes[n].outputs[n].value` | prop | Vec4Property | value | range 0..1 |
 | `material.graph.nodes[n].unit` | prop | EnumProperty | Unit | enum {MILLIMETER, CENTIMETER, METER, INCH, FOOT} |
 | `material.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
 | `material.graph_id` | prop | IntProperty | Graph ID |  |
@@ -214,6 +226,28 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `object.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
 | `object.graph_id` | prop | IntProperty | Graph ID |  |
 | `object.inputs` | list |  |  |  |
+| `object.inputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `object.inputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `object.inputs[n].name` | prop | StringProperty | Name |  |
+| `object.inputs[n].uiname` | prop | StringProperty | UI Name |  |
+| `object.inputs[n].value` | struct |  |  |  |
+| `object.inputs[n].value.data` | struct |  |  |  |
+| `object.inputs[n].value.data.m11` | prop | FloatProperty | m11 |  |
+| `object.inputs[n].value.data.m12` | prop | FloatProperty | m12 |  |
+| `object.inputs[n].value.data.m13` | prop | FloatProperty | m13 |  |
+| `object.inputs[n].value.data.m14` | prop | FloatProperty | m14 |  |
+| `object.inputs[n].value.data.m21` | prop | FloatProperty | m21 |  |
+| `object.inputs[n].value.data.m22` | prop | FloatProperty | m22 |  |
+| `object.inputs[n].value.data.m23` | prop | FloatProperty | m23 |  |
+| `object.inputs[n].value.data.m24` | prop | FloatProperty | m24 |  |
+| `object.inputs[n].value.data.m31` | prop | FloatProperty | m31 |  |
+| `object.inputs[n].value.data.m32` | prop | FloatProperty | m32 |  |
+| `object.inputs[n].value.data.m33` | prop | FloatProperty | m33 |  |
+| `object.inputs[n].value.data.m34` | prop | FloatProperty | m34 |  |
+| `object.inputs[n].value.data.m41` | prop | FloatProperty | m41 |  |
+| `object.inputs[n].value.data.m42` | prop | FloatProperty | m42 |  |
+| `object.inputs[n].value.data.m43` | prop | FloatProperty | m43 |  |
+| `object.inputs[n].value.data.m44` | prop | FloatProperty | m44 |  |
 | `object.lib_flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, SELECT, HIDE, FAKE_USER, NO_SAVE} |
 | `object.lib_id` | prop | IntProperty | Lib ID |  |
 | `object.material` | struct |  |  |  |
@@ -240,9 +274,19 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `object.material.graph.nodes[n].imageUser.image.url` | prop | StringProperty | URL |  |
 | `object.material.graph.nodes[n].imageUser.image.width` | prop | IntProperty | Width | range 1..16384 |
 | `object.material.graph.nodes[n].inputs` | list |  |  |  |
+| `object.material.graph.nodes[n].inputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `object.material.graph.nodes[n].inputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `object.material.graph.nodes[n].inputs[n].name` | prop | StringProperty | Name |  |
+| `object.material.graph.nodes[n].inputs[n].uiname` | prop | StringProperty | UI Name |  |
+| `object.material.graph.nodes[n].inputs[n].value` | prop | FloatProperty | value |  |
 | `object.material.graph.nodes[n].mathFunc` | prop | EnumProperty | Function | enum {ADD, SUB, MUL, DIV, POW, SQRT, FLOOR, CEIL, MIN, MAX, FRACT, TENT, COS, SIN, TAN, ACOS, ASIN, ATAN, ATAN2, LOG, EXP} |
 | `object.material.graph.nodes[n].mode` | prop | EnumProperty | Mode | enum {MIX, MULTIPLY, DIVIDE, ADD, SUBTRACT} |
 | `object.material.graph.nodes[n].outputs` | list |  |  |  |
+| `object.material.graph.nodes[n].outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `object.material.graph.nodes[n].outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `object.material.graph.nodes[n].outputs[n].name` | prop | StringProperty | Name |  |
+| `object.material.graph.nodes[n].outputs[n].uiname` | prop | StringProperty | UI Name |  |
+| `object.material.graph.nodes[n].outputs[n].value` | prop | Vec4Property | value | range 0..1 |
 | `object.material.graph.nodes[n].unit` | prop | EnumProperty | Unit | enum {MILLIMETER, CENTIMETER, METER, INCH, FOOT} |
 | `object.material.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
 | `object.material.graph_id` | prop | IntProperty | Graph ID |  |
@@ -255,6 +299,28 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `object.material.shader` | dynamicStruct |  |  | dynamic |
 | `object.name` | prop | StringProperty | name |  |
 | `object.outputs` | list |  |  |  |
+| `object.outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `object.outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `object.outputs[n].name` | prop | StringProperty | Name |  |
+| `object.outputs[n].uiname` | prop | StringProperty | UI Name |  |
+| `object.outputs[n].value` | prop | Vec4Property | value |  |
+| `object.outputs[n].value.data` | struct |  |  |  |
+| `object.outputs[n].value.data.m11` | prop | FloatProperty | m11 |  |
+| `object.outputs[n].value.data.m12` | prop | FloatProperty | m12 |  |
+| `object.outputs[n].value.data.m13` | prop | FloatProperty | m13 |  |
+| `object.outputs[n].value.data.m14` | prop | FloatProperty | m14 |  |
+| `object.outputs[n].value.data.m21` | prop | FloatProperty | m21 |  |
+| `object.outputs[n].value.data.m22` | prop | FloatProperty | m22 |  |
+| `object.outputs[n].value.data.m23` | prop | FloatProperty | m23 |  |
+| `object.outputs[n].value.data.m24` | prop | FloatProperty | m24 |  |
+| `object.outputs[n].value.data.m31` | prop | FloatProperty | m31 |  |
+| `object.outputs[n].value.data.m32` | prop | FloatProperty | m32 |  |
+| `object.outputs[n].value.data.m33` | prop | FloatProperty | m33 |  |
+| `object.outputs[n].value.data.m34` | prop | FloatProperty | m34 |  |
+| `object.outputs[n].value.data.m41` | prop | FloatProperty | m41 |  |
+| `object.outputs[n].value.data.m42` | prop | FloatProperty | m42 |  |
+| `object.outputs[n].value.data.m43` | prop | FloatProperty | m43 |  |
+| `object.outputs[n].value.data.m44` | prop | FloatProperty | m44 |  |
 
 ## objects
 
@@ -268,6 +334,28 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `objects[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
 | `objects[n].graph_id` | prop | IntProperty | Graph ID |  |
 | `objects[n].inputs` | list |  |  |  |
+| `objects[n].inputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `objects[n].inputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `objects[n].inputs[n].name` | prop | StringProperty | Name |  |
+| `objects[n].inputs[n].uiname` | prop | StringProperty | UI Name |  |
+| `objects[n].inputs[n].value` | struct |  |  |  |
+| `objects[n].inputs[n].value.data` | struct |  |  |  |
+| `objects[n].inputs[n].value.data.m11` | prop | FloatProperty | m11 |  |
+| `objects[n].inputs[n].value.data.m12` | prop | FloatProperty | m12 |  |
+| `objects[n].inputs[n].value.data.m13` | prop | FloatProperty | m13 |  |
+| `objects[n].inputs[n].value.data.m14` | prop | FloatProperty | m14 |  |
+| `objects[n].inputs[n].value.data.m21` | prop | FloatProperty | m21 |  |
+| `objects[n].inputs[n].value.data.m22` | prop | FloatProperty | m22 |  |
+| `objects[n].inputs[n].value.data.m23` | prop | FloatProperty | m23 |  |
+| `objects[n].inputs[n].value.data.m24` | prop | FloatProperty | m24 |  |
+| `objects[n].inputs[n].value.data.m31` | prop | FloatProperty | m31 |  |
+| `objects[n].inputs[n].value.data.m32` | prop | FloatProperty | m32 |  |
+| `objects[n].inputs[n].value.data.m33` | prop | FloatProperty | m33 |  |
+| `objects[n].inputs[n].value.data.m34` | prop | FloatProperty | m34 |  |
+| `objects[n].inputs[n].value.data.m41` | prop | FloatProperty | m41 |  |
+| `objects[n].inputs[n].value.data.m42` | prop | FloatProperty | m42 |  |
+| `objects[n].inputs[n].value.data.m43` | prop | FloatProperty | m43 |  |
+| `objects[n].inputs[n].value.data.m44` | prop | FloatProperty | m44 |  |
 | `objects[n].lib_flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, SELECT, HIDE, FAKE_USER, NO_SAVE} |
 | `objects[n].lib_id` | prop | IntProperty | Lib ID |  |
 | `objects[n].material` | struct |  |  |  |
@@ -294,9 +382,19 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `objects[n].material.graph.nodes[n].imageUser.image.url` | prop | StringProperty | URL |  |
 | `objects[n].material.graph.nodes[n].imageUser.image.width` | prop | IntProperty | Width | range 1..16384 |
 | `objects[n].material.graph.nodes[n].inputs` | list |  |  |  |
+| `objects[n].material.graph.nodes[n].inputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `objects[n].material.graph.nodes[n].inputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `objects[n].material.graph.nodes[n].inputs[n].name` | prop | StringProperty | Name |  |
+| `objects[n].material.graph.nodes[n].inputs[n].uiname` | prop | StringProperty | UI Name |  |
+| `objects[n].material.graph.nodes[n].inputs[n].value` | prop | FloatProperty | value |  |
 | `objects[n].material.graph.nodes[n].mathFunc` | prop | EnumProperty | Function | enum {ADD, SUB, MUL, DIV, POW, SQRT, FLOOR, CEIL, MIN, MAX, FRACT, TENT, COS, SIN, TAN, ACOS, ASIN, ATAN, ATAN2, LOG, EXP} |
 | `objects[n].material.graph.nodes[n].mode` | prop | EnumProperty | Mode | enum {MIX, MULTIPLY, DIVIDE, ADD, SUBTRACT} |
 | `objects[n].material.graph.nodes[n].outputs` | list |  |  |  |
+| `objects[n].material.graph.nodes[n].outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `objects[n].material.graph.nodes[n].outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `objects[n].material.graph.nodes[n].outputs[n].name` | prop | StringProperty | Name |  |
+| `objects[n].material.graph.nodes[n].outputs[n].uiname` | prop | StringProperty | UI Name |  |
+| `objects[n].material.graph.nodes[n].outputs[n].value` | prop | Vec4Property | value | range 0..1 |
 | `objects[n].material.graph.nodes[n].unit` | prop | EnumProperty | Unit | enum {MILLIMETER, CENTIMETER, METER, INCH, FOOT} |
 | `objects[n].material.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
 | `objects[n].material.graph_id` | prop | IntProperty | Graph ID |  |
@@ -309,6 +407,28 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `objects[n].material.shader` | dynamicStruct |  |  | dynamic |
 | `objects[n].name` | prop | StringProperty | name |  |
 | `objects[n].outputs` | list |  |  |  |
+| `objects[n].outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `objects[n].outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `objects[n].outputs[n].name` | prop | StringProperty | Name |  |
+| `objects[n].outputs[n].uiname` | prop | StringProperty | UI Name |  |
+| `objects[n].outputs[n].value` | prop | Vec4Property | value |  |
+| `objects[n].outputs[n].value.data` | struct |  |  |  |
+| `objects[n].outputs[n].value.data.m11` | prop | FloatProperty | m11 |  |
+| `objects[n].outputs[n].value.data.m12` | prop | FloatProperty | m12 |  |
+| `objects[n].outputs[n].value.data.m13` | prop | FloatProperty | m13 |  |
+| `objects[n].outputs[n].value.data.m14` | prop | FloatProperty | m14 |  |
+| `objects[n].outputs[n].value.data.m21` | prop | FloatProperty | m21 |  |
+| `objects[n].outputs[n].value.data.m22` | prop | FloatProperty | m22 |  |
+| `objects[n].outputs[n].value.data.m23` | prop | FloatProperty | m23 |  |
+| `objects[n].outputs[n].value.data.m24` | prop | FloatProperty | m24 |  |
+| `objects[n].outputs[n].value.data.m31` | prop | FloatProperty | m31 |  |
+| `objects[n].outputs[n].value.data.m32` | prop | FloatProperty | m32 |  |
+| `objects[n].outputs[n].value.data.m33` | prop | FloatProperty | m33 |  |
+| `objects[n].outputs[n].value.data.m34` | prop | FloatProperty | m34 |  |
+| `objects[n].outputs[n].value.data.m41` | prop | FloatProperty | m41 |  |
+| `objects[n].outputs[n].value.data.m42` | prop | FloatProperty | m42 |  |
+| `objects[n].outputs[n].value.data.m43` | prop | FloatProperty | m43 |  |
+| `objects[n].outputs[n].value.data.m44` | prop | FloatProperty | m44 |  |
 
 ## propsEditor
 
@@ -367,18 +487,186 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `scene.propIslandOnly` | prop | BoolProperty | Island Only |  |
 | `scene.propMode` | prop | EnumProperty | Magnet Curve | enum {SMOOTH, SHARP, EXTRA_SHARP, SPHERE, LINEAR, CONSTANT} |
 | `scene.propRadius` | prop | FloatProperty | Magnet Radius | range 0.01..1000000 |
-| `scene.selectMaskEnum` | prop | FlagProperty | Selection Mode | enum {VERTEX, EDGE, FACE, HANDLE, GEOM, SGEOM, MESH, LIGHT, CAMERA, NULLOBJECT, PROCMESH, TETMESH, STRANDS, OBJECT} |
+| `scene.selectMaskEnum` | prop | FlagProperty | Selection Mode | enum {VERTEX, EDGE, FACE, HANDLE, GEOM, SGEOM, MESH, LIGHT, CAMERA, NULLOBJECT, PROCMESH, TETMESH, STRANDS, OBJECT, LEAFMESH} |
 | `scene.tool` | dynamicStruct |  |  | dynamic |
 | `scene.tool.transformWidget` | prop | EnumProperty | Transform Widget | enum {NONE} |
 | `scene.tool.type` | prop | StringProperty | Type |  |
-| `scene.toolmode` | prop | EnumProperty | Tool Mode | enum {object, pan} |
+| `scene.toolmode` | prop | EnumProperty | Tool Mode | enum {object, pan, sculptcore, boxmodel, leafmesh} |
 | `scene.tools` | struct |  |  |  |
+| `scene.tools.boxmodel` | struct |  |  |  |
+| `scene.tools.boxmodel.boxModelSelMode` | prop | FlagProperty | Box Model Sel Mode | enum {VERTEX, EDGE, FACE} |
+| `scene.tools.boxmodel.drawPoints` | prop | BoolProperty | Vertex Points |  |
+| `scene.tools.boxmodel.drawSelectionOverlay` | prop | BoolProperty | Selection Overlay |  |
+| `scene.tools.boxmodel.drawWireframe` | prop | BoolProperty | Wireframe |  |
+| `scene.tools.boxmodel.selectRadius` | prop | FloatProperty | Select Radius | range 1..500 |
+| `scene.tools.boxmodel.transformWidget` | prop | EnumProperty | Transform Widget | enum {NONE} |
+| `scene.tools.boxmodel.type` | prop | StringProperty | Type |  |
+| `scene.tools.boxmodel.xray` | prop | BoolProperty | X-Ray |  |
+| `scene.tools.leafmesh` | struct |  |  |  |
+| `scene.tools.leafmesh.drawPoints` | prop | BoolProperty | Vertex Points |  |
+| `scene.tools.leafmesh.drawSelectionOverlay` | prop | BoolProperty | Selection Overlay |  |
+| `scene.tools.leafmesh.drawWireframe` | prop | BoolProperty | Wireframe |  |
+| `scene.tools.leafmesh.leafMeshSelMode` | prop | FlagProperty | Leaf Mesh Sel Mode | enum {VERTEX, EDGE, FACE} |
+| `scene.tools.leafmesh.selectRadius` | prop | FloatProperty | Select Radius | range 1..500 |
+| `scene.tools.leafmesh.transformWidget` | prop | EnumProperty | Transform Widget | enum {NONE} |
+| `scene.tools.leafmesh.type` | prop | StringProperty | Type |  |
 | `scene.tools.object` | struct |  |  |  |
 | `scene.tools.object.transformWidget` | prop | EnumProperty | Transform Widget | enum {NONE, translate, scale, rotate} |
 | `scene.tools.object.type` | prop | StringProperty | Type |  |
 | `scene.tools.pan` | struct |  |  |  |
 | `scene.tools.pan.transformWidget` | prop | EnumProperty | Transform Widget | enum {NONE} |
 | `scene.tools.pan.type` | prop | StringProperty | Type |  |
+| `scene.tools.sculptcore` | struct |  |  |  |
+| `scene.tools.sculptcore.brush` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.anchoredDragRadius` | prop | BoolProperty | Drag Sets Size |  |
+| `scene.tools.sculptcore.brush.anchoredLiveMode` | prop | EnumProperty | Anchored Live | enum {RADIUS, ANGLE} |
+| `scene.tools.sculptcore.brush.autosmooth` | prop | FloatProperty | Autosmooth | range 0..2 |
+| `scene.tools.sculptcore.brush.autosmoothInflate` | prop | FloatProperty | Inflation | range 0..1 |
+| `scene.tools.sculptcore.brush.bgcolor` | prop | Vec4Property | Secondary Color | range 0..1 |
+| `scene.tools.sculptcore.brush.cavityBlurSteps` | prop | IntProperty | Cavity Blur | range 0..8 |
+| `scene.tools.sculptcore.brush.cavityCurve` | prop | Curve1DProperty | Cavity Curve |  |
+| `scene.tools.sculptcore.brush.cavityFactor` | prop | FloatProperty | Cavity Factor | range 0..5 |
+| `scene.tools.sculptcore.brush.color` | prop | Vec4Property | Primary Color | range 0..1 |
+| `scene.tools.sculptcore.brush.colorMixMode` | prop | EnumProperty | Color Mix | enum {MIX, MULTIPLY, SCREEN, OVERLAY, DIFFERENCE, ADD, SUBTRACT, DARKEN, LIGHTEN} |
+| `scene.tools.sculptcore.brush.concaveFilter` | prop | FloatProperty | Concave Wash | range 0..1 |
+| `scene.tools.sculptcore.brush.dynTopo` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.dynTopo.decimateFactor` | prop | FloatProperty | Decimate Factor | range 0..1 |
+| `scene.tools.sculptcore.brush.dynTopo.edgeCount` | prop | IntProperty | Edge Count | range 1..2048 |
+| `scene.tools.sculptcore.brush.dynTopo.edgeMode` | prop | EnumProperty | Mode | enum {SCREEN, WORLD} |
+| `scene.tools.sculptcore.brush.dynTopo.edgeSize` | prop | FloatProperty | Edge Length | range 0.25..40 |
+| `scene.tools.sculptcore.brush.dynTopo.flag` | prop | FlagProperty | Flag | enum {SUBDIVIDE, COLLAPSE, ENABLED, FANCY_EDGE_WEIGHTS, QUAD_COLLAPSE, ALLOW_VALENCE4, DRAW_TRIS_AS_QUADS, ADAPTIVE} |
+| `scene.tools.sculptcore.brush.dynTopo.maxDepth` | prop | IntProperty | Max Depth | range 0..15 |
+| `scene.tools.sculptcore.brush.dynTopo.overrides` | prop | FlagProperty | Overrides | enum {SUBDIVIDE, COLLAPSE, ENABLED, FANCY_EDGE_WEIGHTS, QUAD_COLLAPSE, ALLOW_VALENCE4, DRAW_TRIS_AS_QUADS, ADAPTIVE, VALENCE_GOAL, EDGE_SIZE, DECIMATE_FACTOR, SUBDIVIDE_FACTOR, MAX_DEPTH, EDGE_COUNT, NONE, REPEAT, SPACING_MODE, SPACING, EDGEMODE, SUBDIV_MODE, EVERYTHING} |
+| `scene.tools.sculptcore.brush.dynTopo.repeat` | prop | IntProperty | Repeat | range 1..25 |
+| `scene.tools.sculptcore.brush.dynTopo.spacing` | prop | FloatProperty | Spacing | range 0.01..12 |
+| `scene.tools.sculptcore.brush.dynTopo.spacingMode` | prop | EnumProperty | Spacing Mode | enum {NONE, EVEN} |
+| `scene.tools.sculptcore.brush.dynTopo.subdivMode` | prop | EnumProperty | Subdiv Mode | enum {SIMPLE, SMART} |
+| `scene.tools.sculptcore.brush.dynTopo.subdivideFactor` | prop | FloatProperty | Subdivision Factor | range 0..1 |
+| `scene.tools.sculptcore.brush.dynTopo.valenceGoal` | prop | IntProperty | Valence Goal | range 0..12 |
+| `scene.tools.sculptcore.brush.dynTopoSC` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.dynTopoSC.collapseRatio` | prop | FloatProperty | Collapse Ratio | range 0.05..0.95 |
+| `scene.tools.sculptcore.brush.dynTopoSC.dynTopoSpacing` | prop | FloatProperty | Remesh Spacing | range 0..2 |
+| `scene.tools.sculptcore.brush.dynTopoSC.edgeMode` | prop | EnumProperty | Detail Mode | enum {WORLD, PERCENT, PIXELS} |
+| `scene.tools.sculptcore.brush.dynTopoSC.edgeSize` | prop | FloatProperty | Detail Size | range 0.0001..200 |
+| `scene.tools.sculptcore.brush.dynTopoSC.flag` | prop | FlagProperty | Flag | enum {ENABLED, DO_FLIPS, DO_SMOOTH, PRESERVE_FEATURES} |
+| `scene.tools.sculptcore.brush.dynTopoSC.grade` | prop | FloatProperty | Grade | range 0..8 |
+| `scene.tools.sculptcore.brush.dynTopoSC.maxCollapses` | prop | IntProperty | Collapse Budget | range 0..200000 |
+| `scene.tools.sculptcore.brush.dynTopoSC.maxRounds` | prop | IntProperty | Max Rounds | range 1..200 |
+| `scene.tools.sculptcore.brush.dynTopoSC.maxSplits` | prop | IntProperty | Split Budget | range 0..200000 |
+| `scene.tools.sculptcore.brush.dynTopoSC.mode` | prop | EnumProperty | Refine Mode | enum {SUBDIVIDE, COLLAPSE, BOTH} |
+| `scene.tools.sculptcore.brush.dynTopoSC.overrides` | prop | FlagProperty | Overrides | enum {ENABLED, DO_FLIPS, DO_SMOOTH, PRESERVE_FEATURES, MAX_COLLAPSES, DYNTOPO_SPACING, EDGE_MODE, EDGE_SIZE, COLLAPSE_RATIO, GRADE, MODE, SMOOTH_LAMBDA, MAX_SPLITS, MAX_ROUNDS, NONE, EVERYTHING} |
+| `scene.tools.sculptcore.brush.dynTopoSC.smoothLambda` | prop | FloatProperty | Smooth Amount | range 0..1 |
+| `scene.tools.sculptcore.brush.dynamics` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.dynamics.autosmooth` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.dynamics.autosmooth.curve` | prop | Curve1DProperty | Curve |  |
+| `scene.tools.sculptcore.brush.dynamics.autosmooth.useDynamics` | prop | BoolProperty | Use Dynamics |  |
+| `scene.tools.sculptcore.brush.dynamics.autosmoothInflate` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.dynamics.autosmoothInflate.curve` | prop | Curve1DProperty | Curve |  |
+| `scene.tools.sculptcore.brush.dynamics.autosmoothInflate.useDynamics` | prop | BoolProperty | Use Dynamics |  |
+| `scene.tools.sculptcore.brush.dynamics.concaveFilter` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.dynamics.concaveFilter.curve` | prop | Curve1DProperty | Curve |  |
+| `scene.tools.sculptcore.brush.dynamics.concaveFilter.useDynamics` | prop | BoolProperty | Use Dynamics |  |
+| `scene.tools.sculptcore.brush.dynamics.pinch` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.dynamics.pinch.curve` | prop | Curve1DProperty | Curve |  |
+| `scene.tools.sculptcore.brush.dynamics.pinch.useDynamics` | prop | BoolProperty | Use Dynamics |  |
+| `scene.tools.sculptcore.brush.dynamics.radius` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.dynamics.radius.curve` | prop | Curve1DProperty | Curve |  |
+| `scene.tools.sculptcore.brush.dynamics.radius.useDynamics` | prop | BoolProperty | Use Dynamics |  |
+| `scene.tools.sculptcore.brush.dynamics.rake` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.dynamics.rake.curve` | prop | Curve1DProperty | Curve |  |
+| `scene.tools.sculptcore.brush.dynamics.rake.useDynamics` | prop | BoolProperty | Use Dynamics |  |
+| `scene.tools.sculptcore.brush.dynamics.sharp` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.dynamics.sharp.curve` | prop | Curve1DProperty | Curve |  |
+| `scene.tools.sculptcore.brush.dynamics.sharp.useDynamics` | prop | BoolProperty | Use Dynamics |  |
+| `scene.tools.sculptcore.brush.dynamics.smoothProj` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.dynamics.smoothProj.curve` | prop | Curve1DProperty | Curve |  |
+| `scene.tools.sculptcore.brush.dynamics.smoothProj.useDynamics` | prop | BoolProperty | Use Dynamics |  |
+| `scene.tools.sculptcore.brush.dynamics.strength` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.dynamics.strength.curve` | prop | Curve1DProperty | Curve |  |
+| `scene.tools.sculptcore.brush.dynamics.strength.useDynamics` | prop | BoolProperty | Use Dynamics |  |
+| `scene.tools.sculptcore.brush.enhanceInner` | prop | IntProperty | Detail Inner | range 0..6 |
+| `scene.tools.sculptcore.brush.enhanceRings` | prop | IntProperty | Detail Scale | range 1..8 |
+| `scene.tools.sculptcore.brush.falloff` | prop | Curve1DProperty | Falloff |  |
+| `scene.tools.sculptcore.brush.falloff2` | prop | Curve1DProperty | Falloff |  |
+| `scene.tools.sculptcore.brush.flag` | prop | FlagProperty | Flag | enum {SELECT, SHARED_SIZE, DYNTOPO, INVERT_CONCAVE_FILTER, MULTIGRID_SMOOTH, PLANAR_SMOOTH, CURVE_RAKE_ONLY_POS_X, INVERT, LINE_FALLOFF, SQUARE, USE_LINE_CURVE, ACCUMULATE, AUTOMASK_CAVITY, AUTOMASK_CAVITY_INVERT, AUTOMASK_CAVITY_CURVE, AUTOMASK_VIEW_NORMAL, CULL_BACKFACES, SHARED_CULL_BACKFACES} |
+| `scene.tools.sculptcore.brush.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
+| `scene.tools.sculptcore.brush.graph_id` | prop | IntProperty | Graph ID |  |
+| `scene.tools.sculptcore.brush.inputs` | list |  |  |  |
+| `scene.tools.sculptcore.brush.lib_flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, SELECT, HIDE, FAKE_USER, NO_SAVE} |
+| `scene.tools.sculptcore.brush.lib_id` | prop | IntProperty | Lib ID |  |
+| `scene.tools.sculptcore.brush.name` | prop | StringProperty | name |  |
+| `scene.tools.sculptcore.brush.normalfac` | prop | FloatProperty | Normal Fac | range 0..1 |
+| `scene.tools.sculptcore.brush.outputs` | list |  |  |  |
+| `scene.tools.sculptcore.brush.pinch` | prop | FloatProperty | Pinch | range 0..1 |
+| `scene.tools.sculptcore.brush.planeNormalMode` | prop | EnumProperty | Plane Normal | enum {VIEW, SURFACE} |
+| `scene.tools.sculptcore.brush.planeoff` | prop | FloatProperty | planeoff | range -3.5..3.5 |
+| `scene.tools.sculptcore.brush.radius` | prop | FloatProperty | Radius | range 0.1..350 |
+| `scene.tools.sculptcore.brush.radiusMode` | prop | EnumProperty | Radius Unit | enum {SCREEN, WORLD} |
+| `scene.tools.sculptcore.brush.rake` | prop | FloatProperty | Rake | range 0..1 |
+| `scene.tools.sculptcore.brush.rakeCurvatureFactor` | prop | FloatProperty | Curvature Factor | range 0..1 |
+| `scene.tools.sculptcore.brush.sharp` | prop | FloatProperty | Sharpening | range 0..1 |
+| `scene.tools.sculptcore.brush.smoothProj` | prop | FloatProperty | Projection | range 0..0.97 |
+| `scene.tools.sculptcore.brush.smoothRadiusMul` | prop | FloatProperty | Smooth Radius | range 0.125..15 |
+| `scene.tools.sculptcore.brush.spacing` | prop | FloatProperty | Spacing | range 0.02..2 |
+| `scene.tools.sculptcore.brush.spacingMode` | prop | EnumProperty | Spacing Mode | enum {NONE, EVEN} |
+| `scene.tools.sculptcore.brush.strength` | prop | FloatProperty | Strength | range 0.001..2 |
+| `scene.tools.sculptcore.brush.strokeMethod` | prop | EnumProperty | Stroke Method | enum {PATH, ANCHORED, DRAG_DOT} |
+| `scene.tools.sculptcore.brush.texUser` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.texUser.flag` | prop | FlagProperty | flag | enum {1, 2, 4, 8, 16, 32, SELECT, RAKE, CONSTANT_SIZE, FANCY_RAKE, ORIGINAL_CO, CURVED} |
+| `scene.tools.sculptcore.brush.texUser.mode` | prop | EnumProperty | Mode | enum {0, 1, 2, GLOBAL, VIEWPLANE, VIEW_REPEAT} |
+| `scene.tools.sculptcore.brush.texUser.pinch` | prop | FloatProperty | Tex Pinch | range -1..1 |
+| `scene.tools.sculptcore.brush.texUser.scale` | prop | FloatProperty | Scale | range 0.0001..1000 |
+| `scene.tools.sculptcore.brush.texUser.texture` | struct |  |  |  |
+| `scene.tools.sculptcore.brush.texUser.texture.brightness` | prop | FloatProperty | Brightness | range -5..5 |
+| `scene.tools.sculptcore.brush.texUser.texture.contrast` | prop | FloatProperty | Contrast | range 0.001..100 |
+| `scene.tools.sculptcore.brush.texUser.texture.generator` | dynamicStruct |  |  | dynamic |
+| `scene.tools.sculptcore.brush.texUser.texture.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
+| `scene.tools.sculptcore.brush.texUser.texture.graph_id` | prop | IntProperty | Graph ID |  |
+| `scene.tools.sculptcore.brush.texUser.texture.inputs` | list |  |  |  |
+| `scene.tools.sculptcore.brush.texUser.texture.lib_flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, SELECT, HIDE, FAKE_USER, NO_SAVE} |
+| `scene.tools.sculptcore.brush.texUser.texture.lib_id` | prop | IntProperty | Lib ID |  |
+| `scene.tools.sculptcore.brush.texUser.texture.mode` | prop | EnumProperty | Mode | enum {SimpleNoise, MoireNoise, CombPattern, GaborNoise} |
+| `scene.tools.sculptcore.brush.texUser.texture.name` | prop | StringProperty | name |  |
+| `scene.tools.sculptcore.brush.texUser.texture.outputs` | list |  |  |  |
+| `scene.tools.sculptcore.brush.texUser.texture.power` | prop | FloatProperty | Exp | range 0.001..100 |
+| `scene.tools.sculptcore.brush.texUser.texture.scale` | prop | FloatProperty | Scale | range 0.001..2000 |
+| `scene.tools.sculptcore.brush.tool` | prop | EnumProperty | Tool | enum {CLAY, FILL, SCRAPE, SMOOTH, DRAW, SHARP, INFLATE, SNAKE, TOPOLOGY, GRAB, HOLE_FILLER, MASK_PAINT, WING_SCRAPE, PINCH, DIRECTIONAL_FAIR, SLIDE_RELAX, BVH_DEFORM, COLOR, POLYGROUP, BSMOOTH, KELVINLET, FEATURE_ALIGN, LAYER_DRAW, ENHANCE, PAINT, PAINT_SMOOTH, COLOR_BOUNDARY, TEXTURE_PAINT, FACE_SET_DRAW} |
+| `scene.tools.sculptcore.brush.viewNormalFalloff` | prop | FloatProperty | View Falloff | range 0..90; unit degree |
+| `scene.tools.sculptcore.brush.viewNormalLimit` | prop | FloatProperty | View Limit | range 0..90; unit degree |
+| `scene.tools.sculptcore.brush.wingAngle` | prop | FloatProperty | Wing Angle | range 0..80; unit degree |
+| `scene.tools.sculptcore.brushRadius` | prop | FloatProperty | Radius | range 0..450 |
+| `scene.tools.sculptcore.cullBackfaces` | prop | BoolProperty | Cull Backfaces |  |
+| `scene.tools.sculptcore.drawBVH` | prop | BoolProperty | Draw BVH |  |
+| `scene.tools.sculptcore.drawColPatches` | prop | BoolProperty | Draw Color Patches |  |
+| `scene.tools.sculptcore.drawFeatureOverlay` | prop | BoolProperty | Feature Overlay |  |
+| `scene.tools.sculptcore.drawFlat` | prop | BoolProperty | Draw Flat |  |
+| `scene.tools.sculptcore.drawMask` | prop | BoolProperty | Draw Mask |  |
+| `scene.tools.sculptcore.drawNodeIds` | prop | BoolProperty | Draw BVH Vertex IDs |  |
+| `scene.tools.sculptcore.drawPolyGroupEdges` | prop | BoolProperty | Poly Group Edges |  |
+| `scene.tools.sculptcore.drawWireframe` | prop | BoolProperty | Draw Wireframe |  |
+| `scene.tools.sculptcore.dynTopo` | struct |  |  |  |
+| `scene.tools.sculptcore.dynTopo.collapseRatio` | prop | FloatProperty | Collapse Ratio | range 0.05..0.95 |
+| `scene.tools.sculptcore.dynTopo.dynTopoSpacing` | prop | FloatProperty | Remesh Spacing | range 0..2 |
+| `scene.tools.sculptcore.dynTopo.edgeMode` | prop | EnumProperty | Detail Mode | enum {WORLD, PERCENT, PIXELS} |
+| `scene.tools.sculptcore.dynTopo.edgeSize` | prop | FloatProperty | Detail Size | range 0.0001..200 |
+| `scene.tools.sculptcore.dynTopo.flag` | prop | FlagProperty | Flag | enum {ENABLED, DO_FLIPS, DO_SMOOTH, PRESERVE_FEATURES} |
+| `scene.tools.sculptcore.dynTopo.grade` | prop | FloatProperty | Grade | range 0..8 |
+| `scene.tools.sculptcore.dynTopo.maxCollapses` | prop | IntProperty | Collapse Budget | range 0..200000 |
+| `scene.tools.sculptcore.dynTopo.maxRounds` | prop | IntProperty | Max Rounds | range 1..200 |
+| `scene.tools.sculptcore.dynTopo.maxSplits` | prop | IntProperty | Split Budget | range 0..200000 |
+| `scene.tools.sculptcore.dynTopo.mode` | prop | EnumProperty | Refine Mode | enum {SUBDIVIDE, COLLAPSE, BOTH} |
+| `scene.tools.sculptcore.dynTopo.overrides` | prop | FlagProperty | Overrides | enum {ENABLED, DO_FLIPS, DO_SMOOTH, PRESERVE_FEATURES, MAX_COLLAPSES, DYNTOPO_SPACING, EDGE_MODE, EDGE_SIZE, COLLAPSE_RATIO, GRADE, MODE, SMOOTH_LAMBDA, MAX_SPLITS, MAX_ROUNDS, NONE, EVERYTHING} |
+| `scene.tools.sculptcore.dynTopo.smoothLambda` | prop | FloatProperty | Smooth Amount | range 0..1 |
+| `scene.tools.sculptcore.dynTopoStatsLabel` | prop | StringProperty | DynTopo Stats |  |
+| `scene.tools.sculptcore.gpuBrushStatsLabel` | prop | StringProperty | GPU Brush Stats |  |
+| `scene.tools.sculptcore.inheritDynTopo` | prop | BoolProperty | Inherit Everything |  |
+| `scene.tools.sculptcore.reprojectCustomData` | prop | BoolProperty | Reproject UVs & colors |  |
+| `scene.tools.sculptcore.sceneCullBackfaces` | prop | BoolProperty | Scene Cull Backfaces |  |
+| `scene.tools.sculptcore.sharedBrushRadius` | prop | FloatProperty | Shared Radius | range 0..450 |
+| `scene.tools.sculptcore.symmetryAxes` | prop | FlagProperty | Symmetry Axes | enum {X, Y, Z} |
+| `scene.tools.sculptcore.tool` | prop | EnumProperty | Tool | enum {CLAY, FILL, SCRAPE, SMOOTH, DRAW, SHARP, INFLATE, SNAKE, GRAB, MASK_PAINT, WING_SCRAPE, PINCH, COLOR, POLYGROUP, KELVINLET, FEATURE_ALIGN, ENHANCE, PAINT_SMOOTH} |
+| `scene.tools.sculptcore.transformWidget` | prop | EnumProperty | Transform Widget | enum {NONE} |
+| `scene.tools.sculptcore.type` | prop | StringProperty | Type |  |
 
 ## screen
 
@@ -391,7 +679,7 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 
 | Path | Kind | Type | UI name | Notes |
 | --- | --- | --- | --- | --- |
-| `selectmode` | prop | FlagProperty | Selection Mode | enum {VERTEX, EDGE, FACE, HANDLE, GEOM, SGEOM, MESH, LIGHT, CAMERA, NULLOBJECT, PROCMESH, TETMESH, STRANDS, OBJECT} |
+| `selectmode` | prop | FlagProperty | Selection Mode | enum {VERTEX, EDGE, FACE, HANDLE, GEOM, SGEOM, MESH, LIGHT, CAMERA, NULLOBJECT, PROCMESH, TETMESH, STRANDS, OBJECT, LEAFMESH} |
 
 ## settings
 
@@ -407,6 +695,17 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `settings.autosaveToProjectDir` | prop | BoolProperty | Autosave Next To Project |  |
 | `settings.brushSet` | prop | EnumProperty | Brush Set | enum {0, 1, 2, HIGH_RES, MEDIUM_RES, DEFAULT} |
 | `settings.featureFlags` | struct |  |  |  |
+| `settings.featureFlags.sculptcore_auto_defrag` | prop | BoolProperty | sculptcore.auto_defrag |  |
+| `settings.featureFlags.sculptcore_backface_cull` | prop | BoolProperty | Backface Culling |  |
+| `settings.featureFlags.sculptcore_cpp_stroke_driver` | prop | BoolProperty | C++ Stroke Driver |  |
+| `settings.featureFlags.sculptcore_gpu_brush` | prop | BoolProperty | GPU Brushes |  |
+| `settings.featureFlags.sculptcore_gpu_brush_grab` | prop | BoolProperty | GPU Grab Brush |  |
+| `settings.featureFlags.sculptcore_gpu_brush_verify` | prop | BoolProperty | GPU Brush Shadow-Verify |  |
+| `settings.featureFlags.sculptcore_multires` | prop | BoolProperty | Multires Subsurf |  |
+| `settings.featureFlags.sculptcore_quad_remesher` | prop | BoolProperty | sculptcore.quad_remesher |  |
+| `settings.featureFlags.sculptcore_sculpt_layers` | prop | BoolProperty | Sculpt Layers |  |
+| `settings.featureFlags.sculptcore_select_flush_prefer_op_domain` | prop | BoolProperty | sculptcore.select_flush_prefer_op_domain |  |
+| `settings.featureFlags.sculptcore_vdm_sculpt` | prop | BoolProperty | VDM Sculpting |  |
 | `settings.limitUndoMem` | prop | BoolProperty | Limit Undo Memory |  |
 | `settings.undoMemLimit` | prop | IntProperty | Mem Limit |  |
 
@@ -447,9 +746,19 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `shadernetwork.graph.nodes[n].imageUser.image.url` | prop | StringProperty | URL |  |
 | `shadernetwork.graph.nodes[n].imageUser.image.width` | prop | IntProperty | Width | range 1..16384 |
 | `shadernetwork.graph.nodes[n].inputs` | list |  |  |  |
+| `shadernetwork.graph.nodes[n].inputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `shadernetwork.graph.nodes[n].inputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `shadernetwork.graph.nodes[n].inputs[n].name` | prop | StringProperty | Name |  |
+| `shadernetwork.graph.nodes[n].inputs[n].uiname` | prop | StringProperty | UI Name |  |
+| `shadernetwork.graph.nodes[n].inputs[n].value` | prop | FloatProperty | value |  |
 | `shadernetwork.graph.nodes[n].mathFunc` | prop | EnumProperty | Function | enum {ADD, SUB, MUL, DIV, POW, SQRT, FLOOR, CEIL, MIN, MAX, FRACT, TENT, COS, SIN, TAN, ACOS, ASIN, ATAN, ATAN2, LOG, EXP} |
 | `shadernetwork.graph.nodes[n].mode` | prop | EnumProperty | Mode | enum {MIX, MULTIPLY, DIVIDE, ADD, SUBTRACT} |
 | `shadernetwork.graph.nodes[n].outputs` | list |  |  |  |
+| `shadernetwork.graph.nodes[n].outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `shadernetwork.graph.nodes[n].outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `shadernetwork.graph.nodes[n].outputs[n].name` | prop | StringProperty | Name |  |
+| `shadernetwork.graph.nodes[n].outputs[n].uiname` | prop | StringProperty | UI Name |  |
+| `shadernetwork.graph.nodes[n].outputs[n].value` | prop | Vec4Property | value | range 0..1 |
 | `shadernetwork.graph.nodes[n].unit` | prop | EnumProperty | Unit | enum {MILLIMETER, CENTIMETER, METER, INCH, FOOT} |
 | `shadernetwork.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
 | `shadernetwork.graph_id` | prop | IntProperty | Graph ID |  |
@@ -469,11 +778,22 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.app.__load_file.fileBuffer` | prop | ArrayBufferProperty | File Buffer |  |
 | `toolDefaults.app.prop_set` | struct |  |  |  |
 | `toolDefaults.app.prop_set.dataPath` | prop | StringProperty | Data Path |  |
-| `toolDefaults.app.prop_set.destType` | prop | EnumProperty | Dest Type | enum {INT, STRING, BOOL, ENUM, FLAG, FLOAT, VEC2, VEC3, VEC4, MATRIX4, QUAT, PROPLIST, STRSET, CURVE, FLOAT_ARRAY, REPORT, ARRAY_BUFFER, DataRefProperty, DataRefListProperty} |
+| `toolDefaults.app.prop_set.destType` | prop | EnumProperty | Dest Type | enum {INT, STRING, BOOL, ENUM, FLAG, FLOAT, VEC2, VEC3, VEC4, MATRIX4, QUAT, PROPLIST, STRSET, CURVE, FLOAT_ARRAY, REPORT, ARRAY_BUFFER, DataRefProperty, DataRefListProperty, BrushProperty, PaintSampleProperty} |
 | `toolDefaults.app.prop_set.flagBit` | prop | IntProperty | Flag Bit |  |
 | `toolDefaults.app.prop_set.fullSaveUndo` | prop | BoolProperty | Full Save Undo |  |
 | `toolDefaults.app.prop_set.massSetPath` | prop | StringProperty | Mass Set Path |  |
 | `toolDefaults.app.prop_set.useFlagBit` | prop | BoolProperty | Use Flag Bit |  |
+| `toolDefaults.brush` | struct |  |  |  |
+| `toolDefaults.brush.load_default` | struct |  |  |  |
+| `toolDefaults.brush.load_default.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.brush.set_radius` | struct |  |  |  |
+| `toolDefaults.brush.set_radius.brush` | prop | DataRefProperty | Brush |  |
+| `toolDefaults.brush.set_radius.radius` | prop | FloatProperty | Radius |  |
+| `toolDefaults.brush.set_radius_mode` | struct |  |  |  |
+| `toolDefaults.brush.set_radius_mode.brush` | prop | DataRefProperty | Brush |  |
+| `toolDefaults.brush.set_radius_mode.mode` | prop | EnumProperty | Mode | enum {SCREEN, WORLD} |
+| `toolDefaults.brush.swap_colors` | struct |  |  |  |
+| `toolDefaults.brush.swap_colors.dataPath` | prop | StringProperty | Data Path |  |
 | `toolDefaults.curve1d` | struct |  |  |  |
 | `toolDefaults.curve1d.bspline_add_point` | struct |  |  |  |
 | `toolDefaults.curve1d.bspline_add_point.dataPath` | prop | StringProperty | Data Path |  |
@@ -565,6 +885,35 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.image.open.dataPath` | prop | StringProperty | Data Path |  |
 | `toolDefaults.image.open.dataURL` | prop | StringProperty | Data Url |  |
 | `toolDefaults.image.open.fileName` | prop | StringProperty | File Name |  |
+| `toolDefaults.leafmesh` | struct |  |  |  |
+| `toolDefaults.leafmesh.bevel_edges` | struct |  |  |  |
+| `toolDefaults.leafmesh.bevel_edges.amount` | prop | FloatProperty | Amount |  |
+| `toolDefaults.leafmesh.bevel_verts` | struct |  |  |  |
+| `toolDefaults.leafmesh.bevel_verts.amount` | prop | FloatProperty | Amount |  |
+| `toolDefaults.leafmesh.extrude_individual` | struct |  |  |  |
+| `toolDefaults.leafmesh.extrude_individual.offset` | prop | FloatProperty | Offset |  |
+| `toolDefaults.leafmesh.extrude_region` | struct |  |  |  |
+| `toolDefaults.leafmesh.extrude_region.offset` | prop | FloatProperty | Offset |  |
+| `toolDefaults.leafmesh.inset_faces` | struct |  |  |  |
+| `toolDefaults.leafmesh.inset_faces.amount` | prop | FloatProperty | Amount |  |
+| `toolDefaults.leafmesh.inset_faces.depth` | prop | FloatProperty | Depth |  |
+| `toolDefaults.leafmesh.inset_faces.individual` | prop | BoolProperty | Individual |  |
+| `toolDefaults.leafmesh.loop_cut` | struct |  |  |  |
+| `toolDefaults.leafmesh.loop_cut.t` | prop | FloatProperty | T |  |
+| `toolDefaults.leafmesh.select_all` | struct |  |  |  |
+| `toolDefaults.leafmesh.select_all.mode` | prop | EnumProperty | Mode | enum {ALL, NONE, AUTO} |
+| `toolDefaults.leafmesh.select_circle` | struct |  |  |  |
+| `toolDefaults.leafmesh.select_circle.radius` | prop | FloatProperty | Radius | range 1..500 |
+| `toolDefaults.leafmesh.select_linked` | struct |  |  |  |
+| `toolDefaults.leafmesh.select_linked.deselect` | prop | BoolProperty | Deselect |  |
+| `toolDefaults.leafmesh.select_similar` | struct |  |  |  |
+| `toolDefaults.leafmesh.select_similar.criterion` | prop | EnumProperty | Criterion | enum {FACE_SIDES, FACE_AREA, FACE_NORMAL, FACE_COPLANAR, FACE_HOLES, EDGE_LENGTH, EDGE_FACES, EDGE_DIRECTION, VERT_EDGES, VERT_FACES} |
+| `toolDefaults.leafmesh.select_similar.extend` | prop | BoolProperty | Extend |  |
+| `toolDefaults.leafmesh.select_similar.threshold` | prop | FloatProperty | Threshold | range 0..1 |
+| `toolDefaults.leafmesh.select_similar.type` | prop | EnumProperty | Type | enum {FACE_MATERIAL, FACE_GROUP, FACE_AREA, FACE_NORMAL, FACE_COPLANAR, FACE_SIDES, EDGE_LENGTH, EDGE_DIRECTION, EDGE_FACES, EDGE_DIHEDRAL, VERT_NORMAL, VERT_EDGES, VERT_FACES} |
+| `toolDefaults.leafmesh.subdivide` | struct |  |  |  |
+| `toolDefaults.leafmesh.subdivide.cuts` | prop | IntProperty | Cuts |  |
+| `toolDefaults.leafmesh.subdivide.numCuts` | prop | IntProperty | Num Cuts | range 1..32 |
 | `toolDefaults.light` | struct |  |  |  |
 | `toolDefaults.light.new` | struct |  |  |  |
 | `toolDefaults.light.new.dataPathToSet` | prop | StringProperty | Data Path To Set |  |
@@ -577,6 +926,102 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.listbox.set_active.hasKey` | prop | BoolProperty | Has Key |  |
 | `toolDefaults.listbox.set_active.key` | prop | StringProperty | Key |  |
 | `toolDefaults.listbox.set_active.numericKey` | prop | BoolProperty | Numeric Key |  |
+| `toolDefaults.litemesh` | struct |  |  |  |
+| `toolDefaults.litemesh.add_attr` | struct |  |  |  |
+| `toolDefaults.litemesh.add_attr.domain` | prop | IntProperty | Domain |  |
+| `toolDefaults.litemesh.add_attr.type` | prop | IntProperty | Type |  |
+| `toolDefaults.litemesh.add_attr.use` | prop | IntProperty | Use |  |
+| `toolDefaults.litemesh.add_cube` | struct |  |  |  |
+| `toolDefaults.litemesh.add_cube.goalFaces` | prop | IntProperty | Goal Faces | range 0..6291456 |
+| `toolDefaults.litemesh.add_cube.size` | prop | FloatProperty | Size |  |
+| `toolDefaults.litemesh.add_cube.sphere` | prop | FloatProperty | Sphere | range 0..1 |
+| `toolDefaults.litemesh.add_plane` | struct |  |  |  |
+| `toolDefaults.litemesh.add_plane.size` | prop | FloatProperty | Size |  |
+| `toolDefaults.litemesh.assign_material` | struct |  |  |  |
+| `toolDefaults.litemesh.assign_material.slot` | prop | IntProperty | Slot |  |
+| `toolDefaults.litemesh.assign_material_polygroup` | struct |  |  |  |
+| `toolDefaults.litemesh.assign_material_polygroup.slot` | prop | IntProperty | Slot |  |
+| `toolDefaults.litemesh.generate_uv` | struct |  |  |  |
+| `toolDefaults.litemesh.generate_uv.margin` | prop | FloatProperty | Margin | range 0..0.25 |
+| `toolDefaults.litemesh.mark_seam` | struct |  |  |  |
+| `toolDefaults.litemesh.mark_seam.vEnd` | prop | IntProperty | V End |  |
+| `toolDefaults.litemesh.mark_seam.vStart` | prop | IntProperty | V Start |  |
+| `toolDefaults.litemesh.mark_sharp_by_angle` | struct |  |  |  |
+| `toolDefaults.litemesh.mark_sharp_by_angle.angle` | prop | FloatProperty | Angle | range 0..180 |
+| `toolDefaults.litemesh.multires_enable` | struct |  |  |  |
+| `toolDefaults.litemesh.multires_enable.levels` | prop | IntProperty | Levels | range 1..7 |
+| `toolDefaults.litemesh.multires_set_level` | struct |  |  |  |
+| `toolDefaults.litemesh.multires_set_level.level` | prop | IntProperty | Level | range 1..16 |
+| `toolDefaults.litemesh.quad_remesh` | struct |  |  |  |
+| `toolDefaults.litemesh.quad_remesh.autoDensity` | prop | BoolProperty | Auto Density |  |
+| `toolDefaults.litemesh.quad_remesh.curvatureSmoothIters` | prop | IntProperty | Curvature Smooth Iters | range 0..20 |
+| `toolDefaults.litemesh.quad_remesh.curvatureSmoothLambda` | prop | FloatProperty | Curvature Smooth Lambda | range 0..1 |
+| `toolDefaults.litemesh.quad_remesh.curvatureWeight` | prop | FloatProperty | Curvature Weight | range 0..8 |
+| `toolDefaults.litemesh.quad_remesh.densityGradation` | prop | FloatProperty | Density Gradation | range 0..2 |
+| `toolDefaults.litemesh.quad_remesh.densityGradationIters` | prop | IntProperty | Density Gradation Iters | range 1..30 |
+| `toolDefaults.litemesh.quad_remesh.densityMax` | prop | FloatProperty | Density Max | range 1..16 |
+| `toolDefaults.litemesh.quad_remesh.densityMin` | prop | FloatProperty | Density Min | range 0.05..1 |
+| `toolDefaults.litemesh.quad_remesh.fieldSmoothness` | prop | FloatProperty | Field Smoothness | range 0.1..8 |
+| `toolDefaults.litemesh.quad_remesh.preRemesh` | prop | BoolProperty | Pre Remesh |  |
+| `toolDefaults.litemesh.quad_remesh.preRemeshAlign` | prop | FloatProperty | Pre Remesh Align | range 0..1 |
+| `toolDefaults.litemesh.quad_remesh.preRemeshBootstrapIters` | prop | IntProperty | Pre Remesh Bootstrap Iters | range -1..8 |
+| `toolDefaults.litemesh.quad_remesh.preRemeshConvergeEps` | prop | FloatProperty | Pre Remesh Converge Eps | range 0..0.2 |
+| `toolDefaults.litemesh.quad_remesh.preRemeshDensity` | prop | BoolProperty | Pre Remesh Density |  |
+| `toolDefaults.litemesh.quad_remesh.preRemeshFieldCadence` | prop | IntProperty | Pre Remesh Field Cadence | range 1..8 |
+| `toolDefaults.litemesh.quad_remesh.preRemeshGradation` | prop | FloatProperty | Pre Remesh Gradation | range 0..2 |
+| `toolDefaults.litemesh.quad_remesh.preRemeshGradationIters` | prop | IntProperty | Pre Remesh Gradation Iters | range 1..30 |
+| `toolDefaults.litemesh.quad_remesh.preRemeshIters` | prop | IntProperty | Pre Remesh Iters | range 0..20 |
+| `toolDefaults.litemesh.quad_remesh.preRemeshPreserveFeatures` | prop | BoolProperty | Pre Remesh Preserve Features |  |
+| `toolDefaults.litemesh.quad_remesh.preRemeshSharpAngle` | prop | FloatProperty | Pre Remesh Sharp Angle | range 0..3.141592653589793 |
+| `toolDefaults.litemesh.quad_remesh.preRemeshSmoothIters` | prop | IntProperty | Pre Remesh Smooth Iters | range 0..20 |
+| `toolDefaults.litemesh.quad_remesh.preRemeshSmoothLambda` | prop | FloatProperty | Pre Remesh Smooth Lambda | range 0..1 |
+| `toolDefaults.litemesh.quad_remesh.preRemeshTarget` | prop | FloatProperty | Pre Remesh Target | range 0..10 |
+| `toolDefaults.litemesh.quad_remesh.reproject` | prop | BoolProperty | Reproject |  |
+| `toolDefaults.litemesh.quad_remesh.seed` | prop | IntProperty | Seed | range 0..1073741824 |
+| `toolDefaults.litemesh.quad_remesh.sharpAngle` | prop | FloatProperty | Sharp Angle | range 0..3.141592653589793 |
+| `toolDefaults.litemesh.quad_remesh.singularityCancel` | prop | BoolProperty | Singularity Cancel |  |
+| `toolDefaults.litemesh.quad_remesh.singularityCancelMaxSep` | prop | FloatProperty | Singularity Cancel Max Sep | range 0.5..4 |
+| `toolDefaults.litemesh.quad_remesh.smoothIterations` | prop | IntProperty | Smooth Iterations | range 0..20 |
+| `toolDefaults.litemesh.quad_remesh.smoothStrength` | prop | FloatProperty | Smooth Strength | range 0..1 |
+| `toolDefaults.litemesh.quad_remesh.targetEdgeLength` | prop | FloatProperty | Target Edge Length | range 0..10 |
+| `toolDefaults.litemesh.quad_remesh.targetQuadCount` | prop | IntProperty | Target Quad Count | range 1..1000000 |
+| `toolDefaults.litemesh.quad_remesh.triage` | prop | BoolProperty | Triage |  |
+| `toolDefaults.litemesh.quad_remesh.triageMinComponentFrac` | prop | FloatProperty | Triage Min Component Frac | range 0..0.5 |
+| `toolDefaults.litemesh.quad_remesh.triageWeldRel` | prop | FloatProperty | Triage Weld Rel | range 0..0.001 |
+| `toolDefaults.litemesh.quad_remesh.useCurvature` | prop | BoolProperty | Use Curvature |  |
+| `toolDefaults.litemesh.quad_remesh.useDensity` | prop | BoolProperty | Use Density |  |
+| `toolDefaults.litemesh.quad_remesh.useSharpFeatures` | prop | BoolProperty | Use Sharp Features |  |
+| `toolDefaults.litemesh.sculpt_layer_remove` | struct |  |  |  |
+| `toolDefaults.litemesh.sculpt_layer_remove.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.litemesh.sculpt_layer_set_flag` | struct |  |  |  |
+| `toolDefaults.litemesh.sculpt_layer_set_flag.kind` | prop | EnumProperty | Kind | enum {ENABLED, FROZEN} |
+| `toolDefaults.litemesh.sculpt_layer_set_flag.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.litemesh.sculpt_layer_set_flag.value` | prop | BoolProperty | Value |  |
+| `toolDefaults.litemesh.sculpt_layer_set_target` | struct |  |  |  |
+| `toolDefaults.litemesh.sculpt_layer_set_target.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.litemesh.sculpt_layer_set_weight` | struct |  |  |  |
+| `toolDefaults.litemesh.sculpt_layer_set_weight.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.litemesh.sculpt_layer_set_weight.weight` | prop | FloatProperty | Weight | range -2..2 |
+| `toolDefaults.litemesh.select_all` | struct |  |  |  |
+| `toolDefaults.litemesh.select_all.mode` | prop | EnumProperty | Mode | enum {ALL, NONE, AUTO} |
+| `toolDefaults.litemesh.select_circle` | struct |  |  |  |
+| `toolDefaults.litemesh.select_circle.radius` | prop | FloatProperty | Radius | range 1..500 |
+| `toolDefaults.litemesh.select_similar` | struct |  |  |  |
+| `toolDefaults.litemesh.select_similar.criterion` | prop | EnumProperty | Criterion | enum {FACE_SIDES, FACE_AREA, FACE_NORMAL, FACE_COPLANAR, FACE_HOLES, EDGE_LENGTH, EDGE_FACES, EDGE_DIRECTION, VERT_EDGES, VERT_FACES} |
+| `toolDefaults.litemesh.select_similar.extend` | prop | BoolProperty | Extend |  |
+| `toolDefaults.litemesh.select_similar.threshold` | prop | FloatProperty | Threshold | range 0..1 |
+| `toolDefaults.litemesh.select_similar.type` | prop | EnumProperty | Type | enum {FACE_MATERIAL, FACE_GROUP, FACE_AREA, FACE_NORMAL, FACE_COPLANAR, FACE_SIDES, EDGE_LENGTH, EDGE_DIRECTION, EDGE_FACES, EDGE_DIHEDRAL, VERT_NORMAL, VERT_EDGES, VERT_FACES} |
+| `toolDefaults.litemesh.subdivide` | struct |  |  |  |
+| `toolDefaults.litemesh.subdivide.cuts` | prop | IntProperty | Cuts |  |
+| `toolDefaults.litemesh.subdivide.numCuts` | prop | IntProperty | Num Cuts | range 1..32 |
+| `toolDefaults.litemesh.symmetrize` | struct |  |  |  |
+| `toolDefaults.litemesh.symmetrize.axes` | prop | FlagProperty | Axes | enum {X, Y, Z} |
+| `toolDefaults.litemesh.symmetrize.direction` | prop | EnumProperty | Direction | enum {NEGATIVE, POSITIVE} |
+| `toolDefaults.litemesh.symmetrize.threshold` | prop | FloatProperty | Threshold | range 0..2 |
+| `toolDefaults.litemesh.symmetrize_snap` | struct |  |  |  |
+| `toolDefaults.litemesh.symmetrize_snap.axes` | prop | FlagProperty | Axes | enum {X, Y, Z} |
+| `toolDefaults.litemesh.symmetrize_snap.direction` | prop | EnumProperty | Direction | enum {NEGATIVE, POSITIVE} |
+| `toolDefaults.litemesh.symmetrize_snap.threshold` | prop | FloatProperty | Threshold | range 0..2 |
 | `toolDefaults.material` | struct |  |  |  |
 | `toolDefaults.material.new` | struct |  |  |  |
 | `toolDefaults.material.new.dataPathToSet` | prop | StringProperty | Data Path To Set |  |
@@ -624,19 +1069,27 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.node.selectone.setActive` | prop | BoolProperty | Set Active |  |
 | `toolDefaults.node.selectone.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
 | `toolDefaults.node.toggle_select_all` | struct |  |  |  |
+| `toolDefaults.node.toggle_select_all.dataPath` | prop | StringProperty | Data Path |  |
 | `toolDefaults.node.toggle_select_all.graphClass` | prop | StringProperty | Graph Class |  |
 | `toolDefaults.node.toggle_select_all.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.node.toggle_select_all.layer` | prop | IntProperty | Layer |  |
 | `toolDefaults.node.toggle_select_all.mode` | prop | EnumProperty | Mode | enum {ADD, SUB, AUTO} |
 | `toolDefaults.node.toggle_select_all.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
+| `toolDefaults.node.toggle_select_all.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
 | `toolDefaults.node.toggle_select_all.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
 | `toolDefaults.node.translate` | struct |  |  |  |
+| `toolDefaults.node.translate.dataPath` | prop | StringProperty | Data Path |  |
 | `toolDefaults.node.translate.graphClass` | prop | StringProperty | Graph Class |  |
 | `toolDefaults.node.translate.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.node.translate.layer` | prop | IntProperty | Layer |  |
 | `toolDefaults.node.translate.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
 | `toolDefaults.node.translate.offset` | prop | Vec2Property | Offset |  |
 | `toolDefaults.node.translate.propEnabled` | prop | BoolProperty | Prop Enabled |  |
+| `toolDefaults.node.translate.propIslandOnly` | prop | BoolProperty | Prop Island Only |  |
 | `toolDefaults.node.translate.propMode` | prop | EnumProperty | Prop mode | enum {SMOOTH, SHARP, EXTRA_SHARP, SPHERE, LINEAR, CONSTANT} |
+| `toolDefaults.node.translate.propRadius` | prop | FloatProperty | Prop Radius | range 0.001..10 |
 | `toolDefaults.node.translate.propradius` | prop | FloatProperty | Prop radius |  |
+| `toolDefaults.node.translate.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
 | `toolDefaults.node.translate.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
 | `toolDefaults.node.translate.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
 | `toolDefaults.node.translate.value` | prop | Vec3Property | Value |  |
@@ -654,39 +1107,227 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.object.selectone.setActive` | prop | BoolProperty | Set Active |  |
 | `toolDefaults.object.selectone.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
 | `toolDefaults.object.toggle_select_all` | struct |  |  |  |
+| `toolDefaults.object.toggle_select_all.dataPath` | prop | StringProperty | Data Path |  |
 | `toolDefaults.object.toggle_select_all.graphClass` | prop | StringProperty | Graph Class |  |
 | `toolDefaults.object.toggle_select_all.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.object.toggle_select_all.layer` | prop | IntProperty | Layer |  |
 | `toolDefaults.object.toggle_select_all.mode` | prop | EnumProperty | Mode | enum {ADD, SUB, AUTO} |
 | `toolDefaults.object.toggle_select_all.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
+| `toolDefaults.object.toggle_select_all.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
 | `toolDefaults.object.toggle_select_all.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
+| `toolDefaults.sculptcore` | struct |  |  |  |
+| `toolDefaults.sculptcore.paint` | struct |  |  |  |
+| `toolDefaults.sculptcore.paint.brush` | prop | BrushProperty | Brush |  |
+| `toolDefaults.sculptcore.paint.falloff` | prop | Curve1DProperty | Falloff |  |
+| `toolDefaults.sculptcore.paint.rendermat` | prop | Mat4Property | Rendermat |  |
+| `toolDefaults.sculptcore.paint.samples` | prop | PaintSampleProperty | Samples |  |
+| `toolDefaults.sculptcore.paint.symmetryAxes` | prop | FlagProperty | Symmetry Axes | enum {X, Y, Z} |
+| `toolDefaults.sculptcore.paint.viewportSize` | prop | Vec2Property | Viewport Size |  |
+| `toolDefaults.uveditor` | struct |  |  |  |
+| `toolDefaults.uveditor.clear_flag` | struct |  |  |  |
+| `toolDefaults.uveditor.clear_flag.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.clear_flag.flag` | prop | FlagProperty | Flag | enum {SELECT, PIN} |
+| `toolDefaults.uveditor.clear_flag.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.clear_flag.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.grid_uvs` | struct |  |  |  |
+| `toolDefaults.uveditor.grid_uvs.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.grid_uvs.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.grid_uvs.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.pack_islands` | struct |  |  |  |
+| `toolDefaults.uveditor.pack_islands.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.pack_islands.ignorePinned` | prop | BoolProperty | Ignore Pinned |  |
+| `toolDefaults.uveditor.pack_islands.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.pack_islands.seed` | prop | IntProperty | Seed |  |
+| `toolDefaults.uveditor.pack_islands.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.pack_islands.selectedOnly` | prop | BoolProperty | Selected Only |  |
+| `toolDefaults.uveditor.pack_islands.showBins` | prop | BoolProperty | Show Bins |  |
+| `toolDefaults.uveditor.pick_select_linked` | struct |  |  |  |
+| `toolDefaults.uveditor.pick_select_linked.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.pick_select_linked.element` | prop | IntProperty | Element |  |
+| `toolDefaults.uveditor.pick_select_linked.immediateMode` | prop | BoolProperty | Immediate Mode |  |
+| `toolDefaults.uveditor.pick_select_linked.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.pick_select_linked.mode` | prop | EnumProperty | Mode | enum {ADD, SUB, AUTO} |
+| `toolDefaults.uveditor.pick_select_linked.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.project_uvs` | struct |  |  |  |
+| `toolDefaults.uveditor.project_uvs.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.project_uvs.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.project_uvs.matrix` | prop | Mat4Property | Matrix |  |
+| `toolDefaults.uveditor.project_uvs.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.project_uvs.selectedOnly` | prop | BoolProperty | Selected Only |  |
+| `toolDefaults.uveditor.randomize_uvs` | struct |  |  |  |
+| `toolDefaults.uveditor.randomize_uvs.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.randomize_uvs.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.randomize_uvs.scale` | prop | FloatProperty | Scale | range 0..10 |
+| `toolDefaults.uveditor.randomize_uvs.seed` | prop | IntProperty | Seed |  |
+| `toolDefaults.uveditor.randomize_uvs.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.randomize_uvs.selectedOnly` | prop | BoolProperty | Selected Only |  |
+| `toolDefaults.uveditor.relax` | struct |  |  |  |
+| `toolDefaults.uveditor.relax.boundaryWeight` | prop | FloatProperty | Boundary Weight | range 1..10000 |
+| `toolDefaults.uveditor.relax.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.relax.doSolve` | prop | BoolProperty | Do Solve |  |
+| `toolDefaults.uveditor.relax.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.relax.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.relax.selectedOnly` | prop | BoolProperty | Selected Only |  |
+| `toolDefaults.uveditor.relax.solverWeight` | prop | FloatProperty | Solver Weight | range 0..1 |
+| `toolDefaults.uveditor.relax.steps` | prop | IntProperty | Steps | range 1..55 |
+| `toolDefaults.uveditor.reset_uvs` | struct |  |  |  |
+| `toolDefaults.uveditor.reset_uvs.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.reset_uvs.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.reset_uvs.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.rotate` | struct |  |  |  |
+| `toolDefaults.uveditor.rotate.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.rotate.euler` | prop | Vec3Property | Euler |  |
+| `toolDefaults.uveditor.rotate.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.rotate.propEnabled` | prop | BoolProperty | Prop Enabled |  |
+| `toolDefaults.uveditor.rotate.propIslandOnly` | prop | BoolProperty | Prop Island Only |  |
+| `toolDefaults.uveditor.rotate.propMode` | prop | EnumProperty | Prop mode | enum {SMOOTH, SHARP, EXTRA_SHARP, SPHERE, LINEAR, CONSTANT} |
+| `toolDefaults.uveditor.rotate.propRadius` | prop | FloatProperty | Prop Radius | range 0.001..10 |
+| `toolDefaults.uveditor.rotate.propradius` | prop | FloatProperty | Prop radius |  |
+| `toolDefaults.uveditor.rotate.rotation` | prop | FloatProperty | Rotation |  |
+| `toolDefaults.uveditor.rotate.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.rotate.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
+| `toolDefaults.uveditor.rotate.value` | prop | Vec3Property | Value |  |
+| `toolDefaults.uveditor.scale` | struct |  |  |  |
+| `toolDefaults.uveditor.scale.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.scale.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.scale.propEnabled` | prop | BoolProperty | Prop Enabled |  |
+| `toolDefaults.uveditor.scale.propIslandOnly` | prop | BoolProperty | Prop Island Only |  |
+| `toolDefaults.uveditor.scale.propMode` | prop | EnumProperty | Prop mode | enum {SMOOTH, SHARP, EXTRA_SHARP, SPHERE, LINEAR, CONSTANT} |
+| `toolDefaults.uveditor.scale.propRadius` | prop | FloatProperty | Prop Radius | range 0.001..10 |
+| `toolDefaults.uveditor.scale.propradius` | prop | FloatProperty | Prop radius |  |
+| `toolDefaults.uveditor.scale.scale` | prop | Vec2Property | Scale |  |
+| `toolDefaults.uveditor.scale.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.scale.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
+| `toolDefaults.uveditor.scale.value` | prop | Vec3Property | Value |  |
+| `toolDefaults.uveditor.select_one` | struct |  |  |  |
+| `toolDefaults.uveditor.select_one.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.select_one.elements` | prop | ListProperty | Elements |  |
+| `toolDefaults.uveditor.select_one.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.select_one.mode` | prop | EnumProperty | Mode | enum {ADD, SUB, UNIQUE} |
+| `toolDefaults.uveditor.select_one.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.set_flag` | struct |  |  |  |
+| `toolDefaults.uveditor.set_flag.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.set_flag.flag` | prop | FlagProperty | Flag | enum {SELECT, PIN} |
+| `toolDefaults.uveditor.set_flag.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.set_flag.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.toggle_flag` | struct |  |  |  |
+| `toolDefaults.uveditor.toggle_flag.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.toggle_flag.flag` | prop | FlagProperty | Flag | enum {SELECT, PIN} |
+| `toolDefaults.uveditor.toggle_flag.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.toggle_flag.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.toggle_select_all` | struct |  |  |  |
+| `toolDefaults.uveditor.toggle_select_all.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.toggle_select_all.graphClass` | prop | StringProperty | Graph Class |  |
+| `toolDefaults.uveditor.toggle_select_all.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.uveditor.toggle_select_all.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.toggle_select_all.mode` | prop | EnumProperty | Mode | enum {ADD, SUB, AUTO} |
+| `toolDefaults.uveditor.toggle_select_all.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
+| `toolDefaults.uveditor.toggle_select_all.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.toggle_select_all.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
+| `toolDefaults.uveditor.translate` | struct |  |  |  |
+| `toolDefaults.uveditor.translate.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.translate.graphClass` | prop | StringProperty | Graph Class |  |
+| `toolDefaults.uveditor.translate.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.uveditor.translate.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.translate.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
+| `toolDefaults.uveditor.translate.offset` | prop | Vec2Property | Offset |  |
+| `toolDefaults.uveditor.translate.propEnabled` | prop | BoolProperty | Prop Enabled |  |
+| `toolDefaults.uveditor.translate.propIslandOnly` | prop | BoolProperty | Prop Island Only |  |
+| `toolDefaults.uveditor.translate.propMode` | prop | EnumProperty | Prop mode | enum {SMOOTH, SHARP, EXTRA_SHARP, SPHERE, LINEAR, CONSTANT} |
+| `toolDefaults.uveditor.translate.propRadius` | prop | FloatProperty | Prop Radius | range 0.001..10 |
+| `toolDefaults.uveditor.translate.propradius` | prop | FloatProperty | Prop radius |  |
+| `toolDefaults.uveditor.translate.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.translate.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
+| `toolDefaults.uveditor.translate.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
+| `toolDefaults.uveditor.translate.value` | prop | Vec3Property | Value |  |
+| `toolDefaults.uveditor.unwrap` | struct |  |  |  |
+| `toolDefaults.uveditor.unwrap.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.uveditor.unwrap.layer` | prop | IntProperty | Layer |  |
+| `toolDefaults.uveditor.unwrap.preserveIslands` | prop | BoolProperty | Preserve Islands |  |
+| `toolDefaults.uveditor.unwrap.seed` | prop | IntProperty | Seed |  |
+| `toolDefaults.uveditor.unwrap.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `toolDefaults.uveditor.unwrap.selectedIslandsOnly` | prop | BoolProperty | Selected Islands Only |  |
+| `toolDefaults.uveditor.unwrap.showBins` | prop | BoolProperty | Show Bins |  |
+| `toolDefaults.uveditor.unwrap.solverWeight` | prop | FloatProperty | Solver Weight | range 0..1 |
+| `toolDefaults.uveditor.unwrap.steps` | prop | IntProperty | Steps | range 1..500 |
 | `toolDefaults.velpan` | struct |  |  |  |
 | `toolDefaults.velpan.pan` | struct |  |  |  |
 | `toolDefaults.velpan.pan.velpanPath` | prop | StringProperty | Velpan Path |  |
 | `toolDefaults.view3d` | struct |  |  |  |
 | `toolDefaults.view3d.rotate` | struct |  |  |  |
+| `toolDefaults.view3d.rotate.dataPath` | prop | StringProperty | Data Path |  |
 | `toolDefaults.view3d.rotate.euler` | prop | Vec3Property | Euler |  |
+| `toolDefaults.view3d.rotate.layer` | prop | IntProperty | Layer |  |
 | `toolDefaults.view3d.rotate.propEnabled` | prop | BoolProperty | Prop Enabled |  |
+| `toolDefaults.view3d.rotate.propIslandOnly` | prop | BoolProperty | Prop Island Only |  |
 | `toolDefaults.view3d.rotate.propMode` | prop | EnumProperty | Prop mode | enum {SMOOTH, SHARP, EXTRA_SHARP, SPHERE, LINEAR, CONSTANT} |
+| `toolDefaults.view3d.rotate.propRadius` | prop | FloatProperty | Prop Radius | range 0.001..10 |
 | `toolDefaults.view3d.rotate.propradius` | prop | FloatProperty | Prop radius |  |
+| `toolDefaults.view3d.rotate.rotation` | prop | FloatProperty | Rotation |  |
+| `toolDefaults.view3d.rotate.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
 | `toolDefaults.view3d.rotate.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
 | `toolDefaults.view3d.rotate.value` | prop | Vec3Property | Value |  |
 | `toolDefaults.view3d.scale` | struct |  |  |  |
+| `toolDefaults.view3d.scale.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.view3d.scale.layer` | prop | IntProperty | Layer |  |
 | `toolDefaults.view3d.scale.propEnabled` | prop | BoolProperty | Prop Enabled |  |
+| `toolDefaults.view3d.scale.propIslandOnly` | prop | BoolProperty | Prop Island Only |  |
 | `toolDefaults.view3d.scale.propMode` | prop | EnumProperty | Prop mode | enum {SMOOTH, SHARP, EXTRA_SHARP, SPHERE, LINEAR, CONSTANT} |
+| `toolDefaults.view3d.scale.propRadius` | prop | FloatProperty | Prop Radius | range 0.001..10 |
 | `toolDefaults.view3d.scale.propradius` | prop | FloatProperty | Prop radius |  |
+| `toolDefaults.view3d.scale.scale` | prop | Vec2Property | Scale |  |
+| `toolDefaults.view3d.scale.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
 | `toolDefaults.view3d.scale.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
 | `toolDefaults.view3d.scale.value` | prop | Vec3Property | Value |  |
 | `toolDefaults.view3d.translate` | struct |  |  |  |
+| `toolDefaults.view3d.translate.dataPath` | prop | StringProperty | Data Path |  |
 | `toolDefaults.view3d.translate.graphClass` | prop | StringProperty | Graph Class |  |
 | `toolDefaults.view3d.translate.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.view3d.translate.layer` | prop | IntProperty | Layer |  |
 | `toolDefaults.view3d.translate.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
 | `toolDefaults.view3d.translate.offset` | prop | Vec2Property | Offset |  |
 | `toolDefaults.view3d.translate.propEnabled` | prop | BoolProperty | Prop Enabled |  |
+| `toolDefaults.view3d.translate.propIslandOnly` | prop | BoolProperty | Prop Island Only |  |
 | `toolDefaults.view3d.translate.propMode` | prop | EnumProperty | Prop mode | enum {SMOOTH, SHARP, EXTRA_SHARP, SPHERE, LINEAR, CONSTANT} |
+| `toolDefaults.view3d.translate.propRadius` | prop | FloatProperty | Prop Radius | range 0.001..10 |
 | `toolDefaults.view3d.translate.propradius` | prop | FloatProperty | Prop radius |  |
+| `toolDefaults.view3d.translate.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
 | `toolDefaults.view3d.translate.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
 | `toolDefaults.view3d.translate.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
 | `toolDefaults.view3d.translate.value` | prop | Vec3Property | Value |  |
+
+## uvEditor
+
+| Path | Kind | Type | UI name | Notes |
+| --- | --- | --- | --- | --- |
+| `uvEditor` | struct |  |  |  |
+| `uvEditor.imageUser` | struct |  |  |  |
+| `uvEditor.imageUser.image` | struct |  |  |  |
+| `uvEditor.imageUser.image.flag` | prop | FlagProperty | Flag | enum {1, 2, 4, SELECT, HIDE, UPDATE} |
+| `uvEditor.imageUser.image.genColor` | prop | Vec4Property | Color | range 0..1 |
+| `uvEditor.imageUser.image.genType` | prop | EnumProperty | Generator | enum {0, 1, COLOR, UVGRID} |
+| `uvEditor.imageUser.image.graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 32, 64, 128, 256, 384, SELECT, UPDATE, SORT_TAG, CYCLE_TAG, DISABLED, ZOMBIE, SAVE_PROXY, FORCE_SOCKET_INHERIT, FORCE_FLAG_INHERIT, FORCE_INHERIT} |
+| `uvEditor.imageUser.image.graph_id` | prop | IntProperty | Graph ID |  |
+| `uvEditor.imageUser.image.height` | prop | IntProperty | Height | range 1..16384 |
+| `uvEditor.imageUser.image.inputs` | list |  |  |  |
+| `uvEditor.imageUser.image.lib_flag` | prop | FlagProperty | Flag | enum {1, 2, 4, 8, SELECT, HIDE, FAKE_USER, NO_SAVE} |
+| `uvEditor.imageUser.image.lib_id` | prop | IntProperty | Lib ID |  |
+| `uvEditor.imageUser.image.name` | prop | StringProperty | name |  |
+| `uvEditor.imageUser.image.outputs` | list |  |  |  |
+| `uvEditor.imageUser.image.ready` | prop | BoolProperty | Ready |  |
+| `uvEditor.imageUser.image.type` | prop | EnumProperty | Image Type | enum {0, 1, 2, 3, GENERATED, BYTE_BUFFER, FLOAT_BUFFER, URL} |
+| `uvEditor.imageUser.image.url` | prop | StringProperty | URL |  |
+| `uvEditor.imageUser.image.width` | prop | IntProperty | Width | range 1..16384 |
+| `uvEditor.pos` | prop | Vec2Property | Position |  |
+| `uvEditor.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
+| `uvEditor.size` | prop | Vec2Property | Size |  |
+| `uvEditor.type` | prop | StringProperty | Type |  |
+| `uvEditor.uvLayer` | prop | IntProperty | UV Layer |  |
+| `uvEditor.velpan` | struct |  |  |  |
+| `uvEditor.velpan.max` | prop | Vec2Property | Boundary Maximum |  |
+| `uvEditor.velpan.min` | prop | Vec2Property | Boundary Minimum |  |
+| `uvEditor.velpan.pos` | prop | Vec2Property | Position |  |
+| `uvEditor.velpan.scale` | prop | Vec2Property | Scale |  |
 
 ## view3d
 

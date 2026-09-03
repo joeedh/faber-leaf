@@ -9,7 +9,6 @@ import {DependSocket, Vec3Socket, Vec4Socket, FloatSocket, IntSocket, BoolSocket
 import * as util from '../util/util.js'
 import {OutputNode, DiffuseNode, type IRenderLights, ShaderNetworkClass} from './shader_nodes.js'
 import {WgslShaderGenerator, type RequestedAttrDesc} from './shader_nodes_wgsl.js'
-import {defineGraphAPI} from '../path.ux/scripts/graph/index.js'
 import {api_define_graph} from '../core/graph_api.js'
 
 /**

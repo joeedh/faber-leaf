@@ -25,7 +25,7 @@ import {ShaderNetwork} from '../shadernodes/shadernetwork.js'
 import {Material} from '../core/material.js'
 import '../shadernodes/allnodes.js'
 import {ShaderNode} from '../shadernodes/shader_nodes.js'
-import {Graph, Node, SocketFlags, NodeSocketType} from '../core/graph.js'
+import {Graph, Node, SocketFlags, NodeSocketType, defineSocketListStructs} from '../core/graph.js'
 import {SceneObject} from '../sceneobject/sceneobject.js'
 import {Scene} from '../scene/scene.js'
 import {api_define_graphclasses} from '../core/graph_class.js'
@@ -260,6 +260,10 @@ export function getDataAPI(): MyDataAPI {
   for (const builder of getDataAPIBuilders('after-classes')) {
     builder.build(dataApi)
   }
+
+  // Last in the population pass: every node struct now carries its socket lists
+  // and every socket class its struct, which is what this pass joins.
+  defineSocketListStructs(dataApi)
 
   // ── Attach pass ─────────────────────────────────────────────────────────
   // Build the ToolContext tree: wire the now-populated class structs (fetched by

@@ -16,7 +16,7 @@ import {UVSolver, packUVIslands, randomizeUVGraph, relaxUVGraph} from '../../../
 import {gridUVs} from '../../../addons/builtin/uv_editor/src/uv_edit_geom'
 import {UVFlags, UVGridSource, UVGridSurface} from '../../lib/uv_grid_source'
 import type {IUVSource} from '../../../scripts/core/geometry_contract'
-import {IndexRange, VectorArg, Vector2, Vector3, VectorLike} from '@framework/pathux'
+import {VectorArg, Vector2, Vector3} from '@framework/pathux'
 
 const LAYER = 0
 

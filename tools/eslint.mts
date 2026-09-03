@@ -112,15 +112,27 @@ function eslintVersion(repoRoot: string): string {
   }
 }
 
+// The pathux/valid-datapath rule reads this catalog, so a regenerated catalog
+// changes what a file lints to even though the file itself has not moved. Folded
+// into the result key so `pnpm gen:paths` invalidates the affected entries.
+function catalogHash(repoRoot: string): string {
+  try {
+    return sha256(fs.readFileSync(Path.join(repoRoot, 'scripts', 'path.ux', 'generated', 'api-paths.json'), 'utf-8'))
+  } catch {
+    return 'none'
+  }
+}
+
 function resultCacheKey(parts: {
   configHash: string
+  catalogHash: string
   eslintVersion: string
   argsKey: string
   relPath: string
   content: string
 }): string {
-  const {configHash, eslintVersion, argsKey, relPath, content} = parts
-  return sha256([configHash, eslintVersion, argsKey, relPath, sha256(content)].join(' '))
+  const {configHash, catalogHash, eslintVersion, argsKey, relPath, content} = parts
+  return sha256([configHash, catalogHash, eslintVersion, argsKey, relPath, sha256(content)].join(' '))
 }
 
 interface EslintMessage {
@@ -216,6 +228,7 @@ async function run(targetPath: string, rawEslintArgs: string[]) {
   const repoRoot = getRepoRoot()
   const {ignores, configHash} = await loadConfig(repoRoot)
   const version = eslintVersion(repoRoot)
+  const catalog = catalogHash(repoRoot)
 
   // We always request `--format json` ourselves so batch output can be split per file and
   // cached; drop any `--format`/`-f` the caller passed so it can't collide with that.
@@ -280,7 +293,7 @@ async function run(targetPath: string, rawEslintArgs: string[]) {
   for (const file of files) {
     const relPath = Path.relative(repoRoot, Path.resolve(file)).split(Path.sep).join('/')
     const content = fs.readFileSync(file, 'utf-8')
-    const key = resultCacheKey({configHash, eslintVersion: version, argsKey, relPath, content})
+    const key = resultCacheKey({configHash, catalogHash: catalog, eslintVersion: version, argsKey, relPath, content})
     let cached = casRead<CachedLintResult>(cachePath(key))
 
     if (cached?.output?.search(/allowDefaultProject/) !== -1) {
@@ -401,7 +414,14 @@ async function run(targetPath: string, rawEslintArgs: string[]) {
         continue
       }
       const relPath = Path.relative(repoRoot, result.filePath).split(Path.sep).join('/')
-      const key = resultCacheKey({configHash, eslintVersion: version, argsKey, relPath, content: finalContent})
+      const key = resultCacheKey({
+        configHash,
+        catalogHash: catalog,
+        eslintVersion: version,
+        argsKey,
+        relPath,
+        content    : finalContent,
+      })
 
       pushQueue(
         cachePath(key),

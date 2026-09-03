@@ -19,7 +19,6 @@ const BOX_FRUSTUM = [
   [0, 0, -1, 1], // z <= 1
 ].map((v) => new Vector4(v))
 
-const v4 = (arr: number[]) => new Vector4(arr)
 const v3 = (arr: number[]) => new Vector3([...arr])
 
 describe('point_in_frustum', () => {

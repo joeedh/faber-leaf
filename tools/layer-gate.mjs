@@ -12,21 +12,27 @@
 /** Severities that fail the run outright, regardless of any budget. */
 export const EXIT_SEVERITIES = new Set(['error'])
 
+/** @typedef {{rule: {name: string, severity: string}, from: string, to: string}} Violation */
+
 /**
  * rule name -> {severity, count, violations}, seeded with every configured rule so a
  * rule that starts firing is a budget overrun rather than an unnoticed new key.
  *
- * @param {{summary: {violations: Array<{rule: {name: string, severity: string}}>}}} cruiseResult
+ * @param {{summary: {violations: Violation[]}}} cruiseResult
  * @param {string[]} ruleNames
  * @param {Record<string, string>} [ruleSeverities] name -> severity from the config,
  *   so a rule that fired zero times still reports the severity it was declared with.
  */
 export function tally(cruiseResult, ruleNames, ruleSeverities = {}) {
-  /** @type {{rule: {name: string, severity: string}, from: string, to: string}} */
-  const violations = []
-
   const rules = new Map(
-    ruleNames.map((name) => [name, {count: 0, severity: ruleSeverities[name] ?? 'warn', violations}])
+    ruleNames.map((name) => [
+      name,
+      {
+        count     : 0,
+        severity  : ruleSeverities[name] ?? 'warn',
+        violations: /** @type {Violation[]} */ ([]),
+      },
+    ])
   )
 
   for (const violation of cruiseResult.summary.violations) {

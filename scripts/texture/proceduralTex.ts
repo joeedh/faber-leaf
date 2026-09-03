@@ -425,7 +425,6 @@ export class SimpleNoise extends PatternGen {
     // eslint rule checker isn't valid
     // we could eventually support this with a prefix template parameter to Container
 
-    // eslint-disable-next-line pathux/valid-datapath
     container.prop('levels')
     // eslint-disable-next-line pathux/valid-datapath
     container.prop('levelScale')
@@ -862,7 +861,6 @@ export class GaborNoise extends PatternGen {
   }
 
   static buildSettings(container: Container<ViewContext>): void {
-    // eslint-disable-next-line pathux/valid-datapath
     container.prop('levels')
     // eslint-disable-next-line pathux/valid-datapath
     container.prop('levelScale')

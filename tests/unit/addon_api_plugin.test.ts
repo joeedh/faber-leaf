@@ -4,7 +4,6 @@
  * this file just covers the parser's pattern matching. Step 12 follow-up #2.
  */
 
-// @ts-expect-error — JS module without types.
 import {parseExportNames} from '../../tools/addon_api_plugin.js'
 
 describe('parseExportNames', () => {

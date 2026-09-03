@@ -3,6 +3,7 @@ import {registerDataAPI} from '../data_api/api_define_registry.js'
 
 import '../util/polyfill.d.ts'
 import type {StructReader} from '../path.ux/scripts/util/nstructjs.js'
+import type {DataPath} from '../path.ux/scripts/path-controller/controller/controller_base.js'
 import type {ViewContext} from './context'
 import type {BlockLoader, BlockLoaderAddUser, DataBlock} from './lib_api.js'
 
@@ -100,6 +101,45 @@ export enum GraphFlags {
 }
 
 export const NodeSocketClasses = [] as (typeof NodeSocketType)[]
+
+/** Every `inputs` / `outputs` list `Node.defineAPI` has built, for the pass below. */
+const _socketLists: {cls: typeof Node; inorouts: 'inputs' | 'outputs'; listDef: DataPath}[] = []
+
+/**
+ * Declare which structs a node's socket lists resolve their elements to, taking
+ * them from the sockets the node class actually declares. This is what carries
+ * `<node>.inputs[n].value` and the other socket members into the data-path
+ * catalog. Deferred to its own pass because the socket classes' structs are
+ * populated separately from the node structs that carry the lists; run once
+ * both are done (getDataAPI's population pass).
+ */
+export function defineSocketListStructs(api: DataAPI): void {
+  for (const {cls, inorouts, listDef} of _socketLists) {
+    let sockets
+    try {
+      sockets = cls.getFinalNodeDef()[inorouts]
+    } catch (error) {
+      // Catalog metadata only. A node class that cannot report its sockets here
+      // must not take the boot down with it — its list just stays untyped.
+      // eslint-disable-next-line no-console
+      console.warn(`could not read ${cls.name}'s ${inorouts} sockets:`, error)
+    }
+
+    if (!sockets) {
+      continue
+    }
+
+    const structs = new Set<DataStruct>()
+    for (const key in sockets) {
+      const struct = api.getStruct(sockets[key].constructor as typeof NodeSocketType)
+      if (struct) {
+        structs.add(struct)
+      }
+    }
+
+    listDef.validStructs = [...structs]
+  }
+}
 
 export interface INodeSocketDef {
   name: string
@@ -717,12 +757,17 @@ graph.Node {
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
     const nstruct = struct ?? api.mapStruct(this, true)
+    // The class whose sockets these lists hold. `super.defineAPI(api, st)` keeps
+    // `this` as the subclass, so this is the node class in every path but the
+    // explicit `Node.defineAPI(api, <subclass struct>)` one, which declares no
+    // sockets of its own and so contributes none.
+    const nodeCls = this
 
     nstruct.flags('graph_flag', 'graph_flag', NodeFlags, 'Graph Flags', 'Flags')
     nstruct.int('graph_id', 'graph_id', 'Graph ID', 'Unique graph ID').readOnly()
 
     function defineSockets(inorouts: 'inputs' | 'outputs'): void {
-      nstruct.list('', inorouts, [
+      const listDef = nstruct.list('', inorouts, [
         function getIter(sockApi: DataAPI, list: any) {
           return (function* () {
             for (const k in list[inorouts]) {
@@ -762,6 +807,8 @@ graph.Node {
           return ret === undefined ? sockApi.getStruct(NodeSocketType) : ret
         },
       ])
+
+      _socketLists.push({cls: nodeCls, inorouts, listDef})
     }
 
     defineSockets('inputs')

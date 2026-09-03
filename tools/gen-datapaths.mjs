@@ -20,7 +20,7 @@
  * Usage: node tools/gen-datapaths.mjs
  */
 import {readFile, writeFile, mkdir, rm} from 'node:fs/promises'
-import {existsSync} from 'node:fs'
+import {existsSync, globSync, readFileSync} from 'node:fs'
 import {tmpdir} from 'node:os'
 import {join, resolve, dirname} from 'node:path'
 import {fileURLToPath, pathToFileURL} from 'node:url'
@@ -39,13 +39,51 @@ const EXPORT_NAME = 'getDataAPI'
 // customdata→barrel→mesh_customdata cycle the other way and hits a
 // "Class extends undefined" TDZ. Co-located with api_define.js so these
 // relative specifiers resolve identically.
-// P13 deleted the builtin_data_api bridge along with the BREP addon it fed, so
-// there is nothing addon-owned left to pull in here: the generator never boots
-// addons, and every surviving builtin contributes its data API through the
-// per-addon lifecycle instead.
-const GEN_ENTRY_SRC = `import '../_framework_runtime.js'
-export {${EXPORT_NAME}} from './api_define.js'
-`
+// Each builtin addon's manifest entry is imported alongside it, and its
+// `register()` hook runs against a bare AddonAPI before `getDataAPI()` — that
+// is what puts addon-owned editors in `areaclasses` and addon DataBlock /
+// SceneObjectData classes in the data-API registry, so their paths reach the
+// catalog. Nothing here boots the AddonManager: the hooks run directly, and an
+// addon whose hook throws is reported and skipped rather than failing the run.
+const GEN_ENTRY_NAME = 'registerBuiltinAddons'
+
+/** Manifest id + absolute entry module of every builtin addon. */
+function builtinAddonEntries() {
+  const entries = []
+  for (const manifestPath of globSync(resolve(REPO_ROOT, 'addons/builtin/*/manifest.json'))) {
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
+    if (manifest?.entry) {
+      entries.push({id: manifest.id, entry: resolve(dirname(manifestPath), manifest.entry)})
+    }
+  }
+  return entries
+}
+
+function genEntrySrc() {
+  const addons = builtinAddonEntries()
+  // JSON.stringify escapes the Windows separators in the absolute paths.
+  const imports = addons.map((a, i) => `import * as __addon${i} from ${JSON.stringify(a.entry)}`)
+  const list = addons.map((a, i) => `[${JSON.stringify(a.id)}, __addon${i}]`).join(', ')
+
+  return [
+    `import '../_framework_runtime.js'`,
+    `import {AddonAPI} from '../addon/addon_base.js'`,
+    ...imports,
+    `const __addons = [${list}]`,
+    `export function ${GEN_ENTRY_NAME}() {`,
+    `  for (const [id, mod] of __addons) {`,
+    `    try {`,
+    `      mod.register?.(new AddonAPI())`,
+    `    } catch (err) {`,
+    `      console.warn('[gen-datapaths] addon ' + id + ' register() failed: ' + (err?.message ?? err))`,
+    `    }`,
+    `  }`,
+    `}`,
+    `export {${EXPORT_NAME}} from './api_define.js'`,
+    ``,
+  ].join('\n')
+}
+
 const OUT_DIR = resolve(REPO_ROOT, 'scripts/data_api/generated')
 // path.ux's eslint rule hardcodes resolve(__dirname, "../../generated/api-paths.json").
 const ESLINT_CATALOG = resolve(REPO_ROOT, 'scripts/path.ux/generated/api-paths.json')
@@ -59,6 +97,13 @@ const AUGMENT_MODULE = '@framework/pathux'
 const DOM_STUB_BANNER = `
 {
   const noop = () => {};
+  // An addon's register() may kick off work that cannot finish under node — the
+  // litemesh engine load is the case that exists. The catalog only needs the
+  // registrations that happen synchronously, so the async failure is swallowed
+  // rather than killing the run.
+  if (typeof process !== "undefined" && typeof process.on === "function") {
+    process.on("unhandledRejection", noop);
+  }
   const elTarget = { style: {}, classList: { add: noop, remove: noop, toggle: noop, contains: () => false }, dataset: {}, children: [], childNodes: [] };
   const el = new Proxy(elTarget, { get: (t, k) => (k in t ? t[k] : noop), set: () => true });
   const win = globalThis;
@@ -149,7 +194,17 @@ async function aliasFromTsconfig() {
 // platform → electron, config → the gitignored per-machine config_local.js)
 // that aren't installed/needed to assemble the DataAPI. Resolve them to a
 // permissive proxy so any named import is a harmless no-op.
-const STUBBED_MODULES = ['marked', 'electron', './config_local.js']
+// The last two are the sculptcore emscripten glue, reached only from the engine
+// load the litemesh addon's register() starts. Stubbing them keeps that load
+// from hunting for a .wasm next to the temp bundle and reporting the miss; the
+// catalog is built from class defineAPIs, which never touch the engine.
+const STUBBED_MODULES = [
+  'marked',
+  'electron',
+  './config_local.js',
+  '../build/sculptcore.js',
+  '../build/sculptcore-browser.js',
+]
 
 function stubModulesPlugin(names) {
   const set = new Set(names)
@@ -175,7 +230,7 @@ async function loadApi() {
   const alias = await aliasFromTsconfig()
 
   const genEntry = resolve(REPO_ROOT, 'scripts/data_api', `.gen-entry-${process.pid}.mjs`)
-  await writeFile(genEntry, GEN_ENTRY_SRC, 'utf8')
+  await writeFile(genEntry, genEntrySrc(), 'utf8')
 
   let result
   try {
@@ -250,6 +305,10 @@ async function loadApi() {
 }
 
 function finishLoad(mod) {
+  // Must precede getDataAPI(): it is one-shot, and its registry / editor passes
+  // only see what has registered by the time it runs.
+  mod[GEN_ENTRY_NAME]?.()
+
   const exported = mod[EXPORT_NAME] ?? mod.default
   if (exported === undefined) {
     throw new Error(`api_define.js has no export "${EXPORT_NAME}" (or default)`)

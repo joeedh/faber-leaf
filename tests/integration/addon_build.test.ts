@@ -79,8 +79,8 @@ describeOnce('tools/build-addons.js', () => {
     let exported: Record<string, unknown> | undefined
     const api = {
       addonId        : 'test_addon',
-      exportNamespace: (name: string, exports: Record<string, unknown>) => {
-        if (name === 'test_addon') exported = exports
+      exportNamespace: (name: string, exports: unknown) => {
+        if (name === 'test_addon') exported = exports as Record<string, unknown>
       },
     }
 
