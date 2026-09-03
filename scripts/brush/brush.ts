@@ -190,7 +190,7 @@ SculptBrush {
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    const bst = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
+    const bst = super.defineAPI(api, struct ?? api.mapStruct(this, true))
 
     // Sibling structs referenced below must exist first.
     DynTopoSettings.defineAPI(api)

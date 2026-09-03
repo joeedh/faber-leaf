@@ -443,7 +443,64 @@
     "imageEditor.imageUser.image.outputs": {
       "kind": "list",
       "ownerStruct": "ImageBlock",
+      "structName": "graph.DependSocket",
       "indexed": false
+    },
+    "imageEditor.imageUser.image.outputs[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "64",
+        "128",
+        "SELECT",
+        "UPDATE",
+        "MULTI",
+        "NO_MULTI_OUTPUTS",
+        "PRIVATE",
+        "INSTANCE_API_DEFINE",
+        "NO_UI_EDITING"
+      ]
+    },
+    "imageEditor.imageUser.image.outputs[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "imageEditor.imageUser.image.outputs[n].name": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "imageEditor.imageUser.image.outputs[n].uiname": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "UI Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "imageEditor.imageUser.image.ready": {
       "kind": "prop",
@@ -988,7 +1045,64 @@
     "material.graph.nodes[n].imageUser.image.outputs": {
       "kind": "list",
       "ownerStruct": "ImageBlock",
+      "structName": "graph.DependSocket",
       "indexed": true
+    },
+    "material.graph.nodes[n].imageUser.image.outputs[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "64",
+        "128",
+        "SELECT",
+        "UPDATE",
+        "MULTI",
+        "NO_MULTI_OUTPUTS",
+        "PRIVATE",
+        "INSTANCE_API_DEFINE",
+        "NO_UI_EDITING"
+      ]
+    },
+    "material.graph.nodes[n].imageUser.image.outputs[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "material.graph.nodes[n].imageUser.image.outputs[n].name": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "material.graph.nodes[n].imageUser.image.outputs[n].uiname": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "UI Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "material.graph.nodes[n].imageUser.image.ready": {
       "kind": "prop",
@@ -1350,7 +1464,64 @@
     "material.outputs": {
       "kind": "list",
       "ownerStruct": "Material",
+      "structName": "graph.DependSocket",
       "indexed": false
+    },
+    "material.outputs[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "64",
+        "128",
+        "SELECT",
+        "UPDATE",
+        "MULTI",
+        "NO_MULTI_OUTPUTS",
+        "PRIVATE",
+        "INSTANCE_API_DEFINE",
+        "NO_UI_EDITING"
+      ]
+    },
+    "material.outputs[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "material.outputs[n].name": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "material.outputs[n].uiname": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "UI Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "material.shader": {
       "kind": "dynamicStruct",
@@ -2025,7 +2196,64 @@
     "object.material.graph.nodes[n].imageUser.image.outputs": {
       "kind": "list",
       "ownerStruct": "ImageBlock",
+      "structName": "graph.DependSocket",
       "indexed": true
+    },
+    "object.material.graph.nodes[n].imageUser.image.outputs[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "64",
+        "128",
+        "SELECT",
+        "UPDATE",
+        "MULTI",
+        "NO_MULTI_OUTPUTS",
+        "PRIVATE",
+        "INSTANCE_API_DEFINE",
+        "NO_UI_EDITING"
+      ]
+    },
+    "object.material.graph.nodes[n].imageUser.image.outputs[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "object.material.graph.nodes[n].imageUser.image.outputs[n].name": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "object.material.graph.nodes[n].imageUser.image.outputs[n].uiname": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "UI Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "object.material.graph.nodes[n].imageUser.image.ready": {
       "kind": "prop",
@@ -2387,7 +2615,64 @@
     "object.material.outputs": {
       "kind": "list",
       "ownerStruct": "Material",
+      "structName": "graph.DependSocket",
       "indexed": false
+    },
+    "object.material.outputs[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "64",
+        "128",
+        "SELECT",
+        "UPDATE",
+        "MULTI",
+        "NO_MULTI_OUTPUTS",
+        "PRIVATE",
+        "INSTANCE_API_DEFINE",
+        "NO_UI_EDITING"
+      ]
+    },
+    "object.material.outputs[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "object.material.outputs[n].name": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "object.material.outputs[n].uiname": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "UI Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "object.material.shader": {
       "kind": "dynamicStruct",
@@ -3186,7 +3471,64 @@
     "objects[n].material.graph.nodes[n].imageUser.image.outputs": {
       "kind": "list",
       "ownerStruct": "ImageBlock",
+      "structName": "graph.DependSocket",
       "indexed": true
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.outputs[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "64",
+        "128",
+        "SELECT",
+        "UPDATE",
+        "MULTI",
+        "NO_MULTI_OUTPUTS",
+        "PRIVATE",
+        "INSTANCE_API_DEFINE",
+        "NO_UI_EDITING"
+      ]
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.outputs[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.outputs[n].name": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "objects[n].material.graph.nodes[n].imageUser.image.outputs[n].uiname": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "UI Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "objects[n].material.graph.nodes[n].imageUser.image.ready": {
       "kind": "prop",
@@ -3548,7 +3890,64 @@
     "objects[n].material.outputs": {
       "kind": "list",
       "ownerStruct": "Material",
+      "structName": "graph.DependSocket",
       "indexed": true
+    },
+    "objects[n].material.outputs[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "64",
+        "128",
+        "SELECT",
+        "UPDATE",
+        "MULTI",
+        "NO_MULTI_OUTPUTS",
+        "PRIVATE",
+        "INSTANCE_API_DEFINE",
+        "NO_UI_EDITING"
+      ]
+    },
+    "objects[n].material.outputs[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "objects[n].material.outputs[n].name": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "objects[n].material.outputs[n].uiname": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "UI Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "objects[n].material.shader": {
       "kind": "dynamicStruct",
@@ -4204,7 +4603,73 @@
     "scene.outputs": {
       "kind": "list",
       "ownerStruct": "Scene",
+      "structName": "graph.DependSocket",
       "indexed": false
+    },
+    "scene.outputs[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "64",
+        "128",
+        "SELECT",
+        "UPDATE",
+        "MULTI",
+        "NO_MULTI_OUTPUTS",
+        "PRIVATE",
+        "INSTANCE_API_DEFINE",
+        "NO_UI_EDITING"
+      ]
+    },
+    "scene.outputs[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "scene.outputs[n].name": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "scene.outputs[n].uiname": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "UI Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "scene.outputs[n].value": {
+      "kind": "prop",
+      "ownerStruct": "graph.FloatSocket",
+      "indexed": true,
+      "propType": "FloatProperty",
+      "uiname": "value",
+      "decimalPlaces": 4,
+      "step": 0.1
     },
     "scene.propEnabled": {
       "kind": "prop",
@@ -7012,7 +7477,64 @@
     "shadernetwork.graph.nodes[n].imageUser.image.outputs": {
       "kind": "list",
       "ownerStruct": "ImageBlock",
+      "structName": "graph.DependSocket",
       "indexed": true
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.outputs[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "64",
+        "128",
+        "SELECT",
+        "UPDATE",
+        "MULTI",
+        "NO_MULTI_OUTPUTS",
+        "PRIVATE",
+        "INSTANCE_API_DEFINE",
+        "NO_UI_EDITING"
+      ]
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.outputs[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.outputs[n].name": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "shadernetwork.graph.nodes[n].imageUser.image.outputs[n].uiname": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "UI Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "shadernetwork.graph.nodes[n].imageUser.image.ready": {
       "kind": "prop",
@@ -7364,7 +7886,64 @@
     "shadernetwork.outputs": {
       "kind": "list",
       "ownerStruct": "ShaderNetwork",
+      "structName": "graph.DependSocket",
       "indexed": false
+    },
+    "shadernetwork.outputs[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "64",
+        "128",
+        "SELECT",
+        "UPDATE",
+        "MULTI",
+        "NO_MULTI_OUTPUTS",
+        "PRIVATE",
+        "INSTANCE_API_DEFINE",
+        "NO_UI_EDITING"
+      ]
+    },
+    "shadernetwork.outputs[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "shadernetwork.outputs[n].name": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "shadernetwork.outputs[n].uiname": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "UI Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "toolDefaults": {
       "kind": "struct",
@@ -12941,7 +13520,64 @@
     "uvEditor.imageUser.image.outputs": {
       "kind": "list",
       "ownerStruct": "ImageBlock",
+      "structName": "graph.DependSocket",
       "indexed": false
+    },
+    "uvEditor.imageUser.image.outputs[n].graph_flag": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "FlagProperty",
+      "uiname": "Graph Flags",
+      "description": "Flags",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "1",
+        "2",
+        "4",
+        "8",
+        "16",
+        "64",
+        "128",
+        "SELECT",
+        "UPDATE",
+        "MULTI",
+        "NO_MULTI_OUTPUTS",
+        "PRIVATE",
+        "INSTANCE_API_DEFINE",
+        "NO_UI_EDITING"
+      ]
+    },
+    "uvEditor.imageUser.image.outputs[n].graph_id": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "IntProperty",
+      "uiname": "Graph ID",
+      "description": "Unique graph ID",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "uvEditor.imageUser.image.outputs[n].name": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "uvEditor.imageUser.image.outputs[n].uiname": {
+      "kind": "prop",
+      "ownerStruct": "graph.DependSocket",
+      "indexed": true,
+      "propType": "StringProperty",
+      "uiname": "UI Name",
+      "description": "Name of socket",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "uvEditor.imageUser.image.ready": {
       "kind": "prop",

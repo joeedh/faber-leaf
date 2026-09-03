@@ -768,7 +768,7 @@ propIslandOnly : bool;
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    const sstruct = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
+    const sstruct = super.defineAPI(api, struct ?? api.mapStruct(this, true))
 
     sstruct.struct('envlight', 'envlight', 'Ambient Light', EnvLight.defineAPI(api))
     sstruct.bool('propEnabled', 'propEnabled', 'Magnet Mode').icon(Icons.MAGNET)

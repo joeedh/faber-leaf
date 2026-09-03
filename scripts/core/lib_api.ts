@@ -247,8 +247,9 @@ DataBlock {
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    // `super`, not `Node`, so `this` stays the subclass — Node.defineAPI reads it
-    // to find the sockets its `inputs` / `outputs` lists hold.
+    // Every `defineAPI` in the chain calls `super`, never the base class by name,
+    // so `this` reaches Node.defineAPI as the class whose sockets its `inputs` /
+    // `outputs` lists hold.
     const dstruct = super.defineAPI(api, struct ?? api.mapStruct(this, true))
 
     dstruct.int('lib_id', 'lib_id', 'Lib ID').readOnly()

@@ -218,8 +218,6 @@ export class SceneObject<
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    // `super`, not `DataBlock`, so `this` reaches Node.defineAPI as the subclass
-    // whose sockets the `inputs` / `outputs` lists hold.
     const ostruct = super.defineAPI(api, struct ?? api.mapStruct(this, true))
 
     ostruct.dynamicStruct('data', 'data', 'data')

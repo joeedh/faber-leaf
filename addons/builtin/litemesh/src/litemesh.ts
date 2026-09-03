@@ -521,10 +521,7 @@ export class LiteMesh extends SceneObjectData {
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    const mstruct = SceneObjectData.defineAPI(api, struct ?? api.mapStruct(this, true)) as DataStruct<
-      ViewContext,
-      LiteMesh
-    >
+    const mstruct = super.defineAPI(api, struct ?? api.mapStruct(this, true)) as DataStruct<ViewContext, LiteMesh>
 
     const def = mstruct
       .flags(

@@ -112,7 +112,7 @@ SceneObjectData {
   )
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    const mstruct = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
+    const mstruct = super.defineAPI(api, struct ?? api.mapStruct(this, true))
     mstruct.list<(Material | undefined)[], number, Material>('materials', 'materials', [
       function getIter(_api: DataAPI, list: (Material | undefined)[]) {
         return list

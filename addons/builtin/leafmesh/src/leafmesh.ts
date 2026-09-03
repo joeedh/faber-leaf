@@ -163,10 +163,7 @@ leafmesh.LeafMeshData {
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    const mstruct = SceneObjectData.defineAPI(api, struct ?? api.mapStruct(this, true)) as DataStruct<
-      ViewContext,
-      LeafMeshData
-    >
+    const mstruct = super.defineAPI(api, struct ?? api.mapStruct(this, true)) as DataStruct<ViewContext, LeafMeshData>
 
     mstruct
       .flags('symmetryAxes', 'symmetryAxes', LeafMeshSymmetry, 'Symmetry', 'Mirror axes honoured by transforms')

@@ -268,7 +268,7 @@ ShaderNetwork {
       nodeStructs.push(api.getStruct(cls))
     }
 
-    const mstruct = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
+    const mstruct = super.defineAPI(api, struct ?? api.mapStruct(this, true))
     const graphSt = new DataStruct()
     mstruct.struct('graph', 'graph', 'Shader Graph', api_define_graph(graphSt, nodeStructs))
     return mstruct

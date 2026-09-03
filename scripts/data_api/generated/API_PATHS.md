@@ -94,6 +94,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `imageEditor.imageUser.image.lib_id` | prop | IntProperty | Lib ID |  |
 | `imageEditor.imageUser.image.name` | prop | StringProperty | name |  |
 | `imageEditor.imageUser.image.outputs` | list |  |  |  |
+| `imageEditor.imageUser.image.outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `imageEditor.imageUser.image.outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `imageEditor.imageUser.image.outputs[n].name` | prop | StringProperty | Name |  |
+| `imageEditor.imageUser.image.outputs[n].uiname` | prop | StringProperty | UI Name |  |
 | `imageEditor.imageUser.image.ready` | prop | BoolProperty | Ready |  |
 | `imageEditor.imageUser.image.type` | prop | EnumProperty | Image Type | enum {0, 1, 2, 3, GENERATED, BYTE_BUFFER, FLOAT_BUFFER, URL} |
 | `imageEditor.imageUser.image.url` | prop | StringProperty | URL |  |
@@ -170,6 +174,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `material.graph.nodes[n].imageUser.image.lib_id` | prop | IntProperty | Lib ID |  |
 | `material.graph.nodes[n].imageUser.image.name` | prop | StringProperty | name |  |
 | `material.graph.nodes[n].imageUser.image.outputs` | list |  |  |  |
+| `material.graph.nodes[n].imageUser.image.outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `material.graph.nodes[n].imageUser.image.outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `material.graph.nodes[n].imageUser.image.outputs[n].name` | prop | StringProperty | Name |  |
+| `material.graph.nodes[n].imageUser.image.outputs[n].uiname` | prop | StringProperty | UI Name |  |
 | `material.graph.nodes[n].imageUser.image.ready` | prop | BoolProperty | Ready |  |
 | `material.graph.nodes[n].imageUser.image.type` | prop | EnumProperty | Image Type | enum {0, 1, 2, 3, GENERATED, BYTE_BUFFER, FLOAT_BUFFER, URL} |
 | `material.graph.nodes[n].imageUser.image.url` | prop | StringProperty | URL |  |
@@ -197,6 +205,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `material.lib_id` | prop | IntProperty | Lib ID |  |
 | `material.name` | prop | StringProperty | name |  |
 | `material.outputs` | list |  |  |  |
+| `material.outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `material.outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `material.outputs[n].name` | prop | StringProperty | Name |  |
+| `material.outputs[n].uiname` | prop | StringProperty | UI Name |  |
 | `material.shader` | dynamicStruct |  |  | dynamic |
 
 ## nodeViewer
@@ -269,6 +281,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `object.material.graph.nodes[n].imageUser.image.lib_id` | prop | IntProperty | Lib ID |  |
 | `object.material.graph.nodes[n].imageUser.image.name` | prop | StringProperty | name |  |
 | `object.material.graph.nodes[n].imageUser.image.outputs` | list |  |  |  |
+| `object.material.graph.nodes[n].imageUser.image.outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `object.material.graph.nodes[n].imageUser.image.outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `object.material.graph.nodes[n].imageUser.image.outputs[n].name` | prop | StringProperty | Name |  |
+| `object.material.graph.nodes[n].imageUser.image.outputs[n].uiname` | prop | StringProperty | UI Name |  |
 | `object.material.graph.nodes[n].imageUser.image.ready` | prop | BoolProperty | Ready |  |
 | `object.material.graph.nodes[n].imageUser.image.type` | prop | EnumProperty | Image Type | enum {0, 1, 2, 3, GENERATED, BYTE_BUFFER, FLOAT_BUFFER, URL} |
 | `object.material.graph.nodes[n].imageUser.image.url` | prop | StringProperty | URL |  |
@@ -296,6 +312,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `object.material.lib_id` | prop | IntProperty | Lib ID |  |
 | `object.material.name` | prop | StringProperty | name |  |
 | `object.material.outputs` | list |  |  |  |
+| `object.material.outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `object.material.outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `object.material.outputs[n].name` | prop | StringProperty | Name |  |
+| `object.material.outputs[n].uiname` | prop | StringProperty | UI Name |  |
 | `object.material.shader` | dynamicStruct |  |  | dynamic |
 | `object.name` | prop | StringProperty | name |  |
 | `object.outputs` | list |  |  |  |
@@ -377,6 +397,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `objects[n].material.graph.nodes[n].imageUser.image.lib_id` | prop | IntProperty | Lib ID |  |
 | `objects[n].material.graph.nodes[n].imageUser.image.name` | prop | StringProperty | name |  |
 | `objects[n].material.graph.nodes[n].imageUser.image.outputs` | list |  |  |  |
+| `objects[n].material.graph.nodes[n].imageUser.image.outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `objects[n].material.graph.nodes[n].imageUser.image.outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `objects[n].material.graph.nodes[n].imageUser.image.outputs[n].name` | prop | StringProperty | Name |  |
+| `objects[n].material.graph.nodes[n].imageUser.image.outputs[n].uiname` | prop | StringProperty | UI Name |  |
 | `objects[n].material.graph.nodes[n].imageUser.image.ready` | prop | BoolProperty | Ready |  |
 | `objects[n].material.graph.nodes[n].imageUser.image.type` | prop | EnumProperty | Image Type | enum {0, 1, 2, 3, GENERATED, BYTE_BUFFER, FLOAT_BUFFER, URL} |
 | `objects[n].material.graph.nodes[n].imageUser.image.url` | prop | StringProperty | URL |  |
@@ -404,6 +428,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `objects[n].material.lib_id` | prop | IntProperty | Lib ID |  |
 | `objects[n].material.name` | prop | StringProperty | name |  |
 | `objects[n].material.outputs` | list |  |  |  |
+| `objects[n].material.outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `objects[n].material.outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `objects[n].material.outputs[n].name` | prop | StringProperty | Name |  |
+| `objects[n].material.outputs[n].uiname` | prop | StringProperty | UI Name |  |
 | `objects[n].material.shader` | dynamicStruct |  |  | dynamic |
 | `objects[n].name` | prop | StringProperty | name |  |
 | `objects[n].outputs` | list |  |  |  |
@@ -483,6 +511,11 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `scene.lib_id` | prop | IntProperty | Lib ID |  |
 | `scene.name` | prop | StringProperty | name |  |
 | `scene.outputs` | list |  |  |  |
+| `scene.outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `scene.outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `scene.outputs[n].name` | prop | StringProperty | Name |  |
+| `scene.outputs[n].uiname` | prop | StringProperty | UI Name |  |
+| `scene.outputs[n].value` | prop | FloatProperty | value |  |
 | `scene.propEnabled` | prop | BoolProperty | Magnet Mode |  |
 | `scene.propIslandOnly` | prop | BoolProperty | Island Only |  |
 | `scene.propMode` | prop | EnumProperty | Magnet Curve | enum {SMOOTH, SHARP, EXTRA_SHARP, SPHERE, LINEAR, CONSTANT} |
@@ -741,6 +774,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `shadernetwork.graph.nodes[n].imageUser.image.lib_id` | prop | IntProperty | Lib ID |  |
 | `shadernetwork.graph.nodes[n].imageUser.image.name` | prop | StringProperty | name |  |
 | `shadernetwork.graph.nodes[n].imageUser.image.outputs` | list |  |  |  |
+| `shadernetwork.graph.nodes[n].imageUser.image.outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `shadernetwork.graph.nodes[n].imageUser.image.outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `shadernetwork.graph.nodes[n].imageUser.image.outputs[n].name` | prop | StringProperty | Name |  |
+| `shadernetwork.graph.nodes[n].imageUser.image.outputs[n].uiname` | prop | StringProperty | UI Name |  |
 | `shadernetwork.graph.nodes[n].imageUser.image.ready` | prop | BoolProperty | Ready |  |
 | `shadernetwork.graph.nodes[n].imageUser.image.type` | prop | EnumProperty | Image Type | enum {0, 1, 2, 3, GENERATED, BYTE_BUFFER, FLOAT_BUFFER, URL} |
 | `shadernetwork.graph.nodes[n].imageUser.image.url` | prop | StringProperty | URL |  |
@@ -767,6 +804,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `shadernetwork.lib_id` | prop | IntProperty | Lib ID |  |
 | `shadernetwork.name` | prop | StringProperty | name |  |
 | `shadernetwork.outputs` | list |  |  |  |
+| `shadernetwork.outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `shadernetwork.outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `shadernetwork.outputs[n].name` | prop | StringProperty | Name |  |
+| `shadernetwork.outputs[n].uiname` | prop | StringProperty | UI Name |  |
 
 ## toolDefaults
 
@@ -1314,6 +1355,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `uvEditor.imageUser.image.lib_id` | prop | IntProperty | Lib ID |  |
 | `uvEditor.imageUser.image.name` | prop | StringProperty | name |  |
 | `uvEditor.imageUser.image.outputs` | list |  |  |  |
+| `uvEditor.imageUser.image.outputs[n].graph_flag` | prop | FlagProperty | Graph Flags | enum {1, 2, 4, 8, 16, 64, 128, SELECT, UPDATE, MULTI, NO_MULTI_OUTPUTS, PRIVATE, INSTANCE_API_DEFINE, NO_UI_EDITING} |
+| `uvEditor.imageUser.image.outputs[n].graph_id` | prop | IntProperty | Graph ID |  |
+| `uvEditor.imageUser.image.outputs[n].name` | prop | StringProperty | Name |  |
+| `uvEditor.imageUser.image.outputs[n].uiname` | prop | StringProperty | UI Name |  |
 | `uvEditor.imageUser.image.ready` | prop | BoolProperty | Ready |  |
 | `uvEditor.imageUser.image.type` | prop | EnumProperty | Image Type | enum {0, 1, 2, 3, GENERATED, BYTE_BUFFER, FLOAT_BUFFER, URL} |
 | `uvEditor.imageUser.image.url` | prop | StringProperty | URL |  |

@@ -388,7 +388,7 @@ ImageBlock {
   }
 
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
-    const st = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
+    const st = super.defineAPI(api, struct ?? api.mapStruct(this, true))
 
     st.enum('type', 'type', ImageTypes, 'Image Type')
     st.enum('genType', 'genType', ImageGenTypes, 'Generator')

@@ -277,7 +277,7 @@ export class CameraData extends SceneObjectData {
   static defineAPI(api: DataAPI, struct?: DataStruct): DataStruct {
     // CameraData extends SceneObjectData (helper layering ≠ JS inheritance);
     // chain the SceneObjectData base, not DataBlock.
-    const mstruct = SceneObjectData.defineAPI(api, struct ?? api.mapStruct(this, true))
+    const mstruct = super.defineAPI(api, struct ?? api.mapStruct(this, true))
 
     const onchange = function (this: {dataref: CameraData}) {
       const camera = this.dataref
