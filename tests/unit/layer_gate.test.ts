@@ -44,8 +44,8 @@ describe('tally', () => {
       SEVERITIES
     )
 
-    expect(rules.get('no-circular').count).toBe(2)
-    expect(rules.get('no-circular').violations[0].to).toBe('scripts/b.ts')
+    expect(rules.get('no-circular')!.count).toBe(2)
+    expect(rules.get('no-circular')!.violations[0].to).toBe('scripts/b.ts')
   })
 
   test('a rule absent from the config still gets counted rather than dropped', () => {

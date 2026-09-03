@@ -90,7 +90,7 @@ export const theme = {
     oneAxisPadding      : 2,
     padding             : 1,
   },
-  "propLabels": {
+  propLabels: {
     font: new CSSFont({
       font   : 'sans-serif',
       weight : 'normal',

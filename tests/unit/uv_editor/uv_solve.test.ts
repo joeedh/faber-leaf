@@ -16,6 +16,7 @@ import {UVSolver, packUVIslands, randomizeUVGraph, relaxUVGraph} from '../../../
 import {gridUVs} from '../../../addons/builtin/uv_editor/src/uv_edit_geom'
 import {UVFlags, UVGridSource, UVGridSurface} from '../../lib/uv_grid_source'
 import type {IUVSource} from '../../../scripts/core/geometry_contract'
+import {IndexRange, VectorArg, Vector2, Vector3, VectorLike} from '@framework/pathux'
 
 const LAYER = 0
 
@@ -23,8 +24,20 @@ function allUVs(source: IUVSource): Float32Array {
   return source.getUVs(LAYER, source.listUVElements(LAYER))
 }
 
+function VecErase(n: any): ArrayLike<number> {
+  return n as unknown as ArrayLike<number>
+}
+
 /** The angle at `b` in the triangle `a-b-c`, over the first `n` components. */
-function cornerAngle(a: ArrayLike<number>, b: ArrayLike<number>, c: ArrayLike<number>, n: number): number {
+function cornerAngle(
+  _a: VectorArg<Vector2 | Vector3, 2 | 3>,
+  _b: VectorArg<Vector2 | Vector3, 2 | 3>,
+  _c: VectorArg<Vector2 | Vector3, 2 | 3>,
+  n: number
+): number {
+  const a = VecErase(_a)
+  const b = VecErase(_b)
+  const c = VecErase(_c)
   let dot = 0
   let la = 0
   let lc = 0

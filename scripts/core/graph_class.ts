@@ -55,7 +55,8 @@ export class AbstractGraphClass {
 
   static getGraphClass(name: string) {
     if (!(name in GraphMap)) {
-      console.log(GraphMap)
+      // eslint-disable-next-line no-console
+      console.warn(GraphMap)
       throw new Error('invalid graph class ' + name)
     }
     return GraphMap[name]

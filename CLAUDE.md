@@ -95,9 +95,9 @@ Note: roughly preserve comments written by the user however if they ask you to a
   with `CLAUDENOTE:` so they can be found and stripped later. The final step of
   any plan is to remove the `CLAUDENOTE:` comments — replacing the ones still
   worth keeping with permanent (≤ 3-line) non-doc comments.
-- **Doc comments**: not subject to the 3-line limit, but still keep them short
+- **Doc comments** are not subject to the 3-line limit, keep them short
   and concise; only add them for non-obvious function signatures. A doc comment
-  may simply explain how a non-obvious parameter behaves when that is shorter
+  should explain how a non-obvious parameter behaves when that is shorter
   than describing the whole function.
 - **Approved long non-doc comments**: when a non-doc comment genuinely needs to
   exceed 3 lines (or push a file past its budget), you may ask me to approve it.

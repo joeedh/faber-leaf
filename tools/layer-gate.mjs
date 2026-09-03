@@ -22,8 +22,11 @@ export const EXIT_SEVERITIES = new Set(['error'])
  *   so a rule that fired zero times still reports the severity it was declared with.
  */
 export function tally(cruiseResult, ruleNames, ruleSeverities = {}) {
+  /** @type {{rule: {name: string, severity: string}, from: string, to: string}} */
+  const violations = []
+
   const rules = new Map(
-    ruleNames.map((name) => [name, {count: 0, severity: ruleSeverities[name] ?? 'warn', violations: []}])
+    ruleNames.map((name) => [name, {count: 0, severity: ruleSeverities[name] ?? 'warn', violations}])
   )
 
   for (const violation of cruiseResult.summary.violations) {

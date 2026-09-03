@@ -1,4 +1,5 @@
 /keys/
+.quickbuild/
 # The loose screenshot dump at archive/'s top level. The subdirectories are
 # tracked: P13 moves the rescued BREP code there and P19 reads it back.
 archive/*.png

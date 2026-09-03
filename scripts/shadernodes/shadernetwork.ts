@@ -7,7 +7,7 @@ import type {StructReader} from '../path.ux/scripts/util/nstructjs.js'
 
 import {DependSocket, Vec3Socket, Vec4Socket, FloatSocket, IntSocket, BoolSocket} from '../core/graphsockets.js'
 import * as util from '../util/util.js'
-import {OutputNode, DiffuseNode, type IRenderLights, ShaderNode, ShaderNetworkClass} from './shader_nodes.js'
+import {OutputNode, DiffuseNode, type IRenderLights, ShaderNetworkClass} from './shader_nodes.js'
 import {WgslShaderGenerator, type RequestedAttrDesc} from './shader_nodes_wgsl.js'
 import {defineGraphAPI} from '../path.ux/scripts/graph/index.js'
 

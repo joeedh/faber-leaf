@@ -14,7 +14,6 @@ import type {RenderLight} from '../renderengine/renderengine_realtime.js'
 import type {WgslShaderGenerator} from './shader_nodes_wgsl.js'
 import {LightGenWgsl, DiffuseBRDFWgsl} from './shader_lib_wgsl.js'
 import * as units from '../path.ux/scripts/core/units.js'
-import { ViewContext } from '@framework/api'
 
 export {ClosureGLSL, PointLightCode} from './shader_lib.js'
 

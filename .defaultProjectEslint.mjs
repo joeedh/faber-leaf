@@ -2,6 +2,7 @@
 // without invalidating the entire ESLint cache
 
 export const allowDefaultProject = [
+  /*
   'tests/unit/*',
   'tests/unit/uv_editor/*',
   'tests/unit/leafmesh/*',
@@ -34,4 +35,5 @@ export const allowDefaultProject = [
   'tools/esbuilder.js',
   'tools/serv.js',
   'tests/e2e/*.ts',
+  */
 ]

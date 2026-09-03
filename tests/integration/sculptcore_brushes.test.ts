@@ -56,7 +56,7 @@ interface BrushTestResult {
   symMirrorX?: {movedPos: number; movedNeg: number; maxDisp: number; invalid?: string}
   symOctants?: {octantsCovered: number; movedCount: number; invalid?: string}
   symPlainX?: {movedPos: number; movedNeg: number; maxDisp: number; invalid?: string}
-  symmetrize?: {missBefore: number; missAfter: number}
+  symmetrize?: {missBefore: number; missAfter: number; missPristine: number}
   nonFiniteCount?: number
   radius?: number
 }

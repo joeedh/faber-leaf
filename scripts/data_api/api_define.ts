@@ -24,7 +24,7 @@ import type {ViewContext} from '../core/context.js'
 import {ShaderNetwork} from '../shadernodes/shadernetwork.js'
 import {Material} from '../core/material.js'
 import '../shadernodes/allnodes.js'
-import {ShaderNetworkClass, ShaderNode} from '../shadernodes/shader_nodes.js'
+import {ShaderNode} from '../shadernodes/shader_nodes.js'
 import {Graph, Node, SocketFlags, NodeSocketType} from '../core/graph.js'
 import {SceneObject} from '../sceneobject/sceneobject.js'
 import {Scene} from '../scene/scene.js'
@@ -389,7 +389,7 @@ export function getDataAPI(): MyDataAPI {
     EDGE  : Icons.EDGE_MODE,
     FACE  : Icons.FACE_MODE,
     OBJECT: Icons.CIRCLE_SEL,
-  });
+  })
   def.on('change', function (this: ApiCallbackThis<Scene>, newv: any, oldv: any) {
     const owner = this.dataref
 

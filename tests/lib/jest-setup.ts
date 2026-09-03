@@ -35,7 +35,7 @@ if (typeof g.structuredClone !== 'function') {
       // Float32Array stays Float32Array, etc.
 
       const Ctor = (view as any).constructor as new (b: ArrayBuffer) => unknown
-      return new Ctor(view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength))
+      return new Ctor(view.buffer.slice(view.byteOffset, view.byteOffset + view.byteLength) as ArrayBuffer)
     }
     if (v instanceof ArrayBuffer) return v.slice(0)
     if (Array.isArray(v)) return v.map((x) => g.structuredClone(x))

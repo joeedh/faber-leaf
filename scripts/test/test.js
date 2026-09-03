@@ -1,11 +1,6 @@
 import * as util from '../util/util.js'
 import {AppState} from '../core/appstate.js'
-import {
-  getAppState,
-  registerAppInstance,
-  setActiveAppInstance,
-  unregisterAppInstance,
-} from '../core/app_instance.js'
+import {getAppState, registerAppInstance, setActiveAppInstance, unregisterAppInstance} from '../core/app_instance.js'
 import {FuncAction, PathSetAction, PromiseAction, RedrawAction, ToolAction, WaitAction} from './test_base.js'
 
 export class TestSet extends Array {

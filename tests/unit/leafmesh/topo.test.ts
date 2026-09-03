@@ -6,7 +6,14 @@
 
 import {AttrType, Domain} from '../../../addons/builtin/leafmesh/src/attrs'
 import {ELEM_NONE, LeafMesh, type Vec3} from '../../../addons/builtin/leafmesh/src/topo'
-import {makeCube, makeGrid, makePlane, makeTube, makeUVSphere} from '../../../addons/builtin/leafmesh/src/primitives'
+import {
+  makeCube,
+  makeGrid,
+  makePlane,
+  makeTube,
+  makeUVSphere,
+  PrimitiveResult,
+} from '../../../addons/builtin/leafmesh/src/primitives'
 
 function co(mesh: LeafMesh, v: number): Vec3 {
   return [mesh.v.co[v * 3], mesh.v.co[v * 3 + 1], mesh.v.co[v * 3 + 2]]
@@ -629,8 +636,8 @@ describe('LeafMesh validateAndRepair', () => {
 
 describe('LeafMesh derived-state invariant', () => {
   test('rebuildDerivedTopo is a no-op on a primitive', () => {
-    const builders: [(mesh: LeafMesh) => void][] = [
-      (mesh) => makeCube(mesh, 2),
+    const builders: ((mesh: LeafMesh) => PrimitiveResult)[] = [
+      (mesh: LeafMesh) => makeCube(mesh, 2),
       (mesh) => makeUVSphere(mesh, 8, 4, 1),
       (mesh) => makeTube(mesh, 8, 1, 0.5, 1),
       (mesh) => makeGrid(mesh, 3, 3, 3),

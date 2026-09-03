@@ -28,6 +28,7 @@
   // addon that is not in this build has to drop out of the program, and a child
   // config's `exclude` replaces its base's rather than adding to it.
   "include": [
+    "playwright.config.ts",
     "scripts/**/*.ts",
     "addons/**/*.ts",
     "distributions/**/*.ts",

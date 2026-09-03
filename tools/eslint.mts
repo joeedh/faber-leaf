@@ -1,5 +1,5 @@
 import fs from 'fs'
-import path from 'path'
+import Path from 'path'
 import child_process from 'child_process'
 import crypto from 'crypto'
 import {pathToFileURL} from 'url'
@@ -18,7 +18,7 @@ function sha256(text: string): string {
 // place means a concurrent reader never observes a partially-written file (rename is
 // atomic on both POSIX and Windows).
 function casWrite(filePath: string, data: string) {
-  fs.mkdirSync(path.dirname(filePath), {recursive: true})
+  fs.mkdirSync(Path.dirname(filePath), {recursive: true})
   const tmpPath = `${filePath}.${process.pid}.${crypto.randomBytes(4).toString('hex')}.tmp`
   fs.writeFileSync(tmpPath, data)
   try {
@@ -50,9 +50,9 @@ function casRead<T>(filePath: string): T | undefined {
   }
 }
 
-const CACHE_ROOT = path.join(getRepoRoot(), '.eslintcache')
-const CONFIG_CACHE_DIR = path.join(CACHE_ROOT, 'config')
-const RESULT_CACHE_DIR = path.join(CACHE_ROOT, 'results')
+const CACHE_ROOT = Path.join(getRepoRoot(), '.eslintcache')
+const CONFIG_CACHE_DIR = Path.join(CACHE_ROOT, 'config')
+const RESULT_CACHE_DIR = Path.join(CACHE_ROOT, 'results')
 const CONFIG_CACHE_VERSION = 3
 const RESULT_CACHE_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000
 
@@ -74,10 +74,10 @@ function globToRegExp(glob: string): RegExp {
 }
 
 async function loadConfig(repoRoot: string) {
-  const cfgPath = path.join(repoRoot, 'eslint.config.js')
+  const cfgPath = Path.join(repoRoot, 'eslint.config.js')
   const cfgText = fs.readFileSync(cfgPath, 'utf-8')
   const configHash = sha256(`${CONFIG_CACHE_VERSION}\n${cfgText}`)
-  const cacheFile = path.join(CONFIG_CACHE_DIR, `${configHash}.json`)
+  const cacheFile = Path.join(CONFIG_CACHE_DIR, `${configHash}.json`)
 
   const cached = casRead<IgnoreCacheEntry>(cacheFile)
   if (cached) {
@@ -103,7 +103,7 @@ function isTSJS(filePath: string): boolean {
 
 function eslintVersion(repoRoot: string): string {
   try {
-    const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, 'node_modules', 'eslint', 'package.json'), 'utf-8')) as {
+    const pkg = JSON.parse(fs.readFileSync(Path.join(repoRoot, 'node_modules', 'eslint', 'package.json'), 'utf-8')) as {
       version?: string
     }
     return pkg.version ?? 'unknown'
@@ -195,7 +195,7 @@ function pruneResultCache() {
     if (!entry.isFile()) {
       continue
     }
-    const entryPath = path.join(RESULT_CACHE_DIR, entry.name)
+    const entryPath = Path.join(RESULT_CACHE_DIR, entry.name)
     try {
       if (fs.statSync(entryPath).mtimeMs < cutoff) {
         fs.unlinkSync(entryPath)
@@ -212,7 +212,7 @@ async function run(targetPath: string, rawEslintArgs: string[]) {
     rawEslintArgs.push('--fix')
   }
 
-  const fixMode = rawEslintArgs.find((arg) => arg === '--fix') !== undefined
+  const fixMode = rawEslintArgs.includes('--fix')
   const repoRoot = getRepoRoot()
   const {ignores, configHash} = await loadConfig(repoRoot)
   const version = eslintVersion(repoRoot)
@@ -234,18 +234,19 @@ async function run(targetPath: string, rawEslintArgs: string[]) {
     }
     eslintArgs.push(arg)
   }
+
   if (!Number.isInteger(jobs) || jobs < 1) {
     throw new Error(`--jobs must be a positive integer, got '${jobs}'`)
   }
 
   // Key representing the eslint arguments, excluding --fix which we have special logic for
   const argsKey = eslintArgs.filter((k) => k !== '--fix').join(' ')
-
-  // --fix rewrites files in place, so a cache entry keyed off their pre-fix content would
-  // be stale the instant it's written - always run those files through real eslint.
-  const fixing = eslintArgs.includes('--fix')
-
   const files: string[] = []
+
+  // create a file system tree
+  function cachePath(key: string) {
+    return Path.join(RESULT_CACHE_DIR, key.slice(0, 2), `${key}.json`)
+  }
 
   function ignored(p: string) {
     return ignores.some((pattern) => pattern.test(p))
@@ -265,7 +266,11 @@ async function run(targetPath: string, rawEslintArgs: string[]) {
       }
     }
   }
-  walk(targetPath)
+  if (fs.statSync(targetPath)?.isDirectory()) {
+    walk(targetPath)
+  } else {
+    files.push(targetPath)
+  }
 
   const toLint: string[] = []
   let cachedClean = 0
@@ -273,15 +278,10 @@ async function run(targetPath: string, rawEslintArgs: string[]) {
   let hadErrors = false
 
   for (const file of files) {
-    if (fixing) {
-      toLint.push(file)
-      continue
-    }
-
-    const relPath = path.relative(repoRoot, path.resolve(file)).split(path.sep).join('/')
+    const relPath = Path.relative(repoRoot, Path.resolve(file)).split(Path.sep).join('/')
     const content = fs.readFileSync(file, 'utf-8')
     const key = resultCacheKey({configHash, eslintVersion: version, argsKey, relPath, content})
-    let cached = casRead<CachedLintResult>(path.join(RESULT_CACHE_DIR, `${key}.json`))
+    let cached = casRead<CachedLintResult>(cachePath(key))
 
     if (cached?.output?.search(/allowDefaultProject/) !== -1) {
       // files that failed due to not existing in tsconfig should
@@ -305,26 +305,63 @@ async function run(targetPath: string, rawEslintArgs: string[]) {
     }
   }
 
+  const batchSize = 8
+  const batches: string[][] = []
+  let curSize = 0
+  for (let i = 0; i < toLint.length; i++) {
+    if (batches.length === 0 || curSize > 1024 * 256) {
+      // If the file is larger than 1MB, consider it a separate batch
+      batches.push([])
+      curSize = 0
+    }
+
+    let size = fs.statSync(toLint[i]).size
+
+    batches.at(-1)!.push(toLint[i])
+    curSize += size
+  }
+
   // eslint-disable-next-line no-console
   console.log(
     `eslint: ${files.length} files, ${cachedClean + cachedWithErrors} from cache ` +
-      `(${cachedWithErrors} with errors), ${toLint.length} to lint`
+      `(${cachedWithErrors} with errors), ${toLint.length} to lint in ${batches.length} batches`
   )
 
-  const batchSize = 8
-  const batches: string[][] = []
-  for (let i = 0; i < toLint.length; i += batchSize) {
-    batches.push(toLint.slice(i, i + batchSize))
-  }
   let finishedCount = 0
+
+  interface QueueWrite {
+    path: string
+    content: string
+  }
+  const writeQueue: QueueWrite[] = []
+  const pushQueue = (path2: string, content: string) => {
+    writeQueue.push({path: path2, content})
+  }
+  const flushQueue = () => {
+    const visit = new Set<string>()
+
+    const time = performance.now()
+
+    writeQueue.reverse()
+    while (writeQueue.length > 0) {
+      const {path: path2, content} = writeQueue.shift()!
+      if (!visit.has(path2)) {
+        casWrite(path2, content)
+      }
+      visit.add(path2)
+    }
+    console.log(`flushed queue in ${(performance.now() - time).toFixed(2)}ms`)
+  }
+  let lastFlush = performance.now()
+  const flushInterval = 500
 
   // Batches run up to `jobs` at once, each spawning its own eslint process. Output is
   // built up per batch and written in one shot at the end so concurrent batches can't
   // interleave their lines on stdout.
   await runWithConcurrency(batches, jobs, async (batch) => {
-    const log: string[] = [...batch]
+    const log: string[] = []
 
-    const args = ['exec', 'eslint', '--format', 'json', ...eslintArgs, ...batch]
+    const args = ['--loglevel=error', 'exec', 'eslint', '--format', 'json', ...eslintArgs, ...batch]
     const {stdout, stderr} = await spawnCapture('pnpm', args)
 
     if (stderr) {
@@ -363,22 +400,34 @@ async function run(targetPath: string, rawEslintArgs: string[]) {
       } catch {
         continue
       }
-      const relPath = path.relative(repoRoot, result.filePath).split(path.sep).join('/')
+      const relPath = Path.relative(repoRoot, result.filePath).split(Path.sep).join('/')
       const key = resultCacheKey({configHash, eslintVersion: version, argsKey, relPath, content: finalContent})
-      casWrite(
-        path.join(RESULT_CACHE_DIR, `${key}.json`),
+
+      pushQueue(
+        cachePath(key),
         JSON.stringify({errorCount: result.errorCount, output: text} satisfies CachedLintResult)
       )
+      if (performance.now() - lastFlush > flushInterval) {
+        flushQueue()
+        lastFlush = performance.now()
+      }
     }
 
-    console.log(log.join('\n'))
+    process.stdout.write(log.join('\n') + '\n')
   })
 
+  flushQueue()
   pruneResultCache()
   process.exitCode = hadErrors ? 1 : 0
 }
 
-run(process.argv[2] ?? '.', process.argv.slice(3)).catch((error) => {
-  console.error(error)
-  process.exitCode = 1
-})
+const startTime = performance.now()
+run(process.argv[2] ?? '.', process.argv.slice(3))
+  .catch((error) => {
+    // eslint-disable-next-line no-console
+    console.error(error)
+    process.exitCode = 1
+  })
+  .then(() => {
+    process.stdout.write(`Total time: ${((performance.now() - startTime) / 1000.0).toFixed(2)}s\n`)
+  })

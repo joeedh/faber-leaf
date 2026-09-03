@@ -1,7 +1,8 @@
 {
+  "extends": "../tsconfig.paths.json",
   "compilerOptions": {
     "allowJs": true,
-    "target": "es6",
+    "target": "es2022",
     "module": "es2022",
     "lib": ["dom", "scripthost", "esnext", "ESNext.Disposable"],
     "pretty": true,
@@ -15,6 +16,7 @@
     "noImplicitThis": true,
     "listEmittedFiles": false,
     "outDir": "types",
+    "types": ["node", "jest"],
   },
-  "files": ["scripts/typescript_entry.ts"],
+  "include": ["**/*.ts"]
 }
