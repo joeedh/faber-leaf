@@ -51,6 +51,7 @@ import {
   markDataAPIDefined,
   type DefineAPIClass,
 } from './api_define_registry.js'
+import {api_define_graph} from '../core/graph_api.js'
 export {registerDataAPI, getDataAPIRegistry, type DefineAPIClass}
 
 // Inject Material into sceneobject_base so SceneObjectData.defineAPI can map its
@@ -106,45 +107,10 @@ function api_define_datablock(api: MyDataAPI, cls: AnyClass = DataBlock): DataSt
   return DataBlock.defineAPI(api, api.mapStruct(cls, true))
 }
 
-function api_define_shadernode(api: MyDataAPI, cls?: AnyClass): DataStruct {
+// ensure the base node struct is defined in the data API
+function api_define_shadernode(api: MyDataAPI): DataStruct {
   const nstruct = api_define_node(api, ShaderNode)
-
   return nstruct
-}
-
-function api_define_graph(rootApi: MyDataAPI, cls: AnyClass = Graph): DataStruct {
-  const gstruct = rootApi.mapStruct(cls)
-
-  gstruct.list('', 'nodes', [
-    function getIter(api: MyDataAPI, list: any) {
-      return list.nodes.values()
-    },
-    function getLength(api: MyDataAPI, list: any) {
-      return list.nodes.length
-    },
-    function get(api: MyDataAPI, list: any, key: string) {
-      return list.node_idmap.get(key)
-    },
-    function getKey(api: MyDataAPI, list: any, obj: any) {
-      return '' + obj.graph_id
-    },
-    function getActive(api: MyDataAPI, list: any) {
-      return list.nodes.active
-    },
-    function setActive(api: MyDataAPI, list: any, key: string) {
-      list.nodes.active = list.node_idmap.get(key)
-    },
-    function getStruct(api: MyDataAPI, list: any, key: string) {
-      const obj = list.node_idmap.get(key)
-
-      if (obj === undefined) return api.getStruct(Node)
-
-      const ret = api.getStruct(obj.constructor)
-      return ret === undefined ? api.getStruct(Node) : ret
-    },
-  ])
-
-  return gstruct
 }
 
 function api_define_nodesockets(api: MyDataAPI): void {
@@ -265,7 +231,7 @@ export function getDataAPI(): MyDataAPI {
   api_define_velpan(dataApi)
   api_define_nodesockets(dataApi)
   api_define_shadernode(dataApi) // Node.defineAPI on ShaderNode's struct (not ShaderNode.defineAPI)
-  api_define_graph(dataApi) // Graph free struct (nodes list)
+  api_define_graph(dataApi.mapStruct(Graph)) // Graph free struct (nodes list)
 
   // Provider builders that must run first, because a class `defineAPI` attaches
   // their structs by reference (the mesh addon's customdata elements are the

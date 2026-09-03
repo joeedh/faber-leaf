@@ -10,6 +10,7 @@ import * as util from '../util/util.js'
 import {OutputNode, DiffuseNode, type IRenderLights, ShaderNetworkClass} from './shader_nodes.js'
 import {WgslShaderGenerator, type RequestedAttrDesc} from './shader_nodes_wgsl.js'
 import {defineGraphAPI} from '../path.ux/scripts/graph/index.js'
+import {api_define_graph} from '../core/graph_api.js'
 
 /**
  * WebGPU-side compiled material shader. Holds the emitted WGSL source +
@@ -270,7 +271,7 @@ ShaderNetwork {
 
     const mstruct = DataBlock.defineAPI(api, struct ?? api.mapStruct(this, true))
     const graphSt = new DataStruct()
-    mstruct.struct('graph', 'graph', 'Shader Graph', defineGraphAPI(api, graphSt, nodeStructs))
+    mstruct.struct('graph', 'graph', 'Shader Graph', api_define_graph(graphSt, nodeStructs))
     return mstruct
   }
 
