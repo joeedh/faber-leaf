@@ -14,10 +14,17 @@ The full, generated catalog of every valid path lives in
 - **`API_PATHS.md`** — human/LLM-readable table: every path, its kind
   (`struct` / `prop` / `list`), property type, UI name, range, unit, and enum
   items. **Read this first** to resolve a path or find the path for a property.
-- **`api-paths.json`** — the same catalog, machine-readable.
-- **`datapaths.ts`** — a `DataPathRegistry` augmentation exporting the
-  `KnownDataPath` union that powers autocomplete (committed; in `tsconfig`'s
-  `files`).
+- **`api-paths.json`** — the same catalog, machine-readable. The
+  `pathux/valid-datapath` ESLint rule reads a copy of it.
+
+Paths are checked by that ESLint rule alone. path.ux can also emit the catalog
+as a `KnownDataPath` string-literal union that types `prop()`'s argument, and
+this app does not: a catalog this size made the union expensive enough to hit
+`TS2859: Excessive complexity` inside `PathsUnderPrefix`, and dropping it took
+`scripts`' typecheck from 19s to 3s. `prop()` takes a plain `string` here.
+A container built with a prefix still declares it through
+`withDataPrefix<'...'>()`, which is how the rule resolves prefix + path exactly
+rather than accepting any path with a matching tail.
 
 These are **auto-generated** by walking `getDataAPI()`. Don't hand-edit them —
 edit [`scripts/data_api/api_define.ts`](../scripts/data_api/api_define.ts) (the

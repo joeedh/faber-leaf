@@ -1,19 +1,26 @@
 /* eslint-disable no-console */
 /**
- * Generate the app's data-path catalog + compile-time typo-check artifacts.
+ * Generate the app's data-path catalog.
  *
  * This is a thin wrapper around path.ux's generator: it reuses the submodule's
  * API walker (`walkAPI`/`normalizePath`) and renderers (`renderJSON`,
- * `renderMarkdown`, `renderDts`), but supplies its own esbuild bundle step so
- * our `scripts/data_api/api_define.ts` (which transitively imports addon source
+ * `renderMarkdown`), but supplies its own esbuild bundle step so our
+ * `scripts/data_api/api_define.ts` (which transitively imports addon source
  * using `@framework/*` and `@addon/<id>/api`) actually resolves and loads under
  * node. The stock CLI (`scripts/path.ux/buildtools/gen-datapaths.mjs`) bundles
  * with no alias map and so can't load our API.
  *
+ * No `datapaths.ts` here: path.ux can emit the catalog as a `KnownDataPath`
+ * string-literal union that types `container.prop(...)`, and this app does not
+ * use it. A catalog this size made the union expensive enough to typecheck that
+ * it hit `TS2859: Excessive complexity` inside path.ux's own `PathsUnderPrefix`.
+ * The `pathux/valid-datapath` ESLint rule checks the same paths against
+ * api-paths.json, reading a container's declared prefix off `withDataPrefix`,
+ * and is what the app relies on.
+ *
  * Outputs:
  *   scripts/data_api/generated/api-paths.json   machine-readable catalog
  *   scripts/data_api/generated/API_PATHS.md      human/LLM reference
- *   scripts/data_api/generated/datapaths.ts      KnownDataPath union (typo check)
  *   scripts/path.ux/generated/api-paths.json     copy for the ESLint rule, whose
  *                                                catalog path is hardcoded there
  *
@@ -26,7 +33,7 @@ import {join, resolve, dirname} from 'node:path'
 import {fileURLToPath, pathToFileURL} from 'node:url'
 
 import {walkAPI, normalizePath} from '../scripts/path.ux/buildtools/datapath-walker.mjs'
-import {renderJSON, renderMarkdown, renderDts} from '../scripts/path.ux/buildtools/gen-datapaths.mjs'
+import {renderJSON, renderMarkdown} from '../scripts/path.ux/buildtools/gen-datapaths.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -87,9 +94,6 @@ function genEntrySrc() {
 const OUT_DIR = resolve(REPO_ROOT, 'scripts/data_api/generated')
 // path.ux's eslint rule hardcodes resolve(__dirname, "../../generated/api-paths.json").
 const ESLINT_CATALOG = resolve(REPO_ROOT, 'scripts/path.ux/generated/api-paths.json')
-// renderDts() augments `declare module <this>`; must resolve to the module that
-// re-exports path.ux's DataPathRegistry (tsconfig maps @framework/pathux→pathux.ts).
-const AUGMENT_MODULE = '@framework/pathux'
 
 // DOM / browser-global stub so the app's module-scope code can evaluate under
 // node. Adapted from scripts/path.ux/buildtools/gen-datapaths.mjs with extra
@@ -344,7 +348,7 @@ async function main() {
   // Canonical (lexicographic) ordering. walkAPI yields entries in DataAPI
   // struct-build / traversal order, and renderJSON / renderMarkdown preserve
   // that input order (markdown only sorts top-level group keys, not entries
-  // within a group; renderDts already sorts its literals internally). Sorting
+  // within a group). Sorting
   // by normalized path here decouples the on-disk catalog order from the build
   // order, so reordering when/how structs are populated (e.g. registry-driven
   // defineAPI) produces no spurious catalog diffs — only real content changes.
@@ -358,7 +362,6 @@ async function main() {
   const json = renderJSON(unique)
   await writeFile(join(OUT_DIR, 'api-paths.json'), json, 'utf8')
   await writeFile(join(OUT_DIR, 'API_PATHS.md'), renderMarkdown(unique), 'utf8')
-  await writeFile(join(OUT_DIR, 'datapaths.ts'), renderDts(unique, AUGMENT_MODULE), 'utf8')
 
   // Copy the catalog where path.ux's ESLint rule expects it.
   await mkdir(dirname(ESLINT_CATALOG), {recursive: true})
@@ -366,7 +369,7 @@ async function main() {
 
   console.log(
     `[gen-datapaths] wrote ${unique.length} paths to scripts/data_api/generated/ ` +
-      `(api-paths.json, API_PATHS.md, datapaths.ts) + eslint catalog copy`
+      `(api-paths.json, API_PATHS.md) + eslint catalog copy`
   )
 }
 

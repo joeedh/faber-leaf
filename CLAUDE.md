@@ -312,10 +312,15 @@ how enum/flag icons attach via `.icons(...)`, and how `getDataAPI()` is built).
 Valid `path` strings for `container.prop("...")` (and `slider`, `check`, etc.)
 are catalogued by walking `getDataAPI()`. After editing `api_define.ts` (or any
 class's `defineAPI`), run `pnpm gen:paths` to regenerate
-`scripts/data_api/generated/` — `API_PATHS.md` is the human/LLM path reference,
-`api-paths.json` the machine-readable catalog, and `datapaths.ts` the committed
-`KnownDataPath` autocomplete augmentation. `pnpm typecheck` runs `gen:paths`
-first (`pnpm build` does not).
+`scripts/data_api/generated/` — `API_PATHS.md` is the human/LLM path reference
+and `api-paths.json` the machine-readable catalog. `pnpm typecheck` runs
+`gen:paths` first (`pnpm build` does not).
+
+Paths are checked by the `pathux/valid-datapath` ESLint rule, not by the type
+checker: `prop()` takes a plain `string`. A container built with a prefix should
+declare it — `container.withDataPrefix<'shadernetwork.graph.nodes[n].'>()` — so
+the rule resolves prefix + path exactly instead of accepting any path that ends
+the same way.
 
 ## Feature flags
 
