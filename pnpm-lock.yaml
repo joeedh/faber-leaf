@@ -48,8 +48,8 @@ importers:
         specifier: 7.0.0-dev.20260406.1
         version: 7.0.0-dev.20260406.1
       comment-lint:
-        specifier: ^0.3.7
-        version: 0.3.7
+        specifier: ^0.5.0
+        version: 0.5.0
       dependency-cruiser:
         specifier: ^17.4.0
         version: 17.4.0
@@ -2551,6 +2551,11 @@ packages:
 
   comment-lint@0.3.7:
     resolution: {integrity: sha512-0Njw7uUHcEVfyHaVZZwZvUFUBX/i92lPaW/RqH8e7uaGEgi8MIayvx0bMEwXlfN+vOUJNwsTlYEm84VuBVrB8Q==}
+    engines: {node: '>=16'}
+    hasBin: true
+
+  comment-lint@0.5.0:
+    resolution: {integrity: sha512-2ANrtJT6WhFo/tlo4MqbyL++hGlv+rELZHOCFN6T+YfI+hDpYKHpU6121w2VuH+o+lauoggocymgrGGvVIFiEQ==}
     engines: {node: '>=16'}
     hasBin: true
 
@@ -6631,6 +6636,8 @@ snapshots:
   commander@2.20.3: {}
 
   comment-lint@0.3.7: {}
+
+  comment-lint@0.5.0: {}
 
   commondir@1.0.1: {}
 
