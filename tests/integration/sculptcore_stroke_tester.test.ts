@@ -62,7 +62,7 @@ interface StrokeTesterResult {
  * builds up inside the hull, whose extremes sit outside the dab, so the bounds
  * are exactly unchanged by a perfectly healthy stroke.
  */
-const DRIVER = `(function () {
+const DRIVER = `(async function () {
   var r = {ok: false}
   try {
     var ctx = _appstate.ctx
@@ -91,7 +91,7 @@ const DRIVER = `(function () {
     }
     var before = snap()
     r.vertsBefore = before.size
-    var res = t.runStroke({
+    var res = await t.runStroke({
       points: [[0.42, 0.5], [0.5, 0.5], [0.58, 0.5]],
       radius: 150,
       brushSettings: {strength: 1.0},
@@ -103,9 +103,9 @@ const DRIVER = `(function () {
     var m = moves(before, after)
     r.moved = m.max
     r.vertsMoved = m.count
-    t.undo()
+    await t.undo()
     r.undoResidual = moves(before, snap()).max
-    t.redo()
+    await t.redo()
     r.redoResidual = moves(after, snap()).max
     r.ok = true
   } catch (e) {

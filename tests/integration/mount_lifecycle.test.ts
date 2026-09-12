@@ -114,7 +114,7 @@ const TWO_INSTANCES = evalScript(`
   const materialsOf = (state) => [...state.datalib.material].length
   const before = [materialsOf(first), materialsOf(second)]
 
-  second.ctx.api.execTool(second.ctx, 'material.new()')
+  await second.ctx.api.execTool(second.ctx, 'material.new()')
   const after = [materialsOf(first), materialsOf(second)]
 
   const result = {

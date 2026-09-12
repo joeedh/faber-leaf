@@ -31,6 +31,12 @@
     // reaches nw.App.argv and breaks the window model).
     const argv = (globalThis.nw && nw.App.argv) || [];
     const hasFlag = (name) => argv.some((a) => a === "--" + name || a.startsWith("--" + name + "="));
+
+    // --debug-events: path.ux's polyfill wraps every listener and records the
+    // full pointer/mouse/click sequence; read it back with eventDebugModule.dump()
+    if (hasFlag("debug-events")) {
+      window._debug_event_listeners = true;
+    }
     if (globalThis.nw) {
       const win = nw.Window.get();
       if (!hasFlag("apptest-headless")) {

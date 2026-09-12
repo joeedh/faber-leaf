@@ -38,7 +38,7 @@ editors.DrawerEditor {
     let con = document.createElement('colframe-x')
 
     con.ctx = this.ctx
-    con._init()
+    con.checkInit()
     con.style['width'] = '100%'
 
     let pane = {

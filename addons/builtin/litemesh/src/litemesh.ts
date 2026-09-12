@@ -641,7 +641,7 @@ export class LiteMesh extends SceneObjectData {
      * execOrRedo collapses a drag to a single undo entry. */
     const execLayerTool = (ctx: ViewContext, path: string, inputs: Record<string, unknown>, merge: boolean) => {
       const tool = ctx.api.createTool(ctx, `${path}()`, inputs)
-      const head = ctx.toolstack.head
+      const head = ctx.toolstack.headOp
       const headPath = head ? (head.constructor as unknown as {tooldef(): {toolpath: string}}).tooldef().toolpath : ''
       const sameTarget = merge && headPath === path && (head!.getInputs() as {layer?: number}).layer === inputs.layer
       if (sameTarget) {

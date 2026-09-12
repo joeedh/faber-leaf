@@ -6,7 +6,7 @@ import {SelMask} from './select_types'
 import {ScreenBlock} from '../editors/editor_base'
 import {Collection} from '../scene/collection'
 import {Scene} from '../scene/scene'
-import type {ToolContext} from './context'
+import type {ToolContext, ViewContext} from './context'
 import {Library} from './lib_api'
 import {genDefaultScreen} from '../editors/screengen'
 import {buildDefaultSceneContents, getDefaultToolMode} from './default_file'
@@ -14,7 +14,7 @@ import {getAppStorage} from './app_storage'
 import {getAppState} from './app_instance'
 
 /*root operator for when loading files*/
-export class RootFileOp extends ToolOp {
+export class RootFileOp extends ToolOp<{}, {}, ToolContext, ViewContext> {
   static tooldef() {
     return {
       undoflag: UndoFlags.IS_UNDO_ROOT | UndoFlags.NO_UNDO,
@@ -24,9 +24,14 @@ export class RootFileOp extends ToolOp {
   }
 }
 
-export class RootLoadFileOp extends ToolOp<{
-  fileBuffer: ArrayBufferProperty
-}> {
+export class RootLoadFileOp extends ToolOp<
+  {
+    fileBuffer: ArrayBufferProperty
+  },
+  {},
+  ToolContext,
+  ViewContext
+> {
   constructor(buffer?: ArrayBuffer | SharedArrayBuffer) {
     super()
 
@@ -66,7 +71,7 @@ export class RootLoadFileOp extends ToolOp<{
 ToolOp.register(RootLoadFileOp)
 
 /** Root operator that builds a file. */
-export class BasicFileOp extends ToolOp {
+export class BasicFileOp extends ToolOp<{}, {}, ToolContext, ViewContext> {
   constructor() {
     super()
   }
@@ -116,6 +121,19 @@ export class BasicFileOp extends ToolOp {
   }
 }
 
+/**
+ * Runs a root file op synchronously and off the toolstack. Root ops are
+ * NO_UNDO so the stack never records them, and callers (startup, File > New
+ * from inside another op's exec) need the file to exist when this returns.
+ */
+function runRootFileOp(appstate: AppState, tool: BasicFileOp): void {
+  const tctx = appstate.ctx.toLocked()
+  tool.execCtx = tctx
+  tool.execPre(tctx)
+  tool.exec(tctx)
+  tool.execPost(tctx)
+}
+
 export function genDefaultFile(appstate: AppState, dont_load_startup = 0) {
   getAppState().saveHandle = undefined
 
@@ -142,7 +160,7 @@ export function genDefaultFile(appstate: AppState, dont_load_startup = 0) {
   const tool = new BasicFileOp()
 
   appstate.datalib = new Library()
-  appstate.toolstack.execTool(appstate.ctx, tool)
+  runRootFileOp(appstate, tool)
 
   genDefaultScreen(appstate)
 }

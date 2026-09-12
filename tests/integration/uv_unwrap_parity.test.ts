@@ -91,12 +91,12 @@ interface Probe {
  * worth the risk (see `litemesh_attr_render.test.ts`).
  */
 const EVAL = [
-  'globalThis.__evalTestResult = (function () {',
+  '(async function () { globalThis.__evalTestResult = await (async function () {',
   'try {',
   'var api = _framework.api;',
   'var ctx = _appstate.ctx;',
   'var reports = globalThis.__uvUnwrapAll();',
-  'var ops = (function () {',
+  'var ops = await (async function () {',
   'var lines = [], resets = 0;',
   'var spy = {onTrigger: function (type, data) {',
   'if (type === "resetDrawLines") { resets++; lines.length = 0; }',
@@ -110,10 +110,10 @@ const EVAL = [
   'if (layer < 0) { return {ok: false, error: "the active object carries no UV layer"}; }',
   'var read = function () { return Array.from(src.getUVs(layer, src.listUVElements(layer))); };',
   'var before = read();',
-  'ctx.api.execTool(ctx, "uveditor.unwrap", {steps: 12, showBins: false, seed: 0});',
+  'await ctx.api.execTool(ctx, "uveditor.unwrap", {steps: 12, showBins: false, seed: 0});',
   'var moved = String(read()) !== String(before);',
-  'ctx.api.execTool(ctx, "uveditor.relax", {steps: 1});',
-  'ctx.api.execTool(ctx, "uveditor.pack_islands", {showBins: true, seed: 0});',
+  'await ctx.api.execTool(ctx, "uveditor.relax", {steps: 1});',
+  'await ctx.api.execTool(ctx, "uveditor.pack_islands", {showBins: true, seed: 0});',
   'var uvs = read(), finite = true, inside = true;',
   'for (var i = 0; i < uvs.length; i++) {',
   'finite = finite && isFinite(uvs[i]);',
@@ -132,7 +132,7 @@ const EVAL = [
   '} catch (e) {',
   'return {error: String(e), stack: String(e && e.stack)};',
   '}',
-  '})()',
+  '})() })()',
 ].join(' ')
 
 function resolveNwjsExe(): string | undefined {

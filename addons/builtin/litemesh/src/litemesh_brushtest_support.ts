@@ -416,7 +416,7 @@ function drawAutosmoothAndMeasure(
   return diffMetrics(before, after, normal)
 }
 
-function brushTest(): BrushTestResult {
+async function brushTest(): Promise<BrushTestResult> {
   const result: BrushTestResult = {ok: false}
   try {
     const mesh = peekAppState()?.ctx?.object?.data
@@ -665,7 +665,7 @@ function brushTest(): BrushTestResult {
     symOp.inputs.axes.setValue(1) // X
     symOp.inputs.direction.setValue(1) // POSITIVE: keep +X, mirror onto -X
     const app = getAppState()
-    app.toolstack.execTool(app.ctx, symOp)
+    await app.toolstack.execTool(app.ctx, symOp)
     const missAfter = posMissFrac(dumpLiveCo(mesh), 0, cell)
     result.symmetrize = {missPristine, missBefore, missAfter}
 

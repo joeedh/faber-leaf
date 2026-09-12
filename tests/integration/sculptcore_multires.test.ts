@@ -162,7 +162,7 @@ function runMultiresTest(
       '--scene-arg',
       'subdiv=3',
       '--eval',
-      'globalThis.__evalTestResult = {base: __multiresTest(), vdm: __multiresVdmTest(), layers: __multiresLayerTest(), addLevel: __multiresAddLevelTest()}',
+      '(async () => { globalThis.__evalTestResult = {base: __multiresTest(), vdm: __multiresVdmTest(), layers: __multiresLayerTest(), addLevel: await __multiresAddLevelTest()} })()',
       // Async driver: the harness awaits each eval's RESULT, so return the
       // promise chain (top-level await is not legal in an eval'd script).
       '--eval',

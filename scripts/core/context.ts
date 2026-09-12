@@ -11,7 +11,7 @@ import {BlockSet, DataBlock, DataRef, Library} from './lib_api'
 import {DebugEditor} from '../editors/debug/DebugEditor.js'
 import {MenuBarEditor} from '../editors/menu/MainMenu.js'
 import {Context, DataAPI, ILockableCtx, toLockedImpl} from '../path.ux/scripts/pathux.js'
-import {SavedToolDefaults, Screen, UIBase} from '../path.ux/scripts/pathux.js'
+import {Screen, UIBase} from '../path.ux/scripts/pathux.js'
 import {PropsEditor} from '../editors/properties/PropsEditor.js'
 import {MaterialEditor} from '../editors/node/MaterialEditor.js'
 import {Icons} from '../editors/icon_enum.js'
@@ -184,35 +184,23 @@ export class ToolContext extends ContextExtraAPI {
     return true
   }
 
+  // The saved tool defaults tree the datapath `toolDefaults.<tool>.<prop>` walks
   get toolDefaults() {
-    return SavedToolDefaults.accessors
+    return this.api.toolDefaults
   }
 
   toolDefaults_save() {
-    return SavedToolDefaults.accessors
+    return this.toolDefaults
   }
 
   toolDefaults_load() {
-    return SavedToolDefaults.accessors
-  }
-
-  get propCache() {
-    //used by datapath api
-    return SavedToolDefaults
-  }
-
-  propCache_save() {
-    return SavedToolDefaults
-  }
-
-  propCache_load(ctx: this, data: any) {
-    return SavedToolDefaults
+    return this.toolDefaults
   }
 
   //used by UI code
   //refers to last executed *ToolOp*, don't confused with tool *modes*
   get last_tool() {
-    return this.state.toolstack.head
+    return this.state.toolstack.headOp
   }
 
   copy() {
@@ -566,24 +554,27 @@ export class ViewContext extends ToolContext {
    * (it's called after each tool).
    */
   replay(stopCB: () => boolean): Promise<unknown> {
-    const start = () => {
-      // instead of undo'ing back to root,
-      // use RootFileLoadOp
-      const toolstack = this.toolstack
-      if (toolstack[0] instanceof RootLoadFileOp) {
-        this.state.loadFile(toolstack[0].inputs.fileBuffer.getValue(), {
-          load_screen    : false,
-          reset_toolstack: false,
-          reset_context  : false,
-        })
-        toolstack.cur = 0 // replay will start at cur + 1
-      } else {
-        // eslint-disable-next-line no-console
-        console.log('failed to find root file load op; rewinding via undo')
-        toolstack.rewind()
-      }
+    const toolstack = this.toolstack
+    const root = toolstack[0]
+
+    if (!(root instanceof RootLoadFileOp)) {
+      // eslint-disable-next-line no-console
+      console.log('failed to find root file load op; rewinding via undo')
+      return toolstack.replay(stopCB)
     }
-    return this.toolstack.replay(stopCB, undefined, start)
+
+    // Reload the file instead of undoing back to the root. Runs under the
+    // toolstack lock, so it must not call any public toolstack method.
+    const start = async () => {
+      this.state.loadFile(root.inputs.fileBuffer.getValue(), {
+        load_screen    : false,
+        reset_toolstack: false,
+        reset_context  : false,
+      })
+      toolstack.cur = 0 // replay will start at cur + 1
+      return toolstack
+    }
+    return toolstack.replay(stopCB, undefined, start)
   }
   validate() {
     return true

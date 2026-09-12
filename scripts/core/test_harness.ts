@@ -506,7 +506,7 @@ export async function runTestHarness(argv: string[] = getAppArgv()): Promise<voi
 
     for (const tool of opts.runTools) {
       try {
-        appstate().ctx.api?.execTool(appstate().ctx, tool)
+        await appstate().ctx.api?.execTool(appstate().ctx, tool)
         console.log(`${TAG} ran ${tool}`)
       } catch (err) {
         console.error(`${TAG} tool failed: ${tool}`, err)

@@ -114,7 +114,7 @@ const CASES: [string, Record<string, unknown>][] = [
   ],
 ]
 
-const DRIVER = `(function () {
+const DRIVER = `(async function () {
   var r = {ok: false, cases: []}
   try {
     var ctx = _appstate.ctx
@@ -137,8 +137,8 @@ const DRIVER = `(function () {
     // reads toolstack.head.driver after modalEnd (sculptcore.ts drawBrush), and
     // on the native backend calling a disposed bound object handed C++ a null
     // 'this' -> renderer segfault.
-    var probe = t.runStroke({points: [[0.5, 0.5], [0.52, 0.5]], radius: 20, sculptTool: 9})
-    t.undo()
+    var probe = await t.runStroke({points: [[0.5, 0.5], [0.52, 0.5]], radius: 20, sculptTool: 9})
+    await t.undo()
     var op = new (probe.tool.constructor)()
     op.inputs.brush.setValue(t.getBrush({sculptTool: 9}))
     op.modal_ctx = ctx

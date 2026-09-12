@@ -91,7 +91,7 @@ function leafCount(mesh: LiteMesh): number {
   }
 }
 
-function boundaryTest(): BoundaryTestResult {
+async function boundaryTest(): Promise<BoundaryTestResult> {
   const result: BoundaryTestResult = {ok: false}
   try {
     const app = getAppState()
@@ -142,19 +142,19 @@ function boundaryTest(): BoundaryTestResult {
       const before = mesh.boundaryGraphStats().flaggedEdges
       // Toolpath args are space-separated `k=v` pairs (no commas — see
       // path.ux toolpath.ts p_Start).
-      ctx.api?.execTool(ctx, `litemesh.mark_seam(vStart=${a} vEnd=${b})`)
+      await ctx.api?.execTool(ctx, `litemesh.mark_seam(vStart=${a} vEnd=${b})`)
       result.pathEdgeCounts.push(mesh.boundaryGraphStats().flaggedEdges - before)
     }
     result.marked = mesh.boundaryGraphStats()
 
     // Mark undo/redo through the real toolstack.
-    app.toolstack.undo()
-    app.toolstack.undo()
-    app.toolstack.undo()
+    await app.toolstack.undo()
+    await app.toolstack.undo()
+    await app.toolstack.undo()
     result.markUndo = mesh.boundaryGraphStats()
-    app.toolstack.redo()
-    app.toolstack.redo()
-    app.toolstack.redo()
+    await app.toolstack.redo()
+    await app.toolstack.redo()
+    await app.toolstack.redo()
     result.markRedo = mesh.boundaryGraphStats()
 
     // Stroke setup: dab centered on pole A (a vert on the seam network),

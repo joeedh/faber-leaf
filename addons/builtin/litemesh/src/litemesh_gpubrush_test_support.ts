@@ -122,9 +122,9 @@ async function gpuBrushTest(opts: TestOpts = {}): Promise<GpuBrushTestResult> {
   const g = globalThis as unknown as {
     _sculptcoreStrokeTester?: {
       frameMeshInCamera(): void
-      runStroke(o: object): {redrawPromise: Promise<unknown>}
-      undo(): void
-      redo(): void
+      runStroke(o: object): Promise<{redrawPromise: Promise<unknown>}>
+      undo(): Promise<void>
+      redo(): Promise<void>
     }
     __gpuBrushCompletion?: Promise<void>
     DEBUG?: {
@@ -184,9 +184,9 @@ async function gpuBrushTest(opts: TestOpts = {}): Promise<GpuBrushTestResult> {
     // --- CPU reference pass -------------------------------------------------
     FeatureFlags.set('sculptcore.gpu_brush', false)
     FeatureFlags.set('sculptcore.gpu_brush_verify', false)
-    await tester.runStroke(strokeOpts).redrawPromise
+    await (await tester.runStroke(strokeOpts)).redrawPromise
     const cpuCo = readGpuBuffer(mesh, 'position')
-    tester.undo()
+    await tester.undo()
     await (window as Window).redraw_viewport_p(true)
     // Pre-stroke baseline, captured AFTER the first stroke+undo: the first
     // regenTreeBatch drops the leaf-bounds overlay's 'position' buffer, so a
@@ -201,16 +201,16 @@ async function gpuBrushTest(opts: TestOpts = {}): Promise<GpuBrushTestResult> {
     if (opts.capture) {
       dbgSurface.capture(1)
     }
-    await tester.runStroke(strokeOpts).redrawPromise
+    await (await tester.runStroke(strokeOpts)).redrawPromise
     // Wait for the async finalization (final readback + endStep).
     await g.__gpuBrushCompletion
     const gpuCo = readGpuBuffer(mesh, 'position')
 
     // --- undo/redo fidelity on the GPU stroke (§8.3) -------------------------
-    tester.undo()
+    await tester.undo()
     await (window as Window).redraw_viewport_p(true)
     const undoCo = readGpuBuffer(mesh, 'position')
-    tester.redo()
+    await tester.redo()
     await (window as Window).redraw_viewport_p(true)
     const redoCo = readGpuBuffer(mesh, 'position')
 
@@ -235,15 +235,15 @@ async function gpuBrushTest(opts: TestOpts = {}): Promise<GpuBrushTestResult> {
 
     // --- optional shadow-verify pass (§9.3) ----------------------------------
     if (opts.runShadow) {
-      tester.undo()
+      await tester.undo()
       await (window as Window).redraw_viewport_p(true)
       const divBefore = g.DEBUG?.gpuBrush?.shadowDivergences ?? 0
       FeatureFlags.set('sculptcore.gpu_brush', false)
       FeatureFlags.set('sculptcore.gpu_brush_verify', true)
-      await tester.runStroke(strokeOpts).redrawPromise
+      await (await tester.runStroke(strokeOpts)).redrawPromise
       await g.__gpuBrushCompletion
       result.shadowDivergences = (g.DEBUG?.gpuBrush?.shadowDivergences ?? 0) - divBefore
-      tester.undo()
+      await tester.undo()
       await (window as Window).redraw_viewport_p(true)
     }
 
@@ -304,11 +304,11 @@ async function gpuBrushTest(opts: TestOpts = {}): Promise<GpuBrushTestResult> {
       const divBefore = g.DEBUG?.gpuBrush?.shadowDivergences ?? 0
       FeatureFlags.set('sculptcore.gpu_brush', false)
       FeatureFlags.set('sculptcore.gpu_brush_verify', true)
-      await tester.runStroke({...strokeOpts, sculptTool: SculptTools.GRAB}).redrawPromise
+      await (await tester.runStroke({...strokeOpts, sculptTool: SculptTools.GRAB})).redrawPromise
       await g.__gpuBrushCompletion
       result.grabShadowDivergences = (g.DEBUG?.gpuBrush?.shadowDivergences ?? 0) - divBefore
       FeatureFlags.set('sculptcore.gpu_brush_verify', false)
-      tester.undo()
+      await tester.undo()
       await (window as Window).redraw_viewport_p(true)
     }
 

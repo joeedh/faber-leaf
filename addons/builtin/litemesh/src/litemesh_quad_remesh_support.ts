@@ -79,7 +79,7 @@ function topoSig(lite: LiteMesh): TopoSig {
  * count mode) — on the active LiteMesh, then undo and redo, recording the
  * topology fingerprint at each stage.
  */
-function runQuadRemeshTest(): QuadRemeshTestResult {
+async function runQuadRemeshTest(): Promise<QuadRemeshTestResult> {
   const backend = (globalThis as {__SCULPTCORE_BACKEND?: string}).__SCULPTCORE_BACKEND ?? 'wasm'
   const result: QuadRemeshTestResult = {
     ok: false,
@@ -101,14 +101,14 @@ function runQuadRemeshTest(): QuadRemeshTestResult {
 
     // The real user path: a registered, undoable ToolOp driven by data-API tool
     // path. Explicit 0.1 pins the validated parity band (default = count mode).
-    ctx.api?.execTool(ctx, 'litemesh.quad_remesh(targetEdgeLength=0.1)')
+    await ctx.api?.execTool(ctx, 'litemesh.quad_remesh(targetEdgeLength=0.1)')
     result.after = topoSig(lite)
     result.success = result.after.ngon !== result.before.ngon || result.after.leaf !== result.before.leaf
 
-    app.toolstack.undo()
+    await app.toolstack.undo()
     result.undone = topoSig(lite)
 
-    app.toolstack.redo()
+    await app.toolstack.redo()
     result.redone = topoSig(lite)
 
     result.ok = true

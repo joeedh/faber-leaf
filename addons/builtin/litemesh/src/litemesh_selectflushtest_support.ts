@@ -49,7 +49,7 @@ async function selectFlushTest(): Promise<SelectFlushTestResult> {
     const mesh = ctx.scene.objects.active!.data as LiteMesh
     const view3d = ctx.view3d as View3D
     const objd = ctx.scene.objects.active as SceneObject
-    exec('litemesh.select_all(mode=NONE)') // forces ensureMeshLog()
+    await exec('litemesh.select_all(mode=NONE)') // forces ensureMeshLog()
     const meshlog = SculptPaintOp.meshLog as unknown as IMeshLogSelect
     const size = view3d.size!
 
@@ -66,58 +66,58 @@ async function selectFlushTest(): Promise<SelectFlushTestResult> {
       mesh.selectRect(view3d, objd, min, max, domain, 1, meshlog)
       meshlog.selectionEndStep()
     }
-    const clearAll = () => {
+    const clearAll = async () => {
       tm.boxModelSelMode = 7
-      exec('litemesh.select_all(mode=NONE)')
+      await exec('litemesh.select_all(mode=NONE)')
     }
 
     // vert-only selection drives extrude region (face-domain op)
-    clearAll()
+    await clearAll()
     tm.boxModelSelMode = 1
     selRect(0, 0.4, 0.4, 0.6, 0.6)
     const b1 = counts()
-    exec('litemesh.extrude_region()')
+    await exec('litemesh.extrude_region()')
     const a1 = counts()
     r.extrudeFromVerts = {before: b1, after: a1, worked: b1.v > 0 && a1.f > 0}
-    undo()
+    await undo()
 
     // vert-only selection drives subdivide (edge-domain op); the new cut verts
     // are left selected, so the selected-vert count must grow
-    clearAll()
+    await clearAll()
     tm.boxModelSelMode = 1
     selRect(0, 0.4, 0.4, 0.6, 0.6)
     const b2 = counts()
-    exec('litemesh.subdivide(numCuts=1)')
+    await exec('litemesh.subdivide(numCuts=1)')
     const a2 = counts()
     r.subdivideFromVerts = {before: b2, after: a2, worked: a2.v > b2.v}
-    undo()
+    await undo()
 
     // explicit face selection wins outright with the flag on: the extruded cap
     // face count equals the explicit selection, ignoring the vert selection
-    clearAll()
+    await clearAll()
     tm.boxModelSelMode = 4
     selRect(2, 0.45, 0.45, 0.55, 0.55)
     const fExplicit = counts().f
     tm.boxModelSelMode = 1
     selRect(0, 0.2, 0.2, 0.8, 0.8)
-    exec('litemesh.extrude_region()')
+    await exec('litemesh.extrude_region()')
     const capPrefer = counts().f
     r.preferExplicit = {explicit: fExplicit, capAfter: capPrefer, worked: fExplicit > 0 && capPrefer === fExplicit}
-    undo()
+    await undo()
 
     // flag off: explicit + derived union -> more caps than the explicit set
     FeatureFlags.set(FLAG, false)
     try {
-      clearAll()
+      await clearAll()
       tm.boxModelSelMode = 4
       selRect(2, 0.45, 0.45, 0.55, 0.55)
       const fExplicit2 = counts().f
       tm.boxModelSelMode = 1
       selRect(0, 0.3, 0.3, 0.7, 0.7)
-      exec('litemesh.extrude_region()')
+      await exec('litemesh.extrude_region()')
       const capUnion = counts().f
       r.union = {explicit: fExplicit2, capAfter: capUnion, worked: capUnion > fExplicit2}
-      undo()
+      await undo()
     } finally {
       FeatureFlags.set(FLAG, true)
     }

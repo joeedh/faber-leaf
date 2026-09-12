@@ -1278,7 +1278,7 @@ export interface SculptcoreStrokeTester {
     brushSettings?: Partial<SculptBrush>
     dyntopo?: StrokeTesterDyntopo
     brush?: SculptBrush
-  }): SculptcoreStrokeRunResult
+  }): Promise<SculptcoreStrokeRunResult>
   sampleStroke(opts: {
     points: ArrayLike<number>[]
     useCpp: boolean
@@ -1290,8 +1290,8 @@ export interface SculptcoreStrokeTester {
     /** StrokeSpaceMode override; the sculpt op is always SCREEN otherwise. */
     spaceMode?: number
   }): StrokeDabDump[]
-  undo(): void
-  redo(): void
+  undo(): Promise<void>
+  redo(): Promise<void>
 }
 
 /** One emitted dab, flattened to plain numbers so it survives `--dump` JSON.
@@ -1429,7 +1429,7 @@ window._sculptcoreStrokeTester = {
    * to skip resolution. The op runs non-modally through the toolstack, so it is
    * a normal undoable entry (`undo()`/`redo()` below, or ctrl-Z).
    */
-  runStroke({
+  async runStroke({
     points,
     symmetryAxes = 0,
     radius,
@@ -1447,7 +1447,7 @@ window._sculptcoreStrokeTester = {
     brushSettings?: Partial<SculptBrush>
     dyntopo?: StrokeTesterDyntopo
     brush?: SculptBrush
-  }): SculptcoreStrokeRunResult {
+  }): Promise<SculptcoreStrokeRunResult> {
     const ctx = this.ctx
     const view3d = ctx.view3d as View3D | undefined
     if (!view3d) {
@@ -1528,7 +1528,7 @@ window._sculptcoreStrokeTester = {
     }
     tool.is_modal = false
     try {
-      ctx.toolstack.execTool(ctx, tool)
+      await ctx.toolstack.execTool(ctx, tool)
     } finally {
       if (paintMode && prevSymmetryAxes !== undefined) {
         paintMode.symmetryAxes = prevSymmetryAxes
@@ -1625,13 +1625,13 @@ window._sculptcoreStrokeTester = {
   },
 
   /** Undo the last stroke through the toolstack (the real ctrl-Z path). */
-  undo(): void {
-    this.ctx.toolstack.undo()
+  undo(): Promise<void> {
+    return this.ctx.toolstack.undo()
   },
 
   /** Redo the last undone stroke through the toolstack. */
-  redo(): void {
-    this.ctx.toolstack.redo()
+  redo(): Promise<void> {
+    return this.ctx.toolstack.redo()
   },
 }
 

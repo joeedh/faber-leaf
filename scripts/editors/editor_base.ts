@@ -13,6 +13,7 @@ import {
   KeyMap,
   HotKey,
   ToolClasses,
+  toolopRefusal,
   DropBox,
   DataAPI,
   Area,
@@ -437,7 +438,7 @@ export class DataBlockBrowser<BlockType extends DataBlock> extends Container<Vie
 
   update() {
     // check that init has been called
-    this._init()
+    this.checkInit()
 
     const path = this._getDataPath()!
 
@@ -1004,16 +1005,18 @@ export function spawnToolSearchMenu(ctx: ViewContext) {
   const menu = document.createElement('menu-x') as Menu<ViewContext>
 
   for (const cls of ToolClasses) {
-    let ok: boolean
+    let refusal: ReturnType<typeof toolopRefusal>
 
     try {
-      ok = cls.canRun(ctx)
+      refusal = toolopRefusal(ctx, cls)
     } catch (error) {
       util.print_stack(error as Error)
-      ok = false
+      continue
     }
 
-    if (!ok) {
+    // A tool that answered synchronously with a refusal is left out; an async
+    // answer gets a row that stays disabled until it settles
+    if (refusal !== undefined && !(refusal instanceof Promise)) {
       continue
     }
 
@@ -1028,8 +1031,20 @@ export function spawnToolSearchMenu(ctx: ViewContext) {
       }
     }
 
-    menu.addItemExtra(tdef.uiname ?? tdef.toolpath ?? 'unknown', tools.length, hotkey)
+    const id = tools.length
+    menu.addItemExtra(tdef.uiname ?? tdef.toolpath ?? 'unknown', id, hotkey)
     tools.push(cls)
+
+    if (refusal instanceof Promise) {
+      menu.setItemDisabled(id)
+      void refusal.then(settled => {
+        if (settled === undefined) {
+          menu.setItemEnabled(id)
+        } else {
+          menu.setItemDisabled(id, settled)
+        }
+      })
+    }
   }
 
   menu.setAttribute('title', 'Tools')
@@ -1449,7 +1464,7 @@ export class MaterialChooser extends Container<ViewContext> {
       this.on_change(this.getActive(objectData))
     }
 
-    this.button('Add Material', () => {
+    this.button('Add Material', async () => {
       const obData = this.ctx.api.getValue<SceneObjectData>(this.ctx, this.getAttribute('datapath')!)
       if (obData === undefined) {
         // eslint-disable-next-line no-console
@@ -1459,7 +1474,7 @@ export class MaterialChooser extends Container<ViewContext> {
       }
       const op = new MakeMaterialOp()
 
-      this.ctx.toolstack.execTool(this.ctx, op)
+      await this.ctx.toolstack.execTool(this.ctx, op)
       const mat = this.ctx.datalib.get<Material>(op.outputs.materialID.getValue())!
 
       obData.materials.push(mat)

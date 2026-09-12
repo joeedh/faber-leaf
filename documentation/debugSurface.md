@@ -108,7 +108,9 @@ The related feature flags (`sculptcore.gpu_brush`, `.gpu_brush_grab`,
 
 ## `_appstate` — the first instance, directly
 
-`_appstate.ctx`, `.screen`, `.toolstack` (`.undo()`/`.redo()`/`.execTool()`),
+`_appstate.ctx`, `.screen`, `.toolstack` (`.undo()`/`.redo()`/`.execTool()` — all
+return promises; the stack runs one operation at a time behind a lock, so
+`await` before reading state; `.headOp` is the synchronous head read),
 `.datalib` (`.get(lib_id)`, `.graph`), `.api`, `.arguments`, `.draw()`,
 `.createFile()`, `.modalFlag`, `.container`, `.glCanvas`.
 

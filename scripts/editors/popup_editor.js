@@ -283,7 +283,7 @@ export class PopupEditor extends Editor {
     let container = document.createElement('container-x')
 
     container.ctx = this.ctx
-    container._init()
+    container.checkInit()
 
     container.background = this.getDefault('DefaultPanelBG')
     container.parentWidget = this
@@ -354,7 +354,7 @@ export class PopupEditor extends Editor {
 
     let container = (this.container = document.createElement('rowframe-x'))
     container.ctx = this.ctx
-    container._init()
+    container.checkInit()
     container.parentWidget = this
     this.shadow.appendChild(container)
 

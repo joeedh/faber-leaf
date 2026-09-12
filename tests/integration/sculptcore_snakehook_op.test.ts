@@ -79,7 +79,7 @@ const HOOK_POINTS = [
   [0.63, 0.5],
 ]
 
-const DRIVER = `(function () {
+const DRIVER = `(async function () {
   var r = {ok: false}
   try {
     var ctx = _appstate.ctx
@@ -109,7 +109,7 @@ const DRIVER = `(function () {
     }
 
     r.before = stats()
-    var res = t.runStroke({
+    var res = await t.runStroke({
       points: ${JSON.stringify(HOOK_POINTS)},
       radius: 120,
       // SculptTools.SNAKE. The enum is not a global in --eval, so inline it.
@@ -121,7 +121,7 @@ const DRIVER = `(function () {
     r.after = stats()
     r.maxMove = r.after.max - r.before.max
 
-    t.undo()
+    await t.undo()
     r.undone = stats()
 
     r.ok = true

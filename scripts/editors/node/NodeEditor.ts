@@ -402,7 +402,7 @@ NodeEditor {
 
     if (!this.sidebar) {
       this.sidebar = this.makeSideBar()
-      this.sidebar._init()
+      this.sidebar.checkInit()
       this.sidebar.position = 'right'
       this.sidebar.collapse(false)
     }

@@ -577,7 +577,7 @@ function fnv1aBytes(bytes: Uint8Array): number {
  * (enable/delete + undo through the real toolstack), Draw-dab carrier routing
  * through `runSculptcoreStroke` (texels splat, vertices hold still), and the
  * stroke's VdmLogChunk undo/redo through the shared MeshLog. */
-function vdmSculptTest(): VdmSculptResult {
+async function vdmSculptTest(): Promise<VdmSculptResult> {
   const result: VdmSculptResult = {ok: false}
   const g = globalThis as unknown as {
     __evalTestResult?: unknown
@@ -599,11 +599,11 @@ function vdmSculptTest(): VdmSculptResult {
       if (l > R) R = l
     }
 
-    ctx.api?.execTool(ctx, 'litemesh.multires_enable()')
+    await ctx.api?.execTool(ctx, 'litemesh.multires_enable()')
     result.levels = mesh.multiresLevels
     if (!mesh.multiresActive) throw new Error('multires_enable did not attach a stack')
 
-    ctx.api?.execTool(ctx, 'litemesh.vdm_enable()')
+    await ctx.api?.execTool(ctx, 'litemesh.vdm_enable()')
     if (!mesh.hasVdm) throw new Error('vdm_enable did not attach a store')
     result.isPtex = mesh.vdmIsPtex
     const store = mesh.vdmStore as unknown as {tileCount(): number}
@@ -637,9 +637,9 @@ function vdmSculptTest(): VdmSculptResult {
 
     // Lifecycle undo through the real toolstack: delete releases (not frees)
     // the instance, so its undo brings every texel back.
-    ctx.api?.execTool(ctx, 'litemesh.vdm_delete()')
+    await ctx.api?.execTool(ctx, 'litemesh.vdm_delete()')
     result.vdmAfterDeleteOp = mesh.hasVdm
-    app.toolstack.undo()
+    await app.toolstack.undo()
     result.vdmAfterDeleteUndo = mesh.hasVdm
     if (mesh.hasVdm) {
       result.blobChecksumAfterDeleteUndo = fnv1aBytes(wasm.VdmStore_serializeBlob(mesh.vdmStore!))
@@ -649,7 +649,7 @@ function vdmSculptTest(): VdmSculptResult {
     // store on this multires mesh), store cleared; toolstack undo restores
     // both sides exactly.
     result.posBeforeApply = fnv1a(dumpCoFlat(mesh))
-    ctx.api?.execTool(ctx, 'litemesh.vdm_apply()')
+    await ctx.api?.execTool(ctx, 'litemesh.vdm_apply()')
     result.posAfterApply = fnv1a(dumpCoFlat(mesh))
     result.tilesAfterApply = store.tileCount()
     let applyMoved = 0
@@ -660,7 +660,7 @@ function vdmSculptTest(): VdmSculptResult {
       applyMoved = result.posAfterApply === result.posBeforeApply ? 0 : 1
     }
     result.applyMoved = applyMoved
-    app.toolstack.undo()
+    await app.toolstack.undo()
     result.posAfterApplyUndo = fnv1a(dumpCoFlat(mesh))
     result.tilesAfterApplyUndo = store.tileCount()
     result.blobChecksumAfterApplyUndo = mesh.hasVdm ? fnv1aBytes(wasm.VdmStore_serializeBlob(mesh.vdmStore!)) : -1
@@ -669,10 +669,10 @@ function vdmSculptTest(): VdmSculptResult {
     // empty), capture it back (geometry -> texels, surface drops EXACTLY
     // onto the smooth base = the pre-apply positions), then re-apply and
     // measure the double-bilinear residual against the first apply.
-    app.toolstack.redo()
+    await app.toolstack.redo()
     const applied1 = dumpCoFlat(mesh)
     let maxDisp = 0
-    ctx.api?.execTool(ctx, 'litemesh.vdm_capture()')
+    await ctx.api?.execTool(ctx, 'litemesh.vdm_capture()')
     result.tilesAfterCapture = store.tileCount()
     result.posAfterCapture = fnv1a(dumpCoFlat(mesh))
     {
@@ -683,10 +683,10 @@ function vdmSculptTest(): VdmSculptResult {
       }
     }
     result.captureMaxDisp = maxDisp
-    ctx.api?.execTool(ctx, 'litemesh.vdm_apply()')
+    await ctx.api?.execTool(ctx, 'litemesh.vdm_apply()')
     result.captureRoundTripResidual = maxResidual(applied1, dumpCoFlat(mesh))
-    app.toolstack.undo() // un-apply
-    app.toolstack.undo() // un-capture -> back to the applied state
+    await app.toolstack.undo() // un-apply
+    await app.toolstack.undo() // un-capture -> back to the applied state
     result.captureUndoResidual = maxResidual(applied1, dumpCoFlat(mesh))
     result.tilesAfterCaptureUndo = store.tileCount()
 
@@ -952,7 +952,7 @@ export interface MultiresAddLevelTestResult {
  * (c) round-trips through the real toolstack undo/redo. Checksums are the
  * wasm↔native bit-parity gate.
  */
-function multiresAddLevelTest(): MultiresAddLevelTestResult {
+async function multiresAddLevelTest(): Promise<MultiresAddLevelTestResult> {
   const result: MultiresAddLevelTestResult = {ok: false}
   try {
     const app = getAppState()
@@ -989,7 +989,7 @@ function multiresAddLevelTest(): MultiresAddLevelTestResult {
     result.facesBefore = mesh.mesh.f.count
 
     // Grow one level through the real ToolOp.
-    ctx.api?.execTool(ctx, 'litemesh.multires_add_level()')
+    await ctx.api?.execTool(ctx, 'litemesh.multires_add_level()')
     result.levelsAfter = mesh.multiresLevels
     result.activeAfter = mesh.multiresLevel
     result.facesAfter = mesh.mesh.f.count
@@ -1003,13 +1003,13 @@ function multiresAddLevelTest(): MultiresAddLevelTestResult {
     mesh.multiresSetLevel(mesh.multiresLevels)
 
     // Toolstack undo/redo of the add-level op.
-    app.toolstack.undo()
+    await app.toolstack.undo()
     result.levelsAfterUndo = mesh.multiresLevels
     mesh.multiresSetLevel(preservedLevel)
     result.undoChecksum = fnv1a(dumpCoFlat(mesh))
     result.undoMatches = result.undoChecksum === result.preservedChecksum
 
-    app.toolstack.redo()
+    await app.toolstack.redo()
     result.levelsAfterRedo = mesh.multiresLevels
     result.redoChecksum = fnv1a(dumpCoFlat(mesh))
 

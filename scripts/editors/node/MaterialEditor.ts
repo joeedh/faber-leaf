@@ -90,9 +90,9 @@ export class MaterialEditor extends NodeEditorBase {
 
     const materialTab = sidebar.tabpanel.tab('Materials')
 
-    const panel = UIBase.createElement('material-panel-x')
+    const panel = UIBase.constructElement<UIBase<ViewContext>>('material-panel-x', this.ctx)
     panel.setAttribute('datapath', 'object.data')
-    materialTab.add(panel as unknown as UIBase<ViewContext>)
+    materialTab.add(panel)
   }
 
   buildHeader(): void {

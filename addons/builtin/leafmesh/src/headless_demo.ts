@@ -220,10 +220,10 @@ function record(mesh: LeafMesh, step: string): DemoStep {
  * Build the op by toolpath and run it non-modally. The drag ops read their
  * width from an input, so with `is_modal` off they need no pointer at all.
  */
-function execTool(ctx: ToolContext, path: string): void {
+function execTool(ctx: ToolContext, path: string): Promise<void> {
   const tool = ctx.api.createTool(ctx, path)
   tool.is_modal = false
-  ctx.toolstack.execTool(ctx, tool)
+  return ctx.toolstack.execTool(ctx, tool)
 }
 
 /** One entry of a shape's script: what to select, and which tool to run on it. */
@@ -245,7 +245,12 @@ interface DemoOp {
  * All of it happens while this shape's object is the active one, because that
  * is where every op's `undo` looks for its mesh.
  */
-function runShape(ctx: ToolContext, name: string, build: (mesh: LeafMesh) => void, script: DemoOp[]): DemoShape {
+async function runShape(
+  ctx: ToolContext,
+  name: string,
+  build: (mesh: LeafMesh) => void,
+  script: DemoOp[]
+): Promise<DemoShape> {
   const data = addObject(ctx, name)
   build(data.mesh)
 
@@ -256,15 +261,15 @@ function runShape(ctx: ToolContext, name: string, build: (mesh: LeafMesh) => voi
     const before = meshHash(data.mesh)
 
     entry.pick(data.mesh)
-    execTool(ctx, entry.tool)
+    await execTool(ctx, entry.tool)
 
     const step = record(data.mesh, entry.step)
     const after = meshHash(data.mesh)
 
-    ctx.toolstack.undo()
+    await ctx.toolstack.undo()
     step.undoOk = meshHash(data.mesh) === before
 
-    ctx.toolstack.redo()
+    await ctx.toolstack.redo()
     step.redoOk = meshHash(data.mesh) === after
 
     steps.push(step)
@@ -272,7 +277,7 @@ function runShape(ctx: ToolContext, name: string, build: (mesh: LeafMesh) => voi
   const finalHash = meshHash(data.mesh)
 
   for (let i = 0; i < script.length; i++) {
-    ctx.toolstack.undo()
+    await ctx.toolstack.undo()
   }
   const undoneHash = meshHash(data.mesh)
 
@@ -281,7 +286,7 @@ function runShape(ctx: ToolContext, name: string, build: (mesh: LeafMesh) => voi
   // reproducible is what makes the numbers above worth reading.
   for (const entry of script) {
     entry.pick(data.mesh)
-    execTool(ctx, entry.tool)
+    await execTool(ctx, entry.tool)
   }
   const replayHash = meshHash(data.mesh)
 
@@ -344,12 +349,12 @@ const TUBE_SCRIPT: DemoOp[] = [
  * A cube taken to a shape with a hole through its raised boss, and a tube whose
  * cap already carries one. Returns a plain object so `--dump` can carry it out.
  */
-export function runLeafMeshHeadlessDemo(ctx: ToolContext): LeafMeshDemoReport {
+export async function runLeafMeshHeadlessDemo(ctx: ToolContext): Promise<LeafMeshDemoReport> {
   const shapes: DemoShape[] = []
 
   try {
-    shapes.push(runShape(ctx, 'DemoCube', (mesh) => makeCube(mesh, 2), CUBE_SCRIPT))
-    shapes.push(runShape(ctx, 'DemoTube', (mesh) => makeTube(mesh, 12, 1, 0.5), TUBE_SCRIPT))
+    shapes.push(await runShape(ctx, 'DemoCube', (mesh) => makeCube(mesh, 2), CUBE_SCRIPT))
+    shapes.push(await runShape(ctx, 'DemoTube', (mesh) => makeTube(mesh, 12, 1, 0.5), TUBE_SCRIPT))
   } catch (err) {
     return {ok: false, error: String((err as Error)?.stack ?? err), shapes}
   }

@@ -56,7 +56,7 @@ async function selectSimilarTest(): Promise<SelectSimilarTestResult> {
     r.nFaces = nFaces
     r.nVerts = nVerts
 
-    exec('litemesh.select_all(mode=NONE)') // forces ensureMeshLog()
+    await exec('litemesh.select_all(mode=NONE)') // forces ensureMeshLog()
     const log = SculptPaintOp.meshLog as unknown as IMeshLogSelect
 
     const setActive = (domain: number, idx: number) => {
@@ -83,9 +83,9 @@ async function selectSimilarTest(): Promise<SelectSimilarTestResult> {
 
     // The menu emits the single-arg form; clear first so the default extend=true
     // yields exactly the material matches. Seed = face 0 (slot 1).
-    exec('litemesh.select_all(mode=NONE)')
+    await exec('litemesh.select_all(mode=NONE)')
     setActive(2, 0)
-    exec('litemesh.select_similar(type=FACE_MATERIAL)')
+    await exec('litemesh.select_similar(type=FACE_MATERIAL)')
     const selMat = m.selectedCount(2)
     r.faceMaterial = {selected: selMat, expected: expectMat, worked: selMat === expectMat && expectMat > 0}
 
@@ -95,21 +95,21 @@ async function selectSimilarTest(): Promise<SelectSimilarTestResult> {
     r.faceMaterialNegative = {slot0FaceSelected: slot0Sel, worked: !slot0Sel && mesh.faceMaterial(slot0Face) === 0}
 
     // Undo the material select-similar: selection returns to empty.
-    undo()
+    await undo()
     r.undoRestores = {after: selMat, restored: m.selectedCount(2), worked: m.selectedCount(2) === 0}
 
     // --- FACE_SIDES: a cube is all quads, so every face matches ---
-    exec('litemesh.select_all(mode=NONE)')
+    await exec('litemesh.select_all(mode=NONE)')
     setActive(2, 0)
-    exec('litemesh.select_similar(type=FACE_SIDES)')
+    await exec('litemesh.select_similar(type=FACE_SIDES)')
     const selSides = m.selectedCount(2)
     r.faceSides = {selected: selSides, expected: nFaces, worked: selSides === nFaces}
 
     // --- VERT_EDGES (valence): seed vert 0; must select >0 verts, not all ---
     tm.boxModelSelMode = 1 // vert
-    exec('litemesh.select_all(mode=NONE)')
+    await exec('litemesh.select_all(mode=NONE)')
     setActive(0, 0)
-    exec('litemesh.select_similar(type=VERT_EDGES)')
+    await exec('litemesh.select_similar(type=VERT_EDGES)')
     const selVal = m.selectedCount(0)
     r.vertEdges = {selected: selVal, expected: -1, worked: selVal > 0 && selVal <= nVerts, allVerts: nVerts}
 

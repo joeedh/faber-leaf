@@ -65,7 +65,7 @@ interface ScopeResult {
  * note in `litemesh_attr_render.test.ts`).
  */
 const SCOPE_EVAL = [
-  'globalThis.__evalTestResult = (function () {',
+  '(async function () { globalThis.__evalTestResult = await (async function () {',
   'try {',
   'var ctx = _appstate.ctx;',
   'var src = _framework.api.uvSourceFor(ctx.object && ctx.object.data);',
@@ -88,21 +88,21 @@ const SCOPE_EVAL = [
   'var scoped = elemsOf(true), all = elemsOf(false);',
   'return {scoped: scoped.length, all: all.length, selScoped: selectedIn(scoped), selAll: selectedIn(all)};',
   '};',
-  'var uvOp = function (mode, selectedFacesOnly) {',
-  "ctx.api.execTool(ctx, 'uveditor.toggle_select_all', {mode: mode, selectedFacesOnly: selectedFacesOnly});",
+  'var uvOp = async function (mode, selectedFacesOnly) {',
+  "await ctx.api.execTool(ctx, 'uveditor.toggle_select_all', {mode: mode, selectedFacesOnly: selectedFacesOnly});",
   '};',
-  'var clear = function () { uvOp(1, false); };',
-  'clear(); uvOp(0, true);',
+  'var clear = async function () { await uvOp(1, false); };',
+  'await clear(); await uvOp(0, true);',
   'var noFaces = counts();',
-  'clear(); uvOp(0, false);',
+  'await clear(); await uvOp(0, false);',
   'var unscoped = counts();',
-  "clear(); ctx.api.execTool(ctx, 'litemesh.select_all', {mode: 0}); uvOp(0, true);",
+  "await clear(); await ctx.api.execTool(ctx, 'litemesh.select_all', {mode: 0}); await uvOp(0, true);",
   'var allFaces = counts();',
   'return {ok: true, noFaces: noFaces, unscoped: unscoped, allFaces: allFaces};',
   '} catch (e) {',
   'return {ok: false, error: String(e), stack: String(e && e.stack)};',
   '}',
-  '})()',
+  '})() })()',
 ].join(' ')
 
 function resolveNwjsExe(): string | undefined {

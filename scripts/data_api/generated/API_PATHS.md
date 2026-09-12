@@ -827,6 +827,7 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.brush` | struct |  |  |  |
 | `toolDefaults.brush.load_default` | struct |  |  |  |
 | `toolDefaults.brush.load_default.dataPath` | prop | StringProperty | Data Path |  |
+| `toolDefaults.brush.reload_all_defaults` | struct |  |  |  |
 | `toolDefaults.brush.set_radius` | struct |  |  |  |
 | `toolDefaults.brush.set_radius.brush` | prop | DataRefProperty | Brush |  |
 | `toolDefaults.brush.set_radius.radius` | prop | FloatProperty | Radius |  |
@@ -871,6 +872,11 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.datalib.default_unlink.block` | prop | DataRefProperty | Block |  |
 | `toolDefaults.datalib.default_unlink.dataPathToUnset` | prop | StringProperty | Data Path To Unset |  |
 | `toolDefaults.graph` | struct |  |  |  |
+| `toolDefaults.graph.add_group_socket` | struct |  |  |  |
+| `toolDefaults.graph.add_group_socket.dir` | prop | StringProperty | Dir |  |
+| `toolDefaults.graph.add_group_socket.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.add_group_socket.key` | prop | StringProperty | Key |  |
+| `toolDefaults.graph.add_group_socket.socketType` | prop | StringProperty | Socket Type |  |
 | `toolDefaults.graph.add_node` | struct |  |  |  |
 | `toolDefaults.graph.add_node.graphClass` | prop | StringProperty | Graph Class |  |
 | `toolDefaults.graph.add_node.graphPath` | prop | StringProperty | Graph Path |  |
@@ -878,6 +884,7 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.graph.add_node.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
 | `toolDefaults.graph.add_node.nodeType` | prop | StringProperty | Node Type |  |
 | `toolDefaults.graph.add_node.pos` | prop | Vec2Property | Pos |  |
+| `toolDefaults.graph.add_node.ref` | prop | StringProperty | Ref |  |
 | `toolDefaults.graph.add_node.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
 | `toolDefaults.graph.add_node.x` | prop | FloatProperty | X |  |
 | `toolDefaults.graph.add_node.y` | prop | FloatProperty | Y |  |
@@ -895,6 +902,11 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.graph.connect.srcNode` | prop | StringProperty | Src Node |  |
 | `toolDefaults.graph.connect.srcSocket` | prop | StringProperty | Src Socket |  |
 | `toolDefaults.graph.connect.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
+| `toolDefaults.graph.create_group` | struct |  |  |  |
+| `toolDefaults.graph.create_group.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.create_group.nodeIds` | prop | StringProperty | Node Ids |  |
+| `toolDefaults.graph.create_group.ref` | prop | StringProperty | Ref |  |
+| `toolDefaults.graph.create_group.storePath` | prop | StringProperty | Store Path |  |
 | `toolDefaults.graph.delete_node` | struct |  |  |  |
 | `toolDefaults.graph.delete_node.graphPath` | prop | StringProperty | Graph Path |  |
 | `toolDefaults.graph.delete_node.nodeId` | prop | StringProperty | Node Id |  |
@@ -904,23 +916,54 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.graph.disconnect.graphPath` | prop | StringProperty | Graph Path |  |
 | `toolDefaults.graph.disconnect.srcNode` | prop | StringProperty | Src Node |  |
 | `toolDefaults.graph.disconnect.srcSocket` | prop | StringProperty | Src Socket |  |
+| `toolDefaults.graph.duplicate_node` | struct |  |  |  |
+| `toolDefaults.graph.duplicate_node.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.duplicate_node.nodeId` | prop | StringProperty | Node Id |  |
+| `toolDefaults.graph.duplicate_node.x` | prop | FloatProperty | X |  |
+| `toolDefaults.graph.duplicate_node.y` | prop | FloatProperty | Y |  |
+| `toolDefaults.graph.expose_entry` | struct |  |  |  |
+| `toolDefaults.graph.expose_entry.at` | prop | IntProperty | At |  |
+| `toolDefaults.graph.expose_entry.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.expose_entry.kind` | prop | StringProperty | Kind |  |
+| `toolDefaults.graph.expose_entry.label` | prop | StringProperty | Label |  |
+| `toolDefaults.graph.expose_entry.nodeId` | prop | StringProperty | Node Id |  |
+| `toolDefaults.graph.expose_entry.propKey` | prop | StringProperty | Prop Key |  |
 | `toolDefaults.graph.move_node` | struct |  |  |  |
 | `toolDefaults.graph.move_node.graphPath` | prop | StringProperty | Graph Path |  |
 | `toolDefaults.graph.move_node.nodeId` | prop | StringProperty | Node Id |  |
 | `toolDefaults.graph.move_node.x` | prop | FloatProperty | X |  |
 | `toolDefaults.graph.move_node.y` | prop | FloatProperty | Y |  |
+| `toolDefaults.graph.remove_entry` | struct |  |  |  |
+| `toolDefaults.graph.remove_entry.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.remove_entry.index` | prop | IntProperty | Index |  |
+| `toolDefaults.graph.remove_group_socket` | struct |  |  |  |
+| `toolDefaults.graph.remove_group_socket.dir` | prop | StringProperty | Dir |  |
+| `toolDefaults.graph.remove_group_socket.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.remove_group_socket.key` | prop | StringProperty | Key |  |
 | `toolDefaults.graph.rename_node` | struct |  |  |  |
 | `toolDefaults.graph.rename_node.graphPath` | prop | StringProperty | Graph Path |  |
 | `toolDefaults.graph.rename_node.label` | prop | StringProperty | Label |  |
 | `toolDefaults.graph.rename_node.nodeId` | prop | StringProperty | Node Id |  |
+| `toolDefaults.graph.reorder_entry` | struct |  |  |  |
+| `toolDefaults.graph.reorder_entry.from` | prop | IntProperty | From |  |
+| `toolDefaults.graph.reorder_entry.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.reorder_entry.to` | prop | IntProperty | To |  |
 | `toolDefaults.graph.replace_node` | struct |  |  |  |
 | `toolDefaults.graph.replace_node.graphPath` | prop | StringProperty | Graph Path |  |
 | `toolDefaults.graph.replace_node.newType` | prop | StringProperty | New Type |  |
 | `toolDefaults.graph.replace_node.nodeId` | prop | StringProperty | Node Id |  |
+| `toolDefaults.graph.repoint_entry` | struct |  |  |  |
+| `toolDefaults.graph.repoint_entry.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.repoint_entry.index` | prop | IntProperty | Index |  |
+| `toolDefaults.graph.repoint_entry.nodeId` | prop | StringProperty | Node Id |  |
+| `toolDefaults.graph.repoint_entry.propKey` | prop | StringProperty | Prop Key |  |
 | `toolDefaults.graph.set_node_prop` | struct |  |  |  |
 | `toolDefaults.graph.set_node_prop.graphPath` | prop | StringProperty | Graph Path |  |
 | `toolDefaults.graph.set_node_prop.nodeId` | prop | StringProperty | Node Id |  |
 | `toolDefaults.graph.set_node_prop.propKey` | prop | StringProperty | Prop Key |  |
+| `toolDefaults.graph.ungroup` | struct |  |  |  |
+| `toolDefaults.graph.ungroup.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.graph.ungroup.nodeId` | prop | StringProperty | Node Id |  |
 | `toolDefaults.image` | struct |  |  |  |
 | `toolDefaults.image.open` | struct |  |  |  |
 | `toolDefaults.image.open.dataPath` | prop | StringProperty | Data Path |  |
@@ -943,15 +986,19 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.leafmesh.loop_cut.t` | prop | FloatProperty | T |  |
 | `toolDefaults.leafmesh.select_all` | struct |  |  |  |
 | `toolDefaults.leafmesh.select_all.mode` | prop | EnumProperty | Mode | enum {ALL, NONE, AUTO} |
+| `toolDefaults.leafmesh.select_box` | struct |  |  |  |
+| `toolDefaults.leafmesh.select_box.mode` | prop | EnumProperty | Mode | enum {ADD, SUB, AUTO} |
 | `toolDefaults.leafmesh.select_circle` | struct |  |  |  |
 | `toolDefaults.leafmesh.select_circle.radius` | prop | FloatProperty | Radius | range 1..500 |
 | `toolDefaults.leafmesh.select_linked` | struct |  |  |  |
 | `toolDefaults.leafmesh.select_linked.deselect` | prop | BoolProperty | Deselect |  |
+| `toolDefaults.leafmesh.select_nearest` | struct |  |  |  |
 | `toolDefaults.leafmesh.select_similar` | struct |  |  |  |
 | `toolDefaults.leafmesh.select_similar.criterion` | prop | EnumProperty | Criterion | enum {FACE_SIDES, FACE_AREA, FACE_NORMAL, FACE_COPLANAR, FACE_HOLES, EDGE_LENGTH, EDGE_FACES, EDGE_DIRECTION, VERT_EDGES, VERT_FACES} |
 | `toolDefaults.leafmesh.select_similar.extend` | prop | BoolProperty | Extend |  |
-| `toolDefaults.leafmesh.select_similar.threshold` | prop | FloatProperty | Threshold | range 0..1 |
+| `toolDefaults.leafmesh.select_similar.threshold` | prop | FloatProperty | Threshold | range 0..3.141592653589793 |
 | `toolDefaults.leafmesh.select_similar.type` | prop | EnumProperty | Type | enum {FACE_MATERIAL, FACE_GROUP, FACE_AREA, FACE_NORMAL, FACE_COPLANAR, FACE_SIDES, EDGE_LENGTH, EDGE_DIRECTION, EDGE_FACES, EDGE_DIHEDRAL, VERT_NORMAL, VERT_EDGES, VERT_FACES} |
+| `toolDefaults.leafmesh.split_off` | struct |  |  |  |
 | `toolDefaults.leafmesh.subdivide` | struct |  |  |  |
 | `toolDefaults.leafmesh.subdivide.cuts` | prop | IntProperty | Cuts |  |
 | `toolDefaults.leafmesh.subdivide.numCuts` | prop | IntProperty | Num Cuts | range 1..32 |
@@ -982,13 +1029,29 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.litemesh.assign_material.slot` | prop | IntProperty | Slot |  |
 | `toolDefaults.litemesh.assign_material_polygroup` | struct |  |  |  |
 | `toolDefaults.litemesh.assign_material_polygroup.slot` | prop | IntProperty | Slot |  |
+| `toolDefaults.litemesh.bevel_verts` | struct |  |  |  |
+| `toolDefaults.litemesh.bevel_verts.amount` | prop | FloatProperty | Amount |  |
+| `toolDefaults.litemesh.extrude_individual` | struct |  |  |  |
+| `toolDefaults.litemesh.extrude_individual.offset` | prop | FloatProperty | Offset |  |
+| `toolDefaults.litemesh.extrude_polygroup` | struct |  |  |  |
+| `toolDefaults.litemesh.extrude_region` | struct |  |  |  |
+| `toolDefaults.litemesh.extrude_region.offset` | prop | FloatProperty | Offset |  |
+| `toolDefaults.litemesh.extrude_wire` | struct |  |  |  |
 | `toolDefaults.litemesh.generate_uv` | struct |  |  |  |
 | `toolDefaults.litemesh.generate_uv.margin` | prop | FloatProperty | Margin | range 0..0.25 |
+| `toolDefaults.litemesh.inset_region` | struct |  |  |  |
+| `toolDefaults.litemesh.loop_cut` | struct |  |  |  |
+| `toolDefaults.litemesh.loop_cut.t` | prop | FloatProperty | T |  |
 | `toolDefaults.litemesh.mark_seam` | struct |  |  |  |
 | `toolDefaults.litemesh.mark_seam.vEnd` | prop | IntProperty | V End |  |
 | `toolDefaults.litemesh.mark_seam.vStart` | prop | IntProperty | V Start |  |
+| `toolDefaults.litemesh.mark_seam_interactive` | struct |  |  |  |
 | `toolDefaults.litemesh.mark_sharp_by_angle` | struct |  |  |  |
 | `toolDefaults.litemesh.mark_sharp_by_angle.angle` | prop | FloatProperty | Angle | range 0..180 |
+| `toolDefaults.litemesh.mark_sharp_interactive` | struct |  |  |  |
+| `toolDefaults.litemesh.multires_add_level` | struct |  |  |  |
+| `toolDefaults.litemesh.multires_delete` | struct |  |  |  |
+| `toolDefaults.litemesh.multires_down_refit` | struct |  |  |  |
 | `toolDefaults.litemesh.multires_enable` | struct |  |  |  |
 | `toolDefaults.litemesh.multires_enable.levels` | prop | IntProperty | Levels | range 1..7 |
 | `toolDefaults.litemesh.multires_set_level` | struct |  |  |  |
@@ -1032,6 +1095,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.litemesh.quad_remesh.useCurvature` | prop | BoolProperty | Use Curvature |  |
 | `toolDefaults.litemesh.quad_remesh.useDensity` | prop | BoolProperty | Use Density |  |
 | `toolDefaults.litemesh.quad_remesh.useSharpFeatures` | prop | BoolProperty | Use Sharp Features |  |
+| `toolDefaults.litemesh.rebuild_spatial_tree` | struct |  |  |  |
+| `toolDefaults.litemesh.remove_attr` | struct |  |  |  |
+| `toolDefaults.litemesh.reorder_locality` | struct |  |  |  |
+| `toolDefaults.litemesh.sculpt_layer_add` | struct |  |  |  |
 | `toolDefaults.litemesh.sculpt_layer_remove` | struct |  |  |  |
 | `toolDefaults.litemesh.sculpt_layer_remove.layer` | prop | IntProperty | Layer |  |
 | `toolDefaults.litemesh.sculpt_layer_set_flag` | struct |  |  |  |
@@ -1045,13 +1112,20 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.litemesh.sculpt_layer_set_weight.weight` | prop | FloatProperty | Weight | range -2..2 |
 | `toolDefaults.litemesh.select_all` | struct |  |  |  |
 | `toolDefaults.litemesh.select_all.mode` | prop | EnumProperty | Mode | enum {ALL, NONE, AUTO} |
+| `toolDefaults.litemesh.select_box` | struct |  |  |  |
+| `toolDefaults.litemesh.select_box.mode` | prop | EnumProperty | Mode | enum {ADD, SUB, AUTO} |
 | `toolDefaults.litemesh.select_circle` | struct |  |  |  |
 | `toolDefaults.litemesh.select_circle.radius` | prop | FloatProperty | Radius | range 1..500 |
+| `toolDefaults.litemesh.select_loop` | struct |  |  |  |
+| `toolDefaults.litemesh.select_nearest` | struct |  |  |  |
+| `toolDefaults.litemesh.select_path` | struct |  |  |  |
+| `toolDefaults.litemesh.select_polygroup` | struct |  |  |  |
 | `toolDefaults.litemesh.select_similar` | struct |  |  |  |
 | `toolDefaults.litemesh.select_similar.criterion` | prop | EnumProperty | Criterion | enum {FACE_SIDES, FACE_AREA, FACE_NORMAL, FACE_COPLANAR, FACE_HOLES, EDGE_LENGTH, EDGE_FACES, EDGE_DIRECTION, VERT_EDGES, VERT_FACES} |
 | `toolDefaults.litemesh.select_similar.extend` | prop | BoolProperty | Extend |  |
-| `toolDefaults.litemesh.select_similar.threshold` | prop | FloatProperty | Threshold | range 0..1 |
+| `toolDefaults.litemesh.select_similar.threshold` | prop | FloatProperty | Threshold | range 0..3.141592653589793 |
 | `toolDefaults.litemesh.select_similar.type` | prop | EnumProperty | Type | enum {FACE_MATERIAL, FACE_GROUP, FACE_AREA, FACE_NORMAL, FACE_COPLANAR, FACE_SIDES, EDGE_LENGTH, EDGE_DIRECTION, EDGE_FACES, EDGE_DIHEDRAL, VERT_NORMAL, VERT_EDGES, VERT_FACES} |
+| `toolDefaults.litemesh.split_off` | struct |  |  |  |
 | `toolDefaults.litemesh.subdivide` | struct |  |  |  |
 | `toolDefaults.litemesh.subdivide.cuts` | prop | IntProperty | Cuts |  |
 | `toolDefaults.litemesh.subdivide.numCuts` | prop | IntProperty | Num Cuts | range 1..32 |
@@ -1063,6 +1137,11 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.litemesh.symmetrize_snap.axes` | prop | FlagProperty | Axes | enum {X, Y, Z} |
 | `toolDefaults.litemesh.symmetrize_snap.direction` | prop | EnumProperty | Direction | enum {NEGATIVE, POSITIVE} |
 | `toolDefaults.litemesh.symmetrize_snap.threshold` | prop | FloatProperty | Threshold | range 0..2 |
+| `toolDefaults.litemesh.triangulate` | struct |  |  |  |
+| `toolDefaults.litemesh.vdm_apply` | struct |  |  |  |
+| `toolDefaults.litemesh.vdm_capture` | struct |  |  |  |
+| `toolDefaults.litemesh.vdm_delete` | struct |  |  |  |
+| `toolDefaults.litemesh.vdm_enable` | struct |  |  |  |
 | `toolDefaults.material` | struct |  |  |  |
 | `toolDefaults.material.new` | struct |  |  |  |
 | `toolDefaults.material.new.dataPathToSet` | prop | StringProperty | Data Path To Set |  |
@@ -1079,6 +1158,7 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.node.add_node.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
 | `toolDefaults.node.add_node.nodeType` | prop | StringProperty | Node Type |  |
 | `toolDefaults.node.add_node.pos` | prop | Vec2Property | Pos |  |
+| `toolDefaults.node.add_node.ref` | prop | StringProperty | Ref |  |
 | `toolDefaults.node.add_node.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
 | `toolDefaults.node.add_node.x` | prop | FloatProperty | X |  |
 | `toolDefaults.node.add_node.y` | prop | FloatProperty | Y |  |
@@ -1134,9 +1214,19 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.node.translate.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
 | `toolDefaults.node.translate.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
 | `toolDefaults.node.translate.value` | prop | Vec3Property | Value |  |
+| `toolDefaults.nodeview` | struct |  |  |  |
+| `toolDefaults.nodeview.box_select` | struct |  |  |  |
+| `toolDefaults.nodeview.link_drag` | struct |  |  |  |
+| `toolDefaults.nodeview.translate_node` | struct |  |  |  |
 | `toolDefaults.object` | struct |  |  |  |
 | `toolDefaults.object.apply_transform` | struct |  |  |  |
 | `toolDefaults.object.apply_transform.mode` | prop | FlagProperty | Mode | enum {LOC, ROT, SCALE, ALL} |
+| `toolDefaults.object.delete_selected` | struct |  |  |  |
+| `toolDefaults.object.delete_selected.graphClass` | prop | StringProperty | Graph Class |  |
+| `toolDefaults.object.delete_selected.graphPath` | prop | StringProperty | Graph Path |  |
+| `toolDefaults.object.delete_selected.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
+| `toolDefaults.object.delete_selected.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
+| `toolDefaults.object.duplicate` | struct |  |  |  |
 | `toolDefaults.object.select_box` | struct |  |  |  |
 | `toolDefaults.object.select_box.mode` | prop | EnumProperty | Mode | enum {ADD, SUB, AUTO} |
 | `toolDefaults.object.selectone` | struct |  |  |  |
@@ -1156,6 +1246,9 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.object.toggle_select_all.nodeEditorPath` | prop | StringProperty | Node Editor Path |  |
 | `toolDefaults.object.toggle_select_all.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
 | `toolDefaults.object.toggle_select_all.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
+| `toolDefaults.panzoom` | struct |  |  |  |
+| `toolDefaults.panzoom.pan` | struct |  |  |  |
+| `toolDefaults.panzoom.pan.velpanPath` | prop | StringProperty | Velpan Path |  |
 | `toolDefaults.sculptcore` | struct |  |  |  |
 | `toolDefaults.sculptcore.paint` | struct |  |  |  |
 | `toolDefaults.sculptcore.paint.brush` | prop | BrushProperty | Brush |  |
@@ -1295,6 +1388,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.velpan.pan` | struct |  |  |  |
 | `toolDefaults.velpan.pan.velpanPath` | prop | StringProperty | Velpan Path |  |
 | `toolDefaults.view3d` | struct |  |  |  |
+| `toolDefaults.view3d.center_at_mouse` | struct |  |  |  |
+| `toolDefaults.view3d.orbit` | struct |  |  |  |
+| `toolDefaults.view3d.pan` | struct |  |  |  |
+| `toolDefaults.view3d.pan.velpanPath` | prop | StringProperty | Velpan Path |  |
 | `toolDefaults.view3d.rotate` | struct |  |  |  |
 | `toolDefaults.view3d.rotate.dataPath` | prop | StringProperty | Data Path |  |
 | `toolDefaults.view3d.rotate.euler` | prop | Vec3Property | Euler |  |
@@ -1320,6 +1417,7 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.view3d.scale.selectedFacesOnly` | prop | BoolProperty | Selected Faces Only |  |
 | `toolDefaults.view3d.scale.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
 | `toolDefaults.view3d.scale.value` | prop | Vec3Property | Value |  |
+| `toolDefaults.view3d.touchview` | struct |  |  |  |
 | `toolDefaults.view3d.translate` | struct |  |  |  |
 | `toolDefaults.view3d.translate.dataPath` | prop | StringProperty | Data Path |  |
 | `toolDefaults.view3d.translate.graphClass` | prop | StringProperty | Graph Class |  |
@@ -1336,6 +1434,8 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.view3d.translate.snapMode` | prop | EnumProperty | Snap Mode | enum {NONE, SURFACE} |
 | `toolDefaults.view3d.translate.useNodeEditorGraph` | prop | BoolProperty | Use Node Editor Graph |  |
 | `toolDefaults.view3d.translate.value` | prop | Vec3Property | Value |  |
+| `toolDefaults.view3d.view_selected` | struct |  |  |  |
+| `toolDefaults.view3d.zoom` | struct |  |  |  |
 
 ## uvEditor
 

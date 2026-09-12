@@ -7948,13 +7948,13 @@
     "toolDefaults": {
       "kind": "struct",
       "ownerStruct": "ToolContext",
-      "structName": "ToolPropertyCache",
+      "structName": "ToolDefaults",
       "indexed": false,
       "dynamic": false
     },
     "toolDefaults.app": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "app",
       "indexed": false,
       "dynamic": false
@@ -8068,7 +8068,7 @@
     },
     "toolDefaults.brush": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "brush",
       "indexed": false,
       "dynamic": false
@@ -8089,6 +8089,13 @@
       "description": "Data Path",
       "decimalPlaces": 4,
       "step": 0.05
+    },
+    "toolDefaults.brush.reload_all_defaults": {
+      "kind": "struct",
+      "ownerStruct": "brush",
+      "structName": "reload_all_defaults",
+      "indexed": false,
+      "dynamic": false
     },
     "toolDefaults.brush.set_radius": {
       "kind": "struct",
@@ -8167,7 +8174,7 @@
     },
     "toolDefaults.curve1d": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "curve1d",
       "indexed": false,
       "dynamic": false
@@ -8368,7 +8375,7 @@
     },
     "toolDefaults.datalib": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "datalib",
       "indexed": false,
       "dynamic": false
@@ -8493,10 +8500,57 @@
     },
     "toolDefaults.graph": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "graph",
       "indexed": false,
       "dynamic": false
+    },
+    "toolDefaults.graph.add_group_socket": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "add_group_socket",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.add_group_socket.dir": {
+      "kind": "prop",
+      "ownerStruct": "add_group_socket",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Dir",
+      "description": "Dir",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.add_group_socket.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "add_group_socket",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.add_group_socket.key": {
+      "kind": "prop",
+      "ownerStruct": "add_group_socket",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Key",
+      "description": "Key",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.add_group_socket.socketType": {
+      "kind": "prop",
+      "ownerStruct": "add_group_socket",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Socket Type",
+      "description": "Socket Type",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "toolDefaults.graph.add_node": {
       "kind": "struct",
@@ -8564,6 +8618,16 @@
       "description": "Pos",
       "decimalPlaces": 4,
       "step": 0.1
+    },
+    "toolDefaults.graph.add_node.ref": {
+      "kind": "prop",
+      "ownerStruct": "add_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Ref",
+      "description": "Ref",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "toolDefaults.graph.add_node.useNodeEditorGraph": {
       "kind": "prop",
@@ -8732,6 +8796,53 @@
       "decimalPlaces": 4,
       "step": 0.05
     },
+    "toolDefaults.graph.create_group": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "create_group",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.create_group.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "create_group",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.create_group.nodeIds": {
+      "kind": "prop",
+      "ownerStruct": "create_group",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Ids",
+      "description": "Node Ids",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.create_group.ref": {
+      "kind": "prop",
+      "ownerStruct": "create_group",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Ref",
+      "description": "Ref",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.create_group.storePath": {
+      "kind": "prop",
+      "ownerStruct": "create_group",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Store Path",
+      "description": "Store Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
     "toolDefaults.graph.delete_node": {
       "kind": "struct",
       "ownerStruct": "graph",
@@ -8816,6 +8927,120 @@
       "decimalPlaces": 4,
       "step": 0.05
     },
+    "toolDefaults.graph.duplicate_node": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "duplicate_node",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.duplicate_node.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "duplicate_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.duplicate_node.nodeId": {
+      "kind": "prop",
+      "ownerStruct": "duplicate_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Id",
+      "description": "Node Id",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.duplicate_node.x": {
+      "kind": "prop",
+      "ownerStruct": "duplicate_node",
+      "indexed": false,
+      "propType": "FloatProperty",
+      "uiname": "X",
+      "description": "X",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.duplicate_node.y": {
+      "kind": "prop",
+      "ownerStruct": "duplicate_node",
+      "indexed": false,
+      "propType": "FloatProperty",
+      "uiname": "Y",
+      "description": "Y",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.expose_entry": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "expose_entry",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.expose_entry.at": {
+      "kind": "prop",
+      "ownerStruct": "expose_entry",
+      "indexed": false,
+      "propType": "IntProperty",
+      "uiname": "At",
+      "description": "At",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.expose_entry.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "expose_entry",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.expose_entry.kind": {
+      "kind": "prop",
+      "ownerStruct": "expose_entry",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Kind",
+      "description": "Kind",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.expose_entry.label": {
+      "kind": "prop",
+      "ownerStruct": "expose_entry",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Label",
+      "description": "Label",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.expose_entry.nodeId": {
+      "kind": "prop",
+      "ownerStruct": "expose_entry",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Id",
+      "description": "Node Id",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.expose_entry.propKey": {
+      "kind": "prop",
+      "ownerStruct": "expose_entry",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Prop Key",
+      "description": "Prop Key",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
     "toolDefaults.graph.move_node": {
       "kind": "struct",
       "ownerStruct": "graph",
@@ -8863,6 +9088,70 @@
       "decimalPlaces": 4,
       "step": 0.1
     },
+    "toolDefaults.graph.remove_entry": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "remove_entry",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.remove_entry.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "remove_entry",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.remove_entry.index": {
+      "kind": "prop",
+      "ownerStruct": "remove_entry",
+      "indexed": false,
+      "propType": "IntProperty",
+      "uiname": "Index",
+      "description": "Index",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.remove_group_socket": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "remove_group_socket",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.remove_group_socket.dir": {
+      "kind": "prop",
+      "ownerStruct": "remove_group_socket",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Dir",
+      "description": "Dir",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.remove_group_socket.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "remove_group_socket",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.remove_group_socket.key": {
+      "kind": "prop",
+      "ownerStruct": "remove_group_socket",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Key",
+      "description": "Key",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
     "toolDefaults.graph.rename_node": {
       "kind": "struct",
       "ownerStruct": "graph",
@@ -8900,6 +9189,43 @@
       "decimalPlaces": 4,
       "step": 0.05
     },
+    "toolDefaults.graph.reorder_entry": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "reorder_entry",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.reorder_entry.from": {
+      "kind": "prop",
+      "ownerStruct": "reorder_entry",
+      "indexed": false,
+      "propType": "IntProperty",
+      "uiname": "From",
+      "description": "From",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.reorder_entry.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "reorder_entry",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.reorder_entry.to": {
+      "kind": "prop",
+      "ownerStruct": "reorder_entry",
+      "indexed": false,
+      "propType": "IntProperty",
+      "uiname": "To",
+      "description": "To",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
     "toolDefaults.graph.replace_node": {
       "kind": "struct",
       "ownerStruct": "graph",
@@ -8934,6 +9260,53 @@
       "propType": "StringProperty",
       "uiname": "Node Id",
       "description": "Node Id",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.repoint_entry": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "repoint_entry",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.repoint_entry.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "repoint_entry",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.repoint_entry.index": {
+      "kind": "prop",
+      "ownerStruct": "repoint_entry",
+      "indexed": false,
+      "propType": "IntProperty",
+      "uiname": "Index",
+      "description": "Index",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.graph.repoint_entry.nodeId": {
+      "kind": "prop",
+      "ownerStruct": "repoint_entry",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Id",
+      "description": "Node Id",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.repoint_entry.propKey": {
+      "kind": "prop",
+      "ownerStruct": "repoint_entry",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Prop Key",
+      "description": "Prop Key",
       "decimalPlaces": 4,
       "step": 0.05
     },
@@ -8974,9 +9347,36 @@
       "decimalPlaces": 4,
       "step": 0.05
     },
+    "toolDefaults.graph.ungroup": {
+      "kind": "struct",
+      "ownerStruct": "graph",
+      "structName": "ungroup",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.graph.ungroup.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "ungroup",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.graph.ungroup.nodeId": {
+      "kind": "prop",
+      "ownerStruct": "ungroup",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Id",
+      "description": "Node Id",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
     "toolDefaults.image": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "image",
       "indexed": false,
       "dynamic": false
@@ -9020,7 +9420,7 @@
     },
     "toolDefaults.leafmesh": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "leafmesh",
       "indexed": false,
       "dynamic": false
@@ -9169,6 +9569,28 @@
         "AUTO"
       ]
     },
+    "toolDefaults.leafmesh.select_box": {
+      "kind": "struct",
+      "ownerStruct": "leafmesh",
+      "structName": "select_box",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.leafmesh.select_box.mode": {
+      "kind": "prop",
+      "ownerStruct": "select_box",
+      "indexed": false,
+      "propType": "EnumProperty",
+      "uiname": "Mode",
+      "description": "Mode",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "ADD",
+        "SUB",
+        "AUTO"
+      ]
+    },
     "toolDefaults.leafmesh.select_circle": {
       "kind": "struct",
       "ownerStruct": "leafmesh",
@@ -9206,6 +9628,13 @@
       "description": "Deselect",
       "decimalPlaces": 4,
       "step": 0.05
+    },
+    "toolDefaults.leafmesh.select_nearest": {
+      "kind": "struct",
+      "ownerStruct": "leafmesh",
+      "structName": "select_nearest",
+      "indexed": false,
+      "dynamic": false
     },
     "toolDefaults.leafmesh.select_similar": {
       "kind": "struct",
@@ -9255,10 +9684,10 @@
       "description": "Threshold",
       "range": [
         0,
-        1
+        3.141592653589793
       ],
       "decimalPlaces": 4,
-      "step": 0.1
+      "step": 0.05
     },
     "toolDefaults.leafmesh.select_similar.type": {
       "kind": "prop",
@@ -9284,6 +9713,13 @@
         "VERT_EDGES",
         "VERT_FACES"
       ]
+    },
+    "toolDefaults.leafmesh.split_off": {
+      "kind": "struct",
+      "ownerStruct": "leafmesh",
+      "structName": "split_off",
+      "indexed": false,
+      "dynamic": false
     },
     "toolDefaults.leafmesh.subdivide": {
       "kind": "struct",
@@ -9318,7 +9754,7 @@
     },
     "toolDefaults.light": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "light",
       "indexed": false,
       "dynamic": false
@@ -9378,7 +9814,7 @@
     },
     "toolDefaults.listbox": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "listbox",
       "indexed": false,
       "dynamic": false
@@ -9432,7 +9868,7 @@
     },
     "toolDefaults.litemesh": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "litemesh",
       "indexed": false,
       "dynamic": false
@@ -9570,6 +10006,71 @@
       "decimalPlaces": 4,
       "step": 0.1
     },
+    "toolDefaults.litemesh.bevel_verts": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "bevel_verts",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.bevel_verts.amount": {
+      "kind": "prop",
+      "ownerStruct": "bevel_verts",
+      "indexed": false,
+      "propType": "FloatProperty",
+      "uiname": "Amount",
+      "description": "Amount",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.litemesh.extrude_individual": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "extrude_individual",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.extrude_individual.offset": {
+      "kind": "prop",
+      "ownerStruct": "extrude_individual",
+      "indexed": false,
+      "propType": "FloatProperty",
+      "uiname": "Offset",
+      "description": "Offset",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.litemesh.extrude_polygroup": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "extrude_polygroup",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.extrude_region": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "extrude_region",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.extrude_region.offset": {
+      "kind": "prop",
+      "ownerStruct": "extrude_region",
+      "indexed": false,
+      "propType": "FloatProperty",
+      "uiname": "Offset",
+      "description": "Offset",
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.litemesh.extrude_wire": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "extrude_wire",
+      "indexed": false,
+      "dynamic": false
+    },
     "toolDefaults.litemesh.generate_uv": {
       "kind": "struct",
       "ownerStruct": "litemesh",
@@ -9588,6 +10089,30 @@
         0,
         0.25
       ],
+      "decimalPlaces": 4,
+      "step": 0.1
+    },
+    "toolDefaults.litemesh.inset_region": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "inset_region",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.loop_cut": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "loop_cut",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.loop_cut.t": {
+      "kind": "prop",
+      "ownerStruct": "loop_cut",
+      "indexed": false,
+      "propType": "FloatProperty",
+      "uiname": "T",
+      "description": "T",
       "decimalPlaces": 4,
       "step": 0.1
     },
@@ -9618,6 +10143,13 @@
       "decimalPlaces": 4,
       "step": 0.1
     },
+    "toolDefaults.litemesh.mark_seam_interactive": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "mark_seam_interactive",
+      "indexed": false,
+      "dynamic": false
+    },
     "toolDefaults.litemesh.mark_sharp_by_angle": {
       "kind": "struct",
       "ownerStruct": "litemesh",
@@ -9638,6 +10170,34 @@
       ],
       "decimalPlaces": 4,
       "step": 0.1
+    },
+    "toolDefaults.litemesh.mark_sharp_interactive": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "mark_sharp_interactive",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.multires_add_level": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "multires_add_level",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.multires_delete": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "multires_delete",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.multires_down_refit": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "multires_down_refit",
+      "indexed": false,
+      "dynamic": false
     },
     "toolDefaults.litemesh.multires_enable": {
       "kind": "struct",
@@ -10180,6 +10740,34 @@
       "decimalPlaces": 4,
       "step": 0.05
     },
+    "toolDefaults.litemesh.rebuild_spatial_tree": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "rebuild_spatial_tree",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.remove_attr": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "remove_attr",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.reorder_locality": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "reorder_locality",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.sculpt_layer_add": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "sculpt_layer_add",
+      "indexed": false,
+      "dynamic": false
+    },
     "toolDefaults.litemesh.sculpt_layer_remove": {
       "kind": "struct",
       "ownerStruct": "litemesh",
@@ -10308,6 +10896,28 @@
         "AUTO"
       ]
     },
+    "toolDefaults.litemesh.select_box": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "select_box",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.select_box.mode": {
+      "kind": "prop",
+      "ownerStruct": "select_box",
+      "indexed": false,
+      "propType": "EnumProperty",
+      "uiname": "Mode",
+      "description": "Mode",
+      "decimalPlaces": 4,
+      "step": 0.05,
+      "enumItems": [
+        "ADD",
+        "SUB",
+        "AUTO"
+      ]
+    },
     "toolDefaults.litemesh.select_circle": {
       "kind": "struct",
       "ownerStruct": "litemesh",
@@ -10328,6 +10938,34 @@
       ],
       "decimalPlaces": 4,
       "step": 0.1
+    },
+    "toolDefaults.litemesh.select_loop": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "select_loop",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.select_nearest": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "select_nearest",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.select_path": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "select_path",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.select_polygroup": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "select_polygroup",
+      "indexed": false,
+      "dynamic": false
     },
     "toolDefaults.litemesh.select_similar": {
       "kind": "struct",
@@ -10377,10 +11015,10 @@
       "description": "Threshold",
       "range": [
         0,
-        1
+        3.141592653589793
       ],
       "decimalPlaces": 4,
-      "step": 0.1
+      "step": 0.05
     },
     "toolDefaults.litemesh.select_similar.type": {
       "kind": "prop",
@@ -10406,6 +11044,13 @@
         "VERT_EDGES",
         "VERT_FACES"
       ]
+    },
+    "toolDefaults.litemesh.split_off": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "split_off",
+      "indexed": false,
+      "dynamic": false
     },
     "toolDefaults.litemesh.subdivide": {
       "kind": "struct",
@@ -10538,9 +11183,44 @@
       "decimalPlaces": 4,
       "step": 0.1
     },
+    "toolDefaults.litemesh.triangulate": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "triangulate",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.vdm_apply": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "vdm_apply",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.vdm_capture": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "vdm_capture",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.vdm_delete": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "vdm_delete",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.litemesh.vdm_enable": {
+      "kind": "struct",
+      "ownerStruct": "litemesh",
+      "structName": "vdm_enable",
+      "indexed": false,
+      "dynamic": false
+    },
     "toolDefaults.material": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "material",
       "indexed": false,
       "dynamic": false
@@ -10617,7 +11297,7 @@
     },
     "toolDefaults.node": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "node",
       "indexed": false,
       "dynamic": false
@@ -10688,6 +11368,16 @@
       "description": "Pos",
       "decimalPlaces": 4,
       "step": 0.1
+    },
+    "toolDefaults.node.add_node.ref": {
+      "kind": "prop",
+      "ownerStruct": "add_node",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Ref",
+      "description": "Ref",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "toolDefaults.node.add_node.useNodeEditorGraph": {
       "kind": "prop",
@@ -11250,9 +11940,37 @@
       "decimalPlaces": 4,
       "step": 0.1
     },
+    "toolDefaults.nodeview": {
+      "kind": "struct",
+      "ownerStruct": "ToolDefaults",
+      "structName": "nodeview",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.nodeview.box_select": {
+      "kind": "struct",
+      "ownerStruct": "nodeview",
+      "structName": "box_select",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.nodeview.link_drag": {
+      "kind": "struct",
+      "ownerStruct": "nodeview",
+      "structName": "link_drag",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.nodeview.translate_node": {
+      "kind": "struct",
+      "ownerStruct": "nodeview",
+      "structName": "translate_node",
+      "indexed": false,
+      "dynamic": false
+    },
     "toolDefaults.object": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "object",
       "indexed": false,
       "dynamic": false
@@ -11279,6 +11997,60 @@
         "SCALE",
         "ALL"
       ]
+    },
+    "toolDefaults.object.delete_selected": {
+      "kind": "struct",
+      "ownerStruct": "object",
+      "structName": "delete_selected",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.object.delete_selected.graphClass": {
+      "kind": "prop",
+      "ownerStruct": "delete_selected",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Class",
+      "description": "Graph Class",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.object.delete_selected.graphPath": {
+      "kind": "prop",
+      "ownerStruct": "delete_selected",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Graph Path",
+      "description": "Graph Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.object.delete_selected.nodeEditorPath": {
+      "kind": "prop",
+      "ownerStruct": "delete_selected",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Node Editor Path",
+      "description": "Node Editor Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.object.delete_selected.useNodeEditorGraph": {
+      "kind": "prop",
+      "ownerStruct": "delete_selected",
+      "indexed": false,
+      "propType": "BoolProperty",
+      "uiname": "Use Node Editor Graph",
+      "description": "Use Node Editor Graph",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.object.duplicate": {
+      "kind": "struct",
+      "ownerStruct": "object",
+      "structName": "duplicate",
+      "indexed": false,
+      "dynamic": false
     },
     "toolDefaults.object.select_box": {
       "kind": "struct",
@@ -11476,9 +12248,33 @@
       "decimalPlaces": 4,
       "step": 0.05
     },
+    "toolDefaults.panzoom": {
+      "kind": "struct",
+      "ownerStruct": "ToolDefaults",
+      "structName": "panzoom",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.panzoom.pan": {
+      "kind": "struct",
+      "ownerStruct": "panzoom",
+      "structName": "pan",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.panzoom.pan.velpanPath": {
+      "kind": "prop",
+      "ownerStruct": "pan",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Velpan Path",
+      "description": "Velpan Path",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
     "toolDefaults.sculptcore": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "sculptcore",
       "indexed": false,
       "dynamic": false
@@ -11557,7 +12353,7 @@
     },
     "toolDefaults.uveditor": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "uveditor",
       "indexed": false,
       "dynamic": false
@@ -12875,7 +13671,7 @@
     },
     "toolDefaults.velpan": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "velpan",
       "indexed": false,
       "dynamic": false
@@ -12899,10 +13695,41 @@
     },
     "toolDefaults.view3d": {
       "kind": "struct",
-      "ownerStruct": "ToolPropertyCache",
+      "ownerStruct": "ToolDefaults",
       "structName": "view3d",
       "indexed": false,
       "dynamic": false
+    },
+    "toolDefaults.view3d.center_at_mouse": {
+      "kind": "struct",
+      "ownerStruct": "view3d",
+      "structName": "center_at_mouse",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.view3d.orbit": {
+      "kind": "struct",
+      "ownerStruct": "view3d",
+      "structName": "orbit",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.view3d.pan": {
+      "kind": "struct",
+      "ownerStruct": "view3d",
+      "structName": "pan",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.view3d.pan.velpanPath": {
+      "kind": "prop",
+      "ownerStruct": "pan",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Velpan Path",
+      "description": "Velpan Path",
+      "decimalPlaces": 4,
+      "step": 0.05
     },
     "toolDefaults.view3d.rotate": {
       "kind": "struct",
@@ -13180,6 +14007,13 @@
       "decimalPlaces": 4,
       "step": 0.1
     },
+    "toolDefaults.view3d.touchview": {
+      "kind": "struct",
+      "ownerStruct": "view3d",
+      "structName": "touchview",
+      "indexed": false,
+      "dynamic": false
+    },
     "toolDefaults.view3d.translate": {
       "kind": "struct",
       "ownerStruct": "view3d",
@@ -13352,6 +14186,20 @@
       "description": "Value",
       "decimalPlaces": 4,
       "step": 0.1
+    },
+    "toolDefaults.view3d.view_selected": {
+      "kind": "struct",
+      "ownerStruct": "view3d",
+      "structName": "view_selected",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.view3d.zoom": {
+      "kind": "struct",
+      "ownerStruct": "view3d",
+      "structName": "zoom",
+      "indexed": false,
+      "dynamic": false
     },
     "uvEditor": {
       "kind": "struct",

@@ -1,4 +1,4 @@
-import {Matrix4, ToolPropertyCache, buildToolSysAPI, BoundConstructor, CallbackThis} from '../path.ux/scripts/pathux.js'
+import {Matrix4, buildToolSysAPI, BoundConstructor, CallbackThis} from '../path.ux/scripts/pathux.js'
 
 import '../image/image_ops.js'
 import '../image/image.js'
@@ -341,8 +341,6 @@ export function getDataAPI(): MyDataAPI {
 
   cstruct.struct('material', 'material', 'Material', dataApi.mapStruct(Material, false))
 
-  cstruct.dynamicStruct('last_tool', 'last_tool', 'Last Tool')
-
   let def = cstruct.flags('selectMask', 'selectmode', SelMask, 'Selection Mode', 'Selection Mode')
   def.icons({
     VERTEX: Icons.VERT_MODE,
@@ -383,9 +381,8 @@ export function getDataAPI(): MyDataAPI {
   })
 
   buildEditorsAPI(dataApi, cstruct)
-  buildToolSysAPI(dataApi, true)
-
-  cstruct.struct('propCache', 'toolDefaults', 'Tool Defaults', dataApi.mapStruct(ToolPropertyCache))
+  // Adds the `toolDefaults` struct and the `last_tool` dynamic struct to the context
+  buildToolSysAPI(dataApi, true, cstruct)
 
   cstruct.struct('settings', 'settings', 'Settings', dataApi.mapStruct(AppSettings, false))
 

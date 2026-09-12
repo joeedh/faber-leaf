@@ -83,7 +83,7 @@ const DOT_WANDER = [
   [0.6, 0.45],
 ]
 
-const DRIVER = `(function () {
+const DRIVER = `(async function () {
   var r = {ok: false}
   try {
     var ctx = _appstate.ctx
@@ -108,21 +108,21 @@ const DRIVER = `(function () {
       return sum
     }
 
-    var runOne = function (points, opts) {
+    var runOne = async function (points, opts) {
       var before = checksum()
-      t.runStroke(Object.assign({points: points, radius: 100}, opts))
+      await t.runStroke(Object.assign({points: points, radius: 100}, opts))
       var after = checksum()
-      t.undo()
+      await t.undo()
       var undone = checksum()
       return {before: before, after: after, undone: undone}
     }
 
-    r.anchoredDirect = runOne(${JSON.stringify(ANCHOR_DIRECT)}, {sculptTool: 9})
-    r.anchoredWander = runOne(${JSON.stringify(ANCHOR_WANDER)}, {sculptTool: 9})
+    r.anchoredDirect = await runOne(${JSON.stringify(ANCHOR_DIRECT)}, {sculptTool: 9})
+    r.anchoredWander = await runOne(${JSON.stringify(ANCHOR_WANDER)}, {sculptTool: 9})
 
     var dotOpts = {sculptTool: 0, brushSettings: {strokeMethod: 2, strength: 1.0}}
-    r.dragDotDirect = runOne(${JSON.stringify(DOT_DIRECT)}, dotOpts)
-    r.dragDotWander = runOne(${JSON.stringify(DOT_WANDER)}, dotOpts)
+    r.dragDotDirect = await runOne(${JSON.stringify(DOT_DIRECT)}, dotOpts)
+    r.dragDotWander = await runOne(${JSON.stringify(DOT_WANDER)}, dotOpts)
 
     r.ok = true
   } catch (e) {

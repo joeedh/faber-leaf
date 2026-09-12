@@ -1047,7 +1047,7 @@ export class SculptCorePaintMode extends PaintToolModeBase {
 
     // XXX haveModal is too granular, leads to bad code
     // in brush.set_radius() toolop
-    const activeOp = this.ctx?.toolstack?.head
+    const activeOp = this.ctx?.toolstack?.headOp
     if (haveModal() && !force && !(activeOp instanceof SculptPaintOp)) {
       return
     }

@@ -434,7 +434,7 @@ async function layerTargetTest(): Promise<LayerTargetTestResult> {
       const li = mesh.mesh.sculptLayerAdd()
       mesh.activeSculptLayer = li
       result.layerIndex = li
-      ctx.api.execTool(ctx, `litemesh.sculpt_layer_set_target(layer=${li})`)
+      await ctx.api.execTool(ctx, `litemesh.sculpt_layer_set_target(layer=${li})`)
       result.targetAfterOp = mesh.mesh.sculptLayerEditTarget()
 
       const preTarget = dumpCoFlat(mesh)
@@ -473,7 +473,7 @@ async function layerTargetTest(): Promise<LayerTargetTestResult> {
       // Fold (explicit C export; the clear-target op below folds again —
       // idempotent), clear the target, and round-trip the weight.
       wasm.Mesh_layerFold(mesh.mesh)
-      ctx.api.execTool(ctx, 'litemesh.sculpt_layer_set_target(layer=-1)')
+      await ctx.api.execTool(ctx, 'litemesh.sculpt_layer_set_target(layer=-1)')
       wasm.Mesh_layerSetWeight(mesh.mesh, li, 0)
       result.weightZeroResidual = maxResidual(preTarget, dumpCoFlat(mesh))
       wasm.Mesh_layerSetWeight(mesh.mesh, li, 1)
@@ -481,9 +481,9 @@ async function layerTargetTest(): Promise<LayerTargetTestResult> {
 
       // Toolstack undo of the clear-target op re-targets the layer; redo
       // clears it again (folds are undo-transparent, no column snapshots).
-      getAppState().toolstack.undo()
+      await getAppState().toolstack.undo()
       result.opUndoTarget = mesh.mesh.sculptLayerEditTarget()
-      getAppState().toolstack.redo()
+      await getAppState().toolstack.redo()
       result.opRedoTarget = mesh.mesh.sculptLayerEditTarget()
 
       // ---- MeshLog stroke undo keeps co + the derived delta consistent ----

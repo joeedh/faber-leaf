@@ -301,7 +301,7 @@ export abstract class StrokeDriverOp<
   modalEnd(was_cancelled: boolean): any {
     this.mfinished = true
     // Drop the reference as well as the native object: the brush-cursor overlay
-    // reads `toolstack.head.driver` after the stroke (sculptcore.ts drawBrush),
+    // reads `toolstack.headOp.driver` after the stroke (sculptcore.ts drawBrush),
     // and calling a disposed NativeStrokeDriver hands C++ a null `this`.
     this.driver?.destroy?.()
     this.driver = undefined

@@ -511,13 +511,13 @@ export class AppState {
         this.screen.ctx = this.ctx
       }
       for (const sarea of this.screen.sareas) {
-        sarea._init()
+        sarea.checkInit()
 
         for (const area of sarea.editors) {
           if (!area.ctx) {
             area.ctx = this.ctx
           }
-          area._init()
+          area.checkInit()
         }
       }
 
@@ -1016,7 +1016,7 @@ export class AppState {
 
       this.screen = screen as unknown as Screen<ViewContext>
       this.screen.ctx = this.ctx
-      this.screen._init()
+      this.screen.checkInit()
       this.screen.listen()
 
       for (const sarea of this.screen.sareas) {
@@ -1050,10 +1050,11 @@ export class AppState {
         this.toolstack = filectx.toolstack!
         this.toolstack.ctx = this.ctx
       } else {
-        this.toolstack.execTool(
-          this.ctx,
+        // RootLoadFileOp refuses canRun; it only ever runs through replay
+        this.toolstack.prepend(
           new RootLoadFileOp(filectx.buf instanceof DataView ? filectx.buf.buffer : filectx.buf)
         )
+        this.toolstack.cur = 0
       }
     }
 
@@ -1203,13 +1204,13 @@ export class AppState {
       const props = document.createElement('screenarea-x') as unknown as {
         size: number[]
         ctx: ViewContext
-        _init(): void
+        checkInit(): void
         switch_editor(cls: unknown): void
       }
       props.size[0] = 5
       props.size[1] = screen.size[1]
       props.ctx = this.ctx
-      props._init()
+      props.checkInit()
 
       props.switch_editor(PropsEditor)
       ;(screen as unknown as HTMLElement).appendChild(props as unknown as HTMLElement)

@@ -64,9 +64,14 @@ first:
 _appstate.ctx.scene.switchToolMode('sculptcore')
 const t = window._sculptcoreStrokeTester
 t.frameMeshInCamera()                 // so normalized points hit the surface
-const res = t.runStroke({points: [[0.42,0.5],[0.5,0.5],[0.58,0.5]], radius: 150})
-t.undo(); t.redo()                    // real toolstack undo/redo
+const res = await t.runStroke({points: [[0.42,0.5],[0.5,0.5],[0.58,0.5]], radius: 150})
+await t.undo(); await t.redo()        // real toolstack undo/redo
 ```
+
+`runStroke`, `undo` and `redo` return promises: the toolstack serializes every
+operation behind a lock and runs it asynchronously, so an `--eval` driver that
+reads the mesh after a stroke has to `await` (wrap the script in an
+`(async () => { ... })()` and return the promise — the harness awaits it).
 
 ## Reporting a result back
 

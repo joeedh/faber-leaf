@@ -73,7 +73,7 @@ interface RoundTripResult {
  * substituted as a JSON string literal.
  */
 function roundTripEval(savePath: string): string {
-  return `globalThis.__evalTestResult = (() => {
+  return `(async () => { globalThis.__evalTestResult = await (async () => {
   try {
     const nodefs = require('fs')
     const UV_SELECT = 1
@@ -135,7 +135,7 @@ function roundTripEval(savePath: string): string {
     const original = snapshot(src, layer)
 
     const ctx = _appstate.ctx
-    ctx.api.execTool(ctx, 'uveditor.toggle_select_all', {mode: 0, selectedFacesOnly: false})
+    await ctx.api.execTool(ctx, 'uveditor.toggle_select_all', {mode: 0, selectedFacesOnly: false})
 
     // A mixed column: an all-ones one would match whatever came back. Every
     // third element keeps SELECT, every fourth gains PIN, and the offsets are
@@ -182,7 +182,7 @@ function roundTripEval(savePath: string): string {
   } catch (e) {
     return {ok: false, error: String(e), stack: String(e && e.stack)}
   }
-})()`
+})() })()`
 }
 
 function probe(nwExe: string): RoundTripResult {

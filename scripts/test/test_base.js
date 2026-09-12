@@ -24,14 +24,11 @@ export class ToolAction extends TestAction {
 
   exec(ctx) {
     return new Promise((accept, reject) => {
+      const run = () => ctx.api.execTool(ctx, this.toolpath, this.args).then(accept, reject)
       if (this.delay) {
-        window.setTimeout(() => {
-          ctx.api.execTool(ctx, this.toolpath, this.args)
-          accept()
-        }, this.delay)
+        window.setTimeout(run, this.delay)
       } else {
-        ctx.api.execTool(ctx, this.toolpath, this.args)
-        accept()
+        run()
       }
     })
   }
