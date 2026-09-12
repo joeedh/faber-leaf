@@ -195,7 +195,7 @@ MenuBarEditor {
 
     let menubar = (this._menubar = strip.row())
 
-    menubar.menu('File', [
+    const fileMenu = [
       'app.new()',
       Menu.SEP,
       /* ["Save", () => {
@@ -220,7 +220,19 @@ MenuBarEditor {
       'app.save(forceDialog=true)|Save As',
       'app.export_stl()',
       'app.import_file()',
-    ])
+    ]
+
+    // Only the NW.js shell owns a window to close; the browser build has no Exit.
+    if (window.haveNwjs) {
+      fileMenu.push(Menu.SEP, [
+        'Exit',
+        () => {
+          globalThis.nw.Window.get().close()
+        },
+      ])
+    }
+
+    menubar.menu('File', fileMenu)
 
     this._editMenuDef = []
 
