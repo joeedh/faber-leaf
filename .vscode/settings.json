@@ -176,5 +176,8 @@
   },
   "typescript.tsdk"                    : "node_modules\\typescript\\lib",
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
-  "C_Cpp.default.compileCommands"      : ["sculptcore/build/compile_commands.json"]
+  "C_Cpp.default.compileCommands": [
+    "sculptcore/build/compile_commands.json"
+  ],
+  "cmake.sourceDirectory": "C:/dev/webgl-app-framework/sculptcore"
 }

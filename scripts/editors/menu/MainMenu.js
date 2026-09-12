@@ -220,7 +220,6 @@ MenuBarEditor {
       'app.save(forceDialog=true)|Save As',
       'app.export_stl()',
       'app.import_file()',
-      'app.import_obj()',
     ])
 
     this._editMenuDef = []
