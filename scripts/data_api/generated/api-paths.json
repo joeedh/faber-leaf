@@ -12272,6 +12272,40 @@
       "decimalPlaces": 4,
       "step": 0.05
     },
+    "toolDefaults.richtext": {
+      "kind": "struct",
+      "ownerStruct": "ToolDefaults",
+      "structName": "richtext",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.richtext.edit": {
+      "kind": "struct",
+      "ownerStruct": "richtext",
+      "structName": "edit",
+      "indexed": false,
+      "dynamic": false
+    },
+    "toolDefaults.richtext.edit.inverse": {
+      "kind": "prop",
+      "ownerStruct": "edit",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Inverse",
+      "description": "Inverse",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
+    "toolDefaults.richtext.edit.op": {
+      "kind": "prop",
+      "ownerStruct": "edit",
+      "indexed": false,
+      "propType": "StringProperty",
+      "uiname": "Op",
+      "description": "Op",
+      "decimalPlaces": 4,
+      "step": 0.05
+    },
     "toolDefaults.sculptcore": {
       "kind": "struct",
       "ownerStruct": "ToolDefaults",

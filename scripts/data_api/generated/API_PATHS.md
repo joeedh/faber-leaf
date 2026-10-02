@@ -1249,6 +1249,10 @@ methods, and `<prop path="...">` xmlpage tags. `[n]` marks a list index.
 | `toolDefaults.panzoom` | struct |  |  |  |
 | `toolDefaults.panzoom.pan` | struct |  |  |  |
 | `toolDefaults.panzoom.pan.velpanPath` | prop | StringProperty | Velpan Path |  |
+| `toolDefaults.richtext` | struct |  |  |  |
+| `toolDefaults.richtext.edit` | struct |  |  |  |
+| `toolDefaults.richtext.edit.inverse` | prop | StringProperty | Inverse |  |
+| `toolDefaults.richtext.edit.op` | prop | StringProperty | Op |  |
 | `toolDefaults.sculptcore` | struct |  |  |  |
 | `toolDefaults.sculptcore.paint` | struct |  |  |  |
 | `toolDefaults.sculptcore.paint.brush` | prop | BrushProperty | Brush |  |
