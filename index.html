@@ -59,6 +59,14 @@
           user-select: none;
       }
 
+      #loading-text {
+          max-width: 90vw;
+          max-height: 60vh;
+          overflow: hidden;
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+      }
+
       #loading-spinner {
           width: 48px;
           height: 48px;
@@ -161,8 +169,27 @@
       }).catch(err => {
         clearTimeout(backstop)
         console.error(err)
-        loadingOverlayError('Failed to load application; see the console for details.')
+        loadingOverlayError('Failed to load application: ' + describeError(err))
       });
+    })
+
+    /* Mobile browsers have no console, so load-time errors are printed on the overlay. */
+    function describeError(err) {
+      if (err instanceof Error) {
+        return err.stack && err.stack.includes(err.message) ? err.stack : err.message + '\n' + (err.stack ?? '')
+      }
+      return String(err)
+    }
+
+    window.addEventListener('error', (e) => {
+      if (document.getElementById('loading-spinner')) {
+        loadingOverlayError('Error while loading: ' + describeError(e.error ?? e.message))
+      }
+    })
+    window.addEventListener('unhandledrejection', (e) => {
+      if (document.getElementById('loading-spinner')) {
+        loadingOverlayError('Error while loading: ' + describeError(e.reason))
+      }
     })
   </script>
 </head>

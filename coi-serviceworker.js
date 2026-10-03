@@ -122,9 +122,24 @@ if (typeof window === 'undefined') {
         !coi.quiet && console.log('COOP/COEP Service Worker registered', registration.scope)
 
         registration.addEventListener('updatefound', () => {
-          !coi.quiet && console.log('Reloading page to make use of updated COOP/COEP Service Worker.')
-          window.sessionStorage.setItem('coiReloadedBySelf', 'updatefound')
-          coi.doReload()
+          const reload = () => {
+            !coi.quiet && console.log('Reloading page to make use of updated COOP/COEP Service Worker.')
+            window.sessionStorage.setItem('coiReloadedBySelf', 'updatefound')
+            coi.doReload()
+          }
+
+          // Reloading before the new worker activates loads the page without COOP/COEP,
+          // and coiReloadedBySelf then stops this script from trying again.
+          const worker = registration.installing
+          if (!worker) {
+            reload()
+            return
+          }
+          worker.addEventListener('statechange', () => {
+            if (worker.state === 'activated') {
+              reload()
+            }
+          })
         })
 
         // If the registration is active, but it's not controlling the page
